@@ -1,0 +1,28 @@
+{% assign skills = site.data.data.skills %}
+{% if skills %}
+<section class="skills">
+    {% for skill in skills %}
+        <div class="title">{{skill.category[page.lang]}}</div>
+        {% for s in skill.skill%}
+        <div class="skill">
+            <table>
+                <tr>
+                    {% if s.right %}
+                        <td class="col-left">
+                            {{ s.left[page.lang] }}
+                        </td>
+                        <td class="col-right">
+                            {{ s.right[page.lang] }}
+                        </td>
+                    {% else %}
+                        <td class="single-col">
+                            {{ s.left[page.lang] }}
+                        </td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+    {% endfor %}
+</section>
+{% endif %}

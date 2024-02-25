@@ -1,0 +1,41 @@
+{% assign contact = site.data.data.contact %}
+{% assign link = site.data.data.altlink[page.lang] %}
+{% if contact %}
+<section class="contact">
+    {% if contact.phone %}
+        <div class="contact-item">
+            <i class="fa fa-phone" aria-hidden="true"></i>
+            <a href="#">
+                {{contact.phone}}
+            </a>
+        </div>
+    {% endif %}
+
+    {% if contact.email %}
+        <div class="contact-item">
+            <i class="fa fa-envelope-o" aria-hidden="true"></i>
+            <a href="#">
+                {{contact.email}}
+            </a>
+        </div>
+    {% endif %}
+
+    {% if contact.location %}
+        <div class="contact-item">
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+            <a href="#">
+                {{contact.location}}
+            </a>
+        </div>
+    {% endif %}
+
+    {% if contact.github %}
+        <div class="contact-item">
+            <i class="fa fa-github" aria-hidden="true"></i>
+            <a href="{{contact.github}}">
+                {{contact.github}}
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endif %}

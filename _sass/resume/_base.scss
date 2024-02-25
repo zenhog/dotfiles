@@ -1,0 +1,31 @@
+* {
+    text-align: justify;
+    line-height: 1.5;
+}
+
+html {
+    margin:0;
+}
+
+body {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+}
+
+.container {
+    max-width: 1030px;
+    margin: 0 auto;
+    background-color: var(--bg-color-cv);
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+    padding: 0px;
+    .container-block {
+        width: 97%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 4fr;
+        .sidebar {
+            margin-top: 20px;
+        }
+    }
+}

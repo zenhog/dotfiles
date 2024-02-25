@@ -1,0 +1,14 @@
+{% assign link = site.data.data.altlink[page.lang] %}
+<div class="header">
+  <div class="fullbox">
+    <div class="mainbox">
+      <h1 class="name">{{site.data.data.name}}</h1>
+      <h2 class="title">{{site.data.data.title[page.lang]}}</h2>
+    </div>
+    <div class="mainbox flagbox">
+      <a href="/{{link}}/resume">
+        <img src="/assets/images/{{link}}.gif" width=28 height=18 alt="{{link}}">
+      </a>
+    </div>
+  </div>
+</div>

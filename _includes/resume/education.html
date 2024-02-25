@@ -1,0 +1,34 @@
+{% assign education = site.data.data.education %}
+{% if education %}
+<section class="education">
+    {% if page.lang == 'en' %}
+        <div class="title">Education</div>
+    {% endif %}
+    {% if page.lang == 'fr' %}
+        <div class="title">Formation</div>
+    {% endif %}
+    <div class="education-box">
+        {% for ed in education %}
+        <div class="education-item">
+            {% if page.lang == 'en' %}
+            <div class="degree">
+                {{ed.degree.en}} <span class="location">{{ed.location}}</span>
+            </div>
+            <div class="university">
+                {{ed.university.en}} <span class="time">{{ed.time}}</span>
+            </div>
+            {% endif %}
+            {% if page.lang == 'fr' %}
+            <div class="degree">
+                {{ed.degree.fr}} <span class="location">{{ed.location}}</span>
+            </div>
+            <div class="university">
+                {{ed.university.fr}} <span class="time">{{ed.time}}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    </div>
+</section>
+{% endif %}

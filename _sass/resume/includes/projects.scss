@@ -1,0 +1,21 @@
+.projects {
+    .title {
+        @include header;
+    }
+    .project {
+        @include container-box;
+        span {
+            .name {
+                text-decoration: overline;
+                margin-bottom: 20px;
+            }
+        }
+        .project-link {
+            @include sub-header;
+            text-decoration: none;
+        }
+        .details {
+            @include body-text;
+        }
+    }
+}

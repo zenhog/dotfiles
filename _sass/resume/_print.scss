@@ -1,0 +1,32 @@
+@media print {
+    @page {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    .container {
+        padding: 0;
+        box-shadow: none;
+        background-color: #ffffff;
+        margin: 0 auto;
+        .container-block {
+            padding:0;
+        }
+        .header {
+            input, label {
+                display: none;
+            }
+        }
+    }
+    .header {
+        .flagbox {
+            img {
+                display: none;
+            }
+        }
+    }
+}

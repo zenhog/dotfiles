@@ -1,0 +1,13 @@
+{% assign summary = site.data.data.summary %}
+{% if summary %}
+<section class="career-profile">
+    <h2 class="title">{{summary.title[page.lang]}}</h2>
+    <div class="details">
+        <ul>
+            {% for point in summary.content %}
+            <li>{{point.point[page.lang]}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}

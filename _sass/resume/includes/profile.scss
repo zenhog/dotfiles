@@ -1,0 +1,9 @@
+.career-profile {
+    .title {
+        @include header;
+    }
+    .details {
+        @include container-box;
+        @include body-text;
+    }
+}

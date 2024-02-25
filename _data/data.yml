@@ -1,0 +1,567 @@
+name: Iskander Zemmouri
+
+altlink:
+  fr: en
+  en: fr
+
+contact:
+  phone: +33 (0) 6 52 25 84 74
+  email: iskander.zemmouri@mailbox.org
+  github: https://github.com/zenhog
+  location: Rennes, FR
+
+title:
+  en: |
+    Cyber Security Consultant - Unix Administrator - DevSecOps Engineer
+  fr: |
+    Consultant Cyber Sécurité - Administrateur Unix - Ingénieur DevSecOps
+
+profile:
+  title:
+    en: Profile
+    fr: Profil
+  content:
+    en: |
+      Decade long Unix lover and user, I spend my professional time as well as
+      my personal time improving the deployability and availability of systems
+      through automation, be it for a client's sake or for my own. My other main
+      interest is computer security, more specifically, bug hunting and
+      exploitation in source code or closed-source binaries.
+    fr: |
+      Amoureux de Linux et Unix depuis plus de 10 ans, je passe la plupart de
+      mon temps professionnel ainsi que mon temps personnel à améliorer la
+      déployabilité et la disponibilité de systèmes informatiques à travers
+      l'automatisation, que ce soit pour le compte d'un client ou pour mon usage
+      personnel. Mon autre intérêt majeur est la sécurité informatique, plus
+      spécifiquement, la recherche de vulnérabilités dans du code source ou des
+      binaires.
+
+summary:
+  title:
+    en: Professional Summary
+    fr: Résumé Professionnel
+  content:
+    - point:
+        en: >
+          Experienced in working with Git and Github, Infrastructure as Code,
+          integration, configuration and deployment automation
+        fr: >
+          Experimenté avec Git et Github, l'Infrastructure en tant que code
+          (IAC), l'automatisation d'intégration, de configuration et de
+          déploiement
+    - point:
+        en: >
+          Experienced in working with Splunk, Qualys, Nessus, OpenVAS and the ELK Stack
+        fr: >
+          Experimenté dans l'utilisation des outils Splunk, Qualys, Nessus, OpenVAS et la stack ELK
+    - point:
+        en: >
+          Experienced in automating, configuring and deploying cloud instances
+          on AWS with tools such as Ansible and Terraform
+        fr: >
+          Experimenté dans l'automatisation, la configuration de déploiement
+          d'instances cloud AWS à l'aide d'outils tels que Ansible et Terraform
+    - point:
+        en: >
+          Experienced in managing and integrating Kubernetes solutions into
+          CI/CD pipelines
+        fr: >
+          Experimenté dans la gestion et l'intégration de solutions Kubernetes
+          dans des pipelines CI/CD
+    - point:
+        en: >
+          Experienced in virtualization and containerization ecosystems such as
+          KVM/Qemu, Libvirt, LXD, Docker
+        fr: >
+          Experimenté dans les ecosystèmes de virtualisation et de
+          conteneurisation comme KVM/Qemu, Libvirt, LXD, Docker
+    - point:
+        en: >
+          Experienced in programming in C, C++, various Assembly Languages, Bash
+          and POSIX Shell, Python, Lua and Ruby
+        fr: >
+          Experimenté en programmation C, C++, plusieurs languages assembleur,
+          Bash et POSIX Shell, Python, Lua et Ruby
+    - point:
+        en: >
+          Experienced in administrating Linux and BSD systems, networking,
+          common services (ssh, http, dns, dhcp, ldap, nfs, samba, etc...) and
+          firewall systems (NetFilter, FreeBSD PacketFilter)
+        fr: >
+          Experimenté dans l'administration de systèmes Linux et BSD, de réseaux,
+          des services classiques (ssh, http, dns, dhcp, ldap, nfs, samba, etc...)
+          et des systèmes de firewall (NetFilter, FreeBSD PacketFilter)
+    - point:
+        en: >
+          Extensive knowledge of Linux ecosystems and their internal components
+          (filesystems, build-systems, packaging-systems, init-systems, etc...).
+          Ability to rapidly learn and dive into new Linux or Unix-like systems
+          with ease
+        fr: >
+          Connaissances approfondies des ecosystèmes Linux et de leurs
+          composants internes (systèmes de fichiers, systèmes de build, systèmes
+          de paquets, systèmes d'init, etc...). Capacité d'apprendre et de
+          plonger rapidement dans de nouveaux systèmes Linux ou Unix
+    - point:
+        en: >
+          Experienced in analyzing and reverse-engineering source code and
+          binary code
+        fr: >
+          Expérimenté dans l'analyse et le reverse-engineering de code source et
+          de code binaire
+    - point:
+        en: >
+          Experienced in software bug hunting, exploitation and countermeasures
+        fr: >
+          Experimenté dans le bug hunting, l'exploitation et les contre-mesures
+    - point:
+        en: >
+          Familiar with systems hardening (NIDS, HIDS, SELinux, GRSec, etc...)
+          and experienced with Secure Network Architectures
+        fr: >
+          Familier avec le hardening de systèmes (NIDS, HIDS, SELinux, GRSec,
+          etc...) et experimenté avec les Architectures Réseau sécurisées
+
+education:
+  - degree:
+      en: M.Sc in Cyber Security
+      fr: Master en Cyber Sécurité
+    time: 2016-2018
+    location: Rennes
+    university:
+      en: University of Rennes 1
+      fr: Université de Rennes 1
+  - degree:
+      en: B.Sc in Computer Science
+      fr: Licence en Informatique Générale
+    time: 2013-2016
+    location: Rennes
+    university:
+      en: University of Rennes 1
+      fr: Université de Rennes 1
+
+skills:
+  - category:
+      en: Languages
+      fr: Langues
+    skill:
+    - left:
+        en: English
+        fr: Anglais
+      right:
+        en: bilingual
+        fr: bilingue
+    - left:
+        en: French
+        fr: Français
+      right:
+        en: native
+        fr: natif
+
+  - category:
+      en: Skills
+      fr: Compétences
+    skill:
+      - left:
+          en: Advanced Shell Scripting
+          fr: Advanced Shell Scripting
+      - left:
+          en: Ansible Orchestration
+          fr: Ansible Orchestration
+      - left:
+          en: Linux Administration
+          fr: Linux Administration
+      - left:
+          en: Linux Networking
+          fr: Linux Networking
+      - left:
+          en: KVM Virtualization
+          fr: KVM Virtualization
+      - left:
+          en: VMWare Virtualization
+          fr: VMWare Virtualization
+      - left:
+          en: Libvirt/LXD Management
+          fr: Libvirt/LXD Management
+
+  - category:
+      en: Security
+      fr: Sécurité
+    skill:
+      - left:
+          en: Secure Network Architecture
+          fr: Secure Network Architecture
+      - left:
+          en: Splunk
+          fr: Splunk
+      - left:
+          en: Qualys
+          fr: Qualys
+      - left:
+          en: Reverse Engineering
+          fr: Reverse Engineering
+      - left:
+          en: C/Bash Code Review
+          fr: C/Bash Code Review
+      - left:
+          en: Bug finding and exploitation
+          fr: Bug finding and exploitation
+      - left:
+          en: Penetration Testing
+          fr: Penetration Testing
+      - left:
+          en: ISO 2700X
+          fr: ISO 2700X
+
+  - category:
+      en: DevOps
+      fr: DevOps
+    skill:
+      - left:
+          en: Git
+          fr: Git
+      - left:
+          en: LXD
+          fr: LXD
+      - left:
+          en: Docker
+          fr: Docker
+      - left:
+          en: TravisCI
+          fr: TravisCI
+      - left:
+          en: Ansible
+          fr: Ansible
+      - left:
+          en: Packer
+          fr: Packer
+      - left:
+          en: Kubernetes
+          fr: Kubernetes
+      - left:
+          en: Terraform
+          fr: Terraform
+      - left:
+          en: Postfix
+          fr: Postfix
+  - category:
+      en: Unix
+      fr: Unix
+    skill:
+      - left:
+          en: Debian
+          fr: Debian
+      - left:
+          en: Ubuntu
+          fr: Ubuntu
+      - left:
+          en: ArchLinux
+          fr: ArchLinux
+      - left:
+          en: AlpineLinux
+          fr: AlpineLinux
+      - left:
+          en: VoidLinux
+          fr: VoidLinux
+      - left:
+          en: FreeBSD
+          fr: FreeBSD
+      - left:
+          en: Gentoo
+          fr: Gentoo
+  - category:
+      en: Programming
+      fr: Programmation
+    skill:
+      - left:
+          en: C
+          fr: C
+      - left:
+          en: C++
+          fr: C++
+      - left:
+          en: Bash
+          fr: Bash
+      - left:
+          en: Python
+          fr: Python
+      - left:
+          en: Lua
+          fr: Lua
+      - left:
+          en: Ruby
+          fr: Ruby
+      - left:
+          en: SQL
+          fr: SQL
+  - category:
+      en: Projects
+      fr: Projets
+    skill:
+      - left:
+          en: RootMe
+          fr: RootMe
+        right:
+          en: <a href="https://www.root-me.org/amaenaide">amaenaide</a>
+          fr: <a href="https://www.root-me.org/amaenaide">amaenaide</a>
+      - left:
+          en: ToyKernel
+          fr: ToyKernel
+        right:
+          en: <a href="https://github.com/zenhog/brokern">BroKern</a>
+          fr: <a href="https://github.com/zenhog/brokern">BroKern</a>
+
+experience:
+  title:
+    en: Experience
+    fr: Expérience
+  experiences:
+    - role:
+        en: DevSecOps Engineer
+        fr: Ingénieur DevSecOps
+      time:
+        en: 01/2022 - 12/2023
+        fr: 01/2022 - 12/2023
+      duration:
+        en: 2 years
+        fr: 2 ans
+      company: Secmentis
+      location: Remote
+      details:
+        - point:
+            en: >
+              vulnerability scanning with Nessus and OpenVAS and integration with Splunk
+            fr: >
+              mise en place de scans de vulnérabilités avec Nessus et OpenVAS et
+              intégration avec Splunk
+        - point:
+            en: >
+              webapp vulnerability scanning and vulnerability management with Qualys
+            fr: >
+              scan de vulnérabilités et gestion des vulnérabilités avec Qualys
+        - point:
+            en: >
+              real time monitoring with Splunk and management of detection and correlation
+              rules
+            fr: >
+              monitoring en temps réel avec Splunk et gestion de règles de détection
+              et de corrélation
+        - point:
+            en: >
+              hardening of CI/CD pipelines to include secrets management and
+              scanning as well as static code analysis
+            fr: >
+              hardening de pipelines CI/CD pour gérer les secrets et inclure de
+              l'analyse statique de code
+        - point:
+            en: >
+              conception and implementation of CI/CD pipelines to automate the
+              deployment of a rails webapp with Docker and Amazon ECS
+            fr: >
+              conception et implémentation de pipelines CI/CD pour automatiser le
+              déploiement d'application web rails avec Docker et Amazon ECS
+        - point:
+            en: >
+              conception of libvirt domains and scripts to reliably contain
+              heterogenous systems and networks running on different emulated cpu
+              architectures (arm32, arm64, mips32) with Qemu
+            fr: >
+              conception de domaines libvirt et de scripts pour contenir des
+              systèmes et des réseaux hétérogènes tournant sur différents
+              processeurs émulés/virtualisés (arm32, arm64, mips32)
+              avec Qemu
+        - point:
+            en: >
+              automation of infrastructure deployment for a complex virtualized
+              network of heterogenous machines with the objective to serve as a
+              pentesting lab environment
+            fr: >
+              automatisation du déploiement d'une infrastructure de réseau
+              virtuel complexe de machines hétérogènes dont l'objectif est de
+              servir de laboratoire de pentest
+        - point:
+            en: >
+              setup of log management and monitoring of rails-based webapps
+            fr: >
+              mise en place de log management et de monitoring d'applications
+              web Rails
+        - point:
+            en: >
+              setup of customized openvpn and netfilter configurations to identify
+              traffic coming from different applications and route accordingly
+              through different Linux routing tables (application-based routing)
+            fr: >
+              mise en place de configurations openvpn et netfilter customisées
+              dans le but d'identifier du trafic provenant de différentes
+              applications pour ensuite les faire emprunter différentes tables
+              de routage (application-based routing)
+      technologies_used:
+        fr: Environnement technique
+        en: Technical environment
+        tools: >
+          Git, LXD, Docker, Systemd, Qemu, Libvirt, Bash, Nginx, OpenVPN,
+          Iproute2, Amazon ECS, Splunk, Qualys, Nessus, OpenVAS
+    - role:
+        en: Linux Administrator
+        fr: Administrateur Linux
+      time:
+        en: 01/2019 - 11/2021
+        fr: 01/2019 - 11/2021
+      duration:
+        en: 2 years and 11 months
+        fr: 2 ans et 11 mois
+      company: T-Systems
+      location: Munich, DE
+      details:
+        - point:
+            en: >
+              installation, configuration, maintenance and automation of Linux
+              systems for servers and workstations through ansible
+            fr: >
+              installation, configuration, maintenance et automatisation de
+              systèmes Linux pour serveurs et workstations avec ansible
+        - point:
+            en: >
+              installation, configuration and maintenance of services such as
+              DNS, DHCP, LDAP, NFS, SSH, Samba, APT Repo and Postfix/Dovecot
+            fr: >
+              installation, configuration et maintenance de services tels que
+              DNS, DHCP, LDAP, NFS, SSH, Samba, APT Repo et Postfix
+        - point:
+            en: >
+              automation of server configuration deployment with ansible and
+              gitops
+            fr: >
+              automatisation du déploiement des configurations des servers
+              avec ansible et gitops
+        - point:
+            en: >
+              management and automation of backup systems through bash scripts
+              based on tar and rsync
+            fr: >
+              gestion et automatisation des systèmes de backup à l'aide de
+              scripts bash à l'aide de tar et rsync
+        - point:
+            en: >
+              management and automation of updating and patching policies
+              through bash and ansible scripts
+            fr: >
+              gestion et automatisation des politiques de mise à jour et de
+              patching à l'aide de scripts bash et ansible
+        - point:
+            en: >
+              configuration and testing of netfilter firewall policies and
+              their automatic deployment to the target machines
+            fr: >
+              configuration et test de politiques de firewall netfilter et leur
+              déploiement automatique sur les machines cibles
+        - point:
+            en: >
+              performance monitoring and troubleshooting of Linux systems and
+              networks
+            fr: >
+              monitoring de performances et troubleshooting de systèmes et
+              réseaux Linux
+        - point:
+            en: >
+              administration of a Nagios platform for servers monitoring and
+              incident alert
+            fr: >
+              administration d'une plateforme Nagios pour le monitoring des
+              serveurs et les alertes d'incidents
+      technologies_used:
+        fr: Environnement technique
+        en: Technical environment
+        tools: >
+          Git, Iproute2, Iptables, Postfix, Dovecot, Bash, Ansible, Nagios,
+          Linux
+    - role:
+        en: Cyber Security Consultant (Internship)
+        fr: Consultant Cyber Sécurité (Stage)
+      time:
+        en: 04/2018 - 10/2018
+        fr: 04/2018 - 10/2018
+      duration:
+        en: 6 months
+        fr: 6 mois
+      company: AeBS
+      location: Remote
+      details:
+        - point:
+            en: administration of a Nagios platform
+            fr: administration d'un plateforme Nagios
+        - point:
+            en: administration of a set of Linux testing machines
+            fr: administration d'une ensemble de machines de test Linux
+        - point:
+            en: testing subnet architecture review
+            fr: revue d'architecture d'un sous-réseau de test
+        - point:
+            en: setup of a 802.1X FreeRadius network authentication server
+            fr: >
+              mise ne place d'un serveur d'authentification réseau 802.1X
+              FreeRadius
+        - point:
+            en: >
+              setup of Snort IDS/IPS, OpenVAS scanners and Prelude
+              SIEM on a testing subnet
+            fr: >
+              mise en place de sondes IDS/IPS Snort, de scanners OpenVAS
+              et d'un SIEM Prelude sur un sous-réseau de test
+        - point:
+            en: network traffic and policy analysis
+            fr: analyse du trafic et de la politique réseau
+        - point:
+            en: task automation with bash and ansible scripts
+            fr: >
+              amélioration continue - automatisation des tâches à l'aide de
+              scripts bash et ansible
+      technologies_used:
+        en: Technical environment
+        fr: Environnement technique
+        tools: >
+          Prelude SIEM, Snort IDS/IPS, Git, Ansible, Nagios, Ansible, OpenVAS,
+          Samhain, FreeRadius
+
+projects:
+  title:
+    en: Projects
+    fr: Projets
+  list:
+    - title: Root-Me
+      link: https://www.root-me.org/amaenaide?inc=score&lang=en
+      details:
+        en: >
+          Hacking-challenges platform involving mainly code review and
+          vulnerability research in C, C++ and x86/amd64/arm32/mips32 assembly,
+          the reverse-engineering of closed-source binaries and python pwntools
+          bug exploitation.
+        fr: >
+          Plateforme de challenges de sécurité impliquant principalement de la
+          revue de code et de la recherche de vulnérabilités en C, C++ et
+          langage d'assemblage x86/amd64/arm32/mips32, ainsi que du
+          reverse-engineering de binaires et l'exploitation des bugs trouvés
+          associée en python avec la bibiliothèque pwntools.
+    - title: BroKern
+      link:
+      details:
+        en: >
+          Vulnerable by design Unix-like toy-kernel that runs on real x86
+          hardware, implementing physical and virtual memory management, process
+          management, a console driver and a minimal user-space interface
+          (perhaps a VFS in the future).
+        fr: >
+          Toy-kernel délibérément vulnérable qui run sur du hardware x86,
+          implémentant gestion de mémoire physique et virtuelle, gestion de
+          processus, un driver console ainsi qu'une interface user-space
+          minimale (peut-être un VFS plus tard).
+    - title: 42sh
+      link:
+      details:
+        en: >
+          Bash 4.2 shell clone that implements full bash parsing, terminal
+          management, line editing, command interpretation and shell builtins.
+        fr: >
+          Interpréteur de commande implémentant la spécification du shell Bash
+          4.2, avec parsing du langage, gestion de terminal, édition de ligne de
+          commande, et builtins.

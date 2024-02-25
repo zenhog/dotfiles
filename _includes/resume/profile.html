@@ -1,0 +1,7 @@
+{% assign profile = site.data.data.profile %}
+{% if profile %}
+<section class="career-profile">
+    <h2 class="title">{{profile.title[page.lang]}}</h2>
+    <div class="details">{{profile.content[page.lang]}}</div>
+</section>
+{% endif %}
