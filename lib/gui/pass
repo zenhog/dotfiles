@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+
+KEY=p
+MOD='S-M'
+ICON=󰍁
+
+NOWRAP=1
+
+export STORE="$HOME/.password-store"
+
+function label() {
+  echo ${LOCATION}
+}
+
+function view() {
+  local dir entries
+
+  dir="${1}"
+
+  [[ -z "${dir}" ]] && return
+
+  readarray -t entries < <(fd -tf --base-directory "${STORE}/${dir}")
+
+  local val
+  for entry in "${entries[@]}"; do
+    unset val
+    [[ "$entry" == *.gpg ]] &&
+      read -r val < <(quiet pass show "${dir}/${entry%.gpg}") ||
+        read -r val < "$STORE/$dir/$entry"
+    if [[ "${entry}" == password* ]]; then
+      local charspec
+      read -r charspec < <(get "${dir}" charspec)
+      silent check "${val}" "${charspec}" &&
+        read -r val < <(ansi --green "$val") ||
+          read -r val < <(ansi --red "$val")
+    fi
+    printf "%s%s%s\n" "${entry}" "${iSEP}" "${val}"
+  done | column -t -s "${iSEP}" -o "${oSEP}"
+  echo
+  qrencode -m1 -tANSI256 <<< "$val"
+}
+
+function list() {
+  fd -H --strip-cwd-prefix --base-directory "${STORE}" -td -x \
+    sh -c 'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort
+}
+
+function rename() {
+  local rand
+  read -r rand < <(tr -dc '[:alnum:]' < /dev/urandom | quiet dd bs=1 count=5)
+  mv -v -- "${STORE}/${1}.gpg" "${STORE}/${1}.old.${rand}.gpg"
+}
+
+function get() {
+  local dir="$1" key="$2"
+  quiet pass show "${dir}/${key}" || quiet cat "${STORE}/.defaults/${key}"
+}
+
+function insert() {
+  local dir="$1" key="$2" val="$3" force="$4" curval
+
+  [[ -z "${key?}" ]] && return 1
+
+  read -r curval < <(get "$dir" "$key")
+
+  [[ "$val" == "$curval" ]] && return 0
+
+  pass insert -f "$dir/$key" < <(tee /dev/stdout <<< "$val")
+}
+
+function check() {
+  local password="${1}" charspec="${2}" length count specs regex
+
+  [[ -n "${password}" && -n "${charspec}" ]] || return 1
+
+  {
+    read -r -d, length
+    IFS=$',\n' readarray -d, -t -s 0 specs
+  } <<< "${charspec}" || return 1
+
+  read -r count < <((grep -o '.' | wc -l) <<< "$password")
+
+  (( count == length )) || return 1
+
+  for spec in "${specs[@]}"; do
+    local count class length
+    IFS=$'|\n' read -r -d '' length class _ <<< "$spec"
+    read -r count < <((grep -o "[${class}]" | wc -l) <<< "$password")
+    (( count >= length )) || return 1
+  done
+
+  read -r regex < <(printf "%s" "${specs[@]#*|}")
+
+  grep -o "[^${regex}]" <<< "$password" && return 1 || return 0
+}
+
+BINDS[alt-r:regen]=
+function regen() {
+  local dir="$1" password charspec length specs regex
+
+  read -r charspec < <(get "${dir}" charspec)
+  {
+    read -r -d, length
+    IFS=$',\n' readarray -t -s 0 specs
+  } <<< "${charspec}" || return 1
+
+  mkdir -p "${STORE}/${dir}"
+
+  silent pass show "${dir}/password" && rename "${dir}/password"
+
+  read -r regex < <(printf "%s" "${specs[@]#*|}")
+
+  until check "${password}" "${charspec}"; do
+    PASSWORD_STORE_CHARACTER_SET="${regex}" \
+      command pass generate -f "${dir}/password" "${length}"
+    read -r password < <(quiet pass show "${dir}/password")
+  done
+}
+
+BINDS[alt-u:reloc]=
+function reloc() {
+  local dir="$1"
+  eval "$(tmux show-environment -t menu LOCATION 2>/dev/null)"
+  tmux set-environment -t menu -u LOCATION
+  if [[ -n "${LOCATION}" ]]; then
+    rename "${dir}/location"
+    insert "$dir" location "${LOCATION}" force
+  fi
+}
+
+BINDS[alt-c:clean]=
+function clean() {
+  local dir="$1"
+  [[ -d "${STORE}/${dir}" ]] && rm -f "${STORE}/${dir}"/*.old.*.gpg
+}
+
+BINDS[alt-e:edit]=
+function edit() {
+  local dir="$1" newdir
+  read -r newdir < <(INPUTPREVIEW=$(view "${dir}") input "$dir")
+  [[ ! -d "$STORE/$newdir" ]] &&
+    ( mkdir -p "$STORE/$newdir" && mv -Tvf -- "$STORE/$dir" "$STORE/$newdir" )
+}
+
+BINDS[alt-a:add]=
+function add() {
+  local dir
+  read -r dir < <(input "www/")
+  mkdir -p "${STORE}/${dir}"
+}
+
+BINDS[alt-d:del]=
+function del() {
+  local dir="${1}"
+  rm -rf "${STORE}/${dir}"
+}
+
+function dom() {
+  local IFS='.' i=0 found
+  local zones=($@)
+
+  while [[ $i -lt $((${#zones[@]}-1)) ]]; do
+    read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
+    [[ -n "$found" ]] && break
+    ((++i))
+  done
+  [[ -n "$found" ]] && printf "%s\n" "${found:0:-1}"
+}
+
+function baseurl() {
+  local IFS='.'
+
+  local zones=($@)
+
+  if [[ ${#zones[@]} -gt 2 ]]; then
+    local chunks=(${zones[-1]})
+    local i=2
+    while [[ $i -le ${#zones[@]} ]]; do
+      chunks=("${zones[-$i]}" "${chunks[@]}")
+      [[ ${#zones[-$i]} -ge 4 ]] && break
+      ((i++))
+    done
+    zones=(${chunks[@]})
+  fi
+
+  printf "www/%s\n" "${zones[*]}"
+}
+
+function grab() {
+  local domain="$1" key="$2" dir
+
+  read -r dir < <(dom "$domain") || return 1
+
+  get "$dir" "$key" &&
+    notify "Copied '$dir/$key'" ||
+      notify "Could not copy '$dir/$key'"
+}
+
+BINDS[enter:open]='execute-silent(%s {})+accept'
+function open() {
+  local location dir="$1"
+ 
+  read -r location < <(get "$dir" location)
+
+  command open "$location"
+}
+
+function init() {
+  local domain="${1}" location="${2}" force="${3}" dir dom
+
+  export LOCATION="${location}"
+
+  read -r dir < <(dom "${domain}" || baseurl "${domain}")
+
+  [[ -d "${STORE}/${dir}" ]] && exec menu "$MODULE" "$dir"
+
+  read -r dir < <(menu input "${dir}")
+
+  [[ -n "$dir" ]] &&
+    insert "$dir" location "$location" "$force" &&
+    regen "$dir" &&
+    notify "Initialized dir '${dir}'"
+  [[ -n "${dir}" ]]
+
+}

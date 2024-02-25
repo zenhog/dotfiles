@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+KEY=k
+MOD='S-M'
+ICON=
+
+POSITION=RIGHT
+RATIO=40%
+
+function view() {
+  :
+}
+
+function list() {
+  LIBPROC_HIDE_KERNEL=1 ps axo pid,user,pmem,comm --sort pmem |
+    tail -n +2 | tac | column -t
+}
+
+# kill
+# htop-style

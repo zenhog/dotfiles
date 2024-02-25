@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+KEY=f
+MOD='S-M'
+ICON=󰴽
+
+HORIZONTAL=1
+
+function view() {
+  local y
+}
+
+function list() {
+  {
+    nmcli -c yes -f active,SSID,BSSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+      device wifi list --rescan yes | sed -rn '2,$s/^(.*)$/wifi\t\1/p'
+    nmcli -c yes -f ACTIVE,NAME,UUID,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+      connection show | sed -rn '2,$s/^(.*)$/conn\t\1/p'
+  } | column -t
+}

@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+
+#checkdep tmux rsync ssh unlink quiet wmctrl awm-spawn || exit 1
+
+LSCRIPT=$(realpath "${BASH_SOURCE[0]}")
+RSCRIPT="\$HOME${LSCRIPT#${HOME}}"
+
+PUBFILES="$HOME/./.pubfiles"
+REMFILES="\$HOME/${PUBFILES##*/}"
+
+TMUXP="$HOME/.tmuxp"
+
+
+MUXSOCKET="$HOME/.rmux.S"
+SOCKETDIR="$HOME/.sockets"
+
+mkdir -p "$SOCKETDIR"
+
+function istty
+{
+    local tty=$(tmux display -p '#{client_termname}')
+
+    if [[ "$tty" = fbterm || "$tty" = linux ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
+function run
+{
+    local session="${1%%.*}"
+
+    if istty || [[ -z "$DISPLAY" ]]; then
+        rmux up "$session"
+        return
+    fi
+
+    if wmctrl -a "$session"; then
+        return
+    fi
+
+    awm-spawn vtspawn "$session" rmux up
+}
+
+function connect
+{
+    local host="$1"
+    local sock="$SOCKETDIR/$host.S"
+
+    if [[ -n "$SSH_CONNECTION" ]]; then
+        echo "Cannot connect from remote"
+        exit 1
+    fi
+
+    if ssh -S "$sock" -O check "$host" &>/dev/null; then
+        return
+    fi
+
+    rm -f "$sock"
+
+    if ! ssh -fMNS "$sock" "$host"; then
+        echo "Could not connect to host '$host'"
+        exit 1
+    fi
+}
+
+function disconnect
+{
+    local host="$1"
+    local sock="$SOCKETDIR/$host.S"
+
+    if ssh -S "$sock" -O check "$host"; then
+        ssh -S "$sock" -O cancel "$host"
+        ssh -S "$sock" -O exit   "$host"
+    fi
+}
+
+remsync() {
+    local host="$1"
+    local sock="$SOCKETDIR/$host.S"
+
+    rsync --quiet --relative --delete --archive --no-t --no-o --no-g --no-d \
+        "$PUBFILES" "$host":
+
+    remexec "$host" bash "$REMFILES/install"
+}
+
+function remexec
+{
+    local host="${1}"
+    local sock="${SOCKETDIR}/${host}.S"
+
+    if ssh -S "$sock" -O check "$host" &>/dev/null; then
+        ssh -S "${sock}" "${host}" "${*:2}"
+    fi
+}
+
+function remcall
+{
+    local host="${1}"
+    local sock="${SOCKETDIR}/${host}.S"
+
+    remexec "${host}" "${RSCRIPT}" "${@:2}"
+}
+
+function attach
+{
+    local session="${1%%.*}"
+
+    if [[ -z "${TMUX}" ]]; then
+        if tmux has-session -t "${session}"; then
+            if [[ "${TERM}" = linux && "$(tty)" =~ /dev/pts/.* ]]; then
+                TERM=fbterm tmux attach-session -t "${session}"
+                return
+            else
+                tmux attach-session -t "${session}"
+                return
+            fi
+        fi
+        return 1
+    fi
+
+    if tmux has-session -t "${session}"; then
+        tmux switch-client -t "${session}"
+        return
+    fi
+
+    return 1
+}
+
+function up
+{
+    #tmux start-server
+    local session="${1%%.*}"
+
+    if [[ -n "$SSH_CONNECTION" ]]; then
+        tmux new-session -ds "$session"
+        return
+    fi
+
+    if tmux has-session -t "$session"; then
+        attach "$session"
+        return
+    fi
+
+    local host dummy
+    IFS=$'/\n' read -r -d '' host dummy <<< "$session"
+
+    if [[ "$host" = $(hostname) ]]; then
+        tmux new-session -ds "$session"
+        attach "$session"
+        return
+    fi
+
+    local sock="$SOCKETDIR/$host.S"
+    local sshcmd="ssh -S $sock -t $host tmux attach -t $session"
+
+    connect "$host"
+    remsync "$host"
+
+    local port=$(
+        ssh -S "$sock" -O forward -R "localhost:0:$MUXSOCKET" "$host")
+
+    remcall "$host" up "$session"
+    remexec "$host" tmux set -s "@tunport-$host" "$port"
+
+    tmux new-session -ds "$session" "$sshcmd"
+    tmux set -s "@remote-$host" 1
+    attach "$session"
+}
+
+function down
+{
+    local session="${1%%.*}"
+
+    local host dummy
+    IFS=$'/' read -r -d '' host dummy <<< "$session"
+
+    local sock="$SOCKETDIR/$host.S"
+
+    if [[ "$host" = $(hostname) || -n "$SSH_CONNECTION" ]]; then
+        tmux kill-session -t "${session}"
+        return
+    fi
+
+    tmux set -su "@remote-$host"
+    disconnect "$session"
+}
+
+if [[ "$#" -eq 0 ]]; then
+    up $(hostname)
+else
+    "$@"
+fi

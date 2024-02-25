@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# determine which packages are explicitly installed but not in global `packages'
+
+readarray -t PACKAGES < <(xbps-query -m | sed -rn 's/^(.*)-.*$/\1/p')
+
+for package in "${PACKAGES[@]}"; do
+    if ! grep -q "^$package$" ~/.sysfiles/packages.txt; then
+        echo "$package"
+    fi
+done

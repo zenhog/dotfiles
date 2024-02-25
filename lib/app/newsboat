@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='C-M:r'
+
+COMMAND=(gui tmux open "window:$(hostname):@:newsboat" newsboat)

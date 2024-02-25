@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+function text() {
+    local time=$(date '+%R')
+    local time=$(date '+%I:%M %p')
+    local time=$(date '+%H:%M %a %b %d')
+
+    printf "%s" "$time"
+}
+
+function icon() {
+  local icon=󱑍
+  printf "%s" "$icon"
+}
+
+function output() {
+    printf ":"
+    text
+}

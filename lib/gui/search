@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+KEY=s
+MOD='S-M'
+ICON=
+
+label() {
+  printf "%s/%s (%s)\n" "$(curdir)" "$(filter "$1")" \
+    "$(file -bL --mime-type "$(curdir)/$(filter "$1")")"
+}
+
+function curdir() {
+  if [[ "$(basename "$0")" == gui ]]; then
+    pwd
+    return
+  fi
+  realpath \
+    "$(tmux show-option -s -v '@menu-search-pwd' 2>/dev/null || echo "$HOME")"
+}
+
+function atfinish() {
+  tmux set-option -s -u '@menu-search-pwd'
+}
+
+function filter() {
+    perl -pe 's|^[^[:graph:]].*?[ ]||p' <<< "$1"
+}
+
+function view() {
+  local entry
+  read -r entry < <(filter "$1")
+  CURDIR=$(curdir)
+
+  command preview "$CURDIR/$entry"
+}
+
+function list() {
+  local hidden opts
+  read -r hidden < <(tmux show -s -v '@menu-search-hidden')
+  [[ "$hidden" -eq 1 ]] && opts+=('-A')
+  lsd "${opts[@]}" "$(curdir)"
+}
+
+BINDS[alt-t:toggle]=
+function toggle() {
+  local hidden
+  read -r hidden < <(tmux show -s -v '@menu-search-hidden' 2>/dev/null)
+  [[ -z "$hidden" ]] && hidden=0
+  [[ "$hidden" -eq 1 ]] && tmux set -s '@menu-search-hidden' 0 ||
+    tmux set -s '@menu-search-hidden' 1
+}
+
+# find {q}
+
+# exec {q}: will eval {q} in the context of the gui submodule
+# share
+#   * image -> gui imgur upload
+#   * text  -> gui paste upload
+
+# tmux -s '@gui_search_hidden' true/false
+# tmux -s '@gui_search_dirs' 0/1/2
+# tmux -s '@gui_search_lsd_order' 0/1/2
+#   0: dirs first
+#   1: files first
+#   2: hidden first
+#   3: ...
+# keys to toggle between the options
+
+# requires fzfinput
+function rename() {
+  :
+}
+
+BINDS[alt-s:find]='reload-sync(%s {q})+clear-query'
+function find() {
+  #fd -L -tf -H "$query"
+  fd $1
+}
+# finddir
+# findfile
+# findhidden
+
+BINDS[alt-r:rename]='execute-silent(%s {})+reload-sync(list)+'\
+'clear-query+clear-screen'
+function rename() {
+  local CURDIR=$(curdir)
+  local entry=$(filter "$1")
+  function inputpreview() {
+    lsd
+  }
+  export -f inputpreview
+  read -r input < <(cd "$CURDIR" && input "rename: $entry")
+  mv -- "$CURDIR/$entry" "$CURDIR/$input"
+}
+
+BINDS[alt-q:home]='execute-silent(%s)+reload-sync(list)'
+function home() {
+  local CURDIR=$(curdir)
+  cd "$HOME" && tmux set-option -s '@menu-search-pwd' "$HOME"
+}
+
+BINDS[alt-b:mkfolder]='execute-silent(%s {q})+reload-sync(list)'\
+'+clear-query+clear-screen'
+function mkfolder() {
+  local CURDIR=$(curdir)
+  local dir="$1"
+  #mkdir "$CURDIR/$dir"
+  export T=ab
+  function inputpreview() {
+    echo "$T"
+  }
+  export -f inputpreview
+  read -r input < <(input "mkfolder")
+  mkdir "$CURDIR/$input"
+}
+
+BINDS[alt-d:rmfolder]='execute-silent(%s {})+reload-sync(list)'
+function rmfolder() {
+  local CURDIR="$(curdir)"
+  local entry="$(filter "$1")"
+  rmdir "$CURDIR/$entry"
+}
+
+BINDS[tab:open]='execute-silent(%s {})+reload-sync(list)'
+function open() {
+  local curdir entry
+  read -r entry < <(filter "$1")
+  read -r curdir < <(curdir)
+  command open "$curdir/$entry"
+}
+
+BINDS[enter:enter]='execute-silent(%s {})+reload-sync(list)+clear-query'
+function enter() {
+  local CURDIR=$(curdir)
+  local entry
+  read -r entry < <(filter "$1")
+  cd "$CURDIR/$entry" && tmux set-option -s '@menu-search-pwd' "$CURDIR/$entry"
+}
+
+BINDS[esc:back]='execute-silent(%s)+reload-sync(list)+clear-query'
+function back() {
+  local CURDIR=$(curdir)
+  cd "$CURDIR/.." && tmux set-option -s '@menu-search-pwd' "$CURDIR/.."
+}

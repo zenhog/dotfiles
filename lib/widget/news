@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+function unread() {
+    local db="$HOME/.local/share/newsboat/cache.db"
+    local day=$((3600*24))
+    local age=1
+    local epoch=$(($(date +%s)-($age * $day)))
+
+    sqlite3 "$db" \
+        "SELECT count(*) FROM rss_item WHERE unread == 1 and pubDate > $epoch"
+}
+
+function text() {
+    local count
+    local color=skyblue
+
+    read -r count < <(unread)
+
+    colorize "$color" "$count"
+}
+
+function icon() {
+    local icon=󰑫
+    local color=yellow
+
+    colorize "$color" "$icon"
+}

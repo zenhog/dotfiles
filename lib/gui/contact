@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+KEY=a
+MOD='S-M'
+ICON=󰀆
+
+export DB="$HOME/.db/bookmarks.db"
+
+POSITION=BOTTOM
+
+declare -A -x KEYS
+
+function view() {
+  :
+}
+
+function list() {
+  sqlite3 -separator $'\t' "$DB" \
+    'select id, metadata from bookmarks' | sort -t $'\t' -k2
+}
+
+KEYS[reload]='alt-r'
+function reload() {
+  :
+}
+
+KEYS[open]='enter'
+function open() {
+  :
+}
+
+KEYS[close]='alt-d'
+function close() {
+  :
+}

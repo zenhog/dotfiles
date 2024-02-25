@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+PERIOD=1
+
+POWER_PATH=/sys/class/power_supply
+readarray -t BATTERIES < <(echo $POWER_PATH/BAT*)
+
+function text() {
+  local cur max
+
+  CUR=0
+  MAX=0
+
+  for bat in "${BATTERIES[@]}"; do
+    read -r cur < "$bat/charge_now"
+    read -r max < "$bat/charge_full"
+    CUR=$((CUR+cur))
+    MAX=$((MAX+max))
+  done
+
+  read -r PERCENTAGE < <(echo "$CUR * 100 / $MAX" | bc -l)
+
+  printf "%.f" "$PERCENTAGE"
+}
+
+function icon() {
+  local ok=󱐋
+  local ko=󰂎
+  local status
+  STATUS="$ok"
+  for bat in "${BATTERIES[@]}"; do
+    read -r status < "$bat/status"
+    if [[ "$status" == Discharging ]]; then
+      STATUS="$ko"
+      break
+    fi
+  done
+  printf "%s" "$STATUS"
+}

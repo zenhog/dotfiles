@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+KEY=h
+MOD='S-M'
+ICON=
+
+function view() {
+  local menu
+  read -r icon menu dummy <<< "$1"
+  gui "$menu" list
+}
+
+function list() {
+  gui | column -t -s: | sort -k4
+}
+
+KEYS[reload]='alt-r'
+function reload() {
+  :
+}
+
+KEYS[open]='enter'
+ACTIONS[open]='become(menu {2})'
+# add keys to switch from 1 menu to the next
+# add multi-menu
+function open() {
+  local icon menu dummy
+  read -r -d '' icon menu dummy <<< "$1"
+}

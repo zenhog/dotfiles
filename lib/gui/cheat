@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+KEY=c
+MOD='S-M'
+ICON=
+
+function view() {
+  quiet curl cht.sh/$1
+}
+
+function list() {
+  quiet curl cht.sh/:list
+}
+
+BINDS[enter:open]=
+function open() {
+  local f="$(mktemp --dry-run)"
+
+  view "$1" | fzf --ansi -f '' > "$f"
+  command open "$f"
+}

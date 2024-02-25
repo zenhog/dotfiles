@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+function text() {
+    readarray -t devices < <(bluetoothctl devices Connected | awk '{print $2}')
+    printf "%s" "${devices[0]}"
+}
+
+function icon() {
+    local icon=󰂯
+    printf "%s" "$icon"
+}

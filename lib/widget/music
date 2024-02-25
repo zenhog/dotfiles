@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+PERIOD=1
+
+KEYS[prev]='C-M:p'
+function prev() {
+    mpc prev
+}
+
+KEYS[next]='C-M:n'
+function next() {
+    mpc next
+}
+
+KEYS[toggle]='C-M:space'
+function toggle() {
+    mpc toggle
+}
+
+function text() {
+    read -r song < <(mpc current 2>/dev/null)
+
+    printf "%s" "$song"
+}
+
+function icon() {
+
+    local playing=󰝚
+    local paused=󰽺
+    local down=󰝛
+
+    read -r state < <(mpc status "%state%" 2>/dev/null)
+
+    case "$state" in
+        playing) icon="$playing";;
+        paused) icon="$paused";;
+        *) icon="$down";;
+    esac
+
+    printf "%s" "$icon"
+}

@@ -1,0 +1,47 @@
+if [[ ! -d "$HOME/.zinit/bin"  ]]; then
+    git clone --depth=1 'https://github.com/zdharma-continuum/zinit' \
+        "$HOME/.zinit/bin"
+fi
+
+source "$HOME/.zinit/bin/zinit.zsh"
+
+zinit ice  depth:'1'
+zinit load 'mafredri/zsh-async'
+
+zinit ice  lucid depth'1'
+zinit load 'sainnhe/zsh-completions'
+
+zinit ice  lucid depth'1'
+zinit load 'endaaman/lxd-completion-zsh'
+
+zinit ice  depth:'1'
+zinit load 'RobSis/zsh-completion-generator'
+
+#zinit ice lucid depth'1'
+#zinit load 'marlonrichert/zsh-autocomplete'
+
+zinit ice  depth:'1'
+zinit load 'Aloxaf/fzf-tab'
+
+zinit ice  depth:'1'
+zinit load 'joshskidmore/zsh-fzf-history-search'
+
+zinit ice  depth:'1'
+zinit load 'romkatv/powerlevel10k'
+
+zinit ice  depth:'1' atload:'zle -N zce && bindkey "^@" zce'
+zinit load 'hchbaw/zce.zsh'
+
+zinit ice  depth:'1'
+zinit load 'zdharma-continuum/fast-syntax-highlighting'
+
+zinit ice  depth:'1'
+zinit load 'seletskiy/zsh-fuzzy-search-and-edit'
+
+zinit ice  depth:'1'
+zinit load 'urbainvaes/fzf-marks'
+
+zinit ice   as:'program' pick:'bin/*' src:'asdf.sh'
+zinit load 'asdf-vm/asdf'
+
+autoload -Uz compinit && compinit

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+KEY=space
+MOD='S-M'
+ICON=
+
+POSITION=RIGHT
+NOWRAP=1
+
+function view() {
+  local menu
+  read -r icon menu dummy <<< "$1"
+  gui "$menu" list
+}
+
+function list() {
+  gui | column -t -s: | sort -k4
+}
+
+BINDS[enter:open]='become(menu {2})'
+function open() {
+  local icon menu dummy
+  read -r -d '' icon menu dummy <<< "$1"
+}

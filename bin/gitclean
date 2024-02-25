@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+gitsync
+
+git checkout --orphan tmp
+git add . --all
+git commit -m "$(date)"
+git branch -D master
+git branch --move tmp master
+git push --set-upstream origin master --force
+
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now
+git gc --aggressive --prune=now

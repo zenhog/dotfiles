@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+
+DIR="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
+MODULES_DIR="$DIR/../lib/gui"
+
+source "$DIR/gui"
+
+function atexit() {
+  declare -F atfinish &>/dev/null && atfinish
+  awm set class=@tmux instance=@menu -- hidden=true minimized=true &>/dev/null
+}
+
+function help() {
+  eval "$BINDINGS"
+  readarray -t labels < <(
+    for keyval in "${!BINDS[@]}"; do
+      local key func
+      IFS=$':\n' read -r -d '' key func <<< "$keyval"
+
+      local tabkey= retkey=↵ bspacekey=󰌍 esckey=⬧ spacekey=␣
+
+      key="${key/alt-/}"
+      key="${key/enter/${retkey}}"
+      key="${key/tab/${tabkey}}"
+      key="${key/ctrl/^}"
+      key="${key/esc/${esckey}}"
+      key="${key/space/${spacekey}}"
+      key="${key/bs/${bspacekey}}"
+
+      [[ "${BINDS[$keyval]}" =~ accept$ ]] && func="+$func"
+
+      echo "${func}:${key}"
+    done | sort -k1 -t:
+  )
+
+  (IFS=$' '; echo "${labels[*]}")
+}
+
+BINDS[alt-\\:entry]='execute-silent(copyentry {})+reload-sync(list)'
+BINDS[alt-\|:query]='execute-silent(copyentry {q})+reload-sync(list)'
+copyentry() {
+  echo -n "$1" | fzf --ansi -f '' | tmux load-buffer -
+}
+
+BINDS[alt-/:grep]='execute-silent(extract {})+reload-sync(list)+clear-screen'
+function extract() {
+  view "$1" | fzfgrep 2>/dev/tty
+}
+
+function input() {
+  local query="$1" fifo="$2"
+
+  local -a cmd
+  cmd=('fzf' '--print-query')
+  cmd+=('--border' 'sharp')
+  cmd+=('--prompt' "input($MODULE)> ")
+  cmd+=('--query' "$query")
+  cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
+  cmd+=('--info=inline-right')
+  cmd+=('--no-separator')
+
+  [[ -n "$INPUTPREVIEW" ]] && function inputpreview() {
+    echo "$INPUTPREVIEW"
+  } && export -f inputpreview
+
+  if declare -F inputpreview &>/dev/null; then
+    cmd+=('--preview' 'inputpreview')
+    cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
+  fi
+
+  [[ -n "$fifo" ]] && {
+    exec 1>"$fifo"
+  }
+  echo -n | "${cmd[@]}" 2>/dev/tty
+}
+
+BINDS[change:-]='change-preview(view {})'
+BINDS[alt-enter:eval]='change-preview(eval {q})'
+BINDS[alt-bs:calq]='change-preview(eval qalc {q})'
+
+function main() {
+  trap atexit EXIT
+
+  [[ "$1" == input ]] && {
+    input "${@:2}"
+    return
+  }
+
+  source "$MODULES_DIR/$1" || exit 1
+
+  #export -f $(declare -F | awk '{print $3}') || exit 1
+  while read -r _ _ func _; do
+    export -f "$func"
+  done < <(declare -F) || exit 1
+
+  read -r BINDINGS < <(declare -p BINDS); export BINDINGS
+
+  COMMAND+=(fzf)
+  COMMAND+=(--prompt="$1> ")
+  COMMAND+=(--border=rounded)
+  COMMAND+=(--info=inline-right)
+  COMMAND+=(--no-separator)
+  COMMAND+=(--ansi)
+  COMMAND+=(--cycle)
+  COMMAND+=(--no-multi)
+  COMMAND+=(--query "${*:2}")
+  if [[ -n "$PREVIEW_CMD" ]]; then
+    COMMAND+=(--preview="$PREVIEW_CMD")
+  elif silent declare -F view; then
+    COMMAND+=(--preview="view {}")
+  fi
+
+  if silent declare -F label; then
+    COMMAND+=(--bind 'load:transform-preview-label:label {}')
+    COMMAND+=(--bind 'focus:transform-preview-label:label {}')
+  fi
+
+  COMMAND+=(--border-label "$(help)")
+  WINDOW=right,border-rounded
+  EXTRA='--bind=ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
+
+  if [[ -n "$HORIZONTAL" ]]; then
+    WINDOW=bottom,border-rounded
+    EXTRA='--bind=ctrl-x:change-preview-window(right,border-rounded|bottom,border-rounded)'
+  else
+    case "$POSITION" in
+      TOP)
+        WINDOW=top,border-bottom ;;
+      BOTTOM)
+        WINDOW=bottom,border-top ;;
+      LEFT)
+        WINDOW=left,border-right ;;
+      RIGHT)
+        WINDOW=right,border-left ;;
+    esac
+  fi
+
+  [[ -n "$RATIO" ]] && WINDOW+=",$RATIO" || WINDOW+=,65%
+  [[ -z "$NOWRAP" ]] && WINDOW+=,wrap
+  [[ -n "$FOLLOW" ]] && WINDOW+=,follow
+
+  COMMAND+=(--preview-window="$WINDOW")
+  #BINDS[alt-o:paste]='transform-query(tmux show-buffer)'
+
+  for keyval in "${!BINDS[@]}"; do
+    local key func cmd action
+    IFS=$':\n' read -r -d '' key func <<< "$keyval"
+    [[ -n "${key?}" ]] || exit 1
+    [[ -n "${func?}" ]] || exit 1
+    [[ -z "${BINDS[$keyval]}" ]] &&
+      BINDS[$keyval]='execute-silent(%s {})+reload-sync(list)+clear-screen'
+    read -r action < <(eval "printf '${BINDS[$keyval]}' '$func'")
+    read -r cmd < <(printf -- "--bind=%s:%s" "$key" "$action")
+    COMMAND+=("$cmd")
+  done
+  [[ -n "$EXTRA" ]] && COMMAND+=("$EXTRA")
+
+  gui "$1" list | "${COMMAND[@]}"
+}
+
+[[ $# -eq 0 ]] && exit 1
+
+tty -s && [[ "$(tmux show-environment TMUX_SESSION_NAME)" =~ menu$ ]] || {
+  [[ "$1" == input ]] && {
+    export INPUT_FIFO="$(mktemp --dry-run --suffix "menu-$$-inputfifo")"
+    mkfifo "$INPUT_FIFO"
+    tmux set-environment -t menu INPUTPREVIEW "$INPUTPREVIEW"
+    gui tmux open window:menu:@:menu menu input "$2" "$INPUT_FIFO"
+    cat < "$INPUT_FIFO"
+    rm "$INPUT_FIFO"
+    tmux set-environment -t menu -u INPUTPREVIEW
+    exit
+  } || {
+    tmux set-environment -t menu LOCATION "$LOCATION"
+  # @menu-search-env-location
+  # @menu-search-var-hidden
+  # @menu-search-
+    exec gui tmux open window:menu:@:menu menu "$@"
+  }
+}
+
+main "$@"

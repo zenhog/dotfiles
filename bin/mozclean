@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+rm -rf ~/.cache/mozilla
+rm -rf ~/.mozilla/firefox/*.{main,private}/places.sqlite*

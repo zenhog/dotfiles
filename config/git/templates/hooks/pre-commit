@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+
+[[ -f .gitsecrets ]] || exit 0
+
+retval=0
+
+for f in *; do
+  unset type
+  read -r type < <(file -bL --mime-type "$f")
+  [[ "$type" == application/pgp-encrypted && "$f" =~ \.gpg$ ]] || {
+    retval=1
+    printf "File %s of type %s must be pgp encrypted and must end with the .gpg file extension\n" "$f" "$type"
+  }
+done
+
+exit $retval

@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+KEY=d
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+function query() {
+  local query params URL=http://localhost:6800/jsonrpc
+
+  local -A methods=(
+    stats aria2.getGlobalStat
+    active aria2.tellActive
+    waiting aria2.tellWaiting
+    stopped aria2.tellStopped
+    files aria2.getFiles
+  )
+
+  if [[ $# -ge 2 ]]; then
+    read -r params < <(IFS=,; printf '"params": [%s]' "${*:2}")
+  fi
+
+  read -r -d '' query << EOF
+  {
+    "jsonrpc": "2.0",
+    "id": "menu",
+    "method": "${methods[$1]}",
+    ${params}
+  }
+EOF
+
+  curl -s -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
+    jq -r '.result'
+}
+
+function view() {
+  :
+}
+
+function label() {
+  declare -A -x -g STATS
+
+  local -a values
+  local -a keys=(
+    downloadSpeed
+    uploadSpeed
+    numActive
+    numStopped
+    numStoppedTotal
+    numWaiting
+  )
+
+  readarray -t values < \
+    <(query stats | jq -r "$(IFS=,; printf '%s' "${keys[*]/#/.}")")
+
+  for i in $(seq 0 $((${#values[@]} -1))); do
+    if [[ "${keys[$i]}" == *Speed ]]; then
+      values[$i]="$(numfmt --to=iec --suffix=B <<< "${values[$i]}")"
+    fi
+    STATS[${keys[$i]}]="${values[$i]}"
+  done
+
+  printf "  %s/s  %s/s 󰧩 %s 󰒲 %s 󰙧 %s 󱕱 %s " "${values[@]}"
+  export "$(declare -p STATS)"
+}
+
+function list() {
+  local flatkey
+  local -a values
+  local -a keys=(
+    gid
+    status
+    completedLength
+    totalLength
+    #connections
+    #dir
+    #downloadSpeed
+    #uploadSpeed
+    #uploadLength
+    #numPieces
+  )
+  silent label
+  read -r flatkey < <(IFS=,; printf '%s' "${keys[*]/#/.}")
+  # .bittorrent.info.name
+
+  function f() {
+    query "$@" | jq -r ".[]|${flatkey}"
+  }
+
+  readarray -t values < <(f stopped 0 "${STATS[numStopped]}")
+  printf "%s %s %s %s\n" "${values[@]}"
+}

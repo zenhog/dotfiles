@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+
+help() {
+  $0 "${FUNCNAME[@]}"
+}
+
+test() {
+  case "$1" in
+    16)
+      T='gYw'   # The test text
+      echo -e "\n                 40m     41m     42m     43m     44m     45m     46m     47m";
+      for FGs in '    m' '   1m' '  30m' '1;30m' '  31m' '1;31m' '  32m' '1;32m' '  33m' '1;33m' '  34m' '1;34m' '  35m' '1;35m' '  36m' '1;36m' '  37m' '1;37m';
+        do FG=${FGs// /}
+        echo -en " $FGs \033[$FG  $T  "
+        for BG in 40m 41m 42m 43m 44m 45m 46m 47m;
+          do echo -en "$EINS \033[$FG\033[$BG  $T \033[0m\033[$BG \033[0m";
+        done
+        echo;
+      done
+      echo
+      ;;
+    256)
+      echo -en "\n   +  "
+      for i in {0..35}; do
+        printf "%2b " $i
+      done
+
+      printf "\n\n %3b  " 0
+      for i in {0..15}; do
+        echo -en "\033[48;5;${i}m  \033[m "
+      done
+
+      #for i in 16 52 88 124 160 196 232; do
+      for i in {0..6}; do
+        let "i = i*36 +16"
+        printf "\n\n %3b  " $i
+        for j in {0..35}; do
+          let "val = i+j"
+          echo -en "\033[48;5;${val}m  \033[m "
+        done
+      done
+
+      echo -e "\n"
+      ;;
+    24)
+      #   This file echoes a bunch of 24-bit color codes
+      #   to the terminal to demonstrate its functionality.
+      #   The foreground escape sequence is ^[38;2;<r>;<g>;<b>m
+      #   The background escape sequence is ^[48;2;<r>;<g>;<b>m
+      #   <r> <g> <b> range from 0 to 255 inclusive.
+      #   The escape sequence ^[0m returns output to default
+
+      setBackgroundColor()
+      {
+        echo -en "\x1b[48;2;$1;$2;$3""m"
+      }
+
+      resetOutput()
+      {
+        echo -en "\x1b[0m\n"
+      }
+
+      # Gives a color $1/255 % along HSV
+      # Who knows what happens when $1 is outside 0-255
+      # Echoes "$red $green $blue" where
+      # $red $green and $blue are integers
+      # ranging between 0 and 255 inclusive
+      rainbowColor()
+      { 
+        let h=$1/43
+        let f=$1-43*$h
+        let t=$f*255/43
+        let q=255-t
+
+        if [ $h -eq 0 ]
+        then
+          echo "255 $t 0"
+        elif [ $h -eq 1 ]
+        then
+          echo "$q 255 0"
+        elif [ $h -eq 2 ]
+        then
+          echo "0 255 $t"
+        elif [ $h -eq 3 ]
+        then
+          echo "0 $q 255"
+        elif [ $h -eq 4 ]
+        then
+          echo "$t 0 255"
+        elif [ $h -eq 5 ]
+        then
+          echo "255 0 $q"
+        else
+          # execution should never reach here
+          echo "0 0 0"
+        fi
+      }
+
+      for i in `seq 0 127`; do
+        setBackgroundColor $i 0 0
+        echo -en " "
+      done
+      resetOutput
+      for i in `seq 255 128`; do
+        setBackgroundColor $i 0 0
+        echo -en " "
+      done
+      resetOutput
+
+      for i in `seq 0 127`; do
+        setBackgroundColor 0 $i 0
+        echo -n " "
+      done
+      resetOutput
+      for i in `seq 255 128`; do
+        setBackgroundColor 0 $i 0
+        echo -n " "
+      done
+      resetOutput
+
+      for i in `seq 0 127`; do
+        setBackgroundColor 0 0 $i
+        echo -n " "
+      done
+      resetOutput
+      for i in `seq 255 128`; do
+        setBackgroundColor 0 0 $i
+        echo -n " "
+      done
+      resetOutput
+
+      for i in `seq 0 127`; do
+        setBackgroundColor `rainbowColor $i`
+        echo -n " "
+      done
+      resetOutput
+      for i in `seq 255 128`; do
+        setBackgroundColor `rainbowColor $i`
+        echo -n " "
+      done
+      resetOutput
+      ;;
+    *)
+      help
+      ;;
+  esac
+}
+
+function main() {
+  "$@"
+}
+
+main "$@"

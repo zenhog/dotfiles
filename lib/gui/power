@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+KEY=x
+MOD='S-M'
+ICON=
+
+function view() {
+  declare -f "action:$1"
+}
+
+function list() {
+  while read -r _ _ f _; do
+    [[ "$f" =~ action:.* ]] && printf "%s\n" "${f#action:}"
+  done < <(declare -F)
+}
+
+BINDS[enter:open]='execute(%s {})+accept'
+function open() {
+  action:$1
+}
+
+function action:poweroff() {
+  sudo poweroff
+}
+
+function action:suspend() {
+  sudo poweroff
+}
+
+function action:screenlock() {
+  awm exec -- i3lock
+}
+
+function action:screenshot() {
+  :
+}
+
+function action:windowshot() {
+  :
+}
+
+function action:selectshot() {
+  :
+}
+
+function action:switchtheme() {
+  :
+}
+
+function action:mailsync() {
+  :
+}

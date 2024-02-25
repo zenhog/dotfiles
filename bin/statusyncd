@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+interval=5
+
+widgets=(@ping @vpn @ddc @vol @mail @alert @bat @date)
+widgets=(@ping @ddc @vol @mail @bat)
+
+sep=,
+
+function makestatus
+{
+    local i=0
+    local widget
+    while [[ "$i" -lt $((${#widgets[@]} - 1)) ]]; do
+        widget="${widgets[$i]}"
+        #printf " %s ∙" "$($widget --tmux)"
+        printf "%s$sep " "$($widget --tmux)"
+        ((i++))
+    done
+    widget="${widgets[$i]}"
+    printf "%s " "$($widget --tmux)"
+}
+
+function cleanup
+{
+    echo -n > /tmp/tmux-status
+}
+
+function genwidgets
+{
+    readarray -t sessions < <(tmux ls -F '#{session_name}')
+    status=$(makestatus)
+    for session in "${sessions[@]}"; do
+        read -r -d '' host < <(tmux show -sv "@host-$session")
+        if [[ "$host" = $(hostname) ]]; then
+            echo -n "$status" > /tmp/tmux-status
+            tmux refresh-client -S
+        else
+            #rmux remexec "$host" "tmux set -s @status '$status'"
+            rmux remexec "$host" "echo -n '$status' > /tmp/tmux-status"
+            rmux remexec "$host" "tmux refresh-client -S"
+        fi
+    done
+}
+
+trap cleanup EXIT HUP
+trap genwidgets USR2
+
+while true; do
+    genwidgets
+    sleep "$interval" &
+    wait $!
+done

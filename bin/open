@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+
+read -r mime < <(file -bL --mime-type "$1")
+
+category="${mime%%/*}"
+kind="${mime##*/}"
+
+if [[ "$mime" == inode/directory ]]; then
+    if [[ -r "$1/.dirtype" ]]; then
+        read -r mime < "$1/.dirtype"
+    else
+        cd "$1" &&
+        exec gui tmux open "window:$(hostname):@:$(basename "$1")" "$SHELL"
+    fi
+fi
+
+case "${mime}" in
+    text/*)
+        gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
+        ;;
+    image/*)
+        awm exec -- sxiv -a -s f -- "$@"
+        ;;
+    video/*)
+        awm exec -- vlc "$@"
+        ;;
+    application/pdf)
+        for file in "$@"; do
+            awm exec -- mupdf "$file"
+        done
+        ;;
+    "cannot open "*)
+        case "$1" in
+            file://*)
+                gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
+                ;;
+            irc:*)
+                ;;
+            ircs:*)
+                ;;
+            mailto:*)
+                ;;
+            magnet:*)
+                aria2p add "$@"
+                ;;
+            ftp://*)
+                firefox -p main "$@"
+                ;;
+            http://*)
+                firefox -p main "$@"
+                ;;
+            https://*)
+                firefox -p main "$@"
+                ;;
+        esac
+esac

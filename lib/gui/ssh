@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+KEY=e
+MOD='S-M'
+ICON=
+
+export MUXSOCK="$HOME/.rmux.S"
+export SOCKDIR="$HOME/.sockets"
+
+function view() {
+  preview "$HOME/.ssh/hosts/$1"
+}
+
+function list() {
+  ls -1 "$HOME/.ssh/hosts"
+}
+
+function connect() {
+  local host="$1"
+  local sock="${SOCKDIR}/${host}.S"
+
+  [[ -n "$SSH_CONNECTION" ]] && return
+
+  ssh -S "$sock" -O check "$host" && return
+
+  rm -f "$sock"
+
+  ssh -fMNS "$sock" "$host"
+}
+
+function disconnect() {
+    local host="$1"
+    local sock="$SOCKDIR/$host.S"
+
+    if ssh -S "$sock" -O check "$host"; then
+        ssh -S "$sock" -O cancel "$host"
+        ssh -S "$sock" -O exit   "$host"
+    fi
+}
+
+function sync() {
+  local host="$1"
+  local sock="$SOCKDIR/$host.S"
+
+  rsync --quiet --relative "$PUBFILES"
+  remexec "$host" bash "$REMFILES/bin/dot" install pub
+}

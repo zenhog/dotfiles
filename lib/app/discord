@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=@discord)
+COMMAND=(Discord)

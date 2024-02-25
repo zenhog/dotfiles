@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+KEY=n
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+export DB="$HOME/.local/share/newsboat/cache.db"
+
+function view() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM rss_item WHERE id == ${id}")
+  sepline
+  #sqlite3 "$DB" "SELECT content FROM rss_item WHERE id == ${id}"
+  command preview "$url"
+}
+
+BINDS[enter:open]='execute-silent(%s {})+accept'
+function open() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url _ < <(sqlite3 "$DB" "SELECT url FROM rss_item WHERE id == ${id}")
+  command open "$url"
+}
+
+function list() {
+  local request entries
+
+  read -r -d '' request << EOF
+  SELECT t1.id,t2.title,t1.title
+    FROM
+    rss_item t1
+    INNER JOIN
+    rss_feed t2 ON t1.feedurl = t2.rssurl
+    ORDER BY lastmodified DESC
+EOF
+
+  readarray -t entries < <(sqlite3 "$DB" "${request}")
+  printf "%s\n" "${entries[@]}" | column -t -s '|' -o' '
+}
+

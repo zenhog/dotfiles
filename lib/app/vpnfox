@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+KEY='W:e'
+
+ATTRIBUTES=(profile=@vpnfox)
+COMMAND=(cgexec -g net_cls:vpn1
+  env ICON=vpnfox
+  firefox --new-instance --private-window -p private)

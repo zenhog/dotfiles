@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+KEY=l
+MOD='S-M'
+ICON=
+
+export ALACRITTY_DIR="$HOME/.config/alacritty"
+export PREVIEW_FILE="$HOME/.UTF-8-demo.txt"
+
+function atfinish() {
+  (
+    cd "$ALACRITTY_DIR"
+    read -r orig < <(basename "$(realpath font-name.link.toml)")
+    ln -vf "fonts/${orig}" font-name.toml
+  )
+}
+
+function label() {
+  local font size
+  read -r size < <(size get)
+  read -r font < <(basename $(realpath "${ALACRITTY_DIR}/font-name.link.toml"))
+  echo "${font} (${size})"
+}
+
+function view() {
+  local font size
+  read -r size < <(size get)
+  read -r font <<< "$1"
+  (
+    cd "$ALACRITTY_DIR"
+    ln -f "fonts/${font}" font-name.toml
+  )
+
+  command preview "$ALACRITTY_DIR/fonts/${font}"
+  sepline
+  command preview "$PREVIEW_FILE"
+}
+
+function list() {
+  fd --base-directory "$ALACRITTY_DIR/fonts" -e toml
+  # themes
+  # wallpapers
+}
+
+BINDS[enter:link]=
+function link() {
+  local font
+  read -r font <<< "$1"
+  (
+    cd "$ALACRITTY_DIR"
+    ln -vf "fonts/${font}" font-name.toml
+    ln -svf "fonts/${font}" font-name.link.toml
+  )
+}
+
+function size() {
+  local file="${ALACRITTY_DIR}/font-size.toml"
+  case "$1" in
+    get) sed -rn '/size/s/[^[:digit:]]//gp' "${file}";;
+    set) cat << EOF > "$file"
+[font]
+size = ${2}
+EOF
+        ;;
+  esac
+}
+
+BINDS[alt-n:inc]=
+function inc() {
+  local size
+  read -r size < <(size get)
+  size set $((size+1))
+}
+
+BINDS[alt-p:dec]=
+function dec() {
+  local size
+  read -r size < <(size get)
+  size set $((size-1))
+}

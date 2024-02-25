@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+PERIOD=1
+
+SOCKET="/tmp/rofi_notification_daemon"
+
+NEWSDB="$HOME/.local/share/newsboat/cache.db"
+
+function mail() {
+    local icon=󰊫
+    readarray -t mails < <(notmuch search --format=json tag:unread |
+        jq -r '.[].subject')
+
+    (( ${#mails[@]} == 0 )) && return 1
+
+    printf "$icon %s " "${mails[@]}"
+}
+
+function news() {
+    local icon=󰑫
+    local iconcolor=aqua
+    local textcolor=bisque
+
+    local age=1
+    local day=$((3600*24))
+    local epoch=$(($(date +%s) - $age * $day))
+
+    readarray -t news < <(sqlite3 "$NEWSDB" \
+        "SELECT title FROM rss_item WHERE unread == 1 and pubDate > $epoch")
+
+    (( ${#news[@]} == 0 )) && return 1
+
+    readarray -t news < <(for i in "${news[@]}"; do
+        printf "%s\n" "$(colorize "$textcolor" "$i")"
+    done)
+
+    printf "$(colorize "$iconcolor" "$icon") %s " "${news[@]}"
+}
+
+function notification() {
+
+    function extract() {
+        readarray -t "$1" < <(jq -r ".[].$1" <<< "$TEXT")
+    }
+
+    local icon=󰵈
+    local iconcolor=darkgoldenrod
+
+    read -r TEXT < <(echo list | socat - "UNIX-CONNECT:$SOCKET")
+    extract body
+    extract summary
+
+    (( ${#body[@]} == 0 )) && return 1
+
+    readarray -t bell < \
+        <(paste -d' ' \
+            <(printf "%s ➡\n" "${summary[@]}") <(printf "%s\n" "${body[@]}"))
+
+    printf "%s %s " "$(colorize "$iconcolor" "$icon")" "${bell[@]}"
+}
+
+function text() {
+    notification || mail || news
+}
+
+function icon() {
+    local icon=󰛸
+    local color=seagreen
+
+    colorize "$color" "$icon"
+}

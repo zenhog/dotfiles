@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+read -r mime < <(file -bL --mime-type "$1")
+
+zug() {
+  local fifo
+
+  read -r fifo < <(printf "%s/.zug_fifo\n" "$(dirname "$(realpath "$1")")")
+
+  zugstop() {
+    exec 3>&-
+    rm -f "$fifo"
+  }
+
+  trap zugstop EXIT QUIT INT TERM
+
+  [[ -p "$fifo" ]] && rm -f "$fifo"
+
+  mkfifo "$fifo" || exit 1
+
+  coproc zugzug {
+    ueberzug layer --parser bash < "$fifo"
+  }
+
+  exec 3>"$fifo"
+
+  local lines="${FZF_PREVIEW_LINES:-$LINES}"
+  local columns="${FZF_PREVIEW_COLUMNS:-$COLUMNS}"
+
+  local x=2 y=1
+
+  [[ -n "$PREVIEW_X_OFFSET" ]] && x=$((x+PREVIEW_X_OFFSET))
+  [[ -n "$PREVIEW_Y_OFFSET" ]] && y=$((y+PREVIEW_Y_OFFSET))
+
+  declare -p -A img=(
+    [action]=add
+    [identifier]=lessfilter
+    [path]="$1"
+    [width]="$columns"
+    [height]="$lines"
+    [x]="$x"
+    [y]="$y"
+    [scaler]=fit_contain
+  ) > "$fifo"
+
+  wait $zugzug_pid
+}
+
+category=${mime%%/*}
+kind=${mime##*/}
+
+if [[ "$(basename "$1")" =~ tar.gz.gpg$ ]]; then
+  gpg -d < "$1" | tar tzv
+elif [[ -d "$1" ]]; then
+  lsd -Al "$1"
+elif [[ "$category" = image ]]; then
+  chafa "$1"
+  exiftool "$1"
+elif [[ "$kind" = vnd.openxmlformats-officedocument.spreadsheetml.sheet ]] || \
+  [[ "$kind" = vnd.ms-excel ]]; then
+  in2csv "$1" | xsv table | bat -ltsv --color=always
+elif [[ "$mime" == text/* ]]; then
+  bat -p "$@"
+else
+  lesspipe.sh "$@"
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+while clipnotify; do
+    tmuxdata=$(tmux show-buffer | base64)
+    xseldata=$(xsel -ob | base64)
+    echo "Received $xseldata"
+    echo "Have $tmuxdata"
+    if [[ "$tmuxdata" != "$xseldata" ]]; then
+        xsel -ob | tmux load-buffer -
+    fi
+done

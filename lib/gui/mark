@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+KEY=u
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+export DB="$HOME/.db/bookmarks.db"
+
+function view() {
+  local id
+  read -r -d ' ' id dummy <<< "$1"
+  sqlite3 "$DB" "select url from bookmarks where id == $id"
+}
+
+function list() {
+  sqlite3 -separator "$iSEP" "$DB" \
+    'select id, metadata from bookmarks' | sort -t "$iSEP" -k2 |
+      column -t -s "$iSEP"
+}
+
+BINDS[enter:open]='execute-silent(%s {})+execute-silent(gui run fg firefox)'\
+'+accept'
+BINDS[tab:open]=
+function open() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  command open "$url"
+}
+
+BINDS[alt-c:copy]=
+function copy() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  tmux load-buffer - <<< "$url"
+}
+
+
+function check() {
+  local id
+  read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
+}
+
+BINDS[alt-d:rm]='execute-silent(%s {})+reload-sync(list)'
+function rm() {
+  local id
+  read -r -d ' ' id dummy <<< "$1"
+  sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
+}
+
+BINDS[alt-e:mod]='execute-silent(%s {})+reload-sync(list)+clear-screen'
+function mod() {
+  local id title
+  read -r id title <<< "$1"
+  read -r title < <(input "$title")
+  sqlite3 "$DB" "UPDATE bookmarks SET metadata = '${title}' WHERE id ==  ${id}"
+}
+
+function add() {
+  local url="$1"
+  #local title="$2"
+
+  if check "$url"; then
+    notify "'$url' already exists"
+    exit 1
+  fi
+
+  export INPUTPREVIEW="$(sqlite3 "$DB" "SELECT metadata FROM bookmarks" | sort)"
+
+  read -r title < <(menu input)
+
+  [[ -n "$title" ]] && sqlite3 "$DB" \
+    "INSERT INTO bookmarks (url, metadata) values ('$url', '$title')"
+
+  if check "$1"; then
+    notify "Added '$url'"
+  else
+    notify "Failed to add '$url'"
+  fi
+}
+
+
+function del() {
+  local url="$1"
+  if check "$url"; then
+    sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"
+    if check "$url"; then
+      notify "Failed to delete '$url'"
+    else
+      notify "Deleted '$url'"
+    fi
+  else
+    notify "'$url' does not exist"
+  fi
+}

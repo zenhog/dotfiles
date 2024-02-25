@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+read -r mime < <(file -bL --mime-type "$1")
+
+category=${mime%%/*}
+kind=${mime##*/}
+
+if [[ "$(basename "$1")" =~ tar.gz.gpg$ ]]; then
+  gpg -d < "$1" | tar tzv
+elif [[ -d "$1" ]]; then
+  lsd -Al "$1"
+elif [[ "$category" = image ]]; then
+  chafa "$1"
+  exiftool "$1"
+elif [[ "$kind" = vnd.openxmlformats-officedocument.spreadsheetml.sheet ]] || \
+  [[ "$kind" = vnd.ms-excel ]]; then
+  in2csv "$1" | xsv table | bat -ltsv --color=always
+elif [[ "$mime" == text/* ]]; then
+  bat -p "$@"
+else
+  exit 1
+fi

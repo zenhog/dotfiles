@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+shopt -s extglob
+
+export SHELL="$(which bash)"
+export iSEP=$'\x01' oSEP=' ➡ '
+
+export MODULE="$1"
+
+declare -A -x BINDS
+
+source "$HOME/.zshenv"
+
+function notify() {
+  notify-send -t 5000 -a menu "$MODULE" "$@"
+  widget push timeout
+}
+
+function quiet() {
+  "$@" 2>/dev/null
+}
+
+function silent() {
+  "$@" >/dev/null 2>&1
+}
+
+
+function sepline() {
+  local columns="${FZF_PREVIEW_COLUMNS}"
+  [[ -z "$columns" ]] && read -r _ columns < <(stty size)
+
+  for _ in $(seq 1 $columns); do
+    printf -- ─
+  done
+
+  echo
+}
+
+return 0 2>/dev/null
+
+DIR="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
+MODULES_DIR="$DIR/../lib/gui"
+
+function main() {
+  case $# in
+    0) # list modules
+      readarray -t modules < <(realpath $MODULES_DIR/*)
+      readarray -t modules < <(basename -a "${modules[@]}")
+      for mod in "${modules[@]}"; do
+        unset ICON MOD KEY
+        source "$MODULES_DIR/$mod"
+        printf "%s:%s:%s:%s\n" "$ICON" "$mod" "$MOD" "$KEY"
+      done
+      ;;
+    1) # list module functions
+      source "$MODULES_DIR/$1" || exit 1
+      declare -F | awk '{print $3}'
+      ;;
+    *) # call module functions
+      source "$MODULES_DIR/$1" || exit 1
+      [[ "$2" == inspect ]] && declare -f "$3" || "${@:2}"
+      ;;
+  esac
+}
+
+main "$@"

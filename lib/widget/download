@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+KEYS[toggle]='C-M:a'
+function toggle() {
+  # aria2p toggle-all
+  :
+}
+
+function text() {
+  local count
+  read -r count < <(aria2p show 2>/dev/null |
+    sed -rn '2,$ { /active/p }' | wc -l)
+  printf "%s" "$count"
+}
+
+function icon() {
+  local icon=󰄠
+
+  printf "%s" "$icon"
+}

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='C-M:e'
+
+COMMAND=(gui tmux open "window:$(hostname):@:weechat" weechat)

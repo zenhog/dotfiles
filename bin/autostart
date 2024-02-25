@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+gui run bg firefox
+gui run bg discord

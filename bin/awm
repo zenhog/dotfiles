@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+
+function parse() {
+  local cond
+  read -r cond < <(for p in "$@"; do
+    local lhs="${p%=*}"
+    local rhs="${p#*=}"
+    [[ '@' == "${rhs:0:1}" ]] && rhs="'${rhs:1}'"
+    printf "c.%s == %s," "$lhs" "$rhs"
+  done)
+
+  [[ -n "$cond" ]] && read -r cond < <(sed -r 's/,/ and /pg' <<< "${cond:0:-1}")
+  echo "$cond"
+}
+
+## get ATTRIBUTE=value [...] -- ATTRIBUTE [...]
+get() {
+  until [[ "--" == "$1" ]]; do
+    args+=("$1")
+    shift
+  done
+  shift
+
+  local cond
+  read -r cond < <(parse "${args[@]}")
+
+  local attrs
+  read -r attrs < <(printf "'%s'," "$@")
+
+  attrs="{$attrs}"
+
+  awesome-client << EOF | sed -r '1d;$d' | column -t
+  require('awful')
+  local r = '\n'
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      for _, attr in ipairs(${attrs}) do
+        r = r .. string.format('%s: %s\n', attr, tostring(c[attr]))
+      end
+    end
+  end
+  return r
+EOF
+}
+
+## set ATTRIBUTE=value [...] -- ATTRIBUTE=value [...]
+set() {
+  until [[ "--" == "$1" ]]; do
+    args+=("$1")
+    shift
+  done
+  shift
+
+  local cond
+  read -r cond < <(parse "${args[@]}")
+
+  awesome-client << EOF
+  require('awful')
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      $(
+        for attr in "$@"; do
+          local lhs="${attr%=*}"
+          local rhs="${attr#*=}"
+          [[ '@' == "${rhs:0:1}" ]] && rhs="'${rhs:1}'"
+          printf "c.%s = %s\n" "$lhs" "$rhs"
+        done
+      )
+    end
+  end
+EOF
+  get "${args[@]}" -- "${@%=*}"
+}
+
+## check ATTRIBUTE=value [...]
+check() {
+  local cond
+  read -r cond < <(parse "$@")
+  [[ -z "$cond" ]] && return 1
+  # unhide
+  read -r success < <(awesome-client << EOF
+  require('awful')
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      return true
+    end
+  end
+  return false
+EOF
+  )
+  [[ "boolean true" == "$success" ]]
+}
+
+## exec [ATTRIBUTE=value ...] -- COMMAND [ ARG ... ]
+exec() {
+  until [[ "--" == "$1" ]]; do
+    args+=("$1")
+    shift
+  done
+  shift
+
+  show "${args[@]}" || spawn "${args[@]}" -- "$@"
+}
+
+
+## spawn [ATTRIBUTE=value ...] -- COMMAND [ ARG ... ]
+spawn() {
+  until [[ "--" == "$1" ]]; do
+    args+=("$1")
+    shift
+  done
+  shift
+
+  check "${args[@]}" && exit 1
+
+  local attrs
+  read -r attrs < <(for p in "${args[@]}"; do
+    local lhs="${p%=*}"
+    local rhs="${p#*=}"
+    [[ '@' == "${rhs:0:1}" ]] && rhs="'${rhs:1}'"
+    printf "%s = %s, " "$lhs" "$rhs"
+  done)
+  attrs="{${attrs}}"
+
+  read -r success < <(awesome-client << EOF
+  require('awful').spawn('$@', ${attrs})
+EOF
+  )
+}
+
+## show ATTRIBUTE=value [...]
+show() {
+  local cond
+  read -r cond < <(parse "$@")
+  # unhide
+  read -r success < <(awesome-client << EOF
+  require('awful')
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      c.hidden = false
+      c.minimized = false
+      c:raise()
+      client.focus = c
+      return true
+    end
+  end
+  return false
+EOF
+  )
+  [[ "boolean true" == "$success" ]]
+}
+
+## raise ATTRIBUTE=value [...]
+raise() {
+  local cond
+  read -r cond < <(parse "$@")
+  # unhide
+  read -r success < <(awesome-client << EOF
+  require('awful')
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      c.hidden = false
+      c.minimized = false
+      c:raise()
+      c.first_tag:view_only()
+      client.focus = c
+      return true
+    end
+  end
+  return false
+EOF
+  )
+  [[ "boolean true" == "$success" ]]
+}
+
+## run [ATTRIBUTE=value ...] -- COMMAND [ARG ...]
+function run()
+{
+  until [[ "--" == "$1" ]]; do
+    args+=("$1")
+    shift
+  done
+  shift
+
+  raise "${args[@]}" || spawn "${args[@]}" -- "$@"
+
+  local attempts=20
+  while ((attempts > 0)) && ! raise "${args[@]}"; do
+    sleep 0.1
+    ((attempts--))
+  done
+  return 0
+}
+
+## kill ATTRIBUTE=value [...]
+kill() {
+  local cond
+  read -r cond < <(parse "$@")
+
+  read -r success < <(awesome-client << EOF
+  require('awful')
+  for _, c in ipairs(client.get()) do
+    if ${cond} then
+      c:kill()
+      return true
+    end
+  end
+  return false
+EOF
+  )
+  [[ "boolean true" == "$success" ]]
+}
+
+## timeout widget [...]
+timeout() {
+  for widget in "$@"; do
+    awesome-client << EOF
+    require('widgets').timers.${widget}:emit_signal('timeout')
+EOF
+  done
+}
+
+## info ATTRIBUTE=value [...]
+info() {
+  get "$@" -- \
+    window name type pid role icon_name class instance minimized maximized \
+    ontop above below sticky urgent hidden fullscreen opacity startup_id \
+    maximized_horizontal maximized_vertical
+}
+
+## list
+list() {
+  awesome-client << EOF | sed -r '1d;$d' | column -t -s$'\x01' -o' '
+  require('awful')
+  local r = '\n'
+  for _, c in ipairs(client.get()) do
+    r = r .. string.format('%s\x01%s\x01%s:%s\x01[%s]\n',
+      string.format('0x%08x', c.window),
+        c.profile, c.class, c.instance, c.name)
+  end
+  return r
+EOF
+}
+
+[[ $# -eq 0 ]] && eval "$(sed -rn '/^##/s/^## (.*)$/echo "$0 \1"/p' "$0")"
+
+"$@"

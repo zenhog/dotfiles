@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+KEY=v
+MOD='S-M'
+ICON=󰝨
+
+FOLLOW=1
+NOWRAP=1
+RATIO=80%
+
+function view() {
+  local service
+  read -r service _ <<< "$1"
+  tail -n +1 -f "/var/log/runit/$service/current"
+}
+
+function list() {
+  sudo vsv 2>&1 | sed -rn '3,$p' | awk '{print $2,$3}'  | column -t
+}
+
+BINDS[alt-r:restart]='execute-silent(%s {1})+reload-sync(list)'
+function restart() {
+  sudo vsv restart "$1"
+}
+# start
+# stop
+# disable
+# enable

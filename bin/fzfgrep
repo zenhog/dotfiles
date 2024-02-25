@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+finish() {
+    rm -f "$INPUT"
+}
+
+trap finish EXIT
+
+match() {
+    local pattern="$1"
+    local submatch_id=0
+
+    eval "$SPATS"
+
+    #[[ -n "$2" ]] && submatch_id="$2"
+
+    [[ "$pattern" == CUSTOM ]] && PATTERNS[CUSTOM]="$2"
+
+    sortcmd=(sort -b -u -k3 -t$'\x01')
+
+    [[ "$pattern" == LINE ]] && sortcmd=(cat)
+
+    while read -r line; do
+        IFS=$':\n' read -r index rest <<< "$line"
+        printf "%s\x01%s\x01%s\n" "$index" "$pattern" "$rest"
+    done < <(rg -o -r "\$$submatch_id" -P -n "${PATTERNS[$pattern]}" "$INPUT") |
+        column -t -s$'\x01' -o$'\x01' | "${sortcmd[@]}"
+}
+
+declare -A -x PATTERNS=(
+    [IP4]='\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    [IP6]='[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+'
+
+    [PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
+    [URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
+    [MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
+
+    [NUM]='[0-9]{4,}'
+    [NUMCHAIN]='(([0-9]{4,})-)+[0-9]{4,}'
+
+    [HEXSTR]='[0-9a-fA-F]{7,128}'
+    [HEXNUM]='0x[0-9a-fA-F]+'
+
+    [LONGOPT]='[[:blank:]]([-][-][-[:alnum:]]+)'
+    [SHORTOPT]='[[:blank:]]([-][-[:alnum:]]+)'
+
+    [DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
+    [EMAIL]='\S+@\S+\.\S+'
+
+    [LINE]='^.*$'
+
+    [SHA]='[0-9a-f]{7,40}'
+    [IPFS]='Qm[0-9a-zA-Z]{44}'
+    [UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+    [COLOR]='#[0-9a-fA-F]{6}'
+
+    [DOCKER]='sha256:([0-9a-f]{64})'
+    [DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++)'
+
+    [PARENTHESIS]='(?:\(([^()]+)\))'
+    [ANGLE_BRACKET]='<([^<>]+)>'
+    [SQUARE_BRACKET]='\[([^\[\]]+)\]'
+    [CURLY_BRACKET]='\{([^{}]+)\}'
+
+    [SINGLE_QUOTE]="'([^']+)'"
+    [DOUBLE_QUOTE]='"([^"]+)"'
+    [BACK_QUOTE]='`([^`]+)`'
+)
+
+read -r SPATS < <(declare -p PATTERNS)
+export SPATS
+
+[[ $# -eq 0 ]] && set "${!PATTERNS[@]}"
+
+export INPUT="$(mktemp --suffix fzfgrep-$$)"
+
+cat > "$INPUT"
+
+export -f match
+
+for pat in "$@"; do
+    match "$pat"
+done | column -t -s$'\x01' |
+    fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
+        --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
+        --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
+        --bind="tab:execute-silent(open {3..})" \
+        --bind="ctrl-/:reload-sync(match CUSTOM {q})" \
+        --bind="ctrl-\\:execute-silent(open {3..})+accept" \
+        --preview-label='enter:+clip ^\:clip tab:open' \
+        --prompt='fzfgrep> '
+
+exit 0

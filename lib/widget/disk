@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+function text() {
+  read -d '' text < <(btrfs filesystem usage --raw / 2>/dev/null)
+
+  read -r used < <(awk '/^ *Used:/ {print $2}' <<< "$text")
+  read -r size < <(awk '/^ *Device size/ {print $3}' <<< "$text")
+
+  read -r text < <(bc <<< "$used * 100 / $size")
+
+  printf "%s" "$text"
+}
+
+function icon() {
+  local icon=󰆼
+  printf "%s" "$icon"
+}

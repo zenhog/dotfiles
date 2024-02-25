@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+homedir=$(getent passwd $UID | awk -F: '{print $6}')
+
+logdirbase="$homedir/.log"
+
+svlogdargs=('-tt')
+svlogdargs=()
+
+# Figure out service name.  To do this, we split $PWD on '/' characters and
+# construct an array with each element.  We know that our $PWD will look
+# something like:
+#
+#  '/.../<service-name>/log'
+#
+# So the second-to-last element will contain the service name.
+IFS=/ read -ra parts <<< "$PWD"
+len=${#parts[@]}
+
+# 'parts' must have at least 3 elements ('', <service-name>, and 'log').
+if ((len < 3)); then
+	echo "failed to determine service name from '$PWD'" >&2
+	exit 1
+fi
+
+# Sanity check the last element (should be 'log')
+index=$((len - 1))
+log=${parts[index]}
+if [[ $log != 'log' ]]; then
+	echo "must be run from a 'log' directory, found: '$log' ($PWD)" >&2
+	exit 1
+fi
+
+# Sanity check the service name
+index=$((len - 2))
+servicename=${parts[index]}
+if [[ -z $servicename ]]; then
+	echo 'failed to extract service name' >&2
+	echo "index $index, parts '${parts[*]}'" >&2
+	exit 1
+fi
+
+logdir=$logdirbase/$servicename
+
+# Create the directory and start the logger
+mkdir -p "$logdir"
+exec svlogd "${svlogdargs[@]}" "$logdir"

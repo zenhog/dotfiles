@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+KEY=i
+MOD='S-M'
+ICON=󰐰
+
+HORIZONTAL=1
+
+function view() {
+  :
+}
+
+function list() {
+  :
+  # format: INDEX, SINK/SOURCE/INPUT/OUTPUT/PORT, NAME, MUTE, VOL, DEFAULT
+}

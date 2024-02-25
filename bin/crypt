@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+function passphrase() {
+  [[ -n "$PASSPHRASE" ]] && echo -n "$PASSPHRASE" || pass show tokens/main
+}
+
+function decrypt() {
+  gpg --decrypt --batch --pinentry-mode=loopback --passphrase-file=<(passphrase)
+}
+
+function encrypt() {
+  gpg --symmetric --pinentry-mode=loopback --batch \
+    --passphrase-file=<(passphrase)
+}
+
+"$@"

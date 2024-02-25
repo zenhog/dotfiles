@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+KEY=t
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+NOWRAP=1
+
+function view() {
+  local winid
+  read -r winid < <(awk '{print $1}' <<< "$1")
+  awm info window="$winid"
+}
+
+function list() {
+  awm list
+}
+
+BINDS[enter:open]='execute-silent(%s {})+accept'
+function open() {
+  local winid
+  read -r winid < <(awk '{print $1}' <<< "$1")
+  awm raise window="${winid/:/=}"
+}
+
+BINDS[alt-d:close]='execute-silent(%s {})+reload-sync(list)+clear-query'
+function close() {
+  local winid
+  read -r winid < <(awk '{print $1}' <<< "$1")
+  awm kill window="${winid/:/=}"
+}

@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+KEY=o
+MOD='S-M'
+ICON=
+
+function view() {
+  local kind="${1%%:*}"
+  local rest="${1#*:}"
+  case "$kind" in
+    session)
+      local name="${1#*:}"
+      tmux list-windows -t "$name" -F '#S:#W:#I'
+      ;;
+    window)
+      local session="${1#*:}"
+      local window="${rest%:*}"
+      tmux list-panes -t "$window" \
+        -F '#S:#W:#I.#P (#{pane_current_command})'
+      ;;
+  esac
+}
+
+function list() {
+  tmux ls -F 'session:#S'
+  tmux list-windows -a -F 'window:#S:#I:#W'
+}
+
+BINDS[enter:open]='execute-silent(%s {})+accept'
+function open() {
+  function open_session() {
+    local name="$1"
+    local rtty ctty
+    read -r ctty < <(cat /sys/class/tty/tty0/active)
+    read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+    if [[ "$ctty" == "$rtty" ]]; then
+
+      [[ "$name" == menu ]] && VERB=exec || VERB=run
+
+      awm "$VERB" instance="@$name" -- alacritty --class "$name,tmux" --command \
+        tmux new-session -DX -As "$name" "${@:2}"
+
+      until tmux has-session -t "$session"; do
+        sleep 0.1
+        awm show instance="@$name"
+      done
+    else
+      if [[ -n "$TMUX" ]]; then
+        tmux has-session -t "$name" || tmux new-session -ds "$name" "${@:2}"
+        tmux switch-client -t "$name"
+      else
+        if [[ "$TERM" == linux && "$(tty)" =~ /dev/pts/.* ]]; then
+          PRE="TERM=fbterm"
+        fi
+        env "$PRE" tmux new-session -As "$name" "${@:2}"
+      fi
+    fi
+    tmux set-environment -t "$name" TMUX_SESSION_NAME "$name"
+  }
+
+  local kind="${1%%:*}"
+  local rest="${1#*:}"
+  case "$kind" in
+    session)
+      local session="$rest"
+      open_session "$session" "${@:2}"
+      ;;
+    window) # format: $session_name:$window_number:$window_name
+      local window_id="${rest%:*}"
+      local window_name="${rest##*:}"
+      local session="${rest%%:*}"
+      local winflag="${rest#*:}"
+      winflag="${winflag%%:*}"
+
+      open_session "$session"
+      if [[ "$winflag" == "@" ]]; then
+        tmux new-window -S -n "$window_name" -t "=${session}:" "${@:2}"
+      else
+        tmux select-window -t "$window_id"
+      fi
+      ;;
+  esac
+}
+
+BINDS[alt-d:close]='execute-silent(%s {})+reload-sync(list)'
+function close() {
+  local kind="${1%%:*}"
+  local rest="${1#*:}"
+  case "$kind" in
+    session)
+      tmux kill-session -t "$rest"
+      ;;
+    window) # format: $session_name:$window_number:$window_name
+      local window_id="${rest%:*}"
+      local window_name="${rest##*:}"
+      local session="${rest%%:*}"
+      local winflag="${rest#*:}"
+      winflag="${winflag%%:*}"
+
+      tmux kill-window -t "$session:$winflag"
+      ;;
+  esac
+}

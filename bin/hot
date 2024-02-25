@@ -1,0 +1,331 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+shopt -s extglob
+
+GITURL=https://github.com/zenhog/dotfiles
+DOTURL=https://raw.githubusercontent.com/zenhog/dotfiles/pubfiles/bin/dot
+
+# install
+#   must decrypt .hdot.tmpl.gpg
+# sync
+# status
+# add -enc
+# mklive
+# mkimage
+
+# dot::init
+# dot::encrypt
+# dot::decrypt
+# dot::backup
+# dot::symlink
+# dot::cleanup
+# dot::remaster
+# dot::repo::assert
+# dot::repo::verify
+# dot::repo::cleanup
+# dot::repo::orphan
+# dot::checkbin
+#   git, curl, gpg, pass, rsync
+
+function status() {
+  cd "$HOME/.${1}files" || return
+  git status
+}
+
+function install() {
+  function rename() {
+    local rand
+    rand=$(tr -dc '[:alnum:]' < /dev/urandom | dd bs=1 count=5 2>/dev/null)
+    mv -v -- "$1" "$1.old.$rand"
+  }
+
+  function symlink() {
+    local target link prefix="$HOME"
+    [[ -n "$PREFIX" ]] && prefix="$PREFIX"
+    for t in "$@"; do
+      unset target link
+
+      target="$PWD/$t"
+      link="$prefix/.$t"
+
+      [[ -e "$link" && ! -L "$link" ]] && rename "$link"
+
+      ln -T -svf -- "$target" "$link"
+    done
+  }
+
+  function saferepo() {
+    local dir="$1"
+    local url="$2"
+    [[ -d "$dir" ]] || git clone "$url" "$dir" || exit 1
+    cd "$dir" || exit 1
+    if ! [[ "$(git remote get-url origin)" == "$url" ]]; then
+      rename "$dir"
+      git clone "$url" "$dir" || exit 1
+    fi
+  }
+
+  function checkbin() {
+    for b in "$@"; do
+      which "$b" &>/dev/null || sudo xbps-install -Syu "$b"
+    done
+  }
+
+  local dir url
+  dir="$HOME/.${1}files"
+  url="https://github.com/zenhog/${1}files"
+
+  if [[ "$1" == dot || "$1" == moz || "$1" == sys || "$1" == all ]]; then
+    pass show tokens/main &>/dev/null || {
+      until [[ -n "$PASSPHRASE" && ${#PASSPHRASE} -eq 30 ]]
+      do
+        echo -n 'PASSPHRASE: '
+        read -r -s PASSPHRASE
+      done
+      export PASSPHRASE
+    }
+  fi
+
+  #checkbin git curl gnupg pass rsync
+
+  case "$1" in
+    pub)
+      saferepo "$dir" "$url"
+      cd "$dir" || exit 1
+      mkdir -p "$HOME/.config" "$HOME/.local/share"
+      symlink !(config|local) config/* local/share/*
+      ;;
+    dot)
+      install pub
+      export PATH="$HOME/.bin:$PATH"
+      saferepo "$dir" "$url"
+      cd "$dir" || exit 1
+      mkdir -p "$HOME/.config" "$HOME/.local/share"
+      cd "$dir/public" && fixmod "$dir/public/password-store" &&
+        symlink !(config|local) config/* local/share/* || exit 1
+      cd "$dir/private" && fixmod "$dir/private" &&
+        symlink !(config|local|pwstore) config/* local/share/* || exit 1
+      ;;
+    sys)
+      install dot
+
+      saferepo "$dir" "$url"
+      cd "$dir" || exit 1
+
+      local -a packages
+      readarray -t packages < \
+        <(sed -rn '/^[^#]+/p' "$dir/public/etc/packages"/* | sort -u)
+
+      # for some reason, xbps can't figure this out on its own
+      sudo xbps-install -Syu xbps
+      sudo xbps-install -Syu ncurses-base
+      sudo xbps-install -Syu void-repo-nonfree
+      sudo xbps-install -Syu "${packages[@]}"
+
+      sudo rm /etc/runit/runsvdir/default/*
+
+      sudo rsync -v -archive --no-super --no-g --no-t --no-d --no-o --relative \
+        --backup-dir=/.backups public/./ /
+
+      sudo rsync -v -archive --no-super --no-g --no-t --no-d --no-o --relative \
+        --backup-dir=/.backups --exclude=etc/sudoers private/./ /
+
+      for f in "${!private[@]}"; do
+        local mod="${private[$f]}"
+        [[ -d "$f" ]] && sudo chmod "$mod" "$f"/*
+        [[ -f "$f" ]] && sudo chmod "$mod" "$f"
+      done
+
+      cat private/etc/sudoers | sudo EDITOR=tee visudo
+      ;;
+    moz)
+      saferepo "$dir" "$url"
+      PREFIX="$HOME/.mozilla2" symlink \
+        !(firefox) \
+        firefox/!(*.main|*.private) \
+        firefox/*.main/*.{json,txt,ini,js,db,sqlite,mozlz4m} ||
+          exit 1
+      ;;
+    all)
+      install pub && install dot && install moz && install sys
+      ;;
+    *)
+      echo "$0 install [ pub | dot | sys | moz | all ]"
+      exit 1
+      ;;
+  esac
+}
+
+function sync() {
+  local -a blacklist=(
+    "--exclude=supervise"
+    "--exclude=system-connections"
+    "--exclude=credentials.txt"
+    "--exclude=*~"
+    "--exclude=*.new-*"
+  )
+
+  local -a files=(
+    /usr/local/bin
+    /etc/shells
+    /etc/bluetooth
+    /etc/xbps.d/
+    /etc/acpi/custom.sh
+    /etc/acpi/events/custom
+    /etc/rc.conf
+    /etc/rc.local
+    /etc/svd
+    /root/.fbtermrc
+    /etc/sysctl.conf
+    /etc/rsyslog.conf
+    /etc/modprobe.d
+    /etc/modules-load.d
+    /etc/pam.d/sudo
+    /etc/pam.d/slim
+    /etc/pam.d/login
+    /etc/pam.d/i3lock
+    /etc/X11/xorg.conf
+    /etc/dnscrypt-proxy.toml
+    /etc/forwarding-rules.txt
+    /etc/tor
+    /etc/resolv.conf
+    /etc/resolvconf.conf
+    /etc/openvpn
+    /etc/NetworkManager
+    /etc/slim.conf
+    /usr/share/slim/themes
+    /usr/share/kbd/keymaps/i386/qwerty/us-nocaps.map.gz
+    /etc/cgconfig.conf
+    /etc/zzz.d
+    /etc/udev/rules.d/80-net-name-slot.rules
+    /etc/iproute2/rt_tables
+    /etc/iproute2/rt_tables.d
+    /etc/audit/rules.d
+    /etc/ntpd.conf
+    /etc/rsyslog.conf
+    /etc/default
+    /etc/runit/runsvdir/default/
+    /etc/lxd-config.yaml
+  )
+ 
+  local dir url
+  dir="$HOME/.${1}files"
+  url="https://github.com/zenhog/${1}files"
+
+  case "$1" in
+    pub|dot)
+      cd "$dir" || exit 1
+      pullpush
+      ;;
+    sys)
+      fixmod "$dir/private"
+
+      sudo rsync -v -RrlDpgo --delete --delete-excluded \
+        "${blacklist[@]}" "${files[@]}" "$dir/public"
+
+      sudo rsync -v -RrlDpgo --delete "${!private[@]}" "$dir/private"
+
+      sudo chown -v -R "$USER:$USER" "$dir"/*
+
+      fixmod "$dir/private"
+
+      local -a packages
+      readarray -t packages < \
+        <(sed -rn '/^[^#]+/p' "$dir/public/etc/packages"/* | sort -u)
+      sudo xbps-install -Syu -n "${packages[@]}" || exit 1
+
+      cd "$dir" || exit 1
+      pullpush
+      ;;
+    moz)
+      ;;
+    all)
+      ;;
+    *)
+      echo "$0 sync [ pub | dot | sys | moz | all ]"
+      exit 1
+      ;;
+  esac
+}
+
+function pullpush() {
+  function pull() {
+      #git stash
+      #git pull --rebase
+      git rebase --autostash
+      #git stash pop
+  }
+
+  function push() {
+    git add .
+    git commit -m "$(date) on $(hostname)"
+
+    pull
+
+    git push
+  }
+
+  git fetch
+
+  local -a mods
+
+  readarray -t mods < <(git status --porcelain=v1)
+
+  if [[ ${#mods[@]} -gt 0 ]]; then
+    push
+  else
+    pull
+  fi
+}
+
+function remaster() {
+  git checkout --orphan tmp
+  git add . --all
+  git commit -m "$(date)"
+  git branch -D master
+  git branch --move tmp master
+  git push --set-upstream origin master --force
+}
+
+function cleanup() {
+  rm -rf .git/refs/original
+  git reflog expire --expire=now --all
+  git gc --prune=now
+  git gc --aggressive --prune=now
+}
+
+function mklive() {
+  local dir="$HOME/workspace/repos/void-mklive"
+  local url=https://github.com/void-linux/void-mklive
+
+  [[ -d "$dir" ]] || git clone "$url" "$dir"
+
+  cd "$dir" || return
+
+  local -a packages
+  local -a args=(console=tty0 console=ttyS0,115200n8)
+  local -a services=(sshd dbus NetworkManager)
+  local -a dirs=(-I /etc/NetworkManager -I /etc/security/sudo_authorized_keys)
+
+  readarray -t packages < <(sed -r '/^$/d' $HOME/.sysfiles/packages/base)
+
+  sudo ./mklive.sh -C "${args[*]}" -p "${packages[*]}" -K \
+    -T "Custom Live Image" -S "${services[*]}" -I /root \
+    -o $HOME/custom-live-img.iso
+}
+
+
+function main() {
+  if [[ $# -eq 0 ]]; then
+    readarray -t FUNCS < <(declare -F | awk '{print $3}')
+    for f in "${FUNCS[@]}"; do
+      "$f"
+    done
+    exit 1
+  fi
+  "$@"
+}
+
+#which git &>/dev/null || { echo "git not found" && exit 1; }
+main "$@"

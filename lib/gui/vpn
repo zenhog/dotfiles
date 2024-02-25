@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+KEY=z
+MOD='S-M'
+ICON=󰈻
+
+export PROFILES_DIR=/etc/openvpn/PIA/profiles
+
+function view() {
+  preview "$PROFILES_DIR/$1.ovpn"
+}
+
+function list() {
+  basename -a -s .ovpn $(fd -e ovpn '' "$PROFILES_DIR")
+}

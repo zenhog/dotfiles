@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+cleanup() {
+    rm "${SOCKET}" &>/dev/null
+}
+
+SOCKET="${HOME}/.vmux.S"
+
+trap cleanup EXIT HUP
+
+if [[ -S "${SOCKET}" ]]; then
+    rm "${SOCKET}"
+fi
+
+#openbsd-nc -lvkU "${SOCKET}" | while true; do
+socat UNIX-LISTEN:"${SOCKET}",fork STDOUT | while true; do
+    read -r line
+    if tmux ls &>/dev/null; then
+        echo -n "$line" | base64 -d | tmux load-buffer -
+    fi
+done

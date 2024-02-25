@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+KEY='W:t'
+
+ATTRIBUTES=(profile=@spotube)
+COMMAND=("$HOME/workspace/spotube/spotube")

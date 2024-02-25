@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+KEY=w
+MOD='S-M'
+ICON=󰈭
+
+HORIZONTAL=1
+
+export DB="$HOME/.db/vocabulary.db"
+export API="https://api.dictionaryapi.dev/api/v2/entries/en"
+
+function init() {
+  rm -f "$DB"
+  sqlite3 "$DB" << EOF
+  CREATE TABLE words(
+    id integer primary key,
+    word_en text unique,
+    word_fr text unique,
+    word_es text unique,
+    word_ar text unique,
+    word_ru text unique,
+    learnt boolean
+  );
+EOF
+}
+
+function view() {
+  local id word
+  read -r id word _ <<< "$1"
+
+  curl -s "${API}/${word}" | #yq-go -P -C eval \
+    jq 'def f: recurse | select(IN([], {}));
+      until(isempty(f); del(f)) | map(del(.phonetics,.license,.sourceUrls))' |
+        yq-go -P -C eval
+}
+
+function list() {
+  # @menu-word-language fr|en
+  # @menu-word-hidden 1|0
+  sqlite3 -separator "$iSEP" "$DB" \
+    'SELECT id, word_en, word_fr, word_es, word_ar, word_ru FROM words WHERE learnt == false' |
+      sort -t "$iSEP" -k2 | column -t -s "$iSEP"
+}
+
+function dump() {
+  sqlite3 "$DB" "SELECT word_en FROM words"
+}
+
+BINDS[alt-p:pronounce]=
+function pronounce() {
+  local id word links
+  read -r id word _ <<< "$1"
+  readarray -t links < <(curl -s "${API}/${word}" |
+    jq -r '.[].phonetics.[].audio')
+
+  for link in "${links[@]}"; do
+    [[ "$link" =~ ^http ]] || link="https:${link}"
+    mpv "$link"
+  done
+}
+
+BINDS[enter:add]='execute-silent(%s {q})+reload-sync(list)+clear-query'
+function add() {
+  #local word language domain
+  local -a words
+  read -r -a words <<< "$1"
+  for word in "${words[@]}"; do
+    local word_fr
+    read -r word_fr < <(dt -src en -tg fr -txt "$word" |
+      sed -rn '/^Translation result:/ s/^Translation result: (.*)$/\1/p')
+    sqlite3 "$DB" << EOF
+      INSERT INTO words (word_en, word_fr, learnt)
+      values ('${word}', '${word_fr}', false)
+EOF
+  done
+}
+
+BINDS[alt-r:del]=
+function del() {
+  local id
+  read -r id _ <<< "$1"
+  sqlite3 "$DB" "DELETE FROM words WHERE id == ${id}"
+}

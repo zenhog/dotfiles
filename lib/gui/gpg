@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+KEY=g
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+function view() {
+  local uid
+  read -r uid _ <<< "$1"
+  gpg --list-key --with-fingerprint --with-keygrip "$uid"
+  sepline
+  gpg-connect-agent "keyinfo --list --with-ssh --ssh-fpr" '/bye' | head -n -1
+}
+
+function label() {
+  local grp val
+  read -r _ _ _ _ grp _ <<< "$1"
+  echo "$grp"
+}
+
+function date() {
+  local infinity=󰛤
+  [[ "$1" -eq 0 ]] && echo -n "$infinity" || command date -d "@${1}" '+%F'
+}
+
+
+function list() {
+  local -a uids
+  readarray -t uids < \
+    <(gpg --list-secret-keys --fixed-list-mode --with-keygrip --with-colons |
+      awk -F: '/^uid/{print $10}' | sed -rn 's/^.*<([^>]+)>.*$/\1/p')
+
+  for uid in "${uids[@]}"; do
+    local -a lines
+    readarray -t lines < \
+      <(gpg --list-secret-key --fixed-list-mode --with-colons "$uid" |
+        grep -v '^uid')
+
+    function fmtgpgline() {
+      printf "%s " \
+        "${keys[uid]}" \
+        "${keys[type]}" \
+        "${keys[validity]}" \
+        "${keys[keyid]}" \
+        "${keys[grp]}" \
+        "${keys[keycap]^^}" \
+        "${keys[cache]}" \
+        "${keys[cdate]}" \
+        "${keys[edate]}"
+      echo
+    }
+
+    local i=-1
+
+    local -A keys=([uid]="$uid")
+
+    for line in "${lines[@]}"; do
+      local -a values
+      IFS=: read -r -a values <<< "$line"
+      case "${values[0]}" in
+        sec|ssb)
+          ((++i))
+          (( i > 0 )) && fmtgpgline
+          keys[type]="${values[0]}"
+          keys[validity]="${values[1]}"
+          keys[size]="${values[2]}"
+          keys[keyid]="${values[4]}"
+          keys[edate]="$(date "${values[6]}")"
+          keys[keycap]="$(tr -d '[:upper:]' <<< "${values[11]}")"
+          ;;
+        grp)
+          keys[grp]="${values[9]}"
+          keys[cache]="$(gpg-connect-agent "keyinfo ${keys[grp]}" '/bye' |
+            awk "/${keys[grp]}/{print \$7}")"
+          ;;
+      esac
+    done
+    fmtgpgline
+  done | column -t
+}
+
+BINDS[enter:grip]=
+function grip() {
+  local grp
+  read -r _ _ _ _ grp _ <<< "$1"
+  tmux load-buffer - <<< "$grp"
+}
+
+BINDS[alt-r:clear]=
+function clear() {
+  local grp
+  read -r _ _ _ _ grp _ <<< "$1"
+  gpg-connect-agent "clear_passphrase --mode=normal ${grp}" '/bye'
+  gpg-connect-agent "clear_passphrase --mode=ssh ${grp}" '/bye'
+  # gpg-connect-agent 'reload-agent' '/bye'
+}
+
+# export, copy
+# import
+# renew
+# cancel
+# delete
+# newkey
+# edit
+# grip
+# enc/dec?
