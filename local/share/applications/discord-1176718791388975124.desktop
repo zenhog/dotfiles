@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Game 1176718791388975124
+Exec=/home/maiz/workspace/spotube/spotube %u
+Type=Application
+NoDisplay=true
+Categories=Discord;Games;
+MimeType=x-scheme-handler/discord-1176718791388975124;

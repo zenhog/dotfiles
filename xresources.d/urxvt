@@ -1,0 +1,31 @@
+Rxvt.depth: 32
+Rxvt.colorUL: yellow
+Rxvt.underlineColor: yellow
+Rxvt.saveLines: 0
+Rxvt.fading: 40
+!Rxvt.shading: 40
+Rxvt.letterSpace: 0
+Rxvt.visualBell: false
+Rxvt.urgentOnBell: true
+Rxvt.iso14755: false
+Rxvt.iso14755_52: false
+Rxvt.scrollBar: false
+Rxvt.transparent: false
+Rxvt.termName: rxvt-unicode-256color
+Rxvt.scrollTtyOutput: false
+Rxvt.scrollWithBuffer: false
+Rxvt.scrollTtyKeypress: true
+Rxvt.loginShell: false
+Rxvt.cursorUnderline: false
+Rxvt.cursorBlink: true
+Rxvt.pointerBlank: true
+!Rxvt.iconFile:    .icons/urxvt.png
+
+Rxvt.perl-ext: default,-option-popup,-readline,-selection,-selection-popup,-searchable-scrollback,font-size,ibeam-cursor,-clipboard,-keysym-list,-matcher
+
+Rxvt.keysym.C-Up: font-size:increase
+Rxvt.keysym.C-Down: font-size:decrease
+Rxvt.keysym.C-S-Up: font-size:incglobal
+Rxvt.keysym.C-S-Down: font-size:decglobal
+Rxvt.keysym.C-Prior: font-size:reset
+Rxvt.keysym.C-Next: font-size:show

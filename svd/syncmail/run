@@ -1,0 +1,8 @@
+#!/bin/sh
+
+exec 2>&1
+
+export SSH_AUTH_SOCK=$HOME/.gnupg/S.gpg-agent.ssh
+
+# exec snooze -v -H\* -M\* cgexec -g net_cls:wan mbsync -a mailbox
+exec snooze -v -H\* -M\* mailsync

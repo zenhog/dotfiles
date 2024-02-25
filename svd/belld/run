@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+
+source $HOME/.profile
+
+exec 2>&1
+exec belld

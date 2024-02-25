@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+
+source $HOME/.profile
+source $HOME/.zshrc
+
+exec 2>&1
+
+snooze -v -s 1d -t $PWD/timefile
+zinit update
+touch $PWD/timefile

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+exec 2>&1
+
+touch "$HOME/.aria2.session"
+
+exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads" \
+    --on-download-complete="${HOME}/.bin/aria2clean" \
+    --enable-dht=true \
+    --enable-dht6=false \
+    --disable-ipv6=true \
+    --check-certificate=false \
+    --check-integrity=true \
+    --continue=true \
+    --max-tries=0 \
+    --http-accept-gzip=true \
+    --max-concurrent-downloads=10000 \
+    --pause-metadata=false \
+    --input-file="${HOME}/.aria2.session" \
+    --save-session="${HOME}/.aria2.session" \
+    --save-session-interval=60 \
+    --force-save=true \
+    --always-resume=true \
+    --allow-overwrite=true \
+    --rpc-listen-all=false \
+    --enable-rpc=true

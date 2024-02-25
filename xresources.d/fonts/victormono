@@ -1,0 +1,15 @@
+Rxvt.font:             xft:victormono Nerd Font Mono:regular:size=16, \
+                   xft:DejaVuSansM Nerd Font Mono:regular:size=16, \
+                   xft:Noto Color Emoji:regular:size=16
+Rxvt.imFont:           xft:victormono Nerd Font Mono:regular:size=16, \
+                   xft:DejaVuSansM Nerd Font Mono:regular:size=16, \
+                   xft:Noto Color Emoji:regular:size=16
+Rxvt.boldFont:         xft:victormono Nerd Font Mono:bold:size=16, \
+                   xft:DejaVuSansM Nerd Font Mono:bold:size=16, \
+                   xft:Noto Color Emoji:regular:size=16
+Rxvt.italicFont:       xft:victormono Nerd Font Mono:italic:size=16, \
+                   xft:DejaVuSansM Nerd Font Mono:italic:size=16, \
+                   xft:Noto Color Emoji:regular:size=16
+Rxvt.boldItalicFont:   xft:victormono Nerd Font Mono:bold:italic:size=16, \
+                   xft:DejaVuSansM Nerd Font Mono:bold:italic:size=16, \
+                   xft:Noto Color Emoji:regular:size=16

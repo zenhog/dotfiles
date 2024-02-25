@@ -1,0 +1,11 @@
+#!/bin/sh
+
+exec 2>&1
+
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+export SVDIR=$HOME/.usv
+export XDG_RUNTIME_DIR="/tmp/user/$USER"
+
+sv check dbus || exit 1
+
+exec pulseaudio --daemonize=no --log-target=stderr --use-pid-file=yes

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+exec 2>&1
+
+locker="i3lock -nteu -i ~/.wallpapers/whysosleepy.png"
+killer="sudo /bin/zzz"
+
+echo $DISPLAY
+
+exec xautolock -noclose -detectsleep -time 1 -locker "$locker" \
+    -nowlocker "$locker" -killtime 10 -killer "$killer"

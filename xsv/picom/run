@@ -1,0 +1,25 @@
+#!/bin/sh
+
+exec 2>&1
+exec picom
+    #--shadow \
+    #--no-dock-shadow \
+    #--no-dnd-shadow \
+    #--fading \
+    #--inactive-opacity=0.75 \
+    #--frame-opacity=0.35 \
+    #--inactive-opacity-override \
+    #--active-opacity 1.0 \
+    #--inactive-dim 0.5 \
+    #--vsync \
+    #--blur-background \
+    #--fade-in-step=0.28 \
+    #--fade-out-step=0.28 \
+    #--fade-delta=10 \
+    #--shadow-radius=3 \
+    #--shadow-opacity=0.75 \
+    #--shadow-offset-x=0 \
+    #--shadow-offset-y=0 \
+    #--menu-opacity=1.0 \
+
+

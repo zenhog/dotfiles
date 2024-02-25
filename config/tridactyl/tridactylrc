@@ -1,0 +1,153 @@
+" vim: set filetype=vim:
+
+sanitize tridactyllocal tridactylsync
+jsb browser.storage.local.clear()
+
+set editorcmd mrun vim vim browser
+
+set newtab about:blank
+"set theme midnight
+colors main
+set smoothscroll true
+set allowautofocus false
+set auconcreatecontainer true
+set hintfiltermode vimperator-reflow
+set hintnames short
+set hintchars qwertasdfgzxc
+set hintnames numeric
+set hintdelay 100
+
+"alias mktn js tri.native.run(`mkdir -v "$HOME/prog/${document.location.href.split("/").slice(-1)[0]}"`).then(r=>Array.from(document.querySelectorAll("#Files a")).forEach(a=>fetch(a.href).then(r=>r.text()).then(t=>tri.native.write(`${r.content.match(/'.*'\n/)[0].slice(1,-2)}/${a.href.split("/").slice(-1)[0]}`,t))))
+
+"alias graburl js \ tri.native.run(`mkdir -vp "$HOME/grabs/${document.location.href.split("/").slice(-1)[0]}"`).then(r=>Array.from(document
+
+unbind --mode=browser <C-,>
+unbind --mode=browser <C-6>
+unbind --mode=browser <CS-6>
+
+bind --mode=browser <A-w> escapehatch
+bind --mode=browser <A-o> jsb escapehatch(); fillcmdline('open')
+bind --mode=browser <A-.> tabnext
+bind --mode=browser <A-,> tabprev
+bind --mode=browser <A-q> tabclose
+bind --mode=browser <A-t> jsb escapehatch(); fillcmdline('tabopen')
+bind --mode=browser <A-u> undo
+bind --mode=browser <A-s> source
+
+bind --mode=normal <A-c> tabonly
+
+autocmd DocStart ^http(s?)://www.reddit.com js tri.excmds.urlmodify("-t", "www", "old")
+"autocmd DocStart ^http(s?)://www.amazon.co.uk js tri.excmds.urlmodify("-t", "www", "smile")
+
+"bindurl www.google.com f hint -Jc #search div:not(.action-menu) > a
+"bindurl www.google.com f hint -Jc #search div:not(.action-menu) > a
+
+"bindurl ^https://duckduckgo.com f hint -Jc [class~=result__a]
+"bindurl ^https://duckduckgo.com F hint -Jbc [class~=result__a]
+
+unbind --mode=ex <Space>
+bind --mode=insert <C-j> !s xdotool key Down
+bind --mode=insert <C-k> !s xdotool key Up
+
+bind --mode=normal i mode ignore
+bind --mode=ignore <Escape> mode normal
+
+bind --mode=normal <A-h> back
+bind --mode=normal <A-l> forward
+
+" tab
+bind x tabclose
+unbind d
+
+" search
+bind / fillcmdline find
+bind ? fillcmdline find --reverse
+bind n findnext --search-from-view
+bind N findnext --search-from-view --reverse
+unbind a
+"bind n findselect
+bind gs composite findnext --search-from-view --reverse; findselect
+bind ,<Space> nohlsearch
+
+bind h scrollpx -50
+bind l scrollpx +50
+bind H scrollpx -100
+bind L scrollpx +100
+
+bind j scrollline +5
+bind k scrollline -5
+bind J scrollpage +1
+bind K scrollpage -1
+
+bind U fillcmdline undo
+
+bind <A-d> echo
+bind <C-w> echo
+bind <C-t> echo
+bind <A-<> jsb tabmove('-1')
+bind <A->> jsb tabmove('+1')
+
+" source
+" toggle-hintstyle per website?
+
+bind --mode=ex <A-p> ex.prev_history
+bind --mode=ex <A-n> ex.next_history
+
+bind --mode=ex <A-k> ex.prev_completion
+bind --mode=ex <A-j> ex.next_completion
+
+unbind --mode=ex <C-c>
+
+bind --mode=hint <A-j> hint.focusNextHint
+bind --mode=hint <A-k> hint.focusPreviousHint
+
+bind --mode=ex     <C-a> text.beginning_of_line
+bind --mode=ex     <C-e> text.end_of_line
+bind --mode=ex     <C-u> text.backward_kill_line
+bind --mode=ex     <C-w> text.backward_kill_word
+" bind --mode=input  <C-a> text.beginning_of_line
+" bind --mode=input  <C-e> text.end_of_line
+" bind --mode=input  <C-u> text.backward_kill_line
+" bind --mode=input  <C-w> text.backward_kill_word
+" bind --mode=insert <C-a> text.beginning_of_line
+" bind --mode=insert <C-e> text.end_of_line
+" bind --mode=insert <C-u> text.backward_kill_line
+" bind --mode=insert <C-w> text.backward_kill_word
+
+
+bind --mode=normal c js tri.native.run(`menu mark`)
+bind --mode=normal C js tri.native.run(`menu pass`)
+
+bind --mode=normal m js (async function() { \
+  await tri.native.run(`gui mark add '${document.URL}'`); \
+  })();
+
+bind --mode=normal gm js (async function() { \
+  await tri.native.run(`gui mark del '${document.URL}'`); \
+  })();
+
+bind --mode=normal <C-m> js (async function() { \
+  await tri.native.run(`gui clip clip '${document.location.pathname}'`); \
+  })();
+
+bind --mode=normal gc js (async function() { \
+  await tri.native.run(`gui clip fork '${document.location.origin}' '${document.location.pathname}'`); \
+  })();
+
+bind --mode=normal <C-y> js (async function() { \
+  await tri.native.run(`gui pass init '${document.location.hostname}' '${document.URL}'`); \
+  })();
+
+bind --mode=insert <C-e> js (async function() { \
+  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username`); \
+  await navigator.clipboard.writeText(res.content); \
+  document.execCommand('paste'); \
+  await navigator.clipboard.writeText(`${document.location.hostname}`); \
+  })();
+
+bind --mode=insert <C-r> js (async function() { \
+  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' password`); \
+  await navigator.clipboard.writeText(res.content); \
+  document.execCommand('paste'); \
+  await navigator.clipboard.writeText(`${document.location.hostname}`); \
+  })();

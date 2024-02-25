@@ -1,0 +1,28 @@
+sw_volume: 96
+audio_device_state:1:MPD
+state: pause
+current: 12
+time: 236.871000
+random: 1
+repeat: 1
+single: 0
+consume: 1
+crossfade: 0
+mixrampdb: 0.000000
+mixrampdelay: -1.000000
+playlist_begin
+0:latest/Makoto San - Guadua.mp3
+1:latest/Jimmy Sax - No Man No Cry.mp3
+2:latest/Oceanvs Orientalis - Ozunde lyi Insanlariz.mp3
+3:latest/Hardkandy - Loose Ends.mp3
+4:latest/Flavien Berger - Léviathan.mp3
+5:latest/Orkidz - Mi Corazon.mp3
+6:latest/Acid Pauli - Ahmed.mp3
+7:latest/Eelke Kleijn - Midnight Affair - Samaha Slow Extended Edit.mp3
+8:latest/Onda Mundial, Klik & Frik - Salamanquesa.mp3
+9:latest/Kollektiv Turmstrasse - Grillen im Garten - Gerberei Version.mp3
+10:latest/AVEM - Strum.mp3
+11:latest/Jesse Cook - Afternoon At Satie's.mp3
+12:latest/Estas Tonne, Netanel Goldberg, Joseph Pepe Danza, Mitsch Kohn - When Words Are Wind.mp3
+13:latest/Didula - Arabika.mp3
+playlist_end

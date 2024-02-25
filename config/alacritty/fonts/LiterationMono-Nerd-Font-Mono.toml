@@ -1,0 +1,15 @@
+[font.bold]
+family = "LiterationMono Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "LiterationMono Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "LiterationMono Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "LiterationMono Nerd Font Mono"
+style = "Regular"

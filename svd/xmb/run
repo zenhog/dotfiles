@@ -1,0 +1,9 @@
+#!/bin/bash
+
+exec 2>&1
+
+snooze -v -s 1d -t $PWD/timefile
+cd $HOME/.xmb
+./xbps-mini-builder
+cd -
+touch $PWD/timefile

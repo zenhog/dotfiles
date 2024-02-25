@@ -1,0 +1,32 @@
+[calendars]
+
+[[calendars_local]]
+path = ~/.calendars/*
+type = discover
+
+[[birthdays_family]]
+path = ~/.contacts/family
+type = birthdays
+color = brown
+
+[[birthdays_friends]]
+path = ~/.contacts/friends
+type = birthdays
+color = light blue
+
+[default]
+highlight_event_days = True
+
+[highlight_days]
+multiple = yellow
+
+[view]
+frame = top
+event_view_always_visible = True
+
+[locale]
+timeformat = %H:%M
+dateformat = %Y-%m-%d
+longdateformat = %Y-%m-%d
+datetimeformat = %Y-%m-%d %H:%M
+longdatetimeformat = %Y-%m-%d %H:%M

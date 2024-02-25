@@ -1,0 +1,42 @@
+import = [".config/alacritty/font-name.toml", ".config/alacritty/font-size.toml", ".config/alacritty/colors.toml"]
+live_config_reload = true
+
+[bell]
+animation = "EaseOutExpo"
+
+[cursor]
+thickness = 0.05
+unfocused_hollow = true
+vi_mode_style = "None"
+
+[cursor.style]
+blinking = "Always"
+shape = "Beam"
+
+[env]
+TERM = "xterm-256color"
+
+[scrolling]
+history = 0
+multiplier = 255
+#use_thin_strokes = false
+
+[window]
+dynamic_padding = true
+startup_mode = "Windowed"
+
+[window.class]
+general = "Alacritty"
+instance = "Alacritty"
+
+[window.dimensions]
+columns = 0
+lines = 0
+
+[window.padding]
+x = 0
+y = 0
+
+[window.position]
+x = 0
+y = 0

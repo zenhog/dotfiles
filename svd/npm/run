@@ -1,0 +1,7 @@
+#!/bin/bash
+
+exec 2>&1
+
+snooze -v -s 1d -t $PWD/timefile
+npm update -g
+touch $PWD/timefile

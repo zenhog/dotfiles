@@ -1,0 +1,11 @@
+#!/bin/sh
+
+exec 2>&1
+
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+export XDG_RUNTIME_DIR="/tmp/user/$USER"
+
+export SVDIR=$HOME/.usv
+sv check pipewire-pulse || exit 1
+
+exec wireplumber

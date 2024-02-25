@@ -1,0 +1,15 @@
+[font.bold]
+family = "ProFontWindows Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "ProFontWindows Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "ProFontWindows Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "ProFontWindows Nerd Font Mono"
+style = "Regular"

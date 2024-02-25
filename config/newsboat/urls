@@ -1,0 +1,35 @@
+"query:1 Day Old: age < 1"
+"query:3 Days Old: age < 3"
+"query:5 Days Old:age < 5"
+"query:10 Days Old:age < 10"
+"query:15 Days Old:age < 15"
+https://www.kitploit.com//feeds/posts/default "~Blog: KitPloit" cyber
+https://www.hackers-arise.com/blog-feed.xml "~Blog: Hackers Arise"
+https://redacted.inc/feed "~Redacted" news
+#https://planetes360.fr/feed "~Planet360" news
+#https://qactus.fr/feed "~Qactus" news
+#https://www.businessbourse.com/feed "~BusinessBourse" news
+#https://old.reddit.com/r/DotA2/.rss "~Reddit DotA2" news dota2
+https://blog.mondediplo.net/spip.php?page=backend&id_rubrique=6 "~Blog: La Pompe à Phynance (Frédéric Lordon)" politics philosophy literature essay
+https://www.youtube.com/feeds/videos.xml?channel_id=UCqYPhGiB9tkShZorfgcL2lA "~Youtube: What I've Learned" youtube
+#https://yts.mx/rss ~yts yts
+https://www.youtube.com/feeds/videos.xml?channel_id=UClEllpoK07j_MA8bXflfYYQ "~Youtube: Evil Food Supply" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCYkZbyXcVmtdRUpCBi713vw "~Youtube: Pure Politique" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCsTK8xMZKkrbTeWc8REbn8Q "~Youtube: Loris" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UC1yNl2E66ZzKApQdRuTQ4tw "~Youtube: Sabine" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCIFk2uvCNcEmZ77g0ESKLcQ "~Youtube: The Why Files" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0yBou72Lz9fqeMXh9mkog "~Youtube: Physics Animations" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw "~Youtube: 3Blue1Brown" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCF2uBc1ECqJ5uG_6wtg0Rwg "~Youtube: Abroad and Hungry" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCL5YbN5WLFD8dLIegT5QAbA "~Youtube: Agadmator Chess" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCcAd5Np7fO8SeejB1FVKcYw "~Youtube: Best Ever Food Review Show" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCXw1ddyrUmib3zmCmvSI1ow "~Youtube: More Best Ever Food Review Show" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCtyYjpiVPf6jJ020Fvn4ALA "~Youtube: Bruno Le Salé" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCfAInEvJMxEq_pCb9vehdCw "~Youtube: Hashem Al-Ghaili" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCfsOfLvadg89Bx8Sv_6WERg "~Youtube: NoobFromUA" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g "~Youtube: PBS Space Time" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCynFUJ4zUVuh3GX7bABTjGQ "~Youtube: Trouble Fait" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg "~Youtube: Two Minute Papers" youtube
+https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA "~Youtube: Veritasium" youtube
+#https://www.youtube.com/feeds/videos.xml?channel_id=UCoJhK5kMc4LjBKdiYrDtzlA "~Youtube: Redacted" youtube
+"query:Youtube Today:tags # \"youtube\" and age < 1"
