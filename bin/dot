@@ -126,13 +126,14 @@ function linktarget() {
   ln -T -svf -- "$target" "$link"
 }
 
-function link() {
+function link() (
   local branch="${1?}"
 
   local hints
 
-  readarray -t hints < <(find "$BASEDIR/$branch" \
-    -name '.linkdir' -or -name '.linkfiles')
+  cd "$BASEDIR/$branch" || return
+
+  readarray -t hints < <(find * -name '.linkdir' -or -name '.linkfiles')
 
   for hint in "${hints[@]}"; do
     local prefix type link target dir
@@ -168,7 +169,7 @@ function link() {
     esac
 
   done
-}
+)
 
 function manifest_push() {
   local branch="${1?}"
