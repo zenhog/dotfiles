@@ -80,4 +80,4 @@ if [[ -n "$AUTHOR_NAME" ]]; then
     fi
 fi
 
-[[ -z "$TERM" ]] && TERM=xterm
+[[ -z "$TERM" ]] && TERM=xterm-256color

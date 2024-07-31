@@ -14,13 +14,6 @@ function silent() {
   "$@" &>/dev/null
 }
 
-function verbose() {
-  echo '======================================================================='
-  echo "$*"
-  echo '======================================================================='
-  eval "$*"
-}
-
 function clone() (
   set -e
 
@@ -138,13 +131,9 @@ function link() (
   for hint in "${hints[@]}"; do
     local prefix type link target dir
 
-    # containing directory
-    read -r dir < <(dirname "$hint")
+    read -r hint dir type < <(path "$hint")
 
-    # compute the desired prefix
     read -r prefix < "$hint"
-
-    read -r type < <(basename "$hint")
 
     case "$type" in
       .linkdir)
@@ -203,8 +192,8 @@ function install() (
   local branch="${1?}"
 
   init "$branch"
-  link "$branch"
   manifest_push "$branch"
+  link "$branch"
 )
 
 function enc() {
