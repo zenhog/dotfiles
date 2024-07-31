@@ -1,0 +1,19 @@
+[general]
+status_path = "~/.vdirsyncer/status/"
+
+[pair contacts]
+a = "localcontacts"
+b = "remotecontacts"
+collections = [ "from a", "from b" ]
+conflict_resolution = ["command", "vimdiff"]
+
+[storage localcontacts]
+type = "filesystem"
+path = "~/.contacts/"
+fileext = ".vcf"
+
+[storage remotecontacts]
+type = "carddav"
+url = "https://dav.mailbox.org/carddav/"
+username.fetch = [ "command", "bash", "-c", "pass show www/mailbox.org/username" ]
+password.fetch = [ "command", "bash", "-c", "pass show www/mailbox.org/password" ]

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+exec 2>&1
+
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+export SVDIR=$HOME/.usv
+
+exec chpst -b mpd mpd --no-daemon --stderr --verbose

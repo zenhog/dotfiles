@@ -1,0 +1,23 @@
+*font:             xft:saucecodepro nerd font mono:regular:size=15, \
+                   xft:dejavusansmono nerd font mono:regular:size=15, \
+                   xft:noto color emoji:regular:size=15
+
+sxiv.font:             xft:saucecodepro nerd font mono:regular:size=15, \
+                   xft:dejavusansmono nerd font mono:regular:size=15, \
+                   xft:noto color emoji:regular:size=15
+
+*imFont:           xft:saucecodepro nerd font mono:regular:size=15, \
+                   xft:dejavusansmono nerd font mono:regular:size=15, \
+                   xft:noto color emoji:regular:size=15
+
+*boldFont:         xft:saucecodepro nerd font mono:bold:size=15, \
+                   xft:dejavusansmono nerd font mono:bold:size=15, \
+                   xft:noto color emoji:bold:size=15
+
+*italicFont:       xft:saucecodepro nerd font mono:italic:size=15, \
+                   xft:dejavusansmono nerd font mono:italic:size=15, \
+                   xft:noto color emoji:italic:size=15
+
+*boldItalicFont:   xft:saucecodepro nerd font mono:bold:italic:size=15, \
+                   xft:dejavusansmono nerd font mono:bold:italic:size=15, \
+                   xft:noto color emoji:bold:italic:size=15

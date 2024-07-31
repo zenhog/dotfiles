@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+fzf_command=fzf
+fd_command="fd . ${HOME}/.mail --type d"
+
+folder="$($fd_command | $fzf_command)"
+
+echo "push 'c$folder<enter>'"
+
+# URLs
+# URIs
+# abspath
+# opts
+# markdownURL
+# header ^[[:alnum:]_]+:[[:blank:]]*(?P<value>(.+))$
+# hashes
+# passwords
+# hex
+# color
+# my-mail
+# single-quoted
+# double-quoted
+# back-quoted
+# paren-quoted
+# brace-quoted
+# brack-quoted
+# angle-quoted
+# <>[]{}()**||::

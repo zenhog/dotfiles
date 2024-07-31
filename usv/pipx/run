@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+exec 2>&1
+
+snooze -v -s 1d -t $PWD/timefile
+pipx upgrade-all
+touch $PWD/timefile

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+exec 2>&1
+
+NAME="${PWD##*/}"
+MARK="${NAME##*-}"
+DEV="vpn${MARK}"
+TABLE="11${MARK}"
+
+CONFIG="$PWD/config/current.ovpn"
+SCRIPT="$PWD/config/routes.sh"
+CAFILE="$PWD/config/ca.rsa.4096.crt"
+CRLFILE="$PWD/config/crl.rsa.4096.pem"
+
+read -r VPNUSER < <(pass show www/vpn/privateinternetaccess.com/username)
+read -r VPNPASS < <(pass show www/vpn/privateinternetaccess.com/password)
+
+ipt() {
+  sudo iptables -v -w -C "$@" || sudo iptables -v -w -A "$@"
+}
+
+#ipt OUTPUT -t mangle -m cgroup --cgroup "$MARK" -j MARK --set-mark "$MARK"
+#ipt POSTROUTING -t nat -m mark --mark "$MARK" -o "$DEV" -j MASQUERADE
+#
+#sudo cgcreate -t root:users -a root:users -d 770 -f 660 -s 660 \
+#  -g "net_cls:/$DEV"
+#
+#sudo bash -c "echo $MARK > /sys/fs/cgroup/net_cls/$DEV/net_cls.classid"
+#sudo bash -c "echo $TABLE $DEV > /etc/iproute2/rt_tables.d/${DEV}.conf"
+#
+#sudo ip rule add priority 2000 fwmark "$MARK" blackhole
+#sudo ip rule add priority 1999 fwmark "$MARK" table "$DEV"
+
+CMD=(
+  wgquick
+  --auth-user-pass '<(echo "$VPNUSER"; echo "$VPNPASS")'
+)
+
+export VPNUSER
+export VPNPASS
+
+#exec sudo --preserve-env=VPNUSER,VPNPASS bash -c "${CMD[*]}"

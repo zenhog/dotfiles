@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=open
+Exec=open %U
+NoDisplay=true

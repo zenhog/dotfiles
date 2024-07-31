@@ -1,0 +1,19 @@
+IMAPStore mailbox-remote
+Host imap.mailbox.org
+UserCmd "gui pass get www/mail/mailbox.org username"
+PassCmd "pass show www/mail/mailbox.org/password"
+SSLType STARTTLS
+
+MaildirStore mailbox-local
+Path  ~/.mail/mailbox/
+Inbox ~/.mail/mailbox/INBOX
+SubFolders Verbatim
+
+Channel mailbox
+Far :mailbox-remote:
+Near :mailbox-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All

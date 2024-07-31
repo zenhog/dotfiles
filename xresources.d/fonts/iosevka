@@ -1,0 +1,19 @@
+*font:             xft:iosevka nerd font mono:regular:size=16, \
+                   xft:dejavusansmono nerd font mono:regular:size=16, \
+                   xft:noto color emoji:regular:size=16
+
+*imFont:           xft:iosevka nerd font mono:regular:size=16, \
+                   xft:dejavusansmono nerd font mono:regular:size=16, \
+                   xft:noto color emoji:regular:size=16
+
+*boldFont:         xft:iosevka nerd font mono:bold:size=16, \
+                   xft:dejavusansmono nerd font mono:bold:size=16, \
+                   xft:noto color emoji:bold:size=16
+
+*italicFont:       xft:iosevka nerd font mono:italic:size=16, \
+                   xft:dejavusansmono nerd font mono:italic:size=16, \
+                   xft:noto color emoji:italic:size=16
+
+*boldItalicFont:   xft:iosevka nerd font mono:bold:italic:size=16, \
+                   xft:dejavusansmono nerd font mono:bold:italic:size=16, \
+                   xft:noto color emoji:bold:italic:size=16

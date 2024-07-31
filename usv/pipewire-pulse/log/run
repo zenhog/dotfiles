@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+logit "$HOME/.local/share/log/runit"

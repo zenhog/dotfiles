@@ -1,0 +1,33 @@
+include gruvbox
+auto-reload yes
+reload-time 60
+reload-threads 4
+download-retries 4
+download-timeout 10
+prepopulate-query-feeds yes
+
+text-width 80
+
+#color info default default reverse
+#color background white black
+#color listnormal_unread yellow default
+#color listfocus blue default reverse bold
+#color listfocus_unread blue default reverse bold
+
+show-read-feeds yes
+feed-sort-order unreadarticlecount-asc
+feed-sort-order title
+
+goto-next-feed no
+
+bind-key j down feedlist
+bind-key k up feedlist
+bind-key j next articlelist
+bind-key k prev articlelist
+bind-key J next-feed articlelist
+bind-key K prev-feed articlelist
+bind-key j down article
+bind-key k up article
+
+confirm-exit no
+cleanup-on-quit yes
