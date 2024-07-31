@@ -127,8 +127,8 @@ function link() {
   for hint in "${hints[@]}"; do
     local prefix type link target dir basedir
 
-    read -r dir < <(basename "$hint")
-    read -r hint target type < <(path "$hint")
+    read -r dir < <(dirname "$hint")
+    read -r hint basedir type < <(path "$hint")
 
     read -r prefix < "$hint"
 
@@ -136,17 +136,17 @@ function link() {
       .linkdir)
         eval "prefix=${prefix:-${HOME}/.}"
         link="${prefix}${dir}"
-        linktarget "$target" "$link"
+        linktarget "$basedir" "$link"
         ;;
       .linkfiles)
         eval prefix="${prefix:-${HOME}/.${dir}/}"
         local files
-        readarray -t files < <(cd "$target" && find * -type f -or -type l)
+        readarray -t files < <(cd "$basedir" && find * -type f -or -type l)
 
         for file in "${files[@]}"; do
           link="${prefix}${file}"
 
-          target="$target/$file"
+          target="$basedir/$file"
 
           linktarget "$target" "$link"
         done
