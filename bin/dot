@@ -124,9 +124,10 @@ function link() (
 
   local hints
 
-  cd "$BASEDIR/$branch" || return
+  local basedir="$BASEDIR/$branch"
 
-  readarray -t hints < <(find * -name '.linkdir' -or -name '.linkfiles')
+  readarray -t hints < <(cd "$basedir" &&
+    find * -name '.linkdir' -or -name '.linkfiles')
 
   for hint in "${hints[@]}"; do
     local prefix type link target dir
@@ -187,14 +188,13 @@ function manifest_push() {
   done
 }
 
-function install() (
-  set -e
+function install() {
   local branch="${1?}"
 
-  init "$branch"
-  manifest_push "$branch"
-  link "$branch"
-)
+  if init "$branch"; then
+    manifest_push "$branch" && link "$branch"
+  fi
+}
 
 function enc() {
   gpg -q --yes --pinentry-mode=loopback --symmetric \
