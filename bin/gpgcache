@@ -1,0 +1,65 @@
+#!/usr/bin/env zsh
+
+keylines=$(gpg-connect-agent 'keyinfo --list --with-ssh' '/bye' | awk '/^S/ { print $3,$7 }' )
+
+keygrips=$(gpg --list-keys --with-keygrip)
+
+function extract_gpg_block {
+    local pattern="$1"
+
+    print $keygrips | sed -rn '
+        /^pub/ {
+            :loop
+                /^$/ b loopendv1
+                $    b loopendv2
+                H
+                n
+                b loop
+            :loopendv1
+                x
+                /'"$pattern"'/p
+                b
+            :loopendv2
+                H
+                x
+                /'"$pattern"'/p
+        }'
+}
+
+function sanitize_sed_input {
+    local input="$1"
+    print "$input" | sed -rn -e 's:\.:\\.:pg'
+}
+
+function get_email_addresses {
+    print $keygrips | sed -rn '/^uid/ s/.*<(.*)>.*/\1/p'
+}
+
+function get_full_info {
+    local address="$1"
+    local block=$(extract_gpg_block "$address")
+    local short=$(print "$block" | grep -e '^pub' -e '^sub' -e Keygrip)
+    local output=$(print "$short" | sed -rn '
+        N
+        s/^(pub|sub) *(.*) *([0-9]{4}-[0-9]{2}-[0-9]{2}) *\[([A-Z]+)\] *'\
+'(\[expires: .*\])?\n.*Keygrip = ([0-9A-Fa-f]+)$/'"$1"' \1 \2 \3 \4 \6/p
+        ')
+    print "$output"
+}
+
+emails=($(get_email_addresses))
+declare -A grips
+
+grips=($(print $keylines))
+
+for email in ${emails}; do
+    local info=$(get_full_info "$email")
+    print "$info" | while read line; do
+        grip=$(print "$line" | awk '{print $6}')
+        if [[ "${grips[$grip]}" == "1" ]]; then
+            print "$line" Y
+        else
+            print "$line" N
+        fi
+    done
+done | column -t

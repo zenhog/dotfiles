@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+KEY=i
+MOD='S-M'
+ICON=󰐰
+
+HORIZONTAL=1
+
+declare -Ax trans=(
+  sinks sink
+  sources source
+  sink-inputs input
+  source-outputs output
+)
+
+read -r table < <(declare -p trans); export table
+
+function view() {
+  eval "$table"
+  local type index kind
+  read -r type index _ <<< "$1"
+  for i in "${!trans[@]}"; do
+    [[ "${trans[$i]}" == "$type" ]] && kind="$i"
+  done
+  pactl -f json list "${kind}" |
+    jq ".[] | select(.index == ${index})" | yq -y | bat -pf --language yaml
+}
+
+function entries() {
+
+  eval "$table"
+  local kind="$1"
+  local type="${trans[$kind]}"
+
+  read -r entries < <(pactl -f json list "$kind")
+
+  local names indices states
+
+  readarray -t indices < <(jq -r '.[].index' <<< "$entries")
+
+  readarray -t names < <(jq -r '.[].description' <<< "$entries")
+
+  if [[ "$kind" = *puts ]]; then
+    readarray -t names < <(jq -r '.[].properties."application.name"' <<< "$entries")
+    readarray -t medias < <(jq -r '.[].properties."media.name"' <<< "$entries")
+  fi
+
+  readarray -t states < <(jq -r '.[].state' <<< "$entries")
+
+  for i in "${!indices[@]}"; do
+    printf "%s%s%s%s%s%s%s\n" "$type" "$iSEP" "${indices[$i]}" "$iSEP" "${names[$i]}" "$iSEP" "${medias[$i]}"
+  done
+}
+
+
+function list() {
+  # format: INDEX, SINK/SOURCE/INPUT/OUTPUT/PORT, NAME, MUTE, VOL, DEFAULT
+
+  {
+    entries sinks
+    entries sources
+    entries sink-inputs
+    entries source-outputs
+  } | column -t -s "$iSEP"
+}

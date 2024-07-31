@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+
+KEY=s
+MOD='S-M'
+ICON=
+
+NOWRAP=1
+
+function init() {
+  set_opt pwd "$HOME/.marks"
+  set_opt hide 0
+  set_opt mode 0
+  set_opt mode-mod 3
+}
+
+function filter() {
+  # filters out unprintable and multicell chars like nerdfont icons
+  perl -pe 's|^[^[:graph:]].*?[ ]||p' <<< "$1"
+}
+
+function folder_save() {
+  set_opt pwd "$(pwd)"
+}
+
+function folder_restore() {
+  FOLDER="$(get_opt pwd)"
+}
+
+function path() {
+  local path="$(filter "$1")"
+
+  folder_restore
+
+  if [[ "${path:0:1}" == / ]]; then
+    realpath -s "$path"
+  else
+    realpath -s "$FOLDER/$path"
+  fi
+}
+
+function folder_cd() {
+  cd "$(path "$1")" && folder_save
+}
+
+function label() {
+  local path="$(path "$FOLDER")"
+  local mode="$(get_opt mode)"
+  local hide="$(get_opt hide)"
+  printf "%s - hide = %s - mode = %s" "$path" "$hide" "$mode"
+}
+
+function mimetype() {
+  # assuming valid absolute path
+  local path="$(path "$1")"
+
+  printf "%s (%s)\n" "$path" "$(file -bL --mime-type "$path")"
+}
+
+function view() {
+  local path="$(path "$1")"
+
+  mimetype "$path"
+  sepline
+  command preview "$path"
+}
+
+function state_update() {
+  folder_restore
+  restore_opt hide
+
+  read -r HIDE < <(get_opt hide)
+  read -r MODE < <(get_opt mode)
+
+  case "$HIDE" in
+    1)
+      LSD_OPTS=('-A')
+      FD_OPTS=('-H')
+        ;;
+    0)
+      LSD_OPTS=()
+      FD_OPTS=()
+        ;;
+  esac
+
+  case "$MODE" in
+    0) FD_OPTS+=(-td) ;; # find dirs
+    1) FD_OPTS+=(-tf) ;; # find files
+    2) FD_OPTS+=(-tl) ;; # find links
+    *) ;;
+  esac
+
+  FD_OPTS+=(--base-directory "$FOLDER")
+
+  LIST_CMD=(lsd -1 --no-symlink --group-dirs=first "${LSD_OPTS[@]}")
+  SEARCH_CMD=(fd "${FD_OPTS[@]}")
+}
+
+BINDS[list]=alt-w
+DESCS[list]='Reload current directory listing'
+function list() {
+  state_update
+  "${LIST_CMD[@]}" "$FOLDER/"
+}
+
+BINDS[search]=alt-s
+HOOKS[search]=search
+CALLS[search]='reload-sync(%s {} {q})'
+DESCS[search]='Search arbitrary pattern with fd'
+function search() {
+  state_update
+  cd "$FOLDER" && "${SEARCH_CMD[@]}" "$2"
+}
+
+BINDS[rotate_mode]=alt-y
+HOOKS[rotate_mode]=search
+DESCS[rotate_mode]='Rotate mode'
+function rotate_mode() {
+  rotate_opt mode
+  search "$1" "$2"
+}
+
+
+BINDS[toggle_hide]=alt-t
+DESCS[toggle_hide]='Toggle hidden'
+function toggle_hide() {
+  toggle_opt hide
+}
+
+BINDS[rename]=alt-r
+HOOKS[rename]=sclear
+DESCS[rename]='Prompt rename entry'
+function rename() {
+  folder_restore
+  local entry="$(filter "$1")"
+
+  export MENU_INPUT_PREVIEW=
+
+  read -r input < <(cd "$FOLDER" && input "Rename: $entry")
+  mv -- "$FOLDER/$entry" "$FOLDER/$input"
+}
+
+BINDS[mark]=alt-m
+DESCS[mark]='Mark entry'
+function mark() {
+  local path="$(path "$1")"
+
+  local marksdir="$HOME/.marks"
+
+  local target="$(realpath -m --relative-to="$marksdir" "$path")"
+
+  (cd "$marksdir" && ln -svf "$target" "$(basename "$path")")
+}
+
+BINDS[marks]=alt-space
+DESCS[marks]='Go to marks directory'
+function marks() {
+  save_opt hide
+  set_opt hide 0
+  folder_cd "$HOME/.marks"
+}
+
+BINDS[home]=alt-q
+DESCS[home]='Home directory'
+function home() {
+  folder_cd "$HOME"
+}
+
+BINDS[del]=alt-d
+DESCS[del]='Delete entry definitively'
+function del() {
+  rm -rf "$(path "$1")"
+}
+
+BINDS[open]=tab
+DESCS[open]='Open entry'
+function open() {
+  command open "$(path "$1")"
+}
+
+BINDS[_open]=alt-i
+HOOKS[_open]=accept
+DESCS[_open]='Open entry and quit'
+function _open() {
+  open "$1"
+}
+
+BINDS[enter]=enter
+DESCS[enter]='Change Directory'
+function enter() {
+  folder_cd "$1"
+}
+
+BINDS[back]=esc
+DESCS[back]='Parent Directory'
+function back() {
+  folder_cd ..
+}
+
+function atfinish() {
+  unset_opt pwd
+  unset_opt hide
+  unset_opt mode
+}

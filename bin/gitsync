@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+function pull
+{
+    #git stash
+    #git pull --rebase
+    git rebase --autostash
+    #git stash pop
+}
+
+function push
+{
+    pull
+    git add .
+    git commit -m "$(date) on $(hostname)"
+    git push
+}
+
+git fetch
+
+readarray -t mods < <(git status --porcelain=v1)
+
+if [[ "${#mods[@]}" -gt 0 ]]; then
+    push
+else
+    pull
+fi

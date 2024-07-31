@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+KEY=r
+MOD='S-M'
+ICON=
+
+export APP_DIR="$HOME/.lib/app"
+
+function view() {
+  command preview "$APP_DIR/$1"
+}
+
+function list() {
+  local apps
+  readarray -t apps < <(ls -1 $HOME/.lib/app)
+  printf "%s\n" "${apps[@]}"
+}
+
+function key() {
+  source "$HOME/.lib/app/$1"
+  echo "$1:$KEY"
+}
+
+function keys() {
+  for app in $(basename -a "${APP_DIR}"/*); do
+    gui run key "$app"
+  done
+}
+
+BINDS[fg]=enter
+HOOKS[fg]=accept
+DESCS[fg]='Run in the foreground'
+function fg() {
+  source "$HOME/.lib/app/$1"
+  awm run "${ATTRIBUTES[@]}" -- "${COMMAND[@]}"
+}
+
+BINDS[bg]=tab
+DESCS[bg]='Run in the background'
+function bg() {
+  source "$HOME/.lib/app/$1"
+  awm exec "${ATTRIBUTES[@]}" -- "${COMMAND[@]}"
+}
+
+BINDS[close]=alt-q
+DESCS[close]='Terminate window'
+function close() {
+  source "$HOME/.lib/app/$1"
+  awm kill "${ATTRIBUTES[@]}"
+}

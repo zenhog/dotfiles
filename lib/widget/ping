@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+PERIOD=1
+
+function ping() {
+    command timeout 0.5 ping -n -4 -c 1 "$1" |
+            awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
+}
+
+function text() {
+    local ping
+
+    ip1="185.199.109.153" # voidlinux.org
+    ip2="89.16.167.134"   # gentoo.org
+    ip3="142.250.178.174" # google.com
+
+    [[ -z "$ping" ]] && read -r ping < <(ping "$ip1")
+    [[ -z "$ping" ]] && read -r ping < <(ping "$ip2")
+    [[ -z "$ping" ]] && read -r ping < <(ping "$ip3")
+
+    printf "%s" "$ping"
+}
+
+function icon() {
+    local icon=󰀚
+    printf "%s" "$icon"
+}

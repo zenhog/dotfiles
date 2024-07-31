@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+echo 'session-save ctabs' > "$QUTE_FIFO"
+
+menu tabs

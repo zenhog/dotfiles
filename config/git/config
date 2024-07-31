@@ -1,0 +1,52 @@
+#[include]
+#	path = ~/.config/gitrc
+[user]
+	signingkey = DF02FBE1D0C2D9F3
+[credential "https://github.com"]
+	helper = !/usr/bin/gh auth git-credential
+[hub]
+	protocol = https
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg
+[color]
+	ui = true
+[core]
+	editor = vim
+	autocrlf = input
+	pager = delta
+	compression = 0
+[init]
+	defaultBranch = master
+	templatedir = ~/.config/git/templates
+[merge]
+	tool = vimdiff
+	conflictstyle = diff3
+[mergetool]
+	prompt = false
+[interactive]
+	diffFilter = delta
+[alias]
+	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+	dv = difftool -t vimdiff -y
+	plog = log --all --graph --oneline --decorate
+	se = !git rev-list --all | xargs git grep -F
+	unstage = reset HEAD --
+	cleanup = !dot cleanup
+	remaster = !dot remaster
+	sync = !dot pullpush
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+[diff]
+	colorMoved = default
+[diff "gpg"]
+	textconv = gpg --batch -qd /dev/stdin
+[diff "gpgtar"]
+	textconv = dot gpgtar_cat
+[http]
+	postBuffer = 157286400
+[pack]
+	window = 1

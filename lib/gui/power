@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+KEY=x
+MOD='S-M'
+ICON=
+
+function view() {
+  declare -f "action:$1"
+}
+
+function list() {
+  while read -r _ _ f _; do
+    [[ "$f" =~ action:.* ]] && printf "%s\n" "${f#action:}"
+  done < <(declare -F)
+}
+
+BINDS[open]=enter
+HOOKS[open]=accept
+DESCS[open]='Execute entry'
+function open() {
+  action:$1
+}
+
+function action:poweroff() {
+  sudo poweroff
+}
+
+function action:suspend() {
+  sudo poweroff
+}
+
+function action:screenlock() {
+  awm exec -- i3lock
+}
+
+function action:screenshot() {
+  :
+}
+
+function action:windowshot() {
+  :
+}
+
+function action:selectshot() {
+  :
+}
+
+function action:toggletheme() {
+  local current theme
+
+  read -r current < <(<"$HOME/.colorscheme")
+
+  case "$current" in
+    dark)  theme=light;;
+    light) theme=dark;;
+  esac
+
+  # alacritty theme
+  mkdir -p "$HOME/.themes/alacritty"
+  ln -vf \
+    "$HOME/.config/alacritty/colors.${theme}.toml" \
+    "$HOME/.config/alacritty/colors.toml"
+
+  mkdir -p "$HOME/.themes/lscolors"
+  ln -svf \
+    "$HOME/.config/lsd/lscolors/lscolors.${theme}" \
+    "$HOME/.themes/lscolors/lscolors.sh"
+
+  cd "$HOME/.config/lsd" || return 1
+  ln -svf "themes/${theme}.yaml" colors.yaml
+
+  cd "$HOME/.config/qutebrowser" || return 1
+  ln -svf "${theme}.py" theme.py
+  qutebrowser :config-source
+
+  cd "$HOME/.config/tridactyl/themes" || return 1
+  ln -svf "custom-${theme}.css" main.css
+
+  cd "$HOME/.wallpapers" || return 1
+  ln -svf "main.${theme}" main
+  feh --bg-scale "$HOME/.wallpapers/main"
+
+  local panes
+  readarray -t panes < \
+    <(tmux list-panes -a -F '#S:#I.#P #{pane_current_command}' | grep 'vim$')
+
+  for p in "${panes[@]}"; do
+    local id
+    read -r id _ <<< "$p"
+    tmux send-keys -t "$id" Escape ":lua vim.opt.bg = '${theme}'" Enter
+    tmux send-keys -t "$id" Escape \
+      ":lua vim.cmd('colorscheme ' .. vim.g['theme_${theme}'])" Enter
+    tmux send-keys -t "$id" Escape \
+      ":lua require('lualine').setup({ options = { theme = vim.g.lualine_theme_${theme} } })" Enter
+  done
+
+  echo "$theme" > "$HOME/.colorscheme"
+
+  tmux reload
+}
+
+function action:mailsync() {
+  :
+}

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+KEY=y
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+function view() {
+  local bufnum
+  read -r bufnum _ <<< "$1"
+  tmux show-buffer -b "$bufnum"
+}
+
+function list() {
+  tmux list-buffers -F '#{buffer_name} #{buffer_sample}'
+}
+
+function clip() {
+  tmux load-buffer - <<< "${1:1}"
+  notify "Clipped '${1:1}'"
+}
+
+function fork() {
+  local origin="$1"
+  local pathname="$2"
+
+  IFS=/ read -r _ user repo _ <<< "$pathname"
+
+  cd "$HOME/workspace/repos" && {
+    [[ -d "$repo" ]] && notify "Repo '$repo' already exists" || {
+      git clone "$origin/$user/$repo" "$repo" && notify "Cloned '$repo'" ||
+        notify "Failed to clone '$repo'"
+      }
+  }
+}

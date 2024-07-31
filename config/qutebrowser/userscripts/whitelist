@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+HOST="$1"
+
+echo "config-list-add content.blocking.whitelist ${1}" > "$QUTE_FIFO"
+echo "reload" > "$QUTE_FIFO"

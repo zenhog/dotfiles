@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+KEY=q
+MOD='S-M'
+ICON=󰝚
+
+HORIZONTAL=1
+
+function view() {
+  :
+}
+
+function list() {
+  mpc playlist
+}

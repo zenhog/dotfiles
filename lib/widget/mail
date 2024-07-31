@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+function toggle() {
+  mailsync
+}
+
+function text() {
+    local count
+
+    read -r count < <(notmuch count tag:unread)
+    printf "%s" "$count"
+}
+
+function icon() {
+  local icon=
+  local icon=󰴃
+  printf "%s" "$icon"
+}
+

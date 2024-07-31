@@ -1,0 +1,13 @@
+case "$1" in
+  --seclist)
+    gpg --list-secret-keys --with-subkey-fingerprint --with-fingerprint \
+      --with-keygrip "${@:2}"
+    ;;
+  --publist)
+    gpg --list-public-keys --with-subkey-fingerprint --with-fingerprint \
+      --with-keygrip "${@:2}"
+    ;;
+  *)
+    command gpg "$@"
+    ;;
+esac

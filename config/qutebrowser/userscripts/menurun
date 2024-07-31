@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+SVC="$1"
+HOST="$2"
+ENTRY="$3"
+
+case "$SVC" in
+  grab)
+    gui pass grab "$ENTRY" "$HOST" | xsel -ib
+    echo 'fake-key <Ctrl-V>' > "$QUTE_FIFO"
+    ;;
+  passinit)
+    gui pass new "$HOST" "$ENTRY"
+    ;;
+  mark)
+    gui mark add "$HOST"
+    ;;
+  unmark)
+    gui mark del "$HOST"
+esac
+

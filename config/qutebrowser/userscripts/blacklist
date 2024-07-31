@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+HOST="$1"
+LIST=/tmp/blacklist.txt
+
+echo "*.${1}" >> "$LIST"
+
+echo "tab-close" > "$QUTE_FIFO"
+echo "tab-prev" > "$QUTE_FIFO"

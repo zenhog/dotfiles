@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+KEY=h
+MOD='S-M'
+ICON=󱠏
+
+HORIZONTAL=1
+
+export DB="$HOME/.local/share/qutebrowser/sessions/ctabs.yml"
+
+function view() {
+  :
+}
+
+function list() {
+  #qutebrowser ":session-save ctabs" 2>/dev/null
+  readarray -t tabs < \
+    <(yq -r '.windows[].tabs.[] | .history.[] | select(.active) | .title' < "$DB")
+
+  paste <(seq 1 ${#tabs[@]}) <(printf "%s\n" "${tabs[@]}")
+}
+
+BINDS[open]=enter
+HOOKS[open]=accept
+DESCS[open]='Raise tab'
+function open() {
+  local id title
+  read -r id _ <<< "$1"
+  #echo tab-focus $id > "$QUTE_FIFO"
+  qutebrowser ":tab-focus $id" 2>/dev/null
+}

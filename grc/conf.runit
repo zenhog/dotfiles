@@ -1,0 +1,55 @@
+# svlogd date format
+regexp=(\d\d\d\d-\d\d-\d\d)_(\d\d:\d\d:\d\d\.\d\d\d\d\d)
+colours=white,bold yellow,bold blue
+count=more
+======
+# everything in parentheses
+regexp=\(.+?\)
+colours=yellow
+count=more
+======
+# everything in `'
+regexp=\`.+?\'
+colours=bold yellow
+count=more
+======
+regexp=\`.+?\`
+colours=bold yellow
+count=more
+======
+regexp=\'.+?\'
+colours=bold yellow
+count=more
+======
+regexp=\<.+?\>
+colours=bold green
+count=more
+======
+regexp=\".+?\"
+colours=bold red
+count=more
+======
+regexp=\{.+?\}
+colours=bold red
+count=more
+======
+regexp=/[\w/\.]+
+colours=bold cyan
+count=more
+======
+# everything in brackets
+regexp=\[.+?\]
+colours=bold cyan
+count=more
+======
+# ->
+regexp=->
+colours=bold cyan
+count=more
+======
+# ipv4
+regexp=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+colours=magenta
+count=more
+======
+# ipv6

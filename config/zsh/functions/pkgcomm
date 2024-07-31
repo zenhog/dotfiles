@@ -1,0 +1,9 @@
+
+mainfile="$1"
+
+shift
+
+for file in "$@"; do
+  echo "====== Common to '$mainfile' and '$file' ======"
+  comm -12 <(sort -u "$file") <(sort -u "$mainfile")
+done

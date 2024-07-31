@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+KEY=j
+MOD='S-M'
+ICON=󰛸
+
+export SOCKET="/tmp/rofi_notification_daemon"
+
+function view() {
+  :
+}
+
+function list() {
+  function extract() {
+    readarray -t "$1" < <(jq -r ".[].$1" <<< "$TEXT")
+  }
+
+  read -r TEXT < <(echo list | socat - "UNIX-CONNECT:$SOCKET")
+  #read -r TEXT < <(echo list | openbsd-nc -U "$SOCKET")
+  extract id
+  extract body
+  extract summary
+  extract application
+  extract urgency
+
+  for i in "${!id[@]}"; do
+    printf "%s|%s|(%s)" "${id[$i]}" "${summary[$i]}" "${application[$i]}" |
+      column -t -s'|'
+  done
+}

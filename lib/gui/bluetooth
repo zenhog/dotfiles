@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+KEY=b
+MOD='S-M'
+ICON=󰂯
+
+function view() {
+  read -r _ addr _ <<< "$1"
+  bluetoothctl info "$addr"
+}
+
+function list() {
+  bluetoothctl devices
+}

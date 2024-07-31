@@ -1,0 +1,15 @@
+[font.bold]
+family = "mononoki Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "mononoki Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "mononoki Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "mononoki Nerd Font Mono"
+style = "Regular"

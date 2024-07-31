@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:t'
+
+ATTRIBUTES=(profile=@spotify)
+#COMMAND=(vpn 1 spotify
+#  --username="$(gui pass grab spotify.com username)"
+#  --password="$(gui pass grab spotify.com password)"
+#)

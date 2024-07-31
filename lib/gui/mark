@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+KEY=u
+MOD='S-M'
+ICON=
+
+HORIZONTAL=1
+
+export DB="$HOME/.db/bookmarks.db"
+
+function view() {
+  local id
+  read -r -d ' ' id dummy <<< "$1"
+  sqlite3 "$DB" "select url from bookmarks where id == $id"
+  sepline
+  sqlite3 "$DB" "select metadata from bookmarks" | sed -r 's/[[:blank:][:punct:]]/\n/g' |
+    sort -u | fmt --width="$FZF_PREVIEW_COLUMNS"
+}
+
+function list() {
+  sqlite3 -separator "$iSEP" "$DB" \
+    'select id, metadata from bookmarks' | sort -t "$iSEP" -k2 |
+      column -t -s "$iSEP"
+}
+
+BINDS[open]=enter
+DESCS[open]='Open bookmark'
+function open() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  command open "$url"
+}
+
+BINDS[copy]=alt-c
+DESCS[copy]='Clipboard bookmark URL'
+function copy() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  tmux load-buffer - <<< "$url"
+}
+
+
+function check() {
+  local id
+  read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
+}
+
+BINDS[del]=alt-d
+DESCS[del]='Delete bookmark'
+function del() {
+  local id
+  read -r -d ' ' id dummy <<< "$1"
+  sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
+}
+
+BINDS[mod]=alt-e
+HOOKS[mod]=sclear
+DESCS[mod]='Rename bookmark'
+function mod() {
+  local id title
+  read -r id title <<< "$1"
+
+  MENU_INPUT_PREVIEW="$(sqlite3 "$DB" "SELECT metadata FROM bookmarks" | sort)"
+
+  export MENU_INPUT_PREVIEW
+
+  read -r title < <(input "$title")
+
+  if [[ -n "$title" ]]; then
+    sqlite3 "$DB" \
+      "UPDATE bookmarks SET metadata = '${title}' WHERE id ==  ${id}"
+  fi
+}
+
+function add() {
+  local url="$1"
+  #local title="$2"
+
+  if check "$url"; then
+    notify "'$url' already exists"
+    exit 1
+  fi
+
+  MENU_INPUT_PREVIEW="$(sqlite3 "$DB" "SELECT metadata FROM bookmarks" | sort)"
+
+  export MENU_INPUT_PREVIEW=abc
+
+  read -r title < <(menu input)
+
+  [[ -n "$title" ]] && sqlite3 "$DB" \
+    "INSERT INTO bookmarks (url, metadata) values ('$url', '$title')"
+
+  if check "$1"; then
+    notify "Added '$url'"
+  else
+    notify "Failed to add '$url'"
+  fi
+}
+
+
+function del() {
+  local url="$1"
+  if check "$url"; then
+    sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"
+    if check "$url"; then
+      notify "Failed to delete '$url'"
+    else
+      notify "Deleted '$url'"
+    fi
+  else
+    notify "'$url' does not exist"
+  fi
+}

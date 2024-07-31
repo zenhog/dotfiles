@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+PERIOD=30
+
+KEYS[prev]='C-M:d'
+function prev() {
+  xbacklight -dec 5
+}
+
+KEYS[next]='C-M:u'
+function next() {
+  xbacklight -inc 5
+}
+
+KEYS[toggle]='C-M:f'
+function toggle() {
+    read -r backlight < <(xbacklight | xargs printf "%02.f")
+    if (( backlight <= 30 )); then
+        xbacklight -set 100
+    else
+        xbacklight -set 30
+    fi
+}
+
+function text() {
+    read -r backlight < <(xbacklight | xargs printf "%02.f")
+
+    printf "%s" "$backlight"
+}
+
+function icon() {
+    local icon=
+    local icon=󰃠
+    local icon=󰃞
+
+    printf "%s" "$icon"
+}

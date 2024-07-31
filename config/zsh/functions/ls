@@ -1,0 +1,1 @@
+lsd "$@" &>/dev/null && lsd "$@" || command ls "$@"

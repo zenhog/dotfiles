@@ -1,0 +1,15 @@
+[font.bold]
+family = "DaddyTimeMono Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "DaddyTimeMono Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "DaddyTimeMono Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "DaddyTimeMono Nerd Font Mono"
+style = "Regular"

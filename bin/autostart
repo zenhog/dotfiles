@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+gui run bg wanqute
+#gui run bg discord

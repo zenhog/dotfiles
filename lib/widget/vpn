@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+function text() {
+    local vpn
+    local url='http://ip-api.com/json/?lang=us&fields=countryCode'
+
+    read -r vpn  < <(command timeout 1.5 cgexec -g net_cls:vpn1 curl -s "$url" |
+      jq -r '.countryCode')
+
+    [[ -z "$vpn" ]] && vpn='**'
+
+    printf "%s" "$vpn"
+}
+
+function icon() {
+  local icon=󰉀
+  printf "%s" "$icon"
+}

@@ -1,0 +1,15 @@
+[font.bold]
+family = "Lekton Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "Lekton Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "Lekton Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "Lekton Nerd Font Mono"
+style = "Regular"

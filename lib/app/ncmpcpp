@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='C-M:t'
+
+COMMAND=(gui tmux open "window:$(hostname):@:ncmpcpp" ncmpcpp)

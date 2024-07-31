@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+which curl >/dev/null || exit 1
+
+publicip=$(curl -sf ipinfo.io/ip)
+location=$(curl -sf ipinfo.io/country)
+
+echo -n "${publicip}(${location})"

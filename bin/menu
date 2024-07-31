@@ -1,0 +1,228 @@
+#!/usr/bin/env bash
+
+source "$HOME/.bin/gui"
+
+function atexit() {
+  silent declare -F atfinish && atfinish
+  silent awm set class=@tmux instance=@menu -- hidden=true minimized=true
+  #remove_env
+}
+
+BINDS[help]=alt-h
+HOOKS[help]=preview
+function help() {
+  eval "$SDESCS"
+  eval "$SBINDS"
+  eval "$SGDESCS"
+
+  sepline " Global bindings "
+  for func in "${!GDESCS[@]}"; do
+    echo "${BINDS[$func]} $iSEP ${GDESCS[$func]}"
+  done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
+
+  echo
+  sepline " ${MODULE^^} bindings "
+
+  for func in "${!DESCS[@]}"; do
+    echo "${BINDS[$func]} $iSEP ${DESCS[$func]}"
+  done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
+}
+
+BINDS[copyentry]='alt-\'
+GDESCS[copyentry]='Clip entry'
+function copyentry() {
+  echo -n "$1" | fzf --ansi -f '' | tmux load-buffer -
+}
+
+BINDS[extract]='alt-/'
+HOOKS[extract]=sclear
+GDESCS[extract]='Fzfgrep preview'
+function extract() {
+  view "$1" | fzfgrep 2>/dev/tty
+}
+
+BINDS[change]=change
+HOOKS[change]=change
+CALLS[change]='change-preview(view {})'
+
+BINDS[paste]=alt-b
+HOOKS[paste]=paste
+GDESCS[paste]='Paste clipboard'
+CALLS[paste]='transform-query(tmux showb)'
+
+BINDS[eval]=alt-enter
+HOOKS[eval]=eval
+GDESCS[eval]='Evaluate shell expressions'
+CALLS[eval]='change-preview(eval {q})'
+
+BINDS[qalc]=alt-bs
+HOOKS[qalc]=qalc
+GDESCS[qalc]='Evaluate qalc expressions'
+CALLS[qalc]='change-preview(eval qalc {q})'
+
+function input() {
+  local query="$1" fifo="$2"
+
+  local -a cmd
+  cmd=('fzf' '--print-query')
+  cmd+=('--border' 'sharp')
+  cmd+=('--prompt' "input($MODULE)> ")
+  cmd+=('--query' "$query")
+  cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
+  cmd+=('--info=inline-right')
+  cmd+=('--no-separator')
+
+  echo "$@" > /tmp/menu
+  tmux showenv -t menu >> /tmp/menu
+
+  if [[ -n "$MENU_INPUT_PREVIEW" ]]; then
+    function inputpreview() {
+      echo "$MENU_INPUT_PREVIEW"
+    }
+    export -f inputpreview
+  fi
+
+  if silent declare -F inputpreview; then
+    cmd+=('--preview' 'inputpreview')
+    cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
+  fi
+
+  if [[ -n "$fifo" ]]; then
+    exec 1>"$fifo"
+  fi
+
+  echo -n | "${cmd[@]}" 2>/dev/tty
+}
+
+function main() {
+  trap atexit EXIT
+
+  [[ "$1" == input ]] && {
+    input "${@:2}"
+    return
+  }
+
+  source "$MODULES_DIR/$1" || exit 1
+
+  while read -r _ _ func _; do
+    export -f "$func"
+  done < <(declare -F) || exit 1
+
+  read -r SBINDS < <(declare -p BINDS); export SBINDS
+  read -r SHOOKS < <(declare -p HOOKS); export SHOOKS
+  read -r SCALLS < <(declare -p CALLS); export SCALLS
+  read -r SDESCS < <(declare -p DESCS); export SDESCS
+  read -r SGDESCS < <(declare -p GDESCS); export SGDESCS
+
+  COMMAND+=(fzf)
+  COMMAND+=(--prompt="$1> ")
+  COMMAND+=(--border=rounded)
+  COMMAND+=(--info=inline-right)
+  COMMAND+=(--no-separator)
+  COMMAND+=(--ansi)
+  COMMAND+=(--cycle)
+  COMMAND+=(--no-multi)
+  COMMAND+=(--query "${*:2}")
+
+  if [[ -n "$PREVIEW_CMD" ]]; then
+    COMMAND+=(--preview="$PREVIEW_CMD")
+  elif silent declare -F view; then
+    COMMAND+=(--preview="view {}")
+  fi
+
+  if silent declare -F label; then
+    COMMAND+=(--bind 'load:transform-border-label:label {}')
+    COMMAND+=(--bind 'focus:change-preview(view {})+transform-border-label:label {}')
+  fi
+
+  WINDOW=right,border-rounded
+  EXTRA='--bind=ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
+
+  if [[ -n "$HORIZONTAL" ]]; then
+    WINDOW=bottom,border-rounded
+    EXTRA='--bind=ctrl-x:change-preview-window(right,border-rounded|bottom,border-rounded)'
+  else
+    case "$POSITION" in
+      TOP)
+        WINDOW=top,border-bottom ;;
+      BOTTOM)
+        WINDOW=bottom,border-top ;;
+      LEFT)
+        WINDOW=left,border-right ;;
+      RIGHT)
+        WINDOW=right,border-left ;;
+    esac
+  fi
+
+  [[ -n "$RATIO" ]] && WINDOW+=",$RATIO" || WINDOW+=,65%
+  [[ -z "$NOWRAP" ]] && WINDOW+=,wrap
+  [[ -n "$FOLLOW" ]] && WINDOW+=,follow
+
+  COMMAND+=(--preview-window="$WINDOW")
+
+  for func in "${!BINDS[@]}"; do
+    local key hook call cmd
+
+    key="${BINDS[$func]}"
+
+    hook="${HOOKS[$func]}"
+    hook="${hook:-${CALLS[$func]}}"
+    hook="${hook:-${HOOKS[default]}}"
+
+    read -r call < <(eval printf -- '"${CALLS[$hook]}"' "$func")
+
+    read -r cmd  < <(printf -- '--bind=%s:%s' "$key" "$call")
+
+    COMMAND+=("$cmd")
+  done
+
+  [[ -n "$EXTRA" ]] && COMMAND+=("$EXTRA")
+
+  [[ -n "$DEBUG" ]] ; echo "${COMMAND[@]}" > "$HOME/.menu_debug"
+
+  init
+  list | "${COMMAND[@]}"
+}
+
+function forward_env() {
+  while read var; do
+    local name value
+    IFS='=' read -r name value <<< "$var"
+    echo Setting $name=$value >> /tmp/menu
+    tmux setenv -t menu "$name" "$value"
+  done < <(env | grep '^MENU_')
+}
+
+function remove_env() {
+  while read var; do
+    local name
+    IFS='=' read -r name _ <<< "$var"
+    tmux setenv -t menu -r "$name"
+  done < <(tmux showenv -t menu | grep '^MENU_')
+}
+
+function dispatch() {
+  [[ $# -eq 0 ]] && exit 1
+  # if we are in a tmux menu session, proceed with the main function
+  if tty -s && [[ "$(tmux showenv TMUX_SESSION_NAME)" =~ menu$ ]]; then
+    main "$@"
+  # otherwise, we are in a non-interactive env and we need to setup
+  else
+    # seamless fzf input from script implementation with a fifo
+    if [[ "$1" == input ]]; then
+      local fifo="$(mktemp --dry-run --suffix "menu-$$-inputfifo")"
+
+      mkfifo "$fifo" && export MENU_INPUT_FIFO="$fifo"
+
+      forward_env
+
+      gui tmux open window:menu:@:menu menu input "$2" "$fifo"
+      cat < "$fifo" && rm "$fifo"
+    else
+      forward_env
+      exec gui tmux open window:menu:@:menu menu "$@"
+    fi
+  fi
+}
+
+dispatch "$@"

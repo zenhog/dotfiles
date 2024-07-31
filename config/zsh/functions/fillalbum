@@ -1,0 +1,11 @@
+
+dirname="$1"
+basename="$(basename "$dirname")"
+
+shift
+
+mkalbum "$dirname"
+
+for i in "$@"; do
+  mv -- "$i" "$dirname/$basename-`uuidgen`.jpg"
+done

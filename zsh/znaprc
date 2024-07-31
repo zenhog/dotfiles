@@ -1,0 +1,23 @@
+ZNAPDIR="$HOME/.local/share/znap"
+ZNAPSRC="$ZNAPDIR/znap.zsh"
+REPODIR="$ZNAPDIR/repos"
+
+[[ -r "$ZNAPSRC" ]] ||
+    git clone --depth 1 -- https://github.com/marlonrichert/zsh-snap.git \
+      "$ZNAPDIR"
+
+source "$ZNAPSRC"
+
+zstyle ':znap:*' repos-dir "$REPODIR"
+
+znap source romkatv/powerlevel10k
+znap install sainnhe/zsh-completions
+znap source Aloxaf/fzf-tab
+znap source hchbaw/zce.zsh
+znap source zdharma-continuum/fast-syntax-highlighting
+znap source joshskidmore/zsh-fzf-history-search # to replace with my own fzf
+#znap source urbainvaes/fzf-marks # to replace with gui search
+
+znap source asdf-vm/asdf asdf.sh
+
+zle -N zce && bindkey "^@" zce

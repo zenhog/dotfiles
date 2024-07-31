@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+read -r PROFILE < <(nmcli -t connection show --active)
+read -r TYPE < <(awk -F: '{print $3}' <<< "$PROFILE")
+
+function text() {
+    local connection
+    read -r connection < <(awk -F: '{print $1}' <<< "$PROFILE")
+
+    [[ "$TYPE" =~ (wireless|ethernet)$ ]] || unset connection
+
+    printf "%s" "$connection"
+}
+
+function icon() {
+    local icon
+    local unknown=󱕆
+    local wireless=󰖩
+    local ethernet=󰀂
+
+    case "$TYPE" in
+        *wireless) icon="$wireless";;
+        *ethernet) icon="$ethernet";;
+        *) icon="$unknown";;
+    esac
+
+    printf "%s" "$icon"
+}

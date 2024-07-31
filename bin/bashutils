@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+function quiet() {
+  "$@" 2>/dev/null
+}
+
+function silent() {
+  "$@" >/dev/null 2>&1
+}
+
+function perror() {
+  "$@" >/dev/null
+}
+
+function verbose() {
+  sepline
+  printf '$ %s\n' "$BASH_COMMAND"
+  "$@"
+}
+
+function confirm() {
+  local answer
+
+  sepline
+
+  printf '$ %s' "$BASH_COMMAND" > /dev/tty
+  IFS= read -r answer < /dev/tty
+
+  [[ -n "$answer" ]] || exit
+
+  "$@"
+}
+
+function debug() {
+  trap verbose DEBUG
+  "$@"
+}
+
+function dispatch() {
+  if [[ $# -eq 0 ]]; then
+    main
+  else
+    "$@"
+  fi
+}
+
+function sepline() {
+  local columns="${FZF_PREVIEW_COLUMNS}"
+  [[ -z "$columns" ]] && read -r _ columns < <(stty size)
+
+  local text="$1"
+ 
+  local middle="$(($columns - ${#text}))"
+
+  local d=$(((columns - ${#text})/2))
+  local r=$(((columns - ${#text})%2))
+
+  for _ in $(seq 1 $d); do
+    printf -- ─
+  done
+
+  printf "%s" "$text"
+
+  for _ in $(seq 1 $((d + r))); do
+    printf -- ─
+  done
+
+  echo
+}

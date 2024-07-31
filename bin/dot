@@ -1,0 +1,626 @@
+#!/usr/bin/env bash
+
+GITURL=https://github.com/zenhog/dotfiles
+
+BASEDIR="$HOME/.dotfiles"
+
+BRANCHES=(master public private system)
+
+function quiet() {
+  "$@" 2>/dev/null
+}
+
+function silent() {
+  "$@" &>/dev/null
+}
+
+function verbose() {
+  echo '======================================================================='
+  echo "$*"
+  echo '======================================================================='
+  eval "$*"
+}
+
+function clone() (
+  set -e
+
+  local dir="${1?}" url="${2?}" branch="${3?}"
+
+  local cmd=(git clone --single-branch --branch="$branch" "$url" "$dir")
+
+  cd "$dir" 2>/dev/null || "${cmd[@]}"
+
+  cd "$dir"
+
+  if [[ "$(git remote get-url origin)" != "$url" ||
+    "$(git branch --show-current)" != "$branch" ]]
+  then
+    backup "$dir" && "${cmd[@]}"
+  fi
+)
+
+function init() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  clone "$dir" "$GITURL" "$branch" && decrypt "$branch"
+}
+
+function manifest_pull() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    find "${dir:?manifest dir null}" -exec rm -rf {}/files \;
+
+    opts=(
+      --verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --files-from="$f"
+      --delete
+    )
+
+    if [[ -r "$dir/ignore" ]]; then
+      opts+=(--exclude-from="$dir/ignore")
+    fi
+
+    sudo rsync "${opts[@]}" / "$dir/files"
+    sudo chown -R "$USER:$USER" "$dir/files"
+  done
+}
+
+function update() (
+  set -e
+
+  local branch="${1?}"
+  manifest_pull "$branch"
+  encrypt "$branch"
+  commit "$branch"
+  cdgit "$branch" push
+)
+
+function cdgit() (
+  local branch="${1?}"
+
+  cd "$BASEDIR/$branch" && git "${@:2}"
+)
+
+function status() {
+  local branch="${1?}"
+
+  cdgit "$branch" status
+}
+
+function commit() (
+  local branch="${1?}"
+
+  set -e
+
+  cdgit "$branch" add --all .
+  cdgit "$branch" commit -m \
+    "autocommit of $(date "+%F") at $(date "+%T") on $(hostname)"
+)
+
+function linktarget() {
+  local target="$1"
+  local link="$2"
+
+  mkdir -p "$(dirname "$link")"
+
+  readlink "$link" || backup "$link"
+
+  [[ "$(readlink "$link")" == "$target" ]] && return
+
+  ln -T -svf -- "$target" "$link"
+}
+
+function link() {
+  local branch="${1?}"
+
+  local hints
+
+  readarray -t hints < <(find "$BASEDIR/$branch" \
+    -name '.linkdir' -or -name '.linkfiles')
+
+  for hint in "${hints[@]}"; do
+    local prefix type link target dir
+
+    # containing directory
+    read -r dir < <(dirname "$hint")
+
+    # compute the desired prefix
+    read -r prefix < "$hint"
+
+    read -r type < <(basename "$hint")
+
+    case "$type" in
+      .linkdir)
+        eval "prefix=${prefix:-${HOME}/.}"
+        link="${prefix}${dir}"
+        target="$BASEDIR/$branch/$dir"
+        linktarget "$target" "$link"
+        ;;
+      .linkfiles)
+        eval prefix="${prefix:-${HOME}/.${dir}/}"
+        local files
+        readarray -t files < <(cd "$dir" && find * -type f -or -type l)
+
+        for file in "${files[@]}"; do
+          link="${prefix}${file}"
+
+          target="$BASEDIR/$branch/$dir/$file"
+
+          linktarget "$target" "$link"
+        done
+        ;;
+    esac
+
+  done
+}
+
+function manifest_push() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    opts=(
+      --verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --backup-dir=/.backup
+    )
+
+    (cd "$dir" && sudo rsync "${opts[@]}" files /)
+  done
+}
+
+function install() (
+  set -e
+  local branch="${1?}"
+
+  init "$branch"
+  link "$branch"
+  manifest_push "$branch"
+)
+
+function enc() {
+  gpg -q --yes --pinentry-mode=loopback --symmetric \
+    --passphrase-file=<(passphrase) "$@"
+}
+
+function dec() {
+  gpg -q --yes --pinentry-mode=loopback --decrypt \
+    --passphrase-file=<(passphrase) "$@"
+}
+
+function tar_format() {
+  local base="$(basename "$TAR_FILENAME")"
+  local type="${base##*.}"
+  echo '====================================================='
+  #echo "$TAR_FILETYPE $TAR_MODE $TAR_FILENAME"
+  echo "$TAR_FILENAME"
+  echo '-----------------------------------------------------'
+  cat -v
+}
+
+function path() {
+  local path dir base
+
+  [[ -z "$1" ]] && return
+
+  read -r path < <(realpath -sm "$1")
+  read -r dir  < <(dirname "$path")
+  read -r base < <(basename "$path")
+
+  silent realpath -se "$dir" || return
+
+  echo "$path" "$dir" "$base"
+}
+
+function tar_create() {
+  local src dst
+
+  read -r -a src < <(path "$1")
+  read -r -a dst < <(path "$2")
+
+  local opts=(
+    --create
+    --gzip
+    --file "${dst:=/dev/stdout}"
+    --exclude-vcs-ignores
+    --sort=name
+  )
+
+  tar "${opts[@]}" -C "${src[1]}" "${src[2]}"
+}
+
+function tar_extract() {
+  local src opts
+
+  read -r -a src < <(path "$1")
+
+  opts=(
+    --extract
+    --gzip
+    --keep-newer-files
+    --preserve-permissions
+    --no-same-owner
+    --file "${src:-/dev/stdin}"
+  )
+
+  opts+=("${extra_opts[@]}")
+
+  local errors=(
+    -e 'is newer or samge age'
+    -e 'Unexpected inconsistency when making directory'
+    -e 'Exiting with failure status due to previous errors'
+  )
+
+  tar "${opts[@]}" -C "${src[1]:-$PWD}" 2> >(grep -v "${errors[@]}")
+}
+
+function tar_dump() {
+  local extra_opts=(--to-command="${BASH_SOURCE[0]} tar_format")
+  tar_extract "$@"
+}
+
+function tar_list() {
+  local src
+
+  read -r -a src < <(path "$1")
+
+  local opts=(
+    --list
+    --gzip
+    --verbose
+    --file "${src:-/dev/stdin}"
+  )
+ 
+  local lines
+  readarray -t lines < <(tar "${opts[@]}")
+
+  for line in "${lines[@]}"; do
+    local mode ownership size date time path
+    read -r mode ownership size date time path <<< "$line"
+    echo "$mode $size $path"
+  done
+}
+
+function tar_cat() {
+  if [[ $# -ne 0 ]]; then
+    tar_list "$@"
+    tar_dump "$@"
+    return
+  fi
+
+  local tmp="$(mktemp)"
+
+  cat > "$tmp"
+
+  tar_list < "$tmp"
+  tar_dump < "$tmp"
+
+  rm -f "$tmp"
+}
+
+function tar_preview() {
+  tar_create "$@" | tar_cat
+}
+
+function tar_compare() {
+  diff <(tar_cat "$1") <(tar_cat "$2")
+}
+
+function tar_diff() {
+  local dirsrc="$(path "${1?}")"
+  local tarsrc="$dirsrc.tar.gz"
+  diff <(quiet tar_cat "$tarsrc") <(quiet tar_preview "$dirsrc")
+}
+
+function gpgtar_enc() {
+  if ! gpgtar_diff "$1"; then
+    tar_create "$1" | enc --output "$1.tar.gz.gpg" -
+  fi
+}
+
+function gpgtar_dec() {
+  dec --output - "$1" | tar_extract
+}
+
+function gpgtar_diff() {
+  local dirsrc="${1?}"
+  local tarsrc="$dirsrc.tar.gz.gpg"
+
+  silent diff <(dec --output - "$tarsrc" | tar_cat) <(tar_preview "$dirsrc")
+}
+
+function gpgtar_cat() {
+  dec --output - "$1" | tar_cat
+}
+
+function encrypt() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  [[ -d "$dir" && -x "$dir" ]]
+
+  passphrase >/dev/null
+
+  local secrets archives
+
+  readarray -t secrets < <(find "$dir" -name '.gitsecret')
+
+  for secret in "${secrets[@]}"; do
+    gpgtar_enc "$(dirname "$secret")"
+  done
+
+  # remove archives whose associated secret folder was deleted
+  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+
+  for archive in "${archives[@]}"; do
+    [[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || rm -vf "$archive"
+  done
+}
+
+function decrypt() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  local archives
+
+  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+
+  [[ ${#archives[@]} -eq 0 ]] && return
+
+  passphrase >/dev/null
+
+  for archive in "${archives[@]}"; do
+    gpgtar_dec "$archive"
+  done
+}
+
+function backup() {
+  local rand
+  read -r rand < \
+    <(tr -dc '[:alnum:]' < /dev/urandom | dd bs=1 count=6 2>/dev/null)
+  [[ -e "$1" ]] && mv -v -- "$1" "$1.old.$rand"
+}
+
+function checkbin() {
+  for bin in "$@"; do
+    which "$bin" >/dev/null || exit 1
+  done
+}
+
+function all() {
+  local mod="${1?}"
+
+  for branch in "${BRANCHES[@]}"; do
+    printf -- '-%.0s' $(seq 1 "$COLUMNS")
+    echo "On branch $branch"
+    "$mod" "$branch" "${@:2}"
+  done
+}
+
+function passphrase() {
+  declare -g PASSPHRASE
+
+  local token="$HOME/.password-store/tokens/main.gpg"
+
+  if [[ -z "$PASSPHRASE" ]]; then
+    read -r PASSPHRASE < <(gpg --batch --pinentry-mode=loopback -qd "$token")
+
+    [[ -z "$PASSPHRASE" ]] && read -r -p 'Passphrase: ' PASSPHRASE
+  fi
+
+  [[ -n "$PASSPHRASE" ]] && echo "$PASSPHRASE"
+}
+
+function pull() (
+  set -e
+
+  local repo="${1?}"
+  cdgit "$repo" fetch
+  cdgit "$repo" rebase --autostash
+)
+
+function push() (
+  set -e
+  local repo="${1?}"
+
+  cdgit "$repo" fetch
+
+  commit "$repo"
+
+  pull
+
+  cdgit push
+)
+
+function sync() (
+  set -e
+
+  local repo="${1?}"
+
+  cdgit "$repo" fetch
+
+  local mods
+
+  readarray -t mods < <(cdgit "$repo" status --porcelain=v1)
+
+  if [[ ${#mods[@]} -gt 0 ]]; then
+    push
+  else
+    pull
+  fi
+)
+
+function rebranch() (
+  local repo="${1?}"
+  local branch
+
+  set -e
+
+  read -r branch < <(cdgit "$repo" branch --show-current)
+
+  [[ "$branch" == "$repo" ]]
+
+  cdgit "$repo" checkout --orphan tmp
+  commit "$repo"
+
+  cdgit "$repo" branch -D "$branch"
+  cdgit "$repo" branch --move tmp "$branch"
+
+  cdgit "$repo" push --set-upstream origin "$branch" --force
+)
+
+function cleanup() (
+  local branch="${1?}"
+
+  cd "$BASEDIR/$branch"
+
+  rm -rvf .git/refs/original
+
+  cdgit "$branch" reflog expire --expire=now --all
+  cdgit "$branch" gc --prune=now
+  cdgit "$branch" gc --aggressive --prune=now
+)
+
+function mklive() (
+  local dir="$HOME/.voidlive"
+  local url=https://github.com/void-linux/void-mklive
+  set -e
+
+  local files=(
+    /usr/local/bin/
+    /etc/packages/
+
+    /etc/runit/runsvdir/main/agetty-ttyS0/
+    /etc/runit/runsvdir/main/fbterm-tty2/
+    /etc/runit/runsvdir/main/fbterm-tty3/
+    /etc/runit/runsvdir/main/fbterm-tty4/
+    /etc/runit/runsvdir/main/agetty-tty5/
+    /etc/runit/runsvdir/main/udevd/
+    /etc/runit/runsvdir/main/dbus/
+    /etc/runit/runsvdir/main/networkmanager/
+    /etc/runit/runsvdir/main/avahi-daemon/
+    /etc/runit/runsvdir/main/uuidd/
+    /etc/runit/runsvdir/main/sshd/
+    /etc/runit/runsvdir/main/openntpd/
+    /etc/runit/runsvdir/main/dnscrypt-proxy/
+
+    /etc/NetworkManager/NetworkManager.conf
+    /etc/NetworkManager/system-connections/
+
+    /etc/rc.conf
+    /etc/rc.local
+
+    /etc/resolv.conf
+    /etc/resolvconf.conf
+
+    /etc/acpi/custom.sh
+    /etc/acpi/events/custom
+
+    /etc/sysctl.conf
+
+    /etc/modprobe.d/
+    /etc/modules-load.d/
+
+    /etc/dnscrypt-proxy.toml
+    /etc/forwarding-rules.txt
+
+    /usr/share/kbd/keymaps/i386/qwerty/us-nocaps.map.gz
+
+    /root/.dotfiles
+
+    /usr/share/fonts/NerdFonts/ttf/VictorMonoNerdFontMono-Regular.ttf
+    /usr/share/fonts/NerdFonts/ttf/VictorMonoNerdFontMono-Bold.ttf
+    /usr/share/fonts/NerdFonts/ttf/VictorMonoNerdFontMono-Italic.ttf
+    /usr/share/fonts/NerdFonts/ttf/VictorMonoNerdFontMono-BoldItalic.ttf
+
+    "$@"
+  )
+
+  [[ -d "$dir" ]] || git clone "$url" "$dir"
+
+  cd "$dir" || return
+
+  local packages args=(
+    console=tty0
+    console=ttyS0,115200n8
+    net.ifnames=0
+    main
+  )
+
+  readarray -t packages < <(grep -v -h '^$' /etc/packages/live/* | sort -u)
+
+  xbps-install -n "${packages[@]}"
+
+  local opts=(
+    --recursive
+    --archive
+    --relative
+    --links
+    --copy-links
+    --perms
+    --exclude=supervise
+  )
+
+  local tmpdir="$(mktemp -d)"
+
+  local cmd=(
+    rsync "${opts[@]}"
+    '--files-from=<(printf "%s\n" '"${files[@]}"')'
+    /
+    "$tmpdir"
+  )
+
+  sudo bash -c "${cmd[*]}"
+  sudo bash -c "echo live > $tmpdir/etc/hostname"
+
+  find /etc/live -type f \
+    -exec sudo bash -c "cp -rv --preserve=mode {} $tmpdir/etc/" \;
+
+  # build temp file with root:root and permissions
+
+  sudo ./mklive.sh -K \
+    -C "${args[*]}" \
+    -p "${packages[*]}" \
+    -T "Custom VoidLinux Live Image" \
+    -i gzip -s gzip \
+    -I "$tmpdir" \
+    -o $HOME/custom-voidlinux-liveimg.iso
+
+  sudo rm -rf "$tmpdir"
+)
+
+function main() {
+  checkbin git gpg rsync && mkdir -p "$BASEDIR"
+
+  "$@"
+}
+
+main "$@"

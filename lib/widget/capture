@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+REGEX='/Default/s/.*ID: (.*), Name.*/\1/p'
+
+read -r ID < <(pulsemixer --list-sources | sed -rn "$REGEX")
+
+KEYS[prev]='C-M:h'
+function prev() {
+  pulsemixer --id "$ID" --change-volume -5 --max-volume 100
+}
+
+KEYS[next]='C-M:l'
+function next() {
+  pulsemixer --id "$ID" --change-volume +5 --max-volume 100
+}
+
+KEYS[toggle]='C-M:i'
+function toggle() {
+  pulsemixer --id "$ID" --toggle-mute
+}
+
+function run() {
+  menu pulse
+}
+
+function text() {
+  local volume
+  read -r volume < <(pulsemixer --id "$ID" --get-volume | awk '{print $1}')
+  echo -n $volume
+}
+
+function icon() {
+  local ok=󰍬
+  local ko=󰍭
+
+  read -r mute < <(pulsemixer --id "$ID" --get-mute)
+  case "$mute" in
+    0) echo -n "$ok";;
+    1) echo -n "$ko";;
+  esac
+}

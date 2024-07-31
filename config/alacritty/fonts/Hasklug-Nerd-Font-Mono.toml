@@ -1,0 +1,15 @@
+[font.bold]
+family = "Hasklug Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "Hasklug Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "Hasklug Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "Hasklug Nerd Font Mono"
+style = "Regular"

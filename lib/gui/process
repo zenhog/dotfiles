@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+KEY=k
+MOD='S-M'
+ICON=
+
+#POSITION=RIGHT
+#RATIO=40%
+HORIZONTAL=1
+
+function view() {
+  local pid
+  read -r pid _ <<< "$1"
+
+  local fmt=(
+    pid ppid sid zone
+    pcpu pmem
+    user group euser egroup suser sgroup
+    fsuser fsgroup
+    longtname
+    lxc lwp
+    mntns netns pidns userns
+    sig size slice stat state stime
+    args
+  )
+
+  local buf
+
+  read -r buf < <(ps -p "$pid" -o "$(IFS=,; echo "${fmt[*]/_/%}")" | tail -n1)
+  eval local "${fmt[@]}"
+  eval read -r "${fmt[@]}" <<< "$buf"
+  for name in "${fmt[@]}"; do
+    echo "$name${iSEP}$(eval "echo \$$name")"
+  done | column -t -s "$iSEP"
+}
+
+function list() {
+  LIBPROC_HIDE_KERNEL=1 ps axo pid,ppid,pidns,userns,user,pmem,cmd --sort pmem |
+    tail -n +2 | tac
+}
+
+# kill
+# htop-style

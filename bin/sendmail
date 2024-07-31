@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+opts=(
+  --host=smtp.mailbox.org
+  --port=465
+  --protocol=smtp
+  --auth=on
+  --tls=on
+  --tls-starttls=off
+  --tls-trust-file=/etc/ssl/certs/ca-certificates.crt
+  --logfile=-
+  --from="$EMAIL"
+  --user="$EMAIL"
+  --passwordeval="pass show www/mail/mailbox.org/password"
+)
+
+msmtp "${opts[@]}" "$@"

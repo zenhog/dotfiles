@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+
+shopt -s nullglob
+shopt -s extglob
+
+export SHELL="$(which bash)"
+export iSEP=$'\x01' oSEP=' ➡ '
+
+export MODULE="$1"
+export MODULES_DIR="$HOME/.lib/gui"
+
+source "$HOME/.zshenv"
+
+declare -A -x BINDS
+declare -A -x DESCS
+declare -A -x GDESCS
+declare -A -x HOOKS=([default]=qclear)
+declare -A -x CALLS=(
+  [accept]='execute-silent(%s {} {q})+accept'
+  [qclear]='execute-silent(%s {} {q})+reload-sync(list)+clear-query'
+  [sclear]='execute(%s {} {q})+clear-screen+reload-sync(list)'
+  [preview]='change-preview(%s {} {q})'
+)
+
+function notify() {
+  notify-send -t 5000 -a menu "$MODULE" "$@"
+  widget push timeout
+}
+
+function erronly() {
+  "$@" >/dev/null
+}
+
+function quiet() {
+  "$@" 2>/dev/null
+}
+
+function silent() {
+  "$@" >/dev/null 2>&1
+}
+
+function sepline() {
+  local columns="${FZF_PREVIEW_COLUMNS}"
+  [[ -z "$columns" ]] && read -r _ columns < <(stty size)
+
+  local text="$1"
+ 
+  local middle="$(($columns - ${#text}))"
+
+  local d=$(((columns - ${#text})/2))
+  local r=$(((columns - ${#text})%2))
+
+  for _ in $(seq 1 $d); do
+    printf -- ─
+  done
+
+  printf "%s" "$text"
+
+  for _ in $(seq 1 $((d + r))); do
+    printf -- ─
+  done
+
+  echo
+}
+
+function get_opt() {
+  quiet tmux show -sv "@menu-${MODULE}-$1"
+}
+
+function set_opt() {
+  quiet tmux set -s "@menu-${MODULE}-$1" "$2"
+}
+
+function unset_opt() {
+  quiet tmux set -su "@menu-${MODULE}-$1"
+}
+
+function list_opt() {
+  quiet tmux show -s | grep "^@menu-${MODULE}"
+}
+
+function save_opt() {
+  local val
+
+  read -r val < <(get_opt "$1")
+
+  if [[ -n "$val" ]]; then
+    set_opt "$1-saved" "$val"
+  fi
+}
+
+function restore_opt() {
+  local val
+
+  read -r val < <(get_opt "$1-saved")
+
+  if [[ -n "$val" ]]; then
+    set_opt "$1" "$val"
+    unset_opt "$1-saved"
+  fi
+}
+
+function toggle_opt() {
+  local opt="$1"
+  local val="$(get_opt "$opt")"
+
+  val="${val:-0}"
+
+  case "$val" in
+    0) set_opt "$opt" 1 ;;
+    *) set_opt "$opt" 0 ;;
+  esac
+}
+
+function rotate_opt() {
+  local val="$(get_opt "$1")"
+  local mod="$(get_opt "$1-mod")"
+  set_opt "$1" $((++val % mod))
+}
+
+return 0 2>/dev/null
+
+case $# in
+  0) # list modules
+    readarray -t modules < <(realpath $MODULES_DIR/*)
+    readarray -t modules < <(basename -a "${modules[@]}")
+    for mod in "${modules[@]}"; do
+      unset ICON MOD KEY
+      source "$MODULES_DIR/$mod"
+      printf "%s:%s:%s:%s\n" "$ICON" "$mod" "$MOD" "$KEY"
+    done
+    ;;
+  1) # list module functions
+    source "$MODULES_DIR/$1" || exit 1
+    declare -F | awk '{print $3}'
+    ;;
+  *) # call module functions
+    source "$MODULES_DIR/$1" || exit 1
+    [[ "$2" == inspect ]] && declare -f "$3" || "${@:2}"
+    ;;
+esac

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+PERIOD=10
+
+KEYS[prev]='C-M:j'
+function prev() {
+  pulsemixer --change-volume -5 --max-volume 100
+}
+
+KEYS[next]='C-M:k'
+function next() {
+  pulsemixer --change-volume +5 --max-volume 100
+}
+
+KEYS[toggle]='C-M:o'
+function toggle() {
+  pulsemixer --toggle-mute
+}
+
+function mute() {
+  pulsemixer --mute
+}
+
+function unmute() {
+  pulsemixer --unmute
+}
+
+function run() {
+  menu pulse
+}
+
+function text() {
+  local volume
+  read -r volume < <(pulsemixer --get-volume | awk '{print $1}')
+  echo -n $volume
+}
+
+function icon() {
+  local ok=󰕾
+  local ko=󰖁
+  read -r mute < <(pulsemixer --get-mute)
+  case "$mute" in
+    0) echo -n "$ok";;
+    1) echo -n "$ko";;
+  esac
+}

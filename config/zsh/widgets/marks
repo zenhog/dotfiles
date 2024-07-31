@@ -1,0 +1,7 @@
+local answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |
+  fzf --bind 'enter:execute-silent(echo {})+accept')
+
+cd "$(realpath "$HOME/.marks/$answer/")"
+
+preexec
+zle reset-prompt

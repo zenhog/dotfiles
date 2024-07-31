@@ -1,0 +1,15 @@
+[font.bold]
+family = "GoMono Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "GoMono Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "GoMono Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "GoMono Nerd Font Mono"
+style = "Regular"

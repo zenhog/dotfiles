@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo tab-clone --bg > "$QUTE_FIFO"
+echo tab-close > "$QUTE_FIFO"
+echo 'fake-key <Tab>' > "$QUTE_FIFO"
+echo 'fake-key <Return>' > "$QUTE_FIFO"

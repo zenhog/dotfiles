@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+mbsync -a && {
+  notmuch new 2>/dev/null
+  notmuch tag +inbox +unread -new -- tag:new
+  notmuch tag -new -inbox +sent -- \
+    from:"$(gui pass get www/mail/mailbox.org username)"
+  widget mail timeout
+}
