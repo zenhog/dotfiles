@@ -1,0 +1,7 @@
+#!/bin/sh
+
+username=${PWD##*-}
+homedir=$(getent passwd ${username} | awk -F: '{print $6}')
+
+sv force-stop ${homedir}/.usv/*
+sv shutdown ${homedir}/.usv/*

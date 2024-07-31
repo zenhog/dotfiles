@@ -1,0 +1,19 @@
+#!/bin/sh
+
+tty="${1}"
+
+if [ x"$tty" = x ]; then
+    tty=`tty`
+    tty=`basename $tty`
+fi
+
+dist=$(lsb_release -d | sed -nr 's/^.*:[ \t]*(.*)$/\1/p')
+arch=$(uname -m)
+kern=$(uname -r)
+host=$(uname -n)
+
+printf "%s %s %s (%s) %s %s\n" "$dist" "$kern" "$arch" "$host"
+printf "Framebuffer terminal (%s) %s\n\n" "$tty" "$(date '+%X, %x')"
+printf ""
+
+exec /bin/login -p

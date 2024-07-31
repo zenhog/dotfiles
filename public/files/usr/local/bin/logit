@@ -1,0 +1,35 @@
+#!/bin/bash
+
+logdirbase=${1:-/var/log/runit}
+
+svlogdargs=('-tt')
+
+IFS=/ read -ra parts <<< "$PWD"
+len=${#parts[@]}
+
+if ((len < 3)); then
+	echo "failed to determine service name from '$PWD'" >&2
+	exit 1
+fi
+
+# Sanity check the last element (should be 'log')
+index=$((len - 1))
+log=${parts[index]}
+if [[ $log != 'log' ]]; then
+	echo "must be run from a 'log' directory, found: '$log' ($PWD)" >&2
+	exit 1
+fi
+
+# Sanity check the service name
+index=$((len - 2))
+servicename=${parts[index]}
+if [[ -z $servicename ]]; then
+	echo 'failed to extract service name' >&2
+	echo "index $index, parts '${parts[*]}'" >&2
+	exit 1
+fi
+
+logdir=$logdirbase/$servicename
+
+mkdir -p "$logdir"
+exec svlogd "${svlogdargs[@]}" "$logdir"

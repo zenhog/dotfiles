@@ -1,0 +1,15 @@
+#!/bin/bash
+
+read -r token
+
+preset=/usr/libexec/gpg-preset-passphrase
+
+gpgconf --launch gpg-agent
+
+readarray -t keygrips < <(cd "$HOME/.gnupg/private-keys-v1.d" && find *)
+
+for grip in "${keygrips[@]%.key}"; do
+  "$preset" --preset "$grip" <<< "$token"
+done
+
+exit 0

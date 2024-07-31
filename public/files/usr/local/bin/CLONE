@@ -1,0 +1,290 @@
+#!/bin/bash
+
+BOOTLABEL=EFIBOOT
+ROOTLABEL=ROOTVOL
+
+MOUNT_OPTS="defaults,rw,noatime"
+BTRFS_OPTS="$MOUNT_OPTS,compress=zstd,autodefrag,commit=120"
+
+SRC_HOST=https://raw.githubusercontent.com
+SRC_PATH=void-linux/void-packages/master/etc/xbps.d/repos-remote.conf
+
+SRC_URL="$SRC_HOST/$SRC_PATH"
+
+URL=https://raw.githubusercontent.com/zenhog/dotfiles/minimal/bin/dot
+
+BASE_PACKAGES=(
+    base-system btrfs-progs grub grub-x86_64-efi ansible git zsh tmux xz
+    curl wget void-repo-nonfree gnupg mkpasswd pass tar sudo rsync openssh
+)
+
+function verbose() {
+    echo =======================================================================
+    echo "$@"
+    echo =======================================================================
+    "$@"
+}
+
+efi() (
+    [[ -d /sys/firmware/efi ]]
+)
+
+prompt() {
+    eval "[[ -n \$$1 ]]" && return 0
+
+    echo -n "$1 [$2]: "
+    eval "read -r $1"
+
+    eval "$1=\${$1:-$2}"
+    eval "[[ -n \$$1 ]]" || exit 1
+}
+
+prompts() {
+    prompt NEWUSER
+    prompt MACNAME
+    prompt TARGETS
+    prompt TIMEZONE Europe/Paris
+    prompt ARCH x86_64
+
+    read -a TARGETS <<< "$TARGETS"
+}
+
+partition() (
+    set -e
+    for t in "$@"; do
+        local offset=$(($(blockdev --getsz "$t") - 2048))
+
+        dd bs=512 count=2048 if=/dev/zero of="$t"
+        dd bs=512 count=2048 if=/dev/zero of="$t" seek="$offset"
+
+        parted "$t" mklabel gpt
+
+        parted "$t" mkpart primary   2MiB  10MiB
+        parted "$t" mkpart primary  10MiB 138MiB
+        parted "$t" mkpart primary 138MiB   100%
+
+        parted "$t" set 1 bios_grub on
+        parted "$t" set 2 esp       on
+
+        parted "$t" name 1 GRUB
+        parted "$t" name 2 ESP
+        parted "$t" name 3 BTRFS
+    done
+)
+
+format() (
+    set -e
+
+    [[ $# -lt 2 ]]
+
+    local efipart="$1"
+    local btrfsparts=("${@:2}")
+
+    mkfs.vfat  -n "$BOOTLABEL" -F 32 "$efipart"
+    mkfs.btrfs -L "$ROOTLABEL" -f "${btrfsparts[@]}"
+
+    mkdir -p "/newroot"
+    mountpoint -q /newroot && umount -R /newroot
+
+    mount -o "$BTRFS_OPTS" "${btrfsparts[0]}" /newroot
+
+    btrfs subvolume create /newroot/main
+    btrfs subvolume create /newroot/home
+    btrfs subvolume create /newroot/snapshots
+    umount -R /newroot
+)
+
+mount() (
+    local efipart="$1"
+    local diskref="$2"
+
+    set -e
+
+    mkdir -p "/newroot"
+    mountpoint -q /newroot && umount -R /newroot
+
+    mount -o "$BTRFS_OPTS,subvol=main" "$diskref" /newroot
+
+    mkdir -p /newroot/home
+    mkdir -p /newroot/.snapshots
+    mkdir -p /newroot/.volumes
+    mkdir -p /newroot/boot/grub/efi
+
+    mount -o "$BTRFS_OPTS,subvol=home"      "$diskref" /newroot/home
+    mount -o "$BTRFS_OPTS,subvol=snapshots" "$diskref" /newroot/.snapshots
+    mount -o "$MOUNT_OPTS"                  "$diskref" /newroot/.volumes
+    mount -o "$MOUNT_OPTS"                  "$efipart" /newroot/boot/grub/efi
+
+    for d in dev proc sys; do
+        mkdir -p /newroot/$d
+        mount --rbind /$d /newroot/$d
+        mount --make-rslave /newroot/$d
+    done
+
+    mkdir -p /newroot/etc
+    cp -L /etc/resolv.conf /newroot/etc
+)
+
+rootfs() (
+    local repo rootfs
+
+    set -e
+
+    read -r repo < <(curl -s "$SRC_URL" | awk -F= '/current$/{print $2}' |
+        sed -rn 's|current|live/current/|p')
+
+    read -r rootfs < <(curl -s "$REPO" | grep -i "$ARCH-rootfs" |
+        sed -rn 's:<[^>]*>(.*)<[^>]*>:\1:p' | awk '{print $1}')
+
+    [[ -f "$HOME/$rootfs" ]] || curl "$repo/$rootfs" > "$HOME/$rootfs"
+
+    verbose tar xvf "$ROOTFS" -C /newroot
+
+    chroot /newroot xbps-install -Syu xbps
+    chroot /newroot xbps-install -yu "${BASE_PACKAGES[@]}"
+    chroot /newroot xbps-install -yu ncurses-base
+)
+
+packages() (
+    set -e
+
+    local packages
+
+    readarray -t packages < <(find /etc/packages/ -type f)
+    readarray -t packages < <(grep -v -h '^$' "${packages[@]}")
+
+    verbose echo "Installing ${#packages[@]} packages: ${packages[*]}"
+
+    chroot /newroot xbps-install -n "${packages[@]}"
+    chroot /newroot xbps-install -yu "${packages[@]}"
+)
+
+configure() (
+    set -e
+
+    echo "$MACNAME" > /newroot/etc/hostname
+
+    echo LANG=en_US.UTF-8  > /newroot/etc/locale.conf
+    echo en_US.UTF-8 UTF-8 > /newroot/etc/default/libc-locales
+
+    echo HARDWARECLOCK=UTC     > /newroot/etc/rc.conf
+    echo CGROUP_MODE=hybrid   >> /newroot/etc/rc.conf
+
+    chroot /newroot ln -svf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+    chroot /newroot xbps-reconfigure -f glibc-locales
+
+    chroot /newroot mkdir  -p /var/lib/libvirt/images
+    chroot /newroot chattr +C /var/lib/libvirt/images
+
+    local contents
+
+    contents=(
+        LABEL=$ROOTLABEL /              btrfs $BTRFS_OPTS,subvol=main 0 0
+        LABEL=$ROOTLABEL /home          btrfs $BTRFS_OPTS,subvol=home 0 0
+        LABEL=$BOOTLABEL /boot/grub/efi vfat  $MOUNT_OPTS 0 2
+        LABEL=$ROOTLABEL /.volumes      btrfs $BTRFS_OPTS 0 0
+        LABEL=$ROOTLABEL /.snapshots    btrfs $BTRFS_OPTS,subvol=snapshots 0 0
+        tmpfs            /tmp           tmpfs defaults,nosuid,nodev 0 0
+        #/.swapfile       none           swap  defaults 0 0
+    )
+    column -t < <(printf "%s %s %s %s %s %s\n" "${contents[@]}") \
+        > /newroot/etc/fstab
+
+    contents=(
+        "GRUB_CMDLINE_LINUX_DEFAULT=net.ifnames=0 main"
+        "GRUB_DISABLE_SUBMENU=y"
+        "GRUB_GFXMODE=640x480,800x600,1024x768,1280x1024,auto"
+        "GRUB_GFXPAYLOAD_LINUX=keep"
+    )
+
+    printf "%s\n" "${contents[@]}" > "/newroot/etc/default/grub"
+)
+
+bootloaders() (
+    if efi; then
+        chroot /newroot grub-install       \
+            --target=x86_64-efi            \
+            --efi-directory=/boot/grub/efi \
+            --boot-directory=/boot         \
+            --bootloader-id=GRUB
+    fi
+
+    for t in "$@"; do
+        chroot /newroot grub-install --target=i386-pc "$t"
+    done
+
+    chroot /newroot grub-mkconfig -o /boot/grub/grub.cfg
+    chroot /newroot xbps-reconfigure -fa
+)
+
+finalize() (
+    set -e
+
+    local cmd
+
+    read -r cmd < <(printf 'bash <(curl -s %s)' "$URL")
+
+    verbose chroot "/newroot" usermod -s /bin/zsh root
+    verbose chroot "/newroot" useradd -m -s /bin/zsh "$NEWUSER"
+
+    verbose cp -rv --preserve=mode /etc/Networkmanager /newroot/etc
+    verbose cp -rv --preserve=mode /etc/packages /newroot/etc
+
+    verbose chroot /newroot bash -c \
+        'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee visudo'
+
+    local contents=(
+        root:
+        $NEWUSER:
+    )
+
+    verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
+
+    verbose chroot /newroot /bin/bash -c "${cmd} install master"
+    verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c "${cmd} all install"
+
+    verbose chroot /newroot \
+        btrfs subvolume snapshot /.volumes/main /.snapshots/main@clone
+
+    umount -R /newroot
+)
+
+checktools() (
+    set -e
+    which curl >/dev/null
+)
+
+main() {
+    checktools
+    prompts
+
+    # /dev/sda3 /dev/sdb3 /dev/sdc3 ...
+    BTRFSPARTS=("${TARGETS[@]/%/3}")
+
+    # a single ref for the btrfs `raid`
+    DISKREF="${BTRFSPARTS[0]}"
+
+    # a single ref for the EFI partition
+    EFIPART="${DISKREF/3/2}"
+
+    verbose partition "${TARGETS[@]}"
+
+    verbose format "$EFIPART" "${BTRFSPARTS[@]}"
+
+    verbose mount "$EFIPART" "$DISKREF"
+
+    # fails if /newroot/** are not mounted
+    verbose rootfs
+    verbose packages
+    verbose configure
+
+    verbose bootloaders "${TARGETS[@]}"
+
+    verbose finalize
+}
+
+if [[ $# -eq 0 ]]; then
+    main
+else
+    "$@"
+fi

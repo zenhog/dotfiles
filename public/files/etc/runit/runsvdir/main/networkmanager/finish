@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#sv restart openvpn
+#sv restart tor

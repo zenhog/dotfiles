@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+export USER=$(getent passwd "$EARLYOOM_UID" | awk -F: '{print $1}')
+#export HOME=$(getent passwd "$EARLYOOM_UID" | awk -F: '{print $6}')
+#export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+
+su - "$USER" <<EOF
+
+notify-send -a menu -t 5000 OOM-Killer "$EARLYOOM_PID ($EARLYOOM_NAME)"
+
+EOF

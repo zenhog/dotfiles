@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+echo '>> Syncing repos and updating ...'
+
+xbps-install -uy xbps
+xbps-install -Syu
+
+echo '>> Done'
+echo '-------------------------------------------'
+
+#echo
+#echo '>> Fixing INSTALL hooks ...'
+#
+#rm /var/service/udevd             >/dev/null 2>&1
+#rm /var/service/agetty-tty{1..11} >/dev/null 2>&1
+#
+#ln -svf /etc/svd/udevd /var/service >/dev/null 2>&1
+#
+#echo '>> Done'
+#echo '-------------------------------------------'
+
+echo
+echo '>> Updating mlocate and xlocate databases ...'
+
+#cd /root
+updatedb
+xlocate -S
+
+echo '>> Done'
