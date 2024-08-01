@@ -118,9 +118,9 @@ function linktarget() {
 function link() {
   local branch="${1?}"
 
-  local hints
-
   local basedir="$BASEDIR/$branch"
+
+  local hints
 
   readarray -t hints < <(cd "$basedir" &&
     find * -name '.linkdir' -or -name '.linkfiles')
@@ -129,7 +129,7 @@ function link() {
     local prefix type link target dir basedir
 
     read -r dir < <(dirname "$hint")
-    read -r hint basedir type < <(path "$hint")
+    read -r hint bdir type < <(path "$hint")
 
     read -r prefix < "$hint"
 
@@ -137,17 +137,18 @@ function link() {
       .linkdir)
         eval "prefix=${prefix:-${HOME}/.}"
         link="${prefix}${dir}"
-        linktarget "$basedir" "$link"
+        linktarget "$bdir" "$link"
         ;;
       .linkfiles)
         eval prefix="${prefix:-${HOME}/.${dir}/}"
+
         local files
-        readarray -t files < <(cd "$basedir" && find * -type f -or -type l)
+        readarray -t files < <(cd "$bdir" && find * -type f -or -type l)
 
         for file in "${files[@]}"; do
           link="${prefix}${file}"
 
-          target="$basedir/$file"
+          target="$bdir/$file"
 
           linktarget "$target" "$link"
         done
