@@ -21,8 +21,6 @@ case "$THEME" in
     ;;
 esac
 
-export FZF_MARKS_KEEP_ORDER=1
-
 FZF_BASE_FLAGS=(
   "--color=$THEME"
 

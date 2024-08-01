@@ -14,23 +14,24 @@ function silent() {
   "$@" &>/dev/null
 }
 
-function clone() (
-  set -e
+function clone() {
 
   local dir="${1?}" url="${2?}" branch="${3?}"
 
   local cmd=(git clone --single-branch --branch="$branch" "$url" "$dir")
 
-  cd "$dir" 2>/dev/null || "${cmd[@]}"
+  (cd "$dir" 2>/dev/null || "${cmd[@]}")
 
-  cd "$dir"
+  (
+    cd "$dir" &&
 
-  if [[ "$(git remote get-url origin)" != "$url" ||
-    "$(git branch --show-current)" != "$branch" ]]
-  then
-    backup "$dir" && "${cmd[@]}"
-  fi
-)
+    if [[ "$(git remote get-url origin)" != "$url" ||
+      "$(git branch --show-current)" != "$branch" ]]
+    then
+      backup "$dir" && "${cmd[@]}"
+    fi
+  )
+}
 
 function init() {
   local branch="${1?}"
