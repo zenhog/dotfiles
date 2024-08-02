@@ -320,6 +320,9 @@ function mklive() {
     console=tty0
     console=ttyS0,115200n8
     net.ifnames=0
+    live.user="$USER"
+    live.autologin
+    live.shell=/bin/zsh
     live
   )
 
@@ -340,7 +343,7 @@ function mklive() {
 
   local tmpdir="$(mktemp -d)"
 
-  verbose sudo rsync "${opts[@]}" / "$tmpdir"
+  verbose sudo rsync "${opts[@]}" / "$HOME/.dotfiles" "$tmpdir"
 
   verbose sudo "$dir/mklive.sh" -K \
     -C "${args[*]}" \
