@@ -53,7 +53,7 @@ function manifest_pull() {
 
     read -r dir < <(dirname "$f")
 
-    find "${dir:?manifest dir null}" -exec rm -rf {}/files \;
+    find "${dir:?}" -exec rm -rf {}/files \;
 
     opts=(
       --verbose
@@ -329,11 +329,10 @@ function mklive() {
   verbose xbps-install --yes --dry-run "${packages[@]}"
 
   local opts=(
+    --verbose
     --recursive
-    --archive
     --relative
     --links
-    --copy-links
     --perms
     --exclude=supervise
     --files-from=/etc/live.manifest
