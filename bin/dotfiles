@@ -337,13 +337,14 @@ function mklive() {
     --relative
     --links
     --perms
-    --exclude=supervise
-    --files-from=/etc/live.manifest
   )
 
   local tmpdir="$(mktemp -d)"
 
-  verbose sudo rsync "${opts[@]}" / "$HOME/.dotfiles" "$tmpdir"
+  verbose sudo rsync "${opts[@]}" \
+    --exclude=supervise --files-from=/etc/live.manifest / "$tmpdir"
+
+  verbose sudo rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
 
   cd "$dir" && verbose sudo ./mklive.sh -K \
     -C "${args[*]}" \
