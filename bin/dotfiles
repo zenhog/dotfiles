@@ -345,7 +345,7 @@ function mklive() {
 
   verbose sudo rsync "${opts[@]}" / "$HOME/.dotfiles" "$tmpdir"
 
-  verbose sudo "$dir/mklive.sh" -K \
+  cd "$dir" && verbose sudo ./mklive.sh -K \
     -C "${args[*]}" \
     -p "${packages[*]}" \
     -T "Custom VoidLinux Live Image" \
