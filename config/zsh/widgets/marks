@@ -1,7 +1,10 @@
-local answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |
-  fzf --bind 'enter:execute-silent(echo {})+accept')
+function marks() {
+  local answer
 
-cd "$(realpath "$HOME/.marks/$answer/")"
+  answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |
+    fzf --bind 'enter:execute-silent(echo {})+accept')
 
-preexec
-zle reset-prompt
+  cd "$(realpath "$HOME/.marks/$answer/")"
+
+  zle accept-line
+}

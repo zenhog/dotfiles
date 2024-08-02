@@ -1,3 +1,0 @@
-zle set-mark-command
-zle zce
-zle quote-region

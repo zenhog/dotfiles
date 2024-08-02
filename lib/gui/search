@@ -177,7 +177,7 @@ function open() {
   command open "$(path "$1")"
 }
 
-BINDS[_open]=alt-i
+BINDS[_open]=alt-enter
 HOOKS[_open]=accept
 DESCS[_open]='Open entry and quit'
 function _open() {

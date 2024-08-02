@@ -3,7 +3,6 @@
 mbsync -a && {
   notmuch new 2>/dev/null
   notmuch tag +inbox +unread -new -- tag:new
-  notmuch tag -new -inbox +sent -- \
-    from:"$(gui pass get www/mail/mailbox.org username)"
+  notmuch tag -new +sent -- from:"$EMAIL"
   widget mail timeout
 }

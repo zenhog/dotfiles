@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+
+source "$HOME/.bin/utils"
+
+GITURL=https://github.com/zenhog/dotfiles
+
+BASEDIR="$HOME/.dotfiles"
+
+BRANCHES=(master public private system)
+
+function clone() {
+
+  local dir="${1?}" url="${2?}" branch="${3?}"
+
+  local cmd=(git clone --single-branch --branch="$branch" "$url" "$dir")
+
+  (quiet cd "$dir" || verbose "${cmd[@]}")
+
+  (
+    cd "$dir" &&
+      if [[ "$(git remote get-url origin)" != "$url" ||
+        "$(git branch --show-current)" != "$branch" ]]
+      then
+        verbose backup "$dir" && verbose "${cmd[@]}"
+      fi
+  )
+}
+
+function init() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  verbose clone "$dir" "$GITURL" "$branch" && verbose decrypt "$branch"
+}
+
+function manifest_pull() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    find "${dir:?manifest dir null}" -exec rm -rf {}/files \;
+
+    opts=(
+      --verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --files-from="$f"
+      --delete
+    )
+
+    if [[ -r "$dir/ignore" ]]; then
+      opts+=(--exclude-from="$dir/ignore")
+    fi
+
+    verbose sudo rsync "${opts[@]}" / "$dir/files"
+    verbose sudo chown -R "$USER:$USER" "$dir/files"
+  done
+}
+
+function manifest_push() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    opts=(
+      --verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --backup-dir=/.backup
+    )
+
+    (cd "$dir" && verbose sudo rsync "${opts[@]}" files /)
+  done
+}
+
+function update() {
+  local branch="${1?}"
+
+  verbose manifest_pull "$branch" &&
+    verbose encrypt "$branch" &&
+      verbose commit "$branch" &&
+        verbose cdgit "$branch" push
+}
+
+function linktarget() {
+  local target="$1"
+  local link="$2"
+
+  mkdir -p "$(dirname "$link")"
+
+  mute readlink "$link" || verbose backup "$link"
+
+  [[ "$(quiet readlink "$link")" == "$target" ]] && return
+
+  verbose ln -T -svf -- "$target" "$link"
+}
+
+function link() {
+  local branch="${1?}"
+
+  local basedir="$BASEDIR/$branch"
+
+  local hints
+
+  readarray -t hints < <(cd "$basedir" &&
+    find * -name '.linkdir' -or -name '.linkfiles')
+
+  for hint in "${hints[@]}"; do
+    local prefix type link target dir basedir
+
+    read -r dir < <(dirname "$hint")
+    read -r hint bdir type < <(path "$hint")
+
+    read -r prefix < "$hint"
+
+    case "$type" in
+      .linkdir)
+        eval "prefix=${prefix:-${HOME}/.}"
+        link="${prefix}${dir}"
+        linktarget "$bdir" "$link"
+        ;;
+      .linkfiles)
+        eval prefix="${prefix:-${HOME}/.${dir}/}"
+
+        local files
+        readarray -t files < <(cd "$bdir" && find * -type f -or -type l)
+
+        for file in "${files[@]}"; do
+          link="${prefix}${file}"
+
+          target="$bdir/$file"
+
+          linktarget "$target" "$link"
+        done
+        ;;
+    esac
+
+  done
+}
+
+function install() {
+  local branch="${1?}"
+
+  if init "$branch"; then
+    verbose manifest_push "$branch" && verbose link "$branch"
+  fi
+}
+
+function encrypt() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  silent passphrase
+
+  local secrets archives
+
+  readarray -t secrets < <(find "$dir" -name '.gitsecret')
+
+  for secret in "${secrets[@]}"; do
+    verbose encsecret "$(dirname "$secret")"
+  done
+
+  # remove archives whose associated secret folder was deleted
+  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+
+  for archive in "${archives[@]}"; do
+    [[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || verbose rm -vf "$archive"
+  done
+}
+
+function decrypt() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  local archives
+
+  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+
+  [[ ${#archives[@]} -eq 0 ]] && return
+
+  silent passphrase
+
+  for archive in "${archives[@]}"; do
+    verbose decsecret "$archive"
+  done
+}
+
+function all() {
+  local mod="${1?}"
+
+  for branch in "${BRANCHES[@]}"; do
+    verbose "$mod" "$branch" "${@:2}"
+  done
+}
+
+function cdgit() (
+  local branch="${1?}"
+
+  cd "$BASEDIR/$branch" && git "${@:2}"
+)
+
+function status() {
+  local branch="${1?}"
+
+  verbose cdgit "$branch" status
+}
+
+function commit() {
+  local branch="${1?}"
+
+  verbose cdgit "$branch" add --all . &&
+    verbose cdgit "$branch" commit -m \
+      "autocommit of $(date "+%F") at $(date "+%T") on $(hostname)"
+}
+
+
+function pull() {
+  local repo="${1?}"
+  verbose commit "$branch" &&
+    verbose cdgit "$repo" fetch &&
+      verbose cdgit "$repo" rebase --autostash
+}
+
+function push() {
+  local repo="${1?}"
+
+  verbose pull && verbose cdgit push
+}
+
+function sync() {
+
+  local repo="${1?}"
+
+  cdgit "$repo" fetch
+
+  local mods
+
+  readarray -t mods < <(cdgit "$repo" status --porcelain=v1)
+
+  if [[ ${#mods[@]} -gt 0 ]]; then
+    push
+  else
+    pull
+  fi
+}
+
+function rebranch() (
+  local repo="${1?}"
+  local branch
+
+  set -e
+
+  read -r branch < <(cdgit "$repo" branch --show-current)
+
+  [[ "$branch" == "$repo" ]]
+
+  verbose cdgit "$repo" checkout --orphan tmp
+  commit "$repo"
+
+  verbose cdgit "$repo" branch -D "$branch"
+  verbose cdgit "$repo" branch --move tmp "$branch"
+
+  verbose cdgit "$repo" push --set-upstream origin "$branch" --force
+)
+
+function cleanup() {
+  local branch="${1?}"
+
+  rm -rvf "$BASEDIR/$branch/.git/refs/original"
+
+  cdgit "$branch" reflog expire --expire=now --all
+  cdgit "$branch" gc --prune=now
+  cdgit "$branch" gc --aggressive --prune=now
+}
+
+function mklive() {
+  local dir="$HOME/.voidlive"
+  local url=https://github.com/void-linux/void-mklive
+
+  [[ -d "$dir" ]] || git clone "$url" "$dir"
+
+  local packages args=(
+    console=tty0
+    console=ttyS0,115200n8
+    net.ifnames=0
+    live
+  )
+
+  readarray -t packages < <(grep -v -h '^$' /etc/packages/live/* | sort -u)
+
+  xbps-install -n "${packages[@]}"
+
+  local opts=(
+    --recursive
+    --archive
+    --relative
+    --links
+    --copy-links
+    --perms
+    --exclude=supervise
+    --files-from=/etc/live.manifest
+  )
+
+  local tmpdir="$(mktemp -d)"
+
+  sudo rsync "${opts[@]}" / "$tmpdir"
+
+  sudo "$dir/mklive.sh" -K \
+    -C "${args[*]}" \
+    -p "${packages[*]}" \
+    -T "Custom VoidLinux Live Image" \
+    -i gzip -s gzip \
+    -I "$tmpdir" \
+    -o $HOME/custom-voidlinux-liveimg.iso
+
+  sudo rm -rf "$tmpdir"
+}
+
+checkbin git gpg rsync && mkdir -p "$BASEDIR" && "$@"

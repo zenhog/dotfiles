@@ -1,0 +1,5 @@
+function zce-kill() {
+  zle set-mark-command
+  zle zce
+  zle kill-region
+}

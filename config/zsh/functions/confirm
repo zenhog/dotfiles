@@ -1,5 +1,0 @@
-local answer
-echo '========================================================================='
-printf '$ [%s]' "$*" > /dev/tty
-IFS= read -r answer < /dev/tty
-[[ -n "$answer" ]] && return 1 || "$@"

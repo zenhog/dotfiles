@@ -1,4 +1,0 @@
-wordchars="$WORDCHARS"
-WORDCHARS=$'!@#$%^&*()_-+={}:;<>,./?\\[]~`'
-zle transpose-words
-WORDCHARS="$wordchars"

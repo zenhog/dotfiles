@@ -1,1 +1,3 @@
-lsd "$@" &>/dev/null && lsd "$@" || command ls "$@"
+function ls() {
+  mute lsd "$@" && lsd "$@" || command ls "$@"
+}

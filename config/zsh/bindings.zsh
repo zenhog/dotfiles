@@ -1,10 +1,4 @@
-zle -N fzf-histdb
-zle -N transpose-Words
 zle -N edit-command-line
-zle -N zce-word
-zle -N zce-kill
-zle -N zce-quote
-zle -N envupdate-and-complete
 
 bindkey -e
 bindkey -rp ""
@@ -13,7 +7,6 @@ bindkey -rp ""
 bindkey "[D" backward-char
 bindkey "[C" forward-char
 
-#bindkey "^R" fzf-histdb
 bindkey "^R" fzf_history_search
 bindkey "^T" transpose-Words
 bindkey "^I" envupdate-and-complete

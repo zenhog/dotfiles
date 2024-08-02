@@ -1,11 +1,12 @@
+function fillalbum() {
+  local dirname="$1"
+  local basename="$(basename "$dirname")"
 
-dirname="$1"
-basename="$(basename "$dirname")"
+  shift
 
-shift
+  mkalbum "$dirname"
 
-mkalbum "$dirname"
-
-for i in "$@"; do
-  mv -- "$i" "$dirname/$basename-`uuidgen`.jpg"
-done
+  for img in "$@"; do
+    mv -- "$img" "$dirname/$basename-`uuidgen`.jpg"
+  done
+}

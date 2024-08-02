@@ -50,7 +50,7 @@ HOOKS[paste]=paste
 GDESCS[paste]='Paste clipboard'
 CALLS[paste]='transform-query(tmux showb)'
 
-BINDS[eval]=alt-enter
+BINDS[eval]=btab
 HOOKS[eval]=eval
 GDESCS[eval]='Evaluate shell expressions'
 CALLS[eval]='change-preview(eval {q})'

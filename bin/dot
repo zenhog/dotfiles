@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$HOME/.bin/utils"
+
 GITURL=https://github.com/zenhog/dotfiles
 
 BASEDIR="$HOME/.dotfiles"

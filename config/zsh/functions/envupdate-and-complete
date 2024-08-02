@@ -1,2 +1,0 @@
-source "$HOME/.zshenv"
-zle fzf-tab-complete

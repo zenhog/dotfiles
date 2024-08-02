@@ -115,7 +115,10 @@ function toggle_opt() {
 function rotate_opt() {
   local val="$(get_opt "$1")"
   local mod="$(get_opt "$1-mod")"
-  set_opt "$1" $((++val % mod))
+
+  [[ -z "$val" || -z "$mod" ]] && return
+
+  set_opt "$1" $(( ++val % mod ))
 }
 
 return 0 2>/dev/null

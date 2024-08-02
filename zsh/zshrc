@@ -15,10 +15,10 @@ preexec() {
   source "$HOME/.zshenv"
 }
 
-#chpwd() {
-#    echo
-#    lsd
-#}
+chpwd() {
+    echo
+    lsd
+}
 
 #command_not_found_handler() {
 #    #open "$@"
@@ -39,24 +39,30 @@ fi
 [[ ! -f "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
 
 setopt nullglob
+setopt extendedglob
+
+source "$HOME/.bin/utils"
 
 [[ -r "$HOME/.znaprc" ]] && source "$HOME/.znaprc"
 
 zstyle ':completion:*' completer _complete _ignored _files
+
 autoload -U compinit && compinit
 autoload -U edit-command-line
 
-ZSHCONFIG_PATH="$HOME/.config/zsh"
-fpath+=("$ZSHCONFIG_PATH/functions" "$ZSHCONFIG_PATH/widgets")
+ZSH_DIR="$HOME/.config/zsh"
 
-autoload -Uz "$ZSHCONFIG_PATH/functions/"*(:t)
-autoload -Uz "$ZSHCONFIG_PATH/widgets/"*(:t)
+fpath+=("${ZSHCONFIG_PATH}"/{functions,widgets})
 
-for widget in "$ZSHCONFIG_PATH/widgets/"*(:t); do
-    zle -N "$(basename "$widget")"
+for d in "$ZSH_DIR"/*(/); do
+    fpath+=("$d")
+    for f in "$d"/^*.zwc(:t); do
+        autoload -Uz "$f"
+        [[ "$d" == *widgets ]] && zle -N "$f"
+    done
 done
 
-for rcfile in $HOME/.config/zsh/*; do
+for rcfile in "$ZSH_DIR"/*(.); do
     [[ -f "$rcfile" ]] && source "$rcfile"
 done
 
@@ -64,6 +70,6 @@ alias ls='ls --color=auto '
 alias ll='ls -l '
 alias la='ls -A '
 alias lla='ls -lA '
-alias grep='grep -i --color=auto '
 alias du='du -H '
 alias df='df -H '
+alias grep='grep -i --color=auto '
