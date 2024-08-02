@@ -151,7 +151,8 @@ function link() {
         eval prefix="${prefix:-${HOME}/.${reladir}/}"
 
         local files
-        readarray -t files < <(cd "$reladir" && find * -type f -or -type l)
+        readarray -t files < <(cd "$BASEDIR/$branch/$reladir" &&
+          find * -type f -or -type l)
 
         for file in "${files[@]}"; do
           linktarget "$dir/$file" "${prefix}${file}"
