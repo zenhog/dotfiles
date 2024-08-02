@@ -137,9 +137,9 @@ function link() {
     local prefix reladir link target dir type
 
     read -r reladir < <(dirname "$hint")
-    read -r target dir type < <(path "$hint")
+    read -r target dir type < <(path "$BASEDIR/$hint")
 
-    read -r prefix < "$hint"
+    read -r prefix < "$BASEDIR/$hint"
 
     case "$type" in
       .linkdir)
