@@ -120,37 +120,35 @@ function linktarget() {
 function link() {
   local branch="${1?}"
 
-  local basedir="$BASEDIR/$branch"
-
   local hints
 
-  readarray -t hints < <(cd "$basedir" &&
+  readarray -t hints < <(cd "$BASEDIR/$branch" &&
     find * -name '.linkdir' -or -name '.linkfiles')
 
   for hint in "${hints[@]}"; do
-    local prefix type link target dir basedir
+    local prefix reladir link target dir type
 
-    read -r dir < <(dirname "$hint")
-    read -r hint bdir type < <(path "$hint")
+    read -r reladir < <(dirname "$hint")
+    read -r target dir type < <(path "$hint")
 
     read -r prefix < "$hint"
 
     case "$type" in
       .linkdir)
         eval "prefix=${prefix:-${HOME}/.}"
-        link="${prefix}${dir}"
-        linktarget "$bdir" "$link"
+        link="${prefix}${reladir}"
+        linktarget "$target" "$link"
         ;;
       .linkfiles)
-        eval prefix="${prefix:-${HOME}/.${dir}/}"
+        eval prefix="${prefix:-${HOME}/.${reladir}/}"
 
         local files
-        readarray -t files < <(cd "$bdir" && find * -type f -or -type l)
+        readarray -t files < <(cd "$reladir" && find * -type f -or -type l)
 
         for file in "${files[@]}"; do
           link="${prefix}${file}"
 
-          target="$bdir/$file"
+          target="$dir/$file"
 
           linktarget "$target" "$link"
         done
@@ -225,6 +223,18 @@ function status() {
   local branch="${1?}"
 
   verbose cdgit "$branch" status
+}
+
+function lastdiff() {
+  local branch="${1?}"
+
+  verbose cdgit "$branch" diff "$branch"~.."$branch"
+}
+
+function diff() {
+  local branch="${1?}"
+
+  verbose cdgit "$branch" diff "$branch"
 }
 
 function commit() {
