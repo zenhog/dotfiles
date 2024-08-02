@@ -137,7 +137,7 @@ function link() {
     local prefix reladir link target dir type
 
     read -r reladir < <(dirname "$hint")
-    read -r target dir type < <(path "$BASEDIR/$branch/$hint")
+    read -r _ dir type < <(path "$BASEDIR/$branch/$hint")
 
     read -r prefix < "$BASEDIR/$branch/$hint"
 
@@ -145,7 +145,7 @@ function link() {
       .linkdir)
         eval "prefix=${prefix:-${HOME}/.}"
         link="${prefix}${reladir}"
-        linktarget "$target" "$link"
+        linktarget "$dir" "$link"
         ;;
       .linkfiles)
         eval prefix="${prefix:-${HOME}/.${reladir}/}"
@@ -154,11 +154,7 @@ function link() {
         readarray -t files < <(cd "$reladir" && find * -type f -or -type l)
 
         for file in "${files[@]}"; do
-          link="${prefix}${file}"
-
-          target="$dir/$file"
-
-          linktarget "$target" "$link"
+          linktarget "$dir/$file" "${prefix}${file}"
         done
         ;;
     esac
