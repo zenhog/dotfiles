@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-source "$HOME/.bin/utils"
+
+FS_UTILS="$HOME/.bin/utils"
+GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot/utils
+
+function stage() {
+  if [[ -r "$FS_UTILS" ]]; then
+    source "$FS_UTILS" && return
+  fi
+  source <(curl -s "$GH_UTILS")
+}
 
 GITURL=https://github.com/zenhog/dotfiles
 
@@ -318,9 +327,10 @@ function mklive() {
     live
   )
 
-  readarray -t packages < <(grep -v -h '^$' /etc/packages/live/* | sort -u)
+  readarray -t packages < <(find /etc/packages/live -type f -exec cat {} \; |
+    grep -v -h '^$' | sort -u)
 
-  xbps-install -n "${packages[@]}"
+  verbose xbps-install --yes --dry-run "${packages[@]}"
 
   local opts=(
     --recursive
@@ -335,9 +345,9 @@ function mklive() {
 
   local tmpdir="$(mktemp -d)"
 
-  sudo rsync "${opts[@]}" / "$tmpdir"
+  verbose sudo rsync "${opts[@]}" / "$tmpdir"
 
-  sudo "$dir/mklive.sh" -K \
+  verbose sudo "$dir/mklive.sh" -K \
     -C "${args[*]}" \
     -p "${packages[*]}" \
     -T "Custom VoidLinux Live Image" \
@@ -345,7 +355,13 @@ function mklive() {
     -I "$tmpdir" \
     -o $HOME/custom-voidlinux-liveimg.iso
 
-  sudo rm -rf "$tmpdir"
+  verbose sudo rm -rf "$tmpdir"
 }
 
-checkbin git gpg rsync && mkdir -p "$BASEDIR" && "$@"
+function checkbin() {
+  for bin in "$@"; do
+    which "$bin" >/dev/null || return
+  done
+}
+
+checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && stage && "$@"
