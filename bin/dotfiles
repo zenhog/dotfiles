@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-
 FS_UTILS="$HOME/.bin/utils"
-GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot/utils
+GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/utils
 
 function stage() {
   if [[ -r "$FS_UTILS" ]]; then
