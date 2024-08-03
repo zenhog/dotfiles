@@ -104,7 +104,7 @@ function list() {
 
 BINDS[search]=alt-s
 HOOKS[search]=search
-CALLS[search]='reload-sync(%s {} {q})'
+CALLS[search]='reload-sync(%s {} {q})+clear-query'
 DESCS[search]='Search arbitrary pattern with fd'
 function search() {
   state_update
