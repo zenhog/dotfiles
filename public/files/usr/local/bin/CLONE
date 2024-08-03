@@ -20,7 +20,7 @@ BASE_PACKAGES=(
 
 function verbose() {
     echo '======================================================' 2>/dev/tty >&2
-    echo "\$ $@" 2>/dev/tty >&2
+    echo "$*" 2>/dev/tty >&2
     echo '======================================================' 2>/dev/tty >&2
     if [[ -n "$DEBUG" ]]; then
         local answer
@@ -82,13 +82,13 @@ partition() (
 format() (
     set -e
 
-    [[ $# -lt 2 ]]
+    [[ $# -ge 2 ]]
 
     local efipart="$1"
     local btrfsparts=("${@:2}")
 
     verbose mkfs.vfat  -n "$BOOTLABEL" -F 32 "$efipart"
-    verbose mkfs.btrfs -L "$ROOTLABEL" -f "${btrfsparts[@]}"
+    verbose mkfs.btrfs -L "$ROOTLABEL" --force "${btrfsparts[@]}"
 
     mkdir -p "/newroot"
     mountpoint -q /newroot && umount -R /newroot
@@ -256,8 +256,14 @@ finalize() (
 
     verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
 
+    # install dotfiles
     verbose chroot /newroot /bin/bash -c "${cmd} install master"
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c "${cmd} all install"
+
+    # install vim and zsh plugins
+    verbose chroot /newroot /bin/bash -c "/root/.bin/vimzshupdate"
+    verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c \
+        "/home/$NEWUSER/.bin/vimzshupdate"
 
     verbose chroot /newroot \
         btrfs subvolume snapshot /.volumes/main /.snapshots/main@clone
