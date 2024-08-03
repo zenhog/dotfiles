@@ -40,6 +40,7 @@ opt.ruler = false -- Replaced by Lualine
 opt.showcmd = false -- Replaced by Lualine
 opt.showmatch = false -- Highlight matching parenthesis
 opt.laststatus = 3 -- Set global statusline
+opt.laststatus = 2 -- Set global statusline
 
 opt.foldenable = false -- Disable folding altogether
 opt.foldmethod = 'marker' -- Enable folding (default 'foldmarker')

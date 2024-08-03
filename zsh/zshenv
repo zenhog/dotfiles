@@ -1,14 +1,9 @@
-export COLORSCHEME="$HOME/.colorscheme"
-
-if [[ "$USER" == root ]] || [[ -n "$SUDO_USER" ]]; then
-  export COLORSCHEME="/home/$SUDO_USER/.colorscheme"
-fi
-
-if [[ "$USER" == root  &&  -n "$SUDO_USER" ]]; then
-  cp "/home/$SUDO_USER/.colorscheme" "$HOME"
-fi
-
-[[ -r "$HOME/.colorscheme" ]] || echo dark > "$HOME/.colorscheme"
+[[ -r "$HOME/.colorscheme" ]] || {
+  if [[ "$USER" == root  &&  -n "$SUDO_USER" ]]; then
+    cp "/home/$SUDO_USER/.colorscheme" "$HOME" &>/dev/null
+  fi
+  [[ -r "$HOME/.colorscheme" ]] || echo dark > "$HOME/.colorscheme"
+}
 
 read -r THEME < <(cat "$HOME/.colorscheme")
 
@@ -49,7 +44,7 @@ FZF_BASE_FLAGS=(
 PREVIEW="bottom,border-rounded|right,border-rounded"
 FZF_FLAGS=(
   "${FZF_BASE_FLAGS[@]}"
-  "--history=$HOME/.fzf-history"
+  #"--history=$HOME/.fzf-history"
   #"--preview-window=right,border-rounded"
   #"--border=rounded"
   "--bind=right-click:toggle"
@@ -70,7 +65,8 @@ export FZF_DEFAULT_OPTS="${FZF_FLAGS[@]}"
 
 [[ -n "$TMUX" ]] && eval $(tmux show-environment -s DISPLAY)
 
-[[ -r "$HOME/.themes/lscolors/lscolors.sh" ]] && source "$HOME/.themes/lscolors/lscolors.sh"
+[[ -r "$HOME/.themes/lscolors/lscolors.sh" ]] &&
+  source "$HOME/.themes/lscolors/lscolors.sh"
 
 if [[ "$0" =~ zsh ]]; then
   zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"

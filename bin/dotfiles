@@ -321,7 +321,6 @@ function mklive() {
     console=ttyS0,115200n8
     net.ifnames=0
     live.user="$USER"
-    live.autologin
     live.shell=/bin/zsh
     live
   )
@@ -344,7 +343,7 @@ function mklive() {
   verbose sudo rsync "${opts[@]}" \
     --exclude=supervise --files-from=/etc/live.manifest / "$tmpdir"
 
-  verbose sudo rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
+  verbose rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
 
   cd "$dir" && verbose sudo ./mklive.sh -K \
     -C "${args[*]}" \

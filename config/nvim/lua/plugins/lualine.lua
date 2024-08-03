@@ -78,23 +78,17 @@ local top = {
     tabs,
   },
   lualine_c = {
-    'branch',
-    'diff',
-    {
-      'windows',
-      fmt = function(str)
-        return '%=' .. str
-      end,
-    },
-    'diagnostics',
+    --{
+    --  'windows',
+    --  fmt = function(str)
+    --    return '%=' .. str
+    --  end,
+    --},
   },
   lualine_x = {
-    filetypeLSP,
-    lspname,
-    formatencoding,
   },
   lualine_y = {
-    location,
+    -- dir/repodir?
   },
   lualine_z = {
     session,
@@ -102,17 +96,25 @@ local top = {
 }
 local bottom = {
   lualine_a = {
-    'lsp_progress',
+    'filename',
+    'branch',
   },
   lualine_b = {
+    'diagnostics',
+    'diff',
   },
   lualine_c = {
   },
   lualine_x = {
   },
   lualine_y = {
+    filetypeLSP,
+    lspname,
+    formatencoding,
   },
   lualine_z = {
+    location,
+    'lsp_progress',
   },
 }
 return {
