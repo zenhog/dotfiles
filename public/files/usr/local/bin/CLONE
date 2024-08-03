@@ -11,7 +11,7 @@ SRC_PATH=void-linux/void-packages/master/etc/xbps.d/repos-remote.conf
 
 SRC_URL="$SRC_HOST/$SRC_PATH"
 
-URL=https://raw.githubusercontent.com/zenhog/dotfiles/minimal/bin/dot
+URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 
 BASE_PACKAGES=(
     base-system btrfs-progs grub grub-x86_64-efi ansible git zsh tmux xz
@@ -19,9 +19,15 @@ BASE_PACKAGES=(
 )
 
 function verbose() {
-    echo =======================================================================
-    echo "$@"
-    echo =======================================================================
+    echo '======================================================' 2>/dev/tty >&2
+    echo "\$ $@" 2>/dev/tty >&2
+    echo '======================================================' 2>/dev/tty >&2
+    if [[ -n "$DEBUG" ]]; then
+        local answer
+        IFS= read -r answer < /dev/tty
+        [[ -n "$answer" ]]  && return 1
+    fi
+
     "$@"
 }
 
@@ -69,6 +75,7 @@ partition() (
         parted "$t" name 1 GRUB
         parted "$t" name 2 ESP
         parted "$t" name 3 BTRFS
+        verbose parted "$t" print
     done
 )
 
@@ -80,8 +87,8 @@ format() (
     local efipart="$1"
     local btrfsparts=("${@:2}")
 
-    mkfs.vfat  -n "$BOOTLABEL" -F 32 "$efipart"
-    mkfs.btrfs -L "$ROOTLABEL" -f "${btrfsparts[@]}"
+    verbose mkfs.vfat  -n "$BOOTLABEL" -F 32 "$efipart"
+    verbose mkfs.btrfs -L "$ROOTLABEL" -f "${btrfsparts[@]}"
 
     mkdir -p "/newroot"
     mountpoint -q /newroot && umount -R /newroot
@@ -91,6 +98,9 @@ format() (
     btrfs subvolume create /newroot/main
     btrfs subvolume create /newroot/home
     btrfs subvolume create /newroot/snapshots
+
+    mount -l | grep '/newroot'
+
     umount -R /newroot
 )
 
@@ -123,6 +133,8 @@ mount() (
 
     mkdir -p /newroot/etc
     cp -L /etc/resolv.conf /newroot/etc
+
+    mount -l | grep '/newroot'
 )
 
 rootfs() (
@@ -150,13 +162,14 @@ packages() (
 
     local packages
 
-    readarray -t packages < <(find /etc/packages/ -type f)
-    readarray -t packages < <(grep -v -h '^$' "${packages[@]}")
+    readarray -t packages < <(find /etc/packages/ -type f -exec cat {} \; |
+        grep -v -h '^$' | sort -u)
 
     verbose echo "Installing ${#packages[@]} packages: ${packages[*]}"
 
     chroot /newroot xbps-install -n "${packages[@]}"
     chroot /newroot xbps-install -yu "${packages[@]}"
+    verbose chroot /newroot xbps-query -m
 )
 
 configure() (
@@ -202,7 +215,7 @@ configure() (
 
 bootloaders() (
     if efi; then
-        chroot /newroot grub-install       \
+        verbose chroot /newroot grub-install       \
             --target=x86_64-efi            \
             --efi-directory=/boot/grub/efi \
             --boot-directory=/boot         \
@@ -210,11 +223,11 @@ bootloaders() (
     fi
 
     for t in "$@"; do
-        chroot /newroot grub-install --target=i386-pc "$t"
+        verbose chroot /newroot grub-install --target=i386-pc "$t"
     done
 
-    chroot /newroot grub-mkconfig -o /boot/grub/grub.cfg
-    chroot /newroot xbps-reconfigure -fa
+    verbose chroot /newroot grub-mkconfig -o /boot/grub/grub.cfg
+    verbose chroot /newroot xbps-reconfigure -fa
 )
 
 finalize() (
@@ -246,7 +259,7 @@ finalize() (
     verbose chroot /newroot \
         btrfs subvolume snapshot /.volumes/main /.snapshots/main@clone
 
-    umount -R /newroot
+    verbose umount -R /newroot
 )
 
 checktools() (
