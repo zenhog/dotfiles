@@ -104,7 +104,7 @@ format() (
     umount -R /newroot
 )
 
-mount() (
+remount() (
     local efipart="$1"
     local diskref="$2"
 
@@ -145,12 +145,13 @@ rootfs() (
     read -r repo < <(curl -s "$SRC_URL" | awk -F= '/current$/{print $2}' |
         sed -rn 's|current|live/current/|p')
 
-    read -r rootfs < <(curl -s "$REPO" | grep -i "$ARCH-rootfs" |
+    read -r rootfs < <(curl -s "$repo" | grep -i "$ARCH-rootfs" |
         sed -rn 's:<[^>]*>(.*)<[^>]*>:\1:p' | awk '{print $1}')
 
     [[ -f "$HOME/$rootfs" ]] || curl "$repo/$rootfs" > "$HOME/$rootfs"
 
-    verbose tar xvf "$ROOTFS" -C /newroot
+    xbps-install -Syu xz
+    verbose tar xvf "$rootfs" -C /newroot
 
     chroot /newroot xbps-install -Syu xbps
     chroot /newroot xbps-install -yu "${BASE_PACKAGES[@]}"
@@ -168,8 +169,11 @@ packages() (
     verbose echo "Installing ${#packages[@]} packages: ${packages[*]}"
 
     chroot /newroot xbps-install -n "${packages[@]}"
-    chroot /newroot xbps-install -yu "${packages[@]}"
-    verbose chroot /newroot xbps-query -m
+    verbose chroot /newroot xbps-install -yu "${packages[@]}"
+
+    verbose echo "Checking for installed packages"
+    chroot /newroot xbps-install -n "${packages[@]}" 2>&1 |
+        grep -v 'already installed'
 )
 
 configure() (
@@ -284,7 +288,7 @@ main() {
 
     verbose format "$EFIPART" "${BTRFSPARTS[@]}"
 
-    verbose mount "$EFIPART" "$DISKREF"
+    verbose remount "$EFIPART" "$DISKREF"
 
     # fails if /newroot/** are not mounted
     verbose rootfs
