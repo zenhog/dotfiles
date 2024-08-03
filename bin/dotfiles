@@ -99,7 +99,7 @@ function manifest_push() {
       --backup-dir=/.backup
     )
 
-    (cd "$dir" && verbose sudo rsync "${opts[@]}" files /)
+    (cd "$dir" && verbose sudo rsync "${opts[@]}" files/./ /)
   done
 }
 
@@ -206,7 +206,7 @@ function decrypt() {
   silent passphrase
 
   for archive in "${archives[@]}"; do
-    verbose decsecret "$archive"
+    (cd "$(dirname "$archive")" && verbose decsecret "$archive")
   done
 }
 
@@ -328,7 +328,7 @@ function mklive() {
   readarray -t packages < <(find /etc/packages/live -type f -exec cat {} \; |
     grep -v -h '^$' | sort -u)
 
-  verbose xbps-install --yes --dry-run "${packages[@]}"
+  verbose xbps-install -S --yes --dry-run "${packages[@]}"
 
   local opts=(
     --verbose

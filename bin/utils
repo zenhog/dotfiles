@@ -34,11 +34,14 @@ function mute() {
 }
 
 function verbose() {
-  NONEWLINE=1 sepline '' "> $* <" 2>/dev/tty >&2
+  local msg
+
+  read -r msg < <(printf '> %s $ %s <' "$PWD" "$*")
+  NONEWLINE=1 sepline '' "$msg" >&2
 
   if [[ -n "$DEBUG" ]]; then
     local answer
-    IFS= read -r answer < /dev/tty
+    IFS= read -r answer
     [[ -n "$answer" ]] && return 1
   fi
 
@@ -276,7 +279,7 @@ function tardiff() {
 
 function decsecret() {
   local src="$(realpath -sm "${1?}")"
-  dec --output - "$src" | tarextract
+  (cd "$(dirname "$src")" && dec --output - "$src" | tarextract)
 }
 
 function dumpsecret() {
