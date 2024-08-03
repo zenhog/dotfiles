@@ -1,7 +1,9 @@
 /usr/local/bin/
 /etc/packages/
+/etc/live.manifest
 
 /etc/runit/runsvdir/main/
+/etc/runit/runsvdir/live/
 
 /etc/rc.conf
 /etc/rc.local
@@ -40,7 +42,6 @@
 /etc/rsyslog.conf
 
 /usr/share/OVMF/
-/etc/lxd-config.yaml
 /etc/audit/rules.d/
 
 /etc/slim.conf
