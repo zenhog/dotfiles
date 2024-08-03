@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+vim --headless \
+  -c "TSUpdateSync" \
+  -c "Lazy! sync" \
+  -c "echo 'LazySync done'" \
+  -c "autocmd User MasonToolsUpdateCompleted quitall!" \
+  -c "echo ''" \
+  -c "MasonToolsUpdate"
+
+zsh -s << EOF
+zmodload zsh/zpty
+zpty znapinit 'znap pull'
+zpty -r znapinit
+EOF

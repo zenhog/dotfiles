@@ -1,4 +1,9 @@
-stty -ixon
+source "$HOME/.bin/utils"
+
+setopt nullglob
+setopt extendedglob
+
+quiet stty -ixon
 
 echo -ne "\e[5 q"
 
@@ -11,6 +16,8 @@ then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+[[ ! -f "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
+
 preexec() {
   source "$HOME/.zshenv"
 }
@@ -20,9 +27,9 @@ chpwd() {
     lsd
 }
 
-#command_not_found_handler() {
-#    #open "$@"
-#}
+command_not_found_handler() {
+    :
+}
 
 HISTSIZE=10000
 SAVEHIST=10000
@@ -35,13 +42,6 @@ if [[ -d "$HOME/.gnupg" ]]; then
     gpgconf --launch gpg-agent
     gpg-connect-agent updatestartuptty /bye &>/dev/null
 fi
-
-[[ ! -f "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
-
-setopt nullglob
-setopt extendedglob
-
-source "$HOME/.bin/utils"
 
 [[ -r "$HOME/.znaprc" ]] && source "$HOME/.znaprc"
 
@@ -65,11 +65,3 @@ done
 for rcfile in "$ZSH_DIR"/*(.); do
     [[ -f "$rcfile" ]] && source "$rcfile"
 done
-
-alias ls='ls --color=auto '
-alias ll='ls -l '
-alias la='ls -A '
-alias lla='ls -lA '
-alias du='du -H '
-alias df='df -H '
-alias grep='grep -i --color=auto '

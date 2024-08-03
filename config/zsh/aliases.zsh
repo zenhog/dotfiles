@@ -1,0 +1,7 @@
+alias ls='ls --color=auto '
+alias ll='ls -l '
+alias la='ls -A '
+alias lla='ls -lA '
+alias du='du -H '
+alias df='df -H '
+alias grep='grep -i --color=auto '
