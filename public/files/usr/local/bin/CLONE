@@ -150,11 +150,10 @@ rootfs() (
 
     [[ -f "$HOME/$rootfs" ]] || curl "$repo/$rootfs" > "$HOME/$rootfs"
 
-    xbps-install -Syu xz
     verbose tar xvf "$rootfs" -C /newroot
 
     chroot /newroot xbps-install -Syu xbps
-    chroot /newroot xbps-install -yu "${BASE_PACKAGES[@]}"
+    chroot /newroot xbps-install -yu "${BASE_PACKAGES[@]}" libssl3
     chroot /newroot xbps-install -yu ncurses-base
 )
 
@@ -208,7 +207,7 @@ configure() (
         > /newroot/etc/fstab
 
     contents=(
-        "GRUB_CMDLINE_LINUX_DEFAULT=net.ifnames=0 main"
+        'GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 main"'
         "GRUB_DISABLE_SUBMENU=y"
         "GRUB_GFXMODE=640x480,800x600,1024x768,1280x1024,auto"
         "GRUB_GFXPAYLOAD_LINUX=keep"
@@ -239,12 +238,12 @@ finalize() (
 
     local cmd
 
-    read -r cmd < <(printf 'bash <(curl -s %s)' "$URL")
+    IFS= read -r cmd < <(printf 'bash <(curl -s %s)' "$URL") || true
 
     verbose chroot "/newroot" usermod -s /bin/zsh root
     verbose chroot "/newroot" useradd -m -s /bin/zsh "$NEWUSER"
 
-    verbose cp -rv --preserve=mode /etc/Networkmanager /newroot/etc
+    verbose cp -rv --preserve=mode /etc/NetworkManager /newroot/etc
     verbose cp -rv --preserve=mode /etc/packages /newroot/etc
 
     verbose chroot /newroot bash -c \

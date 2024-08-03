@@ -5,6 +5,7 @@ sudo
 tar
 xz
 gzip
+libssl3
 
 grub
 grub-x86_64-efi
