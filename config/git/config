@@ -45,7 +45,7 @@
 [diff "gpg"]
 	textconv = gpg --batch -qd /dev/stdin
 [diff "gpgtar"]
-	textconv = dot gpgtar_cat
+	textconv = dotfiles dumpsecret
 [http]
 	postBuffer = 157286400
 [pack]
