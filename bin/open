@@ -26,7 +26,7 @@ case "${mime}" in
         gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
         ;;
     image/*)
-        awm exec -- sxiv -a -s f -- "$@"
+        awm exec -- nsxiv -a -s f -- "$@"
         ;;
     video/*)
         awm exec -- vlc "$@"

@@ -5,11 +5,11 @@ MOD='S-M'
 ICON=
 
 function view() {
-  quiet curl cht.sh/$1
+  curl -sL cht.sh/$1
 }
 
 function list() {
-  quiet curl cht.sh/:list
+  curl -sL cht.sh/:list
 }
 
 BINDS[open]=enter

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
 gui run bg wanqute
-#gui run bg discord
+gui run bg vpnfox
+gui run bg discord

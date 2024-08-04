@@ -115,7 +115,7 @@ c.completion.open_categories = ["bookmarks", "history", "quickmarks",
 c.bindings.key_mappings = {}
 
 c.content.cookies.accept = 'all'
-c.auto_save.session = True
+c.auto_save.session = False
 
 c.editor.command = ["gui", "-f", "{file}", "-c", "normal {line}G{column0}l"]
 

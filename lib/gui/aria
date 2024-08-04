@@ -30,7 +30,7 @@ function query() {
   }
 EOF
 
-  curl -s -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
+  curl -sL -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
     jq -r '.result'
 }
 

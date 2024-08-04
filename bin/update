@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+
+vim_update() {
+  vim --headless \
+    -c "TSUpdateSync" \
+    -c "echo '=============================> TSUpdateSync done'" \
+    -c "Lazy! sync" \
+    -c "echo '=============================> LazySync done'" \
+    -c "autocmd User MasonToolsUpdateCompleted quitall!" \
+    -c "echo ''" \
+    -c "MasonToolsUpdate"
+}
+
+zsh_update() {
+  local cmds=(
+    'zmodload zsh/zpty'
+    'zpty firstrun zsh'
+    'zpty -r firstrun'
+  )
+  zsh -s < <(printf "%s\n" "${cmd[@]}")
+}
+
+case "$1" in
+  vim)
+    vim_update
+    ;;
+  zsh)
+    zsh_update
+    ;;
+  *)
+    zsh_update
+    vim_update
+esac

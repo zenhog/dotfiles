@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p "$HOME/.mail/mailbox"
+
 mbsync -a && {
   notmuch new 2>/dev/null
   notmuch tag +inbox +unread -new -- tag:new

@@ -126,6 +126,7 @@ spawn() {
   require('awful').spawn('$@', ${attrs})
 EOF
   )
+  [[ -n "$success" ]]
 }
 
 ## show ATTRIBUTE=value [...]

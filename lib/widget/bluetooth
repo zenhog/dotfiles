@@ -3,7 +3,8 @@
 PERIOD=10
 
 function text() {
-    readarray -t devices < <(bluetoothctl devices Connected | awk '{print $2}')
+    readarray -t devices < <(bluetoothctl devices Connected |
+        grep -v 'No default controller available' | awk '{print $2}')
     printf "%s" "${devices[0]}"
 }
 

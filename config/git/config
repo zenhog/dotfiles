@@ -19,7 +19,7 @@
 	compression = 0
 [init]
 	defaultBranch = master
-	templatedir = ~/.config/git/templates
+	#templatedir = ~/.config/git/templates
 [merge]
 	tool = vimdiff
 	conflictstyle = diff3

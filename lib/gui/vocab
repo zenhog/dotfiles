@@ -28,7 +28,7 @@ function view() {
   local id word
   read -r id word _ <<< "$1"
 
-  curl -s "${API}/${word}" |
+  curl -sL "${API}/${word}" |
     jq 'def f: recurse | select(IN([], {}));
       until(isempty(f); del(f)) | map(del(.phonetics,.license,.sourceUrls))' |
         yq -y | bat -p --force-colorization --language yaml
@@ -51,7 +51,7 @@ DESCS[pronounce]='Pronounce word'
 function pronounce() {
   local id word links
   read -r id word _ <<< "$1"
-  readarray -t links < <(curl -s "${API}/${word}" |
+  readarray -t links < <(curl -sL "${API}/${word}" |
     jq -r '.[].phonetics.[].audio')
 
   for link in "${links[@]}"; do

@@ -108,7 +108,7 @@ function toggle_opt() {
 
   case "$val" in
     0) set_opt "$opt" 1 ;;
-    *) set_opt "$opt" 0 ;;
+    1) set_opt "$opt" 0 ;;
   esac
 }
 

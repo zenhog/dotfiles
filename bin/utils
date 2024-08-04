@@ -36,8 +36,11 @@ function mute() {
 function verbose() {
   local msg
 
-  read -r msg < <(printf '> %s $ %s <' "$PWD" "$*")
-  NONEWLINE=1 sepline '' "$msg" >&2
+  read -r msg < <(printf '[%s] %s' "$PWD" "$*")
+  #NONEWLINE=1 sepline '' "$msg" >&2
+  sepline >&2
+  echo "$msg" >&2
+  sepline '-' >&2
 
   if [[ -n "$DEBUG" ]]; then
     local answer
@@ -66,7 +69,7 @@ function backup() {
   for f in "$@"; do
     local rand
     read -r rand < <( tr -dc '[:alnum:]' < /dev/urandom | quiet dd bs=1 count=8)
-    [[ -e "$f" ]] && mv -v -- "$f" "$f.old.$rand"
+    [[ -e "$f" ]] && verbose mv -v -- "$f" "$f.old.$rand"
   done
 }
 
@@ -209,14 +212,15 @@ function tarextract() {
 
   exec 3>&-
 
-  grep -v "${errs[@]:2}" <&4 |
-    tee >(cat > /dev/stderr) |
-      grep -qv "${errs[@]:0:2}"
+  #grep -v "${errs[@]:2}" <&4 |
+  #  tee >(cat > /dev/stderr) |
+  #    grep -qv "${errs[@]:0:2}"
 
-  if [[ $? -eq 0 ]]; then
+  if grep -v "${errs[@]}" <&4; then
     exec 4>&-
     return 1
   fi
+
   exec 4>&-
   return 0
 }
@@ -302,9 +306,12 @@ function diffsecret() {
 
 function encsecret() {
   local src="$(realpath -sm "${1?}")"
+  local dst="$src.tar.gz"
 
   if ! mute diffsecret "$src"; then
-    tarcreate "$src" | enc --output "$src.tar.gz.gpg" -
+    if tarcreate "$src" | enc --output "$dst" -; then
+      printf 'Successful encryption of %s into %s\n' "$src" "$dst" >&2
+    fi
   fi
 }
 

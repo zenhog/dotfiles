@@ -54,8 +54,8 @@ bind --mode=normal i mode ignore
 bind --mode=ignore <Escape> mode normal
 
 " tab
-bind x tabclose
-unbind d
+bind d tabclose
+unbind x
 
 " search
 bind / fillcmdline find

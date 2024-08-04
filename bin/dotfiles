@@ -3,11 +3,11 @@
 FS_UTILS="$HOME/.bin/utils"
 GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/utils
 
-function stage() {
+function SOURCE() {
   if [[ -r "$FS_UTILS" ]]; then
     source "$FS_UTILS" && return
   fi
-  source <(curl -s "$GH_UTILS")
+  source <(curl -sSL "$GH_UTILS")
 }
 
 GITURL=https://github.com/zenhog/dotfiles
@@ -29,7 +29,7 @@ function clone() {
       if [[ "$(git remote get-url origin)" != "$url" ||
         "$(git branch --show-current)" != "$branch" ]]
       then
-        verbose backup "$dir" && verbose "${cmd[@]}"
+        backup "$dir" && verbose "${cmd[@]}"
       fi
   )
 }
@@ -38,7 +38,7 @@ function init() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
-  verbose clone "$dir" "$GITURL" "$branch" && verbose decrypt "$branch"
+  clone "$dir" "$GITURL" "$branch" && decrypt "$branch"
 }
 
 function manifest_pull() {
@@ -103,13 +103,32 @@ function manifest_push() {
   done
 }
 
+function stage() {
+  local branch="${1?}"
+
+  manifest_pull "$branch" &&
+    encrypt "$branch" &&
+      cdgit "$branch" add --all .
+}
+
+function pull() {
+  local branch="${1?}"
+  verbose commit "$branch" &&
+    verbose cdgit "$branch" fetch &&
+      verbose cdgit "$branch" rebase --autostash
+}
+
+function push() {
+  local branch="${1?}"
+
+  verbose pull "$branch" && verbose cdgit push "$branch"
+}
+
 function update() {
   local branch="${1?}"
 
-  verbose manifest_pull "$branch" &&
-    verbose encrypt "$branch" &&
-      verbose commit "$branch" &&
-        verbose cdgit "$branch" push
+  stage "$branch" && push "$branch"
+  #verbose commit "$branch" && verbose cdgit "$branch" push
 }
 
 function linktarget() {
@@ -118,7 +137,7 @@ function linktarget() {
 
   mkdir -p "$(dirname "$link")"
 
-  mute readlink "$link" || verbose backup "$link"
+  mute readlink "$link" || backup "$link"
 
   [[ "$(quiet readlink "$link")" == "$target" ]] && return
 
@@ -167,7 +186,7 @@ function install() {
   local branch="${1?}"
 
   if init "$branch"; then
-    verbose manifest_push "$branch" && verbose link "$branch"
+    manifest_push "$branch" && link "$branch"
   fi
 }
 
@@ -182,7 +201,7 @@ function encrypt() {
   readarray -t secrets < <(find "$dir" -name '.gitsecret')
 
   for secret in "${secrets[@]}"; do
-    verbose encsecret "$(dirname "$secret")"
+    encsecret "$(dirname "$secret")"
   done
 
   # remove archives whose associated secret folder was deleted
@@ -206,7 +225,7 @@ function decrypt() {
   silent passphrase
 
   for archive in "${archives[@]}"; do
-    (cd "$(dirname "$archive")" && verbose decsecret "$archive")
+    (cd "$(dirname "$archive")" && decsecret "$archive")
   done
 }
 
@@ -227,57 +246,43 @@ function cdgit() (
 function status() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" status
+  stage "$branch" && cdgit "$branch" status
 }
 
 function lastdiff() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" diff "$branch"~.."$branch"
+  cdgit "$branch" diff "$branch"~.."$branch"
 }
 
 function diff() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" diff "$branch"
+  stage "$branch" && cdgit "$branch" diff "$branch"
 }
 
 function commit() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" add --all . &&
-    verbose cdgit "$branch" commit -m \
+  cdgit "$branch" add --all . &&
+    cdgit "$branch" commit -m \
       "autocommit of $(date "+%F") at $(date "+%T") on $(hostname)"
-}
-
-
-function pull() {
-  local repo="${1?}"
-  verbose commit "$branch" &&
-    verbose cdgit "$repo" fetch &&
-      verbose cdgit "$repo" rebase --autostash
-}
-
-function push() {
-  local repo="${1?}"
-
-  verbose pull && verbose cdgit push
 }
 
 function sync() {
 
-  local repo="${1?}"
+  local branch="${1?}"
 
-  cdgit "$repo" fetch
+  cdgit "$branch" fetch
 
   local mods
 
-  readarray -t mods < <(cdgit "$repo" status --porcelain=v1)
+  readarray -t mods < <(cdgit "$branch" status --porcelain=v1)
 
   if [[ ${#mods[@]} -gt 0 ]]; then
-    push
+    push "$branch"
   else
-    pull
+    pull "$branch"
   fi
 }
 
@@ -362,4 +367,4 @@ function checkbin() {
   done
 }
 
-checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && stage && "$@"
+checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && SOURCE && "$@"
