@@ -150,13 +150,11 @@ rootfs() (
 
     [[ -f "$HOME/$rootfs" ]] || curl -sSL "$repo/$rootfs" > "$HOME/$rootfs"
 
-    which xz &>/dev/null || xbps-install -Syu xz
-
     verbose tar xvf "$rootfs" -C /newroot
 
     chroot /newroot xbps-install -Syu xbps
-    chroot /newroot xbps-install -Syu "${BASE_PACKAGES[@]}"
-    chroot /newroot xbps-install -Syu ncurses-base libssl3
+    chroot /newroot xbps-install -yu "${BASE_PACKAGES[@]}" libssl3
+    chroot /newroot xbps-install -yu ncurses-base
 )
 
 packages() (
@@ -167,8 +165,10 @@ packages() (
     readarray -t packages < <(find /etc/packages/ -type f -exec cat {} \; |
         grep -v -h '^$' | sort -u)
 
-    verbose chroot /newroot xbps-install -Syn "${packages[@]}"
-    verbose chroot /newroot xbps-install -Syu "${packages[@]}"
+    verbose echo "Installing ${#packages[@]} packages: ${packages[*]}"
+
+    chroot /newroot xbps-install -n "${packages[@]}"
+    verbose chroot /newroot xbps-install -yu "${packages[@]}"
 
     verbose echo "Checking for installed packages"
     chroot /newroot xbps-install -n "${packages[@]}" 2>&1 |
@@ -213,7 +213,7 @@ configure() (
         "GRUB_GFXPAYLOAD_LINUX=keep"
     )
 
-    printf "%s\n" "${contents[@]}" > /newroot/etc/default/grub
+    printf "%s\n" "${contents[@]}" > "/newroot/etc/default/grub"
 )
 
 bootloaders() (
