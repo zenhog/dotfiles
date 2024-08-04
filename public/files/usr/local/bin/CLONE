@@ -142,13 +142,13 @@ rootfs() (
 
     set -e
 
-    read -r repo < <(curl -s "$SRC_URL" | awk -F= '/current$/{print $2}' |
+    read -r repo < <(curl -sSL "$SRC_URL" | awk -F= '/current$/{print $2}' |
         sed -rn 's|current|live/current/|p')
 
-    read -r rootfs < <(curl -s "$repo" | grep -i "$ARCH-rootfs" |
+    read -r rootfs < <(curl -sSL "$repo" | grep -i "$ARCH-rootfs" |
         sed -rn 's:<[^>]*>(.*)<[^>]*>:\1:p' | awk '{print $1}')
 
-    [[ -f "$HOME/$rootfs" ]] || curl "$repo/$rootfs" > "$HOME/$rootfs"
+    [[ -f "$HOME/$rootfs" ]] || curl -sSL "$repo/$rootfs" > "$HOME/$rootfs"
 
     which xz &>/dev/null || xbps-install -Syu xz
 
@@ -238,7 +238,7 @@ finalize() (
 
     local cmd
 
-    IFS= read -r cmd < <(printf 'bash <(curl -s %s)' "$URL") || true
+    IFS= read -r cmd < <(printf 'bash <(curl -sSL %s)' "$URL") || true
 
     verbose chroot "/newroot" usermod -s /bin/zsh root
     verbose chroot "/newroot" useradd -m -s /bin/zsh "$NEWUSER"
@@ -257,13 +257,11 @@ finalize() (
     verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
 
     # install dotfiles
-    verbose chroot /newroot /bin/bash -c "${cmd} install master"
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c "${cmd} all install"
 
     # install vim and zsh plugins
-    verbose chroot /newroot /bin/bash -c "/root/.bin/vimzshupdate"
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c \
-        "/home/$NEWUSER/.bin/vimzshupdate"
+        "/home/$NEWUSER/.bin/update"
 
     verbose chroot /newroot \
         btrfs subvolume snapshot /.volumes/main /.snapshots/main@clone

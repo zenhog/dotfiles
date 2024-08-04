@@ -6,8 +6,6 @@
 /etc/runit/runsvdir/live/
 /etc/runit/runsvdir/main/
 
-/root/.dotfiles
-
 /etc/NetworkManager/NetworkManager.conf
 /etc/NetworkManager/system-connections/
 

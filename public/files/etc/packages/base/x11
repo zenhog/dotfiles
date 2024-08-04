@@ -46,6 +46,7 @@ scrot
 awesome
 qutebrowser
 python3-adblock
+firefox-esr
 
 ffmpeg
 ffmpegthumbnailer
@@ -54,6 +55,7 @@ ffscreencast
 firejail
 bubblewrap
 
+feh
 nsxiv
 kitty
 ImageMagick

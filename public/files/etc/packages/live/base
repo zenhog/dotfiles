@@ -5,7 +5,9 @@ sudo
 tar
 xz
 gzip
+
 libssl3
+libmount
 
 grub
 grub-x86_64-efi
@@ -23,6 +25,7 @@ NetworkManager
 
 avahi
 openntpd
+ntp
 
 tor
 openvpn
