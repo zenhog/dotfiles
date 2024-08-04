@@ -121,7 +121,7 @@ function pull() {
 function push() {
   local branch="${1?}"
 
-  verbose pull "$branch" && verbose cdgit push "$branch"
+  verbose pull "$branch" && verbose cdgit "$branch" push
 }
 
 function update() {
