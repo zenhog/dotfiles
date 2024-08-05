@@ -16,6 +16,7 @@ URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 BASE_PACKAGES=(
     base-system btrfs-progs grub grub-x86_64-efi ansible git zsh tmux xz libssl3
     curl wget void-repo-nonfree gnupg mkpasswd pass tar sudo rsync openssh
+    ntpdate
 )
 
 function verbose() {
@@ -31,9 +32,9 @@ function verbose() {
     "$@"
 }
 
-efi() (
+efi() {
     [[ -d /sys/firmware/efi ]]
-)
+}
 
 prompt() {
     eval "[[ -n \$$1 ]]" && return 0
@@ -100,7 +101,7 @@ format() (
     btrfs subvolume create /newroot/home
     btrfs subvolume create /newroot/snapshots
 
-    mount -l | grep '/newroot'
+    findmnt -n -M /newroot --submounts
 
     umount -R /newroot
 )
@@ -112,7 +113,8 @@ remount() (
     set -e
 
     mkdir -p "/newroot"
-    mountpoint -q /newroot && umount -R /newroot
+
+    mountpoint /newroot && return
 
     mount -o "$BTRFS_OPTS,subvol=main" "$diskref" /newroot
 
@@ -135,13 +137,15 @@ remount() (
     mkdir -p /newroot/etc
     cp -L /etc/resolv.conf /newroot/etc
 
-    mount -l | grep '/newroot'
+    findmnt -n -M /newroot --submounts
 )
 
 rootfs() (
-    local repo rootfs
-
     set -e
+
+    remount
+
+    local repo rootfs
 
     read -r repo < <(curl -sSL "$SRC_URL" | awk -F= '/current$/{print $2}' |
         sed -rn 's|current|live/current/|p')
@@ -163,6 +167,8 @@ rootfs() (
 packages() (
     set -e
 
+    remount
+
     local packages
 
     readarray -t packages < <(find /etc/packages/ -type f -exec cat {} \; |
@@ -171,13 +177,14 @@ packages() (
     verbose chroot /newroot xbps-install -Syn "${packages[@]}"
     verbose chroot /newroot xbps-install -Syu "${packages[@]}"
 
-    verbose echo "Checking for installed packages"
     chroot /newroot xbps-install -n "${packages[@]}" 2>&1 |
         grep -v 'already installed'
 )
 
 configure() (
     set -e
+
+    remount
 
     echo "$MACNAME" > /newroot/etc/hostname
 
@@ -207,7 +214,17 @@ configure() (
     column -t < <(printf "%s %s %s %s %s %s\n" "${contents[@]}") \
         > /newroot/etc/fstab
 
-    contents=(
+    chroot /newroot ntpdate pool.ntp.org
+    chroot /newroot hwclock --systohc
+    chroot /newroot hwclock --utc
+)
+
+bootloaders() (
+    set -e
+
+    remount
+
+    local contents=(
         'GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 main"'
         "GRUB_DISABLE_SUBMENU=y"
         "GRUB_GFXMODE=640x480,800x600,1024x768,1280x1024,auto"
@@ -215,9 +232,7 @@ configure() (
     )
 
     printf "%s\n" "${contents[@]}" > /newroot/etc/default/grub
-)
 
-bootloaders() (
     if efi; then
         verbose chroot /newroot grub-install       \
             --target=x86_64-efi            \
@@ -234,13 +249,33 @@ bootloaders() (
     verbose chroot /newroot xbps-reconfigure -fa
 )
 
-finalize() (
-    local cmd
+credentials() (
+    set -e
 
-    IFS= read -r cmd < <(printf 'bash <(curl -sSL %s)' "$URL") || true
+    remount
 
-    verbose chroot "/newroot" usermod -s /bin/zsh root
-    verbose chroot "/newroot" useradd -m -s /bin/zsh "$NEWUSER"
+    local rootbase userbase groupbase range uid gid
+
+    verbose chroot /newroot usermod -s /bin/zsh root
+    verbose chroot /newroot useradd -m -s /bin/zsh "$NEWUSER"
+
+    read -r uid < <(chroot /newroot id -u "$NEWUSER")
+    read -r gid < <(chroot /newroot id -g "$NEWUSER")
+
+    range=$((10**6))
+    rootbase=$((10**9))
+    userbase=$((rootbase+10**6*(uid-1000+1)))
+    groupbase=$((rootbase+10**6*(gid-1000+1)))
+
+    verbose usermod \
+        --add-subuids $((rootbase))-$((rootbase+range)) \
+        --add-subgids $((rootbase))-$((rootbase+range)) \
+        root
+
+    verbose usermod \
+        --add-subuids $((userbase))-$((userbase+range)) \
+        --add-subgids $((groupbase))-$((groupbase+range)) \
+        "NEWUSER"
 
     verbose cp -rv --preserve=mode /etc/NetworkManager /newroot/etc
     verbose cp -rv --preserve=mode /etc/packages /newroot/etc
@@ -249,11 +284,23 @@ finalize() (
         'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee visudo'
 
     local contents=(
-        root:$PASSWORD
-        $NEWUSER:$PASSWORD
+        "root:$PASSWORD"
+        "$NEWUSER:$PASSWORD"
     )
 
     verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
+    unset PASSWORD
+)
+
+finalize() (
+
+    set -e
+
+    remount
+
+    local cmd
+
+    IFS= read -r cmd < <(printf 'bash <(curl -sSL %s)' "$URL") || true
 
     # install dotfiles
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c "${cmd} all install"
@@ -262,6 +309,7 @@ finalize() (
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c \
         "/home/$NEWUSER/.bin/update"
 
+    # make a btrfs snapshot
     verbose chroot /newroot \
         btrfs subvolume snapshot /.volumes/main /.snapshots/main@clone
 
@@ -274,9 +322,6 @@ checktools() (
 )
 
 main() {
-    checktools
-    prompts
-
     # /dev/sda3 /dev/sdb3 /dev/sdc3 ...
     BTRFSPARTS=("${TARGETS[@]/%/3}")
 
@@ -292,15 +337,18 @@ main() {
 
     verbose remount "$EFIPART" "$DISKREF"
 
-    # fails if /newroot/** are not mounted
     verbose rootfs
     verbose packages
     verbose configure
 
     verbose bootloaders "${TARGETS[@]}"
 
+    verbose credentials
     verbose finalize
 }
+
+checktools
+prompts
 
 if [[ $# -eq 0 ]]; then
     main
