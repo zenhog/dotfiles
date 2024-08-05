@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='W:m'
+
+COMMAND=(gui action open mailsync)

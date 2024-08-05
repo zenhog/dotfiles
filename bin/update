@@ -7,18 +7,28 @@ vim_update() {
     -c "echo '=============================> TSUpdateSync done'" \
     -c "Lazy! sync" \
     -c "echo '=============================> LazySync done'" \
-    -c "autocmd User MasonToolsUpdateCompleted quitall!" \
-    -c "echo ''" \
-    -c "MasonToolsUpdate"
+    -c "MasonToolsUpdateSync" \
+    -c "quitall!"
 }
 
 zsh_update() {
-  local cmds=(
+  local znapsrc initcmd updatecmd
+  initcmd=(
     'zmodload zsh/zpty'
     'zpty firstrun zsh'
     'zpty -r firstrun'
   )
-  zsh -s < <(printf "%s\n" "${cmd[@]}")
+  updatecmd=(
+    'zmodload zsh/zpty'
+    "source $HOME/.znaprc"
+    'zpty update znap pull'
+    'zpty -r update'
+  )
+
+  znapsrc="$HOME/.local/share/znap/znap.zsh"
+
+  [[ -r "$znapsrc" ]] && zsh -s < <(printf "%s\n" "${updatecmd[@]}") ||
+    zsh -s < <(printf "%s\n" "${initcmd[@]}")
 }
 
 case "$1" in

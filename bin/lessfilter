@@ -10,13 +10,14 @@ if [[ "$(basename "$1")" =~ tar.gz.gpg$ ]]; then
 elif [[ -d "$1" ]]; then
   lsd -1Al --no-symlink "$1/"
 elif [[ "$category" = image ]]; then
-  W=$FZF_PREVIEW_COLUMNS
-  H=$FZF_PREVIEW_LINES
-  kitty icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no \
-    --place ${W}x${H}@0x0 --scale-up "$1" | sed '$d' | sed $'$s/$/\e[m/' || {
-      catimg "$1"
-      exiftool "$1"
-    }
+  catimg "$1"
+  #W=$FZF_PREVIEW_COLUMNS
+  #H=$FZF_PREVIEW_LINES
+  #kitty icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no \
+  #  --place ${W}x${H}@0x0 --scale-up "$1" | sed '$d' | sed $'$s/$/\e[m/' || {
+  #    catimg "$1"
+  #    exiftool "$1"
+  #  }
 elif [[ "$kind" = vnd.openxmlformats-officedocument.spreadsheetml.sheet ]] || \
   [[ "$kind" = vnd.ms-excel ]]; then
   in2csv "$1" | xsv table | bat -ltsv --color=always

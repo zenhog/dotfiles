@@ -25,41 +25,60 @@ function action:poweroff() {
   sudo poweroff
 }
 
+function action:reboot() {
+  sudo reboot
+}
+
 function action:suspend() {
-  sudo poweroff
+  action:screenlock
+  sudo zzz
 }
 
 function action:screenlock() {
-  awm exec -- i3lock
+  local image="$HOME/.wallpapers/whysosleepy.png"
+
+  awm exec -- i3lock -u -e -i "$image"
 }
 
 function action:screenshot() {
-  :
+  local name dir="$HOME/.screenshots"
+  mkdir -p "$dir"
+  name="$dir/screenshot-$(date "+%F_%T")"-'$wx$h.png'
+
+  scrot -zio -F "$name" && notify "Screen shot!"
 }
 
 function action:windowshot() {
-  :
+  local name dir="$HOME/.screenshots"
+  mkdir -p "$dir"
+  name="$dir/windowshot-$(date "+%F_%T")"-'$wx$h.png'
+
+  scrot -ziow "$(xdotool getwindowfocus)" -F "$name" && notify "Window shot!"
 }
 
 function action:selectshot() {
-  :
+  local name dir="$HOME/.screenshots"
+  mkdir -p "$dir"
+  name="$dir/selectshot-$(date "+%F_%T")"-'$wx$h.png'
+
+  scrot -zios -F "$name" && notify "Selection shot!"
 }
 
 function action:toggletheme() {
   local current theme
 
-  read -r current < <(<"$HOME/.colorscheme")
+  read -r current < "$HOME/.colorscheme"
 
   case "$current" in
     dark)  theme=light;;
-    light) theme=dark;;
+    *)     theme=dark;;
   esac
 
   # alacritty theme
   mkdir -p "$HOME/.themes/alacritty"
   ln -vf \
-    "$HOME/.config/alacritty/colors.${theme}.toml" \
-    "$HOME/.config/alacritty/colors.toml"
+    "$HOME/.config/alacritty/colors.${theme}.toml"
+    "$HOME/.themes/alacritty/colors.toml"
 
   mkdir -p "$HOME/.themes/lscolors"
   ln -svf \
@@ -100,5 +119,5 @@ function action:toggletheme() {
 }
 
 function action:mailsync() {
-  :
+  mailsync
 }

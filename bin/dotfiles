@@ -106,29 +106,37 @@ function manifest_push() {
 function stage() {
   local branch="${1?}"
 
-  manifest_pull "$branch" &&
-    encrypt "$branch" &&
-      cdgit "$branch" add --all .
+  manifest_pull "$branch" && encrypt "$branch"
+  cdgit "$branch" add --all .
+}
+
+function sync() {
+  local branch="${1?}"
+
+  decrypt "$branch" && manifest_push "$branch"
 }
 
 function pull() {
   local branch="${1?}"
-  verbose commit "$branch" &&
-    verbose cdgit "$branch" fetch &&
-      verbose cdgit "$branch" rebase --autostash
+
+  verbose cdgit "$branch" fetch origin "$branch"
+  verbose cdgit "$branch" stash
+  verbose cdgit "$branch" rebase
+  sync "$branch"
+  verbose cdgit "$branch" stash pop
 }
 
 function push() {
   local branch="${1?}"
 
-  verbose pull "$branch" && verbose cdgit "$branch" push
+  verbose pull "$branch"
+  verbose cdgit "$branch" push
 }
 
 function update() {
   local branch="${1?}"
 
-  stage "$branch" && push "$branch"
-  #verbose commit "$branch" && verbose cdgit "$branch" push
+  commit "$branch" && push "$branch"
 }
 
 function linktarget() {
@@ -264,26 +272,9 @@ function diff() {
 function commit() {
   local branch="${1?}"
 
-  cdgit "$branch" add --all . &&
+  stage "$branch" &&
     cdgit "$branch" commit -m \
       "autocommit of $(date "+%F") at $(date "+%T") on $(hostname)"
-}
-
-function sync() {
-
-  local branch="${1?}"
-
-  cdgit "$branch" fetch
-
-  local mods
-
-  readarray -t mods < <(cdgit "$branch" status --porcelain=v1)
-
-  if [[ ${#mods[@]} -gt 0 ]]; then
-    push "$branch"
-  else
-    pull "$branch"
-  fi
 }
 
 function rebranch() (
@@ -346,7 +337,8 @@ function mklive() {
   local tmpdir="$(mktemp -d)"
 
   verbose sudo rsync "${opts[@]}" \
-    --exclude=supervise --files-from=/etc/live.manifest / "$tmpdir"
+    --exclude=supervise --files-from=/etc/live.manifest \
+    "$tmpdir"
 
   verbose rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
 

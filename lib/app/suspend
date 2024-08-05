@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='Print'
+
+COMMAND=(gui action open suspend)

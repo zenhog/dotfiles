@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='W:s'
+
+COMMAND=(gui action open selectshot)

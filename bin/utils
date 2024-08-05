@@ -190,6 +190,7 @@ function tarextract() {
     --keep-newer-files
     --preserve-permissions
     --no-same-owner
+    --verbose
     --file "${src:-/dev/stdin}"
   )
 

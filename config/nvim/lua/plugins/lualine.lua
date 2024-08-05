@@ -100,10 +100,10 @@ local bottom = {
     'branch',
   },
   lualine_b = {
-    'diagnostics',
-    'diff',
   },
   lualine_c = {
+    'diagnostics',
+    'diff',
   },
   lualine_x = {
   },

@@ -43,9 +43,11 @@
 [diff]
 	colorMoved = default
 [diff "gpg"]
-	textconv = gpg --batch -qd /dev/stdin
+	textconv = gpg --batch -qd /dev/stdin -o -
+	binary = true
 [diff "gpgtar"]
 	textconv = dotfiles dumpsecret
+	binary = true
 [http]
 	postBuffer = 157286400
 [pack]
