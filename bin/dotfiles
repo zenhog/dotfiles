@@ -338,17 +338,19 @@ function mklive() {
 
   verbose sudo rsync "${opts[@]}" \
     --exclude=supervise --files-from=/etc/live.manifest \
-    "$tmpdir"
+    / "$tmpdir"
 
   verbose rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
 
-  cd "$dir" && verbose sudo ./mklive.sh -K \
-    -C "${args[*]}" \
-    -p "${packages[*]}" \
-    -T "Custom VoidLinux Live Image" \
-    -i gzip -s gzip \
-    -I "$tmpdir" \
-    -o $HOME/custom-voidlinux-liveimg.iso
+  (
+    cd "$dir" && verbose sudo ./mklive.sh -K \
+      -C "${args[*]}" \
+      -p "${packages[*]}" \
+      -T "Custom VoidLinux Live Image" \
+      -i gzip -s gzip \
+      -I "$tmpdir" \
+      -o $HOME/custom-voidlinux-liveimg.iso
+  )
 
   verbose sudo rm -rf "$tmpdir"
 }

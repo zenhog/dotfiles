@@ -27,9 +27,9 @@ chpwd() {
     lsd
 }
 
-command_not_found_handler() {
-    :
-}
+#command_not_found_handler() {
+#    :
+#}
 
 HISTSIZE=10000
 SAVEHIST=10000
@@ -65,3 +65,5 @@ done
 for rcfile in "$ZSH_DIR"/*(.); do
     [[ -f "$rcfile" ]] && source "$rcfile"
 done
+
+mute gui action inittheme

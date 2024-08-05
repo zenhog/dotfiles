@@ -26,33 +26,33 @@ return {
         -- start; they should be the names Mason uses for each tool
         ensure_installed = {
           -- LSP Servers
-          'ansible-language-server',
-          'cpptools',
-          'deno',
-          'asm-lsp',                -- NASM/GAS/GO Assembly
+          --'ansible-language-server',
+          --'cpptools',
+          --'deno',
+          --'asm-lsp',                -- NASM/GAS/GO Assembly
           'clangd',                 -- C/C++/Rust
           'pyright',                -- Python
-          'solargraph',             -- Ruby
+          --'solargraph',             -- Ruby
           'lua-language-server',    -- Lua
           'bash-language-server',   -- Bash
-          'vim-language-server',    -- VimLang
-          'html-lsp',               -- HTML
-          'css-lsp',                -- CSS
-          'lemminx',                -- XML
-          'json-lsp',               -- Json
-          'yaml-language-server',   -- Yaml
-          'ltex-ls',                -- LanguageTool
+          --'vim-language-server',    -- VimLang
+          --'html-lsp',               -- HTML
+          --'css-lsp',                -- CSS
+          --'lemminx',                -- XML
+          --'json-lsp',               -- Json
+          --'yaml-language-server',   -- Yaml
+          --'ltex-ls',                -- LanguageTool
           -- DAP Servers
           'codelldb',               -- C/C++/Rust
           'debugpy',                -- Python
           'bash-debug-adapter',     -- Bash
-          'firefox-debug-adapter',  -- Firefox WebApp/Extension
+          --'firefox-debug-adapter',  -- Firefox WebApp/Extension
           -- Linters
-          'stylua',
-          'luacheck',
-          'shellcheck',
+          --'stylua',
+          --'luacheck',
+          --'shellcheck',
           -- Formatters
-          'shfmt',
+          --'shfmt',
         },
 
         -- if set to true this will check each tool for updates. If updates

@@ -1,9 +1,4 @@
-[[ -r "$HOME/.colorscheme" ]] || {
-  if [[ "$USER" == root  &&  -n "$SUDO_USER" ]]; then
-    cp "/home/$SUDO_USER/.colorscheme" "$HOME" &>/dev/null
-  fi
-  [[ -r "$HOME/.colorscheme" ]] || echo dark > "$HOME/.colorscheme"
-}
+[[ -r "$HOME/.colorscheme" ]] || echo dark > "$HOME/.colorscheme"
 
 read -r THEME < <(cat "$HOME/.colorscheme")
 
@@ -65,8 +60,8 @@ export FZF_DEFAULT_OPTS="${FZF_FLAGS[@]}"
 
 [[ -n "$TMUX" ]] && eval $(tmux show-environment -s DISPLAY)
 
-[[ -r "$HOME/.themes/lscolors/lscolors.sh" ]] &&
-  source "$HOME/.themes/lscolors/lscolors.sh"
+[[ -r "$HOME/.themes/lscolors/lscolors" ]] &&
+  source "$HOME/.themes/lscolors/lscolors"
 
 if [[ "$0" =~ zsh ]]; then
   zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"

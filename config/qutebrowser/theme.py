@@ -1,1 +1,1 @@
-dark.py
+../../../../.themes/qutebrowser/theme.py

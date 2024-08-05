@@ -1,7 +1,7 @@
 import = [
-  ".config/alacritty/font-name.toml",
-  ".config/alacritty/font-size.toml",
-  ".config/alacritty/colors.toml",
+  "~/.config/alacritty/font-name.toml",
+  "~/.config/alacritty/font-size.toml",
+  "~/.themes/alacritty/colors.toml",
 ]
 live_config_reload = true
 

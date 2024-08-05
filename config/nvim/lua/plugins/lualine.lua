@@ -102,6 +102,7 @@ local bottom = {
   lualine_b = {
   },
   lualine_c = {
+    '%=',
     'diagnostics',
     'diff',
   },

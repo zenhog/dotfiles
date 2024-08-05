@@ -66,7 +66,6 @@ function action:selectshot() {
 
 function action:toggletheme() {
   local current theme
-
   read -r current < "$HOME/.colorscheme"
 
   case "$current" in
@@ -74,31 +73,74 @@ function action:toggletheme() {
     *)     theme=dark;;
   esac
 
-  # alacritty theme
+  applytheme "$theme"
+}
+
+function inittheme() {
+  local current theme
+  read -r current < "$HOME/.colorscheme"
+
+  case "$current" in
+    light)  theme=light;;
+    *)     theme=dark;;
+  esac
+
+  settheme "$theme"
+}
+
+
+function settheme() {
+  local theme="$1"
+
+  # alacritty
   mkdir -p "$HOME/.themes/alacritty"
   ln -vf \
-    "$HOME/.config/alacritty/colors.${theme}.toml"
+    "$HOME/.config/alacritty/colors.${theme}.toml" \
     "$HOME/.themes/alacritty/colors.toml"
 
+  # lscolors
   mkdir -p "$HOME/.themes/lscolors"
   ln -svf \
     "$HOME/.config/lsd/lscolors/lscolors.${theme}" \
-    "$HOME/.themes/lscolors/lscolors.sh"
+    "$HOME/.themes/lscolors/lscolors"
 
-  cd "$HOME/.config/lsd" || return 1
-  ln -svf "themes/${theme}.yaml" colors.yaml
+  # lsd
+  mkdir -p "$HOME/.themes/lsd"
+  ln -svf \
+    "$HOME/.config/lsd/themes/${theme}.yaml" \
+    "$HOME/.themes/lsd/colors.yaml"
 
-  cd "$HOME/.config/qutebrowser" || return 1
-  ln -svf "${theme}.py" theme.py
+  # qutebrowser
+  mkdir -p "$HOME/.themes/qutebrowser"
+  ln -svf \
+    "$HOME/.config/qutebrowser/${theme}.py" \
+    "$HOME/.themes/qutebrowser/theme.py"
+
+  # tridactyl
+  mkdir -p "$HOME/.themes/tridactyl"
+  ln -svf \
+    "$HOME/.config/tridactyl/themes/custom-${theme}.css" \
+    "$HOME/.themes/tridactyl/theme.css"
+
+  # wallpapers
+  mkdir -p "$HOME/.themes/wallpapers"
+  ln -svf \
+    "$HOME/.wallpapers/main.${theme}" \
+    "$HOME/.themes/wallpapers/main"
+
+  # write new theme
+  echo "$theme" > "$HOME/.colorscheme"
+}
+
+function applytheme() {
+  local theme="$1"
+
+  settheme "$1"
+
   qutebrowser :config-source
-
-  cd "$HOME/.config/tridactyl/themes" || return 1
-  ln -svf "custom-${theme}.css" main.css
-
-  cd "$HOME/.wallpapers" || return 1
-  ln -svf "main.${theme}" main
   feh --bg-scale "$HOME/.wallpapers/main"
 
+  # neovim
   local panes
   readarray -t panes < \
     <(tmux list-panes -a -F '#S:#I.#P #{pane_current_command}' | grep 'vim$')
@@ -113,8 +155,7 @@ function action:toggletheme() {
       ":lua require('lualine').setup({ options = { theme = vim.g.lualine_theme_${theme} } })" Enter
   done
 
-  echo "$theme" > "$HOME/.colorscheme"
-
+  # tmux
   tmux reload
 }
 

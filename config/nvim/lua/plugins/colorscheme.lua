@@ -23,7 +23,7 @@ return {
             theme = 'dark'
           end
 
-          vim.g.theme_current = theme
+          vim.g.theme_current = theme or 'dark'
 
           vim.g.theme_dark = 'tokyonight-night'
           vim.g.theme_light = 'NeoSolarized'
