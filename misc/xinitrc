@@ -86,4 +86,6 @@ runsvdir "${HOME}"/.xsv &
 
 register
 
+gui action inittheme &>/dev/null
+
 awesome
