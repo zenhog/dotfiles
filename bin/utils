@@ -306,7 +306,7 @@ function diffsecret() {
 
 function encsecret() {
   local src="$(realpath -sm "${1?}")"
-  local dst="$src.tar.gz"
+  local dst="$src.tar.gz.gpg"
 
   if ! mute diffsecret "$src"; then
     if tarcreate "$src" | enc --output "$dst" -; then

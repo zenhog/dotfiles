@@ -96,6 +96,7 @@ function manifest_push() {
       --perms
       --no-group
       --no-owner
+      --delete
       --backup-dir=/.backup
     )
 
