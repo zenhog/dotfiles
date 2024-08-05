@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+snooze -v -s 1d -t "$PWD/timefile"
+
+xlocate -S
+
+touch $PWD/timefile
