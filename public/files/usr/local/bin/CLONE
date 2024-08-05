@@ -19,12 +19,12 @@ BASE_PACKAGES=(
 )
 
 function verbose() {
-    echo '======================================================' 2>/dev/tty >&2
-    echo "$*" 2>/dev/tty >&2
-    echo '======================================================' 2>/dev/tty >&2
+    echo '======================================================' >&2
+    echo "$*" >&2
+    echo '======================================================' >&2
     if [[ -n "$DEBUG" ]]; then
         local answer
-        IFS= read -r answer < /dev/tty
+        IFS= read -r answer
         [[ -n "$answer" ]]  && return 1
     fi
 
@@ -49,6 +49,7 @@ prompts() {
     prompt NEWUSER
     prompt MACNAME
     prompt TARGETS
+    prompt PASSWORD
     prompt TIMEZONE Europe/Paris
     prompt ARCH x86_64
 
@@ -234,8 +235,6 @@ bootloaders() (
 )
 
 finalize() (
-    set -e
-
     local cmd
 
     IFS= read -r cmd < <(printf 'bash <(curl -sSL %s)' "$URL") || true
@@ -250,8 +249,8 @@ finalize() (
         'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee visudo'
 
     local contents=(
-        root:
-        $NEWUSER:
+        root:$PASSWORD
+        $NEWUSER:$PASSWORD
     )
 
     verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
