@@ -15,8 +15,7 @@ URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 
 BASE_PACKAGES=(
     base-system btrfs-progs grub grub-x86_64-efi ansible git zsh tmux xz libssl3
-    curl wget void-repo-nonfree gnupg mkpasswd pass tar sudo rsync openssh
-    ntpdate
+    curl wget void-repo-nonfree gnupg mkpasswd pass tar sudo rsync openssh ntp
 )
 
 function verbose() {
@@ -26,7 +25,7 @@ function verbose() {
     if [[ -n "$DEBUG" ]]; then
         local answer
         IFS= read -r answer
-        [[ -n "$answer" ]]  && return 1
+        [[ -n "$answer" ]]  && return 0
     fi
     "$@"
 }
@@ -208,9 +207,10 @@ configure() (
         tmpfs            /tmp           tmpfs defaults,nosuid,nodev 0 0
         #/.swapfile       none           swap  defaults 0 0
     )
-    column -t < <(printf "%s %s %s %s %s %s\n" "${contents[@]}") \
-        > /newroot/etc/fstab
+    column -t < <(printf "%s %s %s %s %s %s\n" "${contents[@]}") |
+        tee /newroot/etc/fstab
 
+    echo "Setting up system time and hardware clock" 2>/dev/null
     chroot /newroot ntpdate pool.ntp.org
     chroot /newroot hwclock --systohc
     chroot /newroot hwclock --utc
@@ -258,39 +258,45 @@ credentials() (
 
     local rootbase userbase groupbase range uid gid
 
-    verbose chroot /newroot usermod -s /bin/zsh root
-    verbose chroot /newroot useradd -m -s /bin/zsh "$NEWUSER"
+    chroot /newroot id "$NEWUSER" &>/dev/null ||
+        verbose chroot /newroot useradd -m "$NEWUSER"
+
+    chroot /newroot usermod -s /bin/zsh root
+    chroot /newroot useradd -s /bin/zsh "$NEWUSER"
 
     read -r uid < <(chroot /newroot id -u "$NEWUSER")
     read -r gid < <(chroot /newroot id -g "$NEWUSER")
 
-    range=$((10**6))
+    range=$((10**6-1))
     rootbase=$((10**9))
     userbase=$((rootbase+10**6*(uid-1000+1)))
     groupbase=$((rootbase+10**6*(gid-1000+1)))
 
-    verbose usermod \
+    echo -n > /newroot/etc/subuid
+    echo -n > /newroot/etc/subgid
+
+    chroot /newroot usermod \
         --add-subuids $((rootbase))-$((rootbase+range)) \
         --add-subgids $((rootbase))-$((rootbase+range)) \
         root
 
-    verbose usermod \
+    chroot /newroot usermod \
         --add-subuids $((userbase))-$((userbase+range)) \
         --add-subgids $((groupbase))-$((groupbase+range)) \
-        "NEWUSER"
+        "$NEWUSER"
 
-    verbose cp -rv --preserve=mode /etc/NetworkManager /newroot/etc
-    verbose cp -rv --preserve=mode /etc/packages /newroot/etc
+    cp -rv --preserve=mode /etc/NetworkManager /newroot/etc
+    cp -rv --preserve=mode /etc/packages /newroot/etc
 
     verbose chroot /newroot bash -c \
-        'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee visudo'
+        'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee VISUAL=tee visudo'
 
     local contents=(
         "root:$PASSWORD"
         "$NEWUSER:$PASSWORD"
     )
 
-    verbose chroot /newroot chpasswd < <(printf "%s\n" "${contents[@]}")
+    chroot /newroot chpasswd -c SHA512 < <(printf "%s\n" "${contents[@]}")
     unset PASSWORD
 )
 
