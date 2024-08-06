@@ -297,6 +297,14 @@ credentials() (
     )
 
     chroot /newroot chpasswd -c SHA512 < <(printf "%s\n" "${contents[@]}")
+
+    chroot /newroot useradd -r vpn -d "/home/$NEWUSER" -s /bin/false
+    chroot /newroot useradd -r log -d /var/log/runit -s /bin/false
+
+    for group in wheel audio video kvm input bluetooth tor wireshark log vpn; do
+        chroot /newroot gpasswd -a "$NEWUSER" "$group"
+    done
+
     unset PASSWORD
 )
 
