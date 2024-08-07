@@ -182,13 +182,14 @@ configure() (
 
     remount
 
-    echo "$MACNAME" > /newroot/etc/hostname
+    echo "$MACNAME" | tee /newroot/etc/hostname
 
-    echo LANG=en_US.UTF-8  > /newroot/etc/locale.conf
-    echo en_US.UTF-8 UTF-8 > /newroot/etc/default/libc-locales
+    echo LANG=en_US.UTF-8  | tee /newroot/etc/locale.conf
+    echo en_US.UTF-8 UTF-8 | tee /newroot/etc/default/libc-locales
 
-    echo HARDWARECLOCK=UTC     > /newroot/etc/rc.conf
-    echo CGROUP_MODE=hybrid   >> /newroot/etc/rc.conf
+    echo 'HARDWARECLOCK="UTC"'  | tee    /newroot/etc/rc.conf
+    echo 'KEYMAP="us-nocaps"'   | tee -a /newroot/etc/rc.conf
+    echo 'CGROUP_MODE="hybrid"' | tee -a /newroot/etc/rc.conf
 
     chroot /newroot ln -svf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
     chroot /newroot xbps-reconfigure -f glibc-locales
@@ -207,13 +208,13 @@ configure() (
         tmpfs            /tmp           tmpfs defaults,nosuid,nodev 0 0
         #/.swapfile       none           swap  defaults 0 0
     )
+
     column -t < <(printf "%s %s %s %s %s %s\n" "${contents[@]}") |
         tee /newroot/etc/fstab
 
     echo "Setting up system time and hardware clock" 2>/dev/null
     chroot /newroot ntpdate pool.ntp.org
-    chroot /newroot hwclock --systohc
-    chroot /newroot hwclock --utc
+    chroot /newroot hwclock --utc --systohc
 )
 
 bootloaders() (
@@ -249,8 +250,6 @@ bootloaders() (
 )
 
 credentials() (
-    set -e
-
     remount
 
     prompt NEWUSER
@@ -272,6 +271,7 @@ credentials() (
     userbase=$((rootbase+10**6*(uid-1000+1)))
     groupbase=$((rootbase+10**6*(gid-1000+1)))
 
+    verbose echo "Overwrting /etc/{subuid,subgid}"
     echo -n > /newroot/etc/subuid
     echo -n > /newroot/etc/subgid
 
@@ -285,10 +285,11 @@ credentials() (
         --add-subgids $((groupbase))-$((groupbase+range)) \
         "$NEWUSER"
 
+    verbose echo "Copying /etc/{NetworkManager,packages} into the chroot"
     cp -rv --preserve=mode /etc/NetworkManager /newroot/etc
     cp -rv --preserve=mode /etc/packages /newroot/etc
 
-    verbose chroot /newroot bash -c \
+    chroot /newroot bash -c \
         'echo "ALL ALL=(ALL) NOPASSWD: ALL" | EDITOR=tee VISUAL=tee visudo'
 
     local contents=(
@@ -296,12 +297,18 @@ credentials() (
         "$NEWUSER:$PASSWORD"
     )
 
+    verbose echo "Setting the initial passwords for 'root' and '$NEWUSER'"
     chroot /newroot chpasswd -c SHA512 < <(printf "%s\n" "${contents[@]}")
 
-    chroot /newroot useradd -r vpn -d "/home/$NEWUSER" -s /bin/false
-    chroot /newroot useradd -r log -d /var/log/runit -s /bin/false
+    local groups=(
+        wheel audio video input bluetooth
+        kvm libvirt
+        _incus _incus-admin
+        tor wireshark
+    )
 
-    for group in wheel audio video kvm input bluetooth tor wireshark log vpn; do
+    verbose echo "Adding '$NEWUSER' to the appropriate groups"
+    for group in "${groups[@]}"; do
         chroot /newroot gpasswd -a "$NEWUSER" "$group"
     done
 
@@ -319,6 +326,9 @@ finalize() (
     prompt NEWUSER
 
     IFS= read -r cmd < <(printf 'bash <(curl -sSL %s)' "$URL") || true
+
+    # ensure /home/$NEWUSER is correctly setup
+    verbose chroot /newroot chown -hvR "$NEWUSER:$NEWUSER" "/home/$NEWUSER"
 
     # install dotfiles
     verbose chroot /newroot su -l "$NEWUSER" /bin/bash -c "${cmd} all install"
