@@ -40,8 +40,8 @@ CMD=(
   --script-security 2
   --route-up "$SCRIPT"
   --route-pre-down "$SCRIPT"
-  --user vpn
-  --group vpn
+  --user "$USER"
+  --group "$USER"
   --dev "$DEV"
   --dev-type tun
   --connect-retry 5 5

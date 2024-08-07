@@ -8,6 +8,7 @@ local modkey = "Mod4"
 
 local mods = {}
 
+mods['E'] = {}
 mods['W'] = { modkey }
 mods['S-M'] = { altkey, "Shift" }
 mods['C-M'] = { altkey, "Control" }
