@@ -1,3 +1,4 @@
+import os
 config.load_autoconfig(False)
 
 c.content.webgl = True
@@ -20,6 +21,10 @@ c.input.forward_unbound_keys = 'all'
 c.new_instance_open_target = 'tab'
 
 c.content.default_encoding = 'utf-8'
+
+
+bl_file = 'file://' + os.environ['HOME'] + \
+    '/.config/qutebrowser/lists/blacklist.txt'
 
 c.content.blocking.enabled = True
 c.content.blocking.method = 'adblock'
@@ -67,8 +72,9 @@ c.content.blocking.adblock.lists = [
     'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/ubo-link-shorteners.txt',
     'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/ubol-filters.txt',
     'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt',
-    'file:///tmp/blacklist.txt',
+    bl_file,
 ]
+
 
 c.scrolling.smooth = False
 

@@ -121,6 +121,10 @@ function sepline() {
   [[ -n "$NONEWLINE" ]] || echo
 }
 
+function zug() {
+  mute which ueberzug || return
+}
+
 function enc() {
   gpg -q --yes --pinentry-mode=loopback --symmetric \
     --passphrase-file=<(passphrase) "$@"

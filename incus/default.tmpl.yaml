@@ -1,0 +1,144 @@
+config: {}
+networks:
+- config:
+    ipv4.address: 10.100.100.1/24
+    ipv4.nat: "true"
+    ipv6.address: fd42:720e:63bd:4d94::1/64
+    ipv6.nat: "true"
+  type: bridge
+  project: default
+  description: default flat network
+  name: flatnet
+storage_pools:
+- config:
+    source: /var/lib/incus/storage-pools/default
+    volatile.initial_source: /var/lib/incus/storage-pools/default
+  driver: btrfs
+  description: default storage pool
+  name: default
+projects:
+- config:
+    features.images: "true"
+    features.networks: "true"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+  description: default project
+  name: default
+profiles:
+- config: {}
+  devices:
+    eth0:
+      name: eth0
+      network: flatnet
+      type: nic
+    root:
+      path: /
+      pool: default
+      type: disk
+  description: default profile
+  name: default
+- config:
+    environment.DISPLAY: :0
+    environment.PULSE_SERVER: /tmp/.pulse-native
+    user.user-data: |
+      #cloud-config
+      package_upgrade: true
+      package_reboot_if_required: true
+      packages:
+        - x11-apps
+        - mesa-utils
+        - pulseaudio
+        - firefox-esr
+      runcmd:
+        - 'systemctl enable --now pulseaudio'
+  devices:
+    PASocket:
+      path: /tmp/.pulse-native
+      source: /tmp/user/${USER}/pulse/native
+      type: disk
+    X0:
+      path: /tmp/.X11-unix/X0
+      source: /tmp/.X11-unix/X0
+      type: disk
+    mygpu:
+      type: gpu
+  name: gui
+  description: gui profile
+- config:
+    user.user-data: |
+      #cloud-config
+      users:
+        - name: ${USER}
+          ssh-authorized-keys:
+            - ${PUBKEY}
+          sudo: ALL=(ALL) NOPASSWD:ALL
+          groups: sudo, wheel, users, audio, video
+          shell: /usr/bin/zsh
+      locale: en_US.UTF-8
+      timezone: ${TIMEZONE}
+      manage_etc_hosts: localhost
+      package_upgrade: true
+      package_reboot_if_required: true
+      packages:
+        - screen
+        - bat
+        - lsd
+        - fzf
+        - jq
+        - yq
+        - less
+        - fd-find
+        - ripgrep
+        - git-delta
+        - wget
+        - w3m
+        - elinks
+        - socat
+        - ssh
+        - sshpass
+        - zsh
+        - neovim
+        - git
+        - curl
+        - rsync
+        - bash
+        - tmux
+        - gnupg
+        - pass
+        - ansible
+        - apt-file
+        - ansifilter
+        - jdupes
+        - grc
+        - chafa
+        - wgetpaste
+        - cargo
+        - pipx
+        - python3-pip
+        - nodejs
+        - npm
+        - luarocks
+      runcmd:
+        - systemctl enable --now ssh
+        - ln -svf /usr/bin/batcat /usr/local/bin/bat
+        - ln -svf /usr/bin/fdfind /usr/local/bin/fd
+        - su -l ${USER} -s /bin/bash -c "bash <(curl -s ${URL}) install master"
+        - su -l ${USER} -s /bin/bash -c "bash '/home/${USER}/.bin/update'"
+  description: ${USER} profile
+  name: ${USER}
+- config:
+    user.user-data: |
+      #cloud-config
+      package_upgrade: true
+      package_reboot_if_required: true
+      packages:
+        - kali-linux-large
+        - radare2
+        - lxd-gdb
+        - gdbmtool
+        - rizin-cutter
+  devices: {}
+  description: kali profile
+  name: kali

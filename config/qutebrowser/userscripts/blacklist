@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 HOST="$1"
-LIST=/tmp/blacklist.txt
+LIST="$HOME/.config/qutebrowser/lists/blacklist.txt"
 
 echo "*.${1}" >> "$LIST"
 

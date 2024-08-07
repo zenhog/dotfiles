@@ -21,7 +21,9 @@ function list() {
 BINDS[restart]=alt-r
 DESCS[restart]='Restart service'
 function restart() {
-  sudo vsv restart "$1"
+  local svc
+  read -r svc _ <<< "$1"
+  sudo vsv restart "$svc"
 }
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-KEY='W:v'
+KEY='E:Print'
 
 COMMAND=(gui action open screenshot)

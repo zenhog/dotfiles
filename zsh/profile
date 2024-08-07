@@ -1,6 +1,6 @@
-if (return 0 2>/dev/null); then
-    printf "Being sourced by %s\n" "$(realpath $0)" >> "$HOME/.bash_readers"
-fi
+#if (return 0 2>/dev/null); then
+#    printf "Being sourced by %s\n" "$(realpath $0)" >> "$HOME/.bash_readers"
+#fi
 
 function prependpath() {
     case ":$PATH:" in

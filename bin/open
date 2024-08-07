@@ -16,7 +16,7 @@ if [[ "$mime" == inode/directory ]]; then
         read -r mime < "$1/.dirtype"
     else
         cd "$1" &&
-        exec gui tmux open "window:$(hostname):@:$(basename "$1")"
+            exec gui tmux open "window:$(hostname):@:$(basename "$1")"
         #exec gui tmux open "window:$(hostname):@:$(basename "$1")" "$SHELL"
     fi
 fi
@@ -37,13 +37,16 @@ case "${mime}" in
     *)
         case "$1" in
             file://*)
-                gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
+                gui tmux open "window:$(hostname):@:$(basename "$1")" vim \
+                    "${1#file://}"
                 ;;
             irc:*)
                 ;;
             ircs:*)
                 ;;
             mailto:*)
+                gui tmux open "window:$(hostname):@:neomutt" \
+                    neomutt "${1#mailto:}"
                 ;;
             magnet:*)
                 aria2p add "$@"

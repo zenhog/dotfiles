@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-KEY='W:s'
+KEY='E:Delete'
 
 COMMAND=(gui action open selectshot)

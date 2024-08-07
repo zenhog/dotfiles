@@ -9,6 +9,7 @@ export iSEP=$'\x01' oSEP=' ➡ '
 export MODULE="$1"
 export MODULES_DIR="$HOME/.lib/gui"
 
+source "$HOME/.bin/utils"
 source "$HOME/.zshenv"
 
 declare -A -x BINDS
@@ -25,42 +26,6 @@ declare -A -x CALLS=(
 function notify() {
   notify-send -t 5000 -a menu "$MODULE" "$@"
   widget push timeout
-}
-
-function erronly() {
-  "$@" >/dev/null
-}
-
-function quiet() {
-  "$@" 2>/dev/null
-}
-
-function silent() {
-  "$@" >/dev/null 2>&1
-}
-
-function sepline() {
-  local columns="${FZF_PREVIEW_COLUMNS}"
-  [[ -z "$columns" ]] && read -r _ columns < <(stty size)
-
-  local text="$1"
- 
-  local middle="$(($columns - ${#text}))"
-
-  local d=$(((columns - ${#text})/2))
-  local r=$(((columns - ${#text})%2))
-
-  for _ in $(seq 1 $d); do
-    printf -- ─
-  done
-
-  printf "%s" "$text"
-
-  for _ in $(seq 1 $((d + r))); do
-    printf -- ─
-  done
-
-  echo
 }
 
 function get_opt() {

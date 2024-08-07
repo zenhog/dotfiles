@@ -86,6 +86,7 @@ local top = {
     --},
   },
   lualine_x = {
+    lspname,
   },
   lualine_y = {
     -- dir/repodir?
@@ -110,7 +111,6 @@ local bottom = {
   },
   lualine_y = {
     filetypeLSP,
-    lspname,
     formatencoding,
   },
   lualine_z = {

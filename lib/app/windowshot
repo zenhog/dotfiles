@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-KEY='W:b'
+KEY='E:Insert'
 
 COMMAND=(gui action open windowshot)

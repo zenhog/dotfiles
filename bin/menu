@@ -205,6 +205,7 @@ function dispatch() {
   [[ $# -eq 0 ]] && exit 1
   # if we are in a tmux menu session, proceed with the main function
   if tty -s && [[ "$(tmux showenv TMUX_SESSION_NAME)" =~ menu$ ]]; then
+    zug
     main "$@"
   # otherwise, we are in a non-interactive env and we need to setup
   else
