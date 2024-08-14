@@ -38,7 +38,7 @@ function init() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
-  clone "$dir" "$GITURL" "$branch" && decrypt "$branch"
+  clone "$dir" "$GITURL" "$branch"
 }
 
 function manifest_pull() {
@@ -113,7 +113,7 @@ function stage() {
 function sync() {
   local branch="${1?}"
 
-  decrypt "$branch" && manifest_push "$branch"
+  decrypt "$branch" && manifest_push "$branch" && link "$branch"
 }
 
 function pull() {
@@ -193,9 +193,7 @@ function link() {
 function install() {
   local branch="${1?}"
 
-  if init "$branch"; then
-    manifest_push "$branch" && link "$branch"
-  fi
+  init "$branch" && sync "$branch"
 }
 
 function encrypt() {

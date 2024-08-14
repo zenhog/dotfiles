@@ -106,9 +106,7 @@ function rexec() {
 
   shift
 
-  if connected "$host"; then
-    quiet ssh -S "$sock" "$host" zsh -ilc "'$*'"
-  fi
+  connect "$host" && quiet ssh -S "$sock" "$host" zsh -ilc "'$*'"
 }
 
 function sync() {
@@ -119,10 +117,7 @@ function sync() {
 
   read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
-  set -e
-  connect "$host"
   rexec "$host" bash "$cmd" install master
   rexec "$host" dotfiles pull master
   rexec "$host" dotfiles link master
-  set +e
 }

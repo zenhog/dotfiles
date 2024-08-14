@@ -193,7 +193,7 @@ function on_xsession() {
 }
 
 function open-session() {
-  local name="$1"
+  local session="$1"
   local class=tmux
 
   [[ -n "$HOST" ]] && class=rmux
