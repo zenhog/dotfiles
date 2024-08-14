@@ -68,6 +68,7 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
 
 export MAILDIR="$HOME/.mail"
 export NOTMUCH_DATABASE="$HOME/.mail"
+export HOSTNAME="$(hostname)"
 
 chainsource "$HOME/.userinfo/info_$(whoami)_$(hostname)"
 

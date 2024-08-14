@@ -37,7 +37,7 @@ function verbose() {
   local msg
 
   read -r msg < <(printf '[%s] %s' "$PWD" "$*")
-  #NONEWLINE=1 sepline '' "$msg" >&2
+
   sepline >&2
   echo "$msg" >&2
   sepline '-' >&2
@@ -93,6 +93,17 @@ function path() {
   echo "$fullpath" "$dir" "$base"
 }
 
+function prompt() {
+  if eval "[[ -z \$$1 ]]"; then
+    echo -n "$1: " >&2
+    eval "IFS=$'\n' read -r $1"
+  fi
+
+  eval "export $1=\$$1"
+
+  printf '%s=%s\n' "$1" "$(eval "echo \$$1")" >&2
+}
+
 function sepline() {
   local columns="${FZF_PREVIEW_COLUMNS}"
 
@@ -100,8 +111,8 @@ function sepline() {
   [[ -z "$columns" ]] && read -r _ columns < <(quiet stty size)
   [[ -z "$columns" ]] && columns=80
 
-  local sep="${1:-}"
-  local text="$2"
+  local text="$1"
+  local sep="${2:-}"
 
   local middle="$(($columns - ${#text}))"
 
@@ -161,7 +172,7 @@ if [[ "$RUNSHELL" == zsh ]]; then
 fi
 
 function tarformat() {
-  COLUMNS=80 sepline '-' "> $TAR_FILENAME <"
+  COLUMNS=80 sepline "> $TAR_FILENAME <" '-'
   cat -v -
   echo
 }
@@ -246,7 +257,7 @@ function tarlist() {
 
   readarray -t lines < <(tar "${opts[@]}")
 
-  COLUMNS=80 sepline '-' '> Archive contents <'
+  COLUMNS=80 sepline '> Archive contents <' '-'
   for line in "${lines[@]}"; do
     local mode ownership size date time path
     read -r mode ownership size date time path <<< "$line"

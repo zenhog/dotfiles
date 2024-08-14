@@ -13,6 +13,11 @@ shopt -s nullglob
 
 #source "$HOME/.profile"
 
+StartDate=$(date -u +%S.%N)
+
 for config in "$DIR"/??-*.conf; do
-    source "$config"
+  source "$config"
+  #newdate=$(date -u +%S.%N)
+  #echo "$config took: $(echo "scale=6; $newdate - $StartDate" | bc)"
+  #StartDate="$newdate"
 done

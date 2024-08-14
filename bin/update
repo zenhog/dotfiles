@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$HOME/.bin/utils"
+
 vim_update() {
   vim --headless \
     -c "TSUpdateSync" \
@@ -15,7 +17,7 @@ zsh_update() {
 
   initcmd=(
     'zmodload zsh/zpty'
-    'zpty firstrun zsh'
+    'zpty firstrun zsh -i'
     'zpty -r firstrun'
   )
 
@@ -29,8 +31,8 @@ zsh_update() {
   znapsrc="$HOME/.local/share/znap/znap.zsh"
 
   [[ -r "$znapsrc" ]] &&
-    zsh -s < <(printf "%s\n" "${updatecmd[@]}") ||
-      zsh -s < <(printf "%s\n" "${initcmd[@]}")
+    zsh -is < <(printf "%s\n" "${updatecmd[@]}") ||
+      zsh -is < <(printf "%s\n" "${initcmd[@]}")
 }
 
 function incus_update() {
@@ -39,10 +41,14 @@ function incus_update() {
 
   URL="https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles"
 
-  export PUBKEY="$(ssh-add -L)"
-  export TIMEZONE
-  export USER
-  export URL
+  PUBKEY="$(ssh-add -L)"
+
+  prompt PUBKEY
+  prompt USER
+  prompt URL
+  prompt TIMEZONE
+  prompt USER
+
   sudo incus admin init --preseed < \
     <(envsubst < "$HOME/.incus/default.tmpl.yaml")
 }

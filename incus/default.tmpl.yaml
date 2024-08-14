@@ -7,14 +7,14 @@ networks:
     ipv6.nat: "true"
   type: bridge
   project: default
-  description: default flat network
+  description: Flat network
   name: flatnet
 storage_pools:
 - config:
     source: /var/lib/incus/storage-pools/default
     volatile.initial_source: /var/lib/incus/storage-pools/default
   driver: btrfs
-  description: default storage pool
+  description: Default btrfs storage pool
   name: default
 projects:
 - config:
@@ -24,10 +24,11 @@ projects:
     features.profiles: "true"
     features.storage.buckets: "true"
     features.storage.volumes: "true"
-  description: default project
+  description: Default project
   name: default
 profiles:
-- config: {}
+- config:
+    security.secureboot: false
   devices:
     eth0:
       name: eth0
@@ -37,11 +38,10 @@ profiles:
       path: /
       pool: default
       type: disk
-  description: default profile
+  description: Default profile
   name: default
 - config:
     environment.DISPLAY: :0
-    environment.PULSE_SERVER: /tmp/.pulse-native
     user.user-data: |
       #cloud-config
       package_upgrade: true
@@ -51,21 +51,19 @@ profiles:
         - mesa-utils
         - pulseaudio
         - firefox-esr
-      runcmd:
-        - 'systemctl enable --now pulseaudio'
   devices:
     PASocket:
-      path: /tmp/.pulse-native
       source: /tmp/user/${USER}/pulse/native
+      path: /tmp/user/${USER}/pulse/native
       type: disk
     X0:
-      path: /tmp/.X11-unix/X0
-      source: /tmp/.X11-unix/X0
+      path: "/tmp/.X11-unix/X0"
+      source: "/tmp/.X11-unix/X0"
       type: disk
-    mygpu:
+    gpu:
       type: gpu
   name: gui
-  description: gui profile
+  description: GUI profile
 - config:
     user.user-data: |
       #cloud-config
@@ -126,7 +124,7 @@ profiles:
         - ln -svf /usr/bin/fdfind /usr/local/bin/fd
         - su -l ${USER} -s /bin/bash -c "bash <(curl -s ${URL}) install master"
         - su -l ${USER} -s /bin/bash -c "bash '/home/${USER}/.bin/update'"
-  description: ${USER} profile
+  description: User ${USER} profile
   name: ${USER}
 - config:
     user.user-data: |
@@ -139,6 +137,5 @@ profiles:
         - lxd-gdb
         - gdbmtool
         - rizin-cutter
-  devices: {}
   description: kali profile
   name: kali

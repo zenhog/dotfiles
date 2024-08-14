@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#KEY='W:e'
+KEY='S-W:e'
 
-ATTRIBUTES=(profile=@vpnqute)
+ATTRIBUTES=(profile=vpnqute)
 COMMAND=(cgexec -g net_cls:vpn1
   qutebrowser --qt-arg name vpnqute --target private-window --temp-basedir
-  --config-py "$HOME/.config/qutebrowser/config.py" :adblock-update)
+  --config-py "$HOME/.config/qutebrowser/config.py")

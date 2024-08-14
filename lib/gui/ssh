@@ -6,42 +6,123 @@ ICON=
 
 export MUXSOCK="$HOME/.rmux.S"
 export SOCKDIR="$HOME/.sockets"
+export HOSTDIR="$HOME/.ssh/hosts"
+
+export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 
 function view() {
-  preview "$HOME/.ssh/hosts/$1"
+  local hostfile
+  read -r hostfile < <(ansifilter <<< "$1")
+  echo "$HOSTDIR/$hostfile"
+  sepline
+  preview "$HOSTDIR/$hostfile"
 }
 
 function list() {
-  ls -1 "$HOME/.ssh/hosts"
+  local hosts
+  readarray -t hosts < <(cd "$HOSTDIR" && find * -type f)
+
+  for host in "${hosts[@]}"; do
+    if connected "$host"; then
+      host="$(ansi --green "$host")"
+    fi
+    printf "%s\n" "$host"
+  done
+}
+
+function get() {
+  local kind="$1" namespace host sock
+
+  IFS=$'/\n' read -r namespace host _ < <(ansifilter <<< "$2")
+
+  [[ "$kind" == host ]] && echo "$namespace/$host"
+  [[ "$kind" == sock ]] && echo "$SOCKDIR/$host.$namespace.S"
+}
+
+function connected() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  mute ssh -S "$sock" -O check "$host"
+}
+
+BINDS[toggle]=tab
+DESCS[toggle]='Toggle ssh master connection'
+function toggle() {
+  local host="$(get host "$1")"
+
+  if connected "$host"; then
+    disconnect "$1"
+  else
+    connect "$1"
+  fi
 }
 
 function connect() {
-  local host="$1"
-  local sock="${SOCKDIR}/${host}.S"
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
 
-  [[ -n "$SSH_CONNECTION" ]] && return
-
-  ssh -S "$sock" -O check "$host" && return
+  if [[ -n "$SSH_CONNECTION" ]] || connected "$host"; then
+    return
+  fi
 
   rm -f "$sock"
 
-  ssh -fMNS "$sock" "$host"
+  timeout 5 ssh -fMNS "$sock" "$host"
 }
 
 function disconnect() {
-    local host="$1"
-    local sock="$SOCKDIR/$host.S"
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
 
-    if ssh -S "$sock" -O check "$host"; then
-        ssh -S "$sock" -O cancel "$host"
-        ssh -S "$sock" -O exit   "$host"
-    fi
+  if connected "$host"; then
+    ssh -S "$sock" -O cancel "$host"
+    ssh -S "$sock" -O exit   "$host"
+  fi
+}
+
+function revport() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  if connected "$host"; then
+    ssh -S "$sock" -O forward -R "localhost:0:$MUXSOCK" "$host"
+  fi
+}
+
+BINDS[tmux]=enter
+HOOKS[tmux]=accept
+DESCS[tmux]='New remote tmux session'
+function tmux() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  HOST="$host" gui tmux open-session "${host##*/}"
+}
+
+function rexec() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  shift
+
+  if connected "$host"; then
+    quiet ssh -S "$sock" "$host" zsh -ilc "'$*'"
+  fi
 }
 
 function sync() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
 
-  rsync --quiet --relative "$PUBFILES"
-  remexec "$host" bash "$REMFILES/bin/dot" install pub
+  local cmd
+
+  read -r cmd < <(printf '<(curl -sL %s)' "$URL")
+
+  set -e
+  connect "$host"
+  rexec "$host" bash "$cmd" install master
+  rexec "$host" dotfiles pull master
+  rexec "$host" dotfiles link master
+  set +e
 }

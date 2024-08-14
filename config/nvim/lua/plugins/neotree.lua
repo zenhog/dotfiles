@@ -23,8 +23,8 @@ return {
             {
                 "<C-y>",
                 mode = { "n" },
-                '<Cmd>Neotree focus<CR>',
-                desc = 'Neotree Focus',
+                '<Cmd>Neotree toggle<CR>',
+                desc = 'Neotree toggle',
             },
         },
     },

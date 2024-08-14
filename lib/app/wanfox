@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#KEY='W:w'
+KEY='S-W:w'
 
-ATTRIBUTES=(profile=@wanfox)
+ATTRIBUTES=(profile=wanfox)
 COMMAND=(firefox -p main --new-instance --class wanfox)

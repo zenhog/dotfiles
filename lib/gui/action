@@ -37,7 +37,7 @@ function action:suspend() {
 function action:screenlock() {
   local image="$HOME/.wallpapers/whysosleepy.png"
 
-  awm exec -- i3lock -u -e -i "$image"
+  gui awm spawn -- i3lock -nuei "$image"
 }
 
 function action:screenshot() {

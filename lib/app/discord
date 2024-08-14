@@ -2,5 +2,5 @@
 
 KEY='W:r'
 
-ATTRIBUTES=(profile=@discord)
+ATTRIBUTES=(profile=discord)
 COMMAND=(Discord)

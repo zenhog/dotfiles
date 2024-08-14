@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KEY='S-W:Return'
+
+COMMAND=(gui ssh tmux "incus ctfbox")

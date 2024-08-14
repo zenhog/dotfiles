@@ -7,7 +7,8 @@ ICON=
 NOWRAP=1
 
 function init() {
-  set_opt pwd "$HOME/.marks"
+  #set_opt pwd "$HOME/.marks"
+  [[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
   set_opt hide 0
   set_opt mode 0
   set_opt mode-mod 3
@@ -119,7 +120,6 @@ function rotate_mode() {
   search "$1" "$2"
 }
 
-
 BINDS[toggle_hide]=alt-t
 DESCS[toggle_hide]='Toggle hidden'
 function toggle_hide() {
@@ -133,9 +133,9 @@ function rename() {
   folder_restore
   local entry="$(filter "$1")"
 
-  export MENU_INPUT_PREVIEW=
+  export MENU_INPUT_PREVIEW="$entry"
 
-  read -r input < <(cd "$FOLDER" && input "Rename: $entry")
+  read -r input < <(cd "$FOLDER" && input "$entry")
   mv -- "$FOLDER/$entry" "$FOLDER/$input"
 }
 
@@ -148,7 +148,9 @@ function mark() {
 
   local target="$(realpath -m --relative-to="$marksdir" "$path")"
 
-  (cd "$marksdir" && ln -svf "$target" "$(basename "$path")")
+  local link="$(basename "$path")"
+
+  (cd "$marksdir" && ln -svf "$target" "${link#.}")
 }
 
 BINDS[marks]=alt-space
@@ -163,6 +165,14 @@ BINDS[home]=alt-q
 DESCS[home]='Home directory'
 function home() {
   folder_cd "$HOME"
+}
+
+BINDS[add]=alt-a
+DESCS[add]='Create directory'
+function add() {
+  local query="$2"
+  folder_restore
+  mkdir -p "$FOLDER/$query"
 }
 
 BINDS[del]=alt-d
@@ -184,6 +194,13 @@ function _open() {
   open "$1"
 }
 
+BINDS[vimsession]=alt-u
+HOOKS[vimsession]=accept
+DESCS[vimsession]='Open vim project and quit'
+function vimsession() {
+  command open "$(path "$1")" nvim
+}
+
 BINDS[enter]=enter
 DESCS[enter]='Change Directory'
 function enter() {
@@ -197,7 +214,7 @@ function back() {
 }
 
 function atfinish() {
-  unset_opt pwd
+  #unset_opt pwd
   unset_opt hide
   unset_opt mode
 }

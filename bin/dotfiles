@@ -260,7 +260,7 @@ function status() {
 function lastdiff() {
   local branch="${1?}"
 
-  cdgit "$branch" diff "$branch"~.."$branch"
+  cdgit "$branch" diff "$branch"~ "$branch"
 }
 
 function diff() {

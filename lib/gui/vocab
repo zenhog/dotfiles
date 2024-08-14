@@ -9,7 +9,7 @@ HORIZONTAL=1
 export DB="$HOME/.db/vocabulary.db"
 export API="https://api.dictionaryapi.dev/api/v2/entries/en"
 
-function init() {
+function noinit() {
   rm -f "$DB"
   sqlite3 "$DB" << EOF
   CREATE TABLE words(

@@ -1,20 +1,10 @@
 #!/usr/bin/env bash
 
-#checkdep tmux rsync ssh unlink quiet wmctrl awm-spawn || exit 1
-
 LSCRIPT=$(realpath "${BASH_SOURCE[0]}")
 RSCRIPT="\$HOME${LSCRIPT#${HOME}}"
 
 PUBFILES="$HOME/./.pubfiles"
 REMFILES="\$HOME/${PUBFILES##*/}"
-
-TMUXP="$HOME/.tmuxp"
-
-
-MUXSOCKET="$HOME/.rmux.S"
-SOCKETDIR="$HOME/.sockets"
-
-mkdir -p "$SOCKETDIR"
 
 function istty
 {
@@ -25,55 +15,6 @@ function istty
     fi
 
     return 1
-}
-
-function run
-{
-    local session="${1%%.*}"
-
-    if istty || [[ -z "$DISPLAY" ]]; then
-        rmux up "$session"
-        return
-    fi
-
-    if wmctrl -a "$session"; then
-        return
-    fi
-
-    awm-spawn vtspawn "$session" rmux up
-}
-
-function connect
-{
-    local host="$1"
-    local sock="$SOCKETDIR/$host.S"
-
-    if [[ -n "$SSH_CONNECTION" ]]; then
-        echo "Cannot connect from remote"
-        exit 1
-    fi
-
-    if ssh -S "$sock" -O check "$host" &>/dev/null; then
-        return
-    fi
-
-    rm -f "$sock"
-
-    if ! ssh -fMNS "$sock" "$host"; then
-        echo "Could not connect to host '$host'"
-        exit 1
-    fi
-}
-
-function disconnect
-{
-    local host="$1"
-    local sock="$SOCKETDIR/$host.S"
-
-    if ssh -S "$sock" -O check "$host"; then
-        ssh -S "$sock" -O cancel "$host"
-        ssh -S "$sock" -O exit   "$host"
-    fi
 }
 
 remsync() {
@@ -184,12 +125,12 @@ function down
         return
     fi
 
+    # @gui-$module-env-name
+    # @gui-$module-var-name
+    # @gui-$module-opt-name
+ 
+    # @host-remote-
+
     tmux set -su "@remote-$host"
     disconnect "$session"
 }
-
-if [[ "$#" -eq 0 ]]; then
-    up $(hostname)
-else
-    "$@"
-fi

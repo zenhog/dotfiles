@@ -1,0 +1,16 @@
+config:
+  user.user-data: |
+    #cloud-config
+    package_upgrade: true
+    package_reboot_if_required: true
+    packages:
+      - kali-linux-large
+      - radare2
+      - lxd-gdb
+      - gdbmtool
+      - rizin-cutter
+description: kali profile
+devices: {}
+name: kali
+used_by: []
+project: default

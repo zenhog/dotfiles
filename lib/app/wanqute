@@ -2,5 +2,5 @@
 
 KEY='W:w'
 
-ATTRIBUTES=(profile=@wanqute)
+ATTRIBUTES=(profile=wanqute)
 COMMAND=(qutebrowser --qt-arg name wanqute)

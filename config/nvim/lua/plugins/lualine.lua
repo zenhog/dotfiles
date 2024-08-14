@@ -16,7 +16,8 @@ local function lspname()
 end
 
 local function session()
-  return require('possession.session').session_name or ''
+  --return require('possession.session').get_session_name() or ''
+  return vim.env.PWD
 end
 
 local function location()
@@ -73,9 +74,9 @@ local top = {
   lualine_a = {
     'mode',
     updates,
+    'tabs',
   },
   lualine_b = {
-    tabs,
   },
   lualine_c = {
     --{
@@ -86,10 +87,9 @@ local top = {
     --},
   },
   lualine_x = {
-    lspname,
   },
   lualine_y = {
-    -- dir/repodir?
+    lspname,
   },
   lualine_z = {
     session,
@@ -98,20 +98,20 @@ local top = {
 local bottom = {
   lualine_a = {
     'filename',
-    'branch',
   },
   lualine_b = {
+    'branch',
+    'diff',
+    'diagnostics',
   },
   lualine_c = {
-    '%=',
-    'diagnostics',
-    'diff',
   },
   lualine_x = {
   },
   lualine_y = {
-    filetypeLSP,
-    formatencoding,
+    --filetypeLSP,
+    --formatencoding,
+    {'encoding', 'fileformat', 'filetype'}
   },
   lualine_z = {
     location,
@@ -141,10 +141,13 @@ return {
         options = {
           theme = vim.g['lualine_theme_' .. theme],
           icons_enabled = true,
-          component_separators = { left = '∙', right = '∙' },
-          section_separators = { left = '', right = '' },
+          --component_separators = { left = '∙', right = '∙' },
+          --section_separators = { left = '', right = '' },
           disabled_filetypes = {
-            statusline = {},
+            statusline = {
+              'aerial',
+              'neo-tree',
+            },
             winbar = {},
           },
           ignore_focus = {},

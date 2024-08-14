@@ -2,8 +2,8 @@
 
 KEY='W:t'
 
-ATTRIBUTES=(profile=@spotify)
-#COMMAND=(vpn 1 spotify
+ATTRIBUTES=(profile=spotify)
+#COMMAND=(vpn 2 spotify
 #  --username="$(gui pass grab spotify.com username)"
 #  --password="$(gui pass grab spotify.com password)"
 #)

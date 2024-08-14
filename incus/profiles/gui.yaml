@@ -1,0 +1,26 @@
+config:
+  environment.DISPLAY: :0
+  environment.PULSE_SERVER: /tmp/.pulse-native
+  user.user-data: |
+    #cloud-config
+    package_upgrade: true
+    package_reboot_if_required: true
+    packages:
+      - x11-apps
+      - mesa-utils
+      - pulseaudio
+      - firefox-esr
+description: gui profile
+devices:
+  PASocket:
+    path: /tmp/user/${USER}/pulse/native
+    source: /tmp/user/${USER}/pulse/native
+    type: disk
+  X0:
+    path: /tmp/.X11-unix/X0
+    source: /tmp/.X11-unix/X0
+    type: disk
+  mygpu:
+    type: gpu
+name: gui
+project: default

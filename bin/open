@@ -16,7 +16,7 @@ if [[ "$mime" == inode/directory ]]; then
         read -r mime < "$1/.dirtype"
     else
         cd "$1" &&
-            exec gui tmux open "window:$(hostname):@:$(basename "$1")"
+            exec gui tmux open "window:$(hostname):@:$(basename "$1")" "${@:2}"
         #exec gui tmux open "window:$(hostname):@:$(basename "$1")" "$SHELL"
     fi
 fi
@@ -26,13 +26,13 @@ case "${mime}" in
         gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
         ;;
     image/*)
-        awm exec -- nsxiv -a -s f -- "$@"
+        awm exec -- nsxiv -a -s f -- "$(realpath -s "$1")"
         ;;
     video/*)
         awm exec -- vlc "$@"
         ;;
     application/pdf)
-        awm exec -- mupdf "$1"
+        awm exec -- mupdf "$(realpath -s "$1")"
         ;;
     *)
         case "$1" in

@@ -1,0 +1,14 @@
+config:
+  security.secureboot: "false"
+description: Default profile
+devices:
+  eth0:
+    name: eth0
+    network: flatnet
+    type: nic
+  root:
+    path: /
+    pool: default
+    type: disk
+name: default
+project: default

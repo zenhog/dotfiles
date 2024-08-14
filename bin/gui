@@ -20,6 +20,7 @@ declare -A -x CALLS=(
   [accept]='execute-silent(%s {} {q})+accept'
   [qclear]='execute-silent(%s {} {q})+reload-sync(list)+clear-query'
   [sclear]='execute(%s {} {q})+clear-screen+reload-sync(list)'
+  [unclear]='execute-silent(%s {} {q})+reload-sync(list)'
   [preview]='change-preview(%s {} {q})'
 )
 
@@ -100,7 +101,10 @@ case $# in
     ;;
   1) # list module functions
     source "$MODULES_DIR/$1" || exit 1
-    declare -F | awk '{print $3}'
+    #declare -F | awk '{print $3}'
+    for f in "${!BINDS[@]}"; do
+      echo "$f"
+    done
     ;;
   *) # call module functions
     source "$MODULES_DIR/$1" || exit 1

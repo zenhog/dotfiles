@@ -4,30 +4,214 @@ KEY=o
 MOD='S-M'
 ICON=
 
-function view() {
-  local kind="${1%%:*}"
-  local rest="${1#*:}"
-  case "$kind" in
-    session)
-      local name="${1#*:}"
-      tmux list-windows -t "$name" -F '#S:#W:#I'
-      ;;
-    window)
-      local session="${1#*:}"
-      local window="${rest%:*}"
-      tmux list-panes -t "$window" \
-        -F '#S:#W:#I.#P (#{pane_current_command})'
-      ;;
+NOWRAP=1
+
+export MUXSOCKET="$HOME/.vmux.S"
+
+function label() {
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    0) mode=sessions ;;
+    1) mode=windows ;;
+    2) mode=panes ;;
   esac
+
+  echo " mode: $mode "
+}
+
+function init() {
+  set_opt mode 0
+  set_opt mode-mod 3
 }
 
 function list() {
-  tmux ls -F 'session:#S'
-  tmux list-windows -a -F 'window:#S:#I:#W'
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    0) list-sessions ;;
+    1) list-windows ;;
+    2) list-panes ;;
+  esac
 }
 
-function attach() {
-  tmux new-session -ds "$1" "${@:2}" && tmux attach -dxt "$1"
+function list-sessions() {
+  local sessions
+  readarray -t sessions < <(tmux ls -F '#S')
+
+  for s in "${sessions[@]}"; do
+    mute is_remote "$s" && s="$(ansi --yellow "$s")"
+    echo "$s"
+  done
+}
+
+function list-windows() {
+  local sid="$1"
+  if [[ -n "$sid" ]]; then
+    dmux list-windows -t "$sid" -F '#S:#I #W' | column -t
+  else
+    dmux list-windows -a -F '#S:#I #W' | column -t
+  fi
+}
+
+function list-panes() {
+  local wid="$1"
+  if [[ -n "$wid" ]]; then
+    dmux list-panes -t "$wid" -F '#S:#I.#P' | column -t
+  else
+    dmux list-panes -a -F '#S:#I.#P' | column -t
+  fi
+}
+
+function view() {
+  local id mode="$(get_opt mode)"
+
+  read -r id _ <<< "$1"
+
+  case "$mode" in
+    0) view-session "$id";;
+    1) view-window "$id";;
+    2) view-pane "$id";;
+  esac
+}
+
+function view-session() {
+  local ids
+  readarray -t ids < <(dmux list-windows -t "$1" -F '#S:#I')
+  for id in "${ids[@]}"; do
+    view-window "$id"
+  done
+}
+
+function view-window() {
+  local ids
+  readarray -t ids < <(dmux list-panes -t "$1" -F '#S:#I.#P')
+
+  for id in "${ids[@]}"; do
+    view-pane "$id"
+  done
+}
+
+function view-pane() {
+  ansi --reset-color
+  sepline "> $id <"
+  dmux capture-pane -t "$1" -pe
+}
+
+BINDS[rotate_mode]=alt-t
+DESCS[rotate_mode]='Rotate mode'
+function rotate_mode() {
+  rotate_opt mode
+}
+
+function is_remote() {
+  local sid="$1"
+
+  [[ -z "$sid" ]] && read -r sid < <(tmux display -p '#S')
+
+  [[ -n "$sid" ]] && get_opt "host-$session"
+}
+
+function rmux() {
+  local host sid="${1?}"
+
+  read -r host < <(is_remote "$sid")
+
+  shift
+
+  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@"
+}
+
+function dmux() {
+  local session host
+
+  if [[ "$1" == session:* ]]; then
+    IFS=: read -r _ session <<< "$1"
+    shift
+  else
+    read -r session < <(tmux display -p '#S')
+  fi
+
+  read -r host < <(get_opt "host-$session")
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" "$@"
+  else
+    tmux "$@"
+  fi
+}
+
+function session() {
+  local name="$1"
+
+  mute tmux has-session -t "$name" || tmux new-session -ds "$name" "$@"
+}
+
+function new() {
+  local session="$1"
+  local port
+
+  if [[ -n "$host" ]]; then
+    set -e
+    gui ssh sync "$host"
+
+    session "$session" gui ssh rexec "$host" gui tmux session "$session"
+
+    read -r port < <(gui ssh revport "$host")
+
+    set_opt "host-$session" "$host"
+
+    tmux set-environment -t "$session" TMUX_SESSION_KIND remote
+    tmux set-environment -t "$session" TMUX_SESSION_HOST "$host"
+
+    dmux set-environment -t "$session" TMUX_SESSION_KIND slave
+    dmux set-environment -t "$session" TMUX_SESSION_PORT "$port"
+
+    gui ssh rexec "$host" gui tmux set_opt "port-$session" "$port"
+
+    set +e
+  else
+    set -e
+    session "$session"
+    tmux set-environment -t "$session" TMUX_SESSION_KIND local
+    set +e
+  fi
+
+  tmux set-environment -t "$session" TMUX_SESSION_NAME "$session"
+  dmux set-environment -t "$session" TMUX_SESSION_NAME "$session"
+
+  tmux attach -t "$session"
+}
+
+function on_xsession() {
+    local rtty ctty
+
+    read -r ctty < <(cat /sys/class/tty/tty0/active)
+    read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+
+    [[ "$ctty" == "$rtty" ]]
+}
+
+function open-session() {
+  local session="$1"
+  local class=tmux
+
+  [[ -n "$HOST" ]] && class=rmux
+
+  shift
+
+  if on_xsession; then
+    gui awm runonce fg instance="$session" -- \
+      alacritty --class "$class,$session" --command gui tmux new "$session" "$@"
+  fi
+
+  if [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
+    exec env TERM=fbterm gui tmux new "$@"
+  fi
+
+  if [[ -n "$TMUX" ]]; then
+    exec gui tmux new "$@"
+  fi
 }
 
 BINDS[open]=enter
@@ -36,22 +220,12 @@ DESCS[open]='Run or raise selected tmux session'
 function open() {
   function open_session() {
     local name="$1"
-    local rtty ctty
-    read -r ctty < <(cat /sys/class/tty/tty0/active)
-    read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
-    if [[ "$ctty" == "$rtty" ]]; then
+    if on_xsession; then
 
       [[ "$name" == menu ]] && VERB=exec || VERB=run
 
       awm "$VERB" instance="@$name" -- alacritty --class "tmux,$name" --command \
         tmux new-session -DX -As "$name" "${@:2}"
- 
-      #awm "$VERB" instance="@$name" -- kitty -1 --class tmux --name "$name" \
-      #  tmux new-session -DX -As "$name" "${@:2}"
-
-      #export -f attach
-      #awm "$VERB" instance ="@$name" -- kitty -1 --class tmux --name "$name" \
-      #  attach "$name" "${@:2}"
 
       until tmux has-session -t "$session"; do
         sleep 0.1

@@ -3,6 +3,7 @@ import = [
   "~/.config/alacritty/font-size.toml",
   "~/.themes/alacritty/colors.toml",
 ]
+
 live_config_reload = true
 
 [bell]
