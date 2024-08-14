@@ -144,6 +144,8 @@ function dmux() {
 function session() {
   local name="$1"
 
+  shift
+
   mute tmux has-session -t "$name" || tmux new-session -ds "$name" "$@"
 }
 
@@ -151,23 +153,23 @@ function new() {
   local session="$1"
   local port
 
-  if [[ -n "$host" ]]; then
+  if [[ -n "$HOST" ]]; then
     set -e
-    gui ssh sync "$host"
+    gui ssh sync "$HOST"
 
-    session "$session" gui ssh rexec "$host" gui tmux session "$session"
+    session "$session" gui ssh ttyexec "$HOST" gui tmux session "$session"
 
-    read -r port < <(gui ssh revport "$host")
+    read -r port < <(gui ssh revport "$HOST")
 
-    set_opt "host-$session" "$host"
+    set_opt "host-$session" "$HOST"
 
     tmux set-environment -t "$session" TMUX_SESSION_KIND remote
-    tmux set-environment -t "$session" TMUX_SESSION_HOST "$host"
+    tmux set-environment -t "$session" TMUX_SESSION_HOST "$HOST"
 
     dmux set-environment -t "$session" TMUX_SESSION_KIND slave
     dmux set-environment -t "$session" TMUX_SESSION_PORT "$port"
 
-    gui ssh rexec "$host" gui tmux set_opt "port-$session" "$port"
+    gui ssh rexec "$HOST" gui tmux set_opt "port-$session" "$port"
 
     set +e
   else
