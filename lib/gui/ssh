@@ -119,5 +119,4 @@ function sync() {
 
   rexec "$host" bash "$cmd" install master
   rexec "$host" dotfiles pull master
-  rexec "$host" dotfiles link master
 }
