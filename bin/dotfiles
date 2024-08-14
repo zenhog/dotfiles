@@ -132,9 +132,8 @@ function push() {
 
   verbose pull "$branch"
   # stash pop in case a stash was left by push
-  mute cdgit "$branch" stash show &&
-    verbose cdgit "$branch" stash pop &&
-      verbose cdgit "$branch" push
+  mute cdgit "$branch" stash show && verbose cdgit "$branch" stash pop
+  verbose cdgit "$branch" push
 }
 
 function update() {
