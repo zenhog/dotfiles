@@ -123,14 +123,18 @@ function pull() {
   verbose cdgit "$branch" stash
   verbose cdgit "$branch" rebase
   sync "$branch"
-  verbose cdgit "$branch" stash pop
+  # stash pop manually in case there are conflicts
+  #verbose cdgit "$branch" stash pop
 }
 
 function push() {
   local branch="${1?}"
 
   verbose pull "$branch"
-  verbose cdgit "$branch" push
+  # stash pop in case a stash was left by push
+  mute cdgit "$branch" stash show &&
+    verbose cdgit "$branch" stash pop &&
+      verbose cdgit "$branch" push
 }
 
 function update() {
