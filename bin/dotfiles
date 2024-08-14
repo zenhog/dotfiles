@@ -202,11 +202,13 @@ function encrypt() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
-  silent passphrase
-
   local secrets archives
 
   readarray -t secrets < <(find "$dir" -name '.gitsecret')
+
+  [[ ${#secrets[@]} -eq 0 ]] && return
+
+  silent passphrase
 
   for secret in "${secrets[@]}"; do
     encsecret "$(dirname "$secret")"
