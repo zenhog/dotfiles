@@ -100,6 +100,22 @@ function tmux() {
   HOST="$host" gui tmux open-session "${host##*/}"
 }
 
+function shell() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  connect "$host" && ssh -S "$sock" -t "$host" zsh -il
+}
+
+function ttyexec() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  shift
+
+  connect "$host" && quiet ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
+}
+
 function rexec() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
@@ -117,6 +133,7 @@ function sync() {
 
   read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
-  rexec "$host" bash "$cmd" install master
-  rexec "$host" dotfiles pull master
+  if rexec "$host" bash "$cmd" install master; then
+    rexec "$host" bash "$cmd" pull master
+  fi
 }
