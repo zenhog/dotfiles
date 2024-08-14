@@ -113,7 +113,7 @@ function ttyexec() {
 
   shift
 
-  connect "$host" && quiet ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
+  connect "$host" && ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
 }
 
 function rexec() {
@@ -122,7 +122,7 @@ function rexec() {
 
   shift
 
-  connect "$host" && quiet ssh -S "$sock" "$host" zsh -ilc "'$*'"
+  connect "$host" && ssh -S "$sock" "$host" zsh -ilc "'$*'"
 }
 
 function sync() {
