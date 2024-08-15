@@ -105,28 +105,32 @@ function rotate_mode() {
 }
 
 function mksession() {
-  local type="$1"
-  local name="$2"
+  local type="${1?}"
+  local name="${2?}"
 
   shift 2
 
   case "$type" in
-    local)
+    local|menu)
       tmux has-session -t "$name" || tmux new-session -ds "$name"
 
       tmux has-session -t "$name" || failwith "Failed creating session '$name'"
 
-      set_opt "session-${name}-kind" local
+      set_opt "session-${name}-name" "$name"
+      set_opt "session-${name}-kind" "$type"
 
-      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
       tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
       ;;
     remote)
       local port host="$1"
 
       shift
 
-      tmux has-session -t "$name" || exitwith "Session '$name' already exists"
+      if tmux has-session -t "$name"; then
+        echo "Remote session '$name' already exists" >&2
+        return
+      fi
 
       gui ssh sync "$host" || failwith "Failed to sync host '$host'"
 
@@ -138,17 +142,32 @@ function mksession() {
       gui ssh rexec "$host" gui tmux set_opt "session-${name}-port" "$port"
       rmux "$host" setenv -t "$name" TMUX_SESSION_PORT "$port"
 
-      #new-session "$name" gui ssh rexec "$host" \
-      #  gui tmux mksession slave "$name" || return
+      tmux new-session -ds "$name" \
+        gui ssh ttyexec "$host" tmux attach -t "$name"
 
-      #set_opt "session-${name}-kind" remote
-      #set_opt "session-${name}-host" "$host"
+      tmux has-session -t "$name" || failwith "Failed creating session '$name'"
 
-      #tmux setenv -t "$name" TMUX_SESSION_KIND remote
-      #tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
-      #tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+      set_opt "session-${name}-name" "$name"
+
+      tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
+      set_opt "session-${name}-host" "$host"
+
+      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
+      set_opt "session-${name}-kind" "$type"
       ;;
   esac
+}
+
+function fixstatus() {
+  local name="$(tmux display -p '#S')"
+
+  if [[ "$(get_opt "session-${name}-kind")" == menu ]]; then
+    tmux set status off
+    tmux set key-table menu
+  fi
+
+  [[ "$(get_opt "session-${name}-kind")" == remote ]] && tmux set status off
 }
 
 function is_remote() {
@@ -168,13 +187,20 @@ function rmux() {
 }
 
 function dmux() {
-  local host="$(is_remote "$1")"
+  local session="$(tmux display -p '#S')"
 
-  shift
+  [[ -n "$session" ]] || return
 
-  [[ -n "$host" ]] && rmux "$host" "$@" || tmux "$@"
+  local kind="$(get_opt "session-${session}-kind")"
+  local host="$(get_opt "session-${session}-host")"
+
+  if [[ "$kind" == remote ]]; then
+    rmux "$host" "$@"
+    return
+  elif [[ "$kind" == local ]]; then
+    tmux "$@"
+  fi
 }
-
 
 function on_xsession() {
     local rtty ctty
@@ -185,26 +211,29 @@ function on_xsession() {
     [[ "$ctty" == "$rtty" ]]
 }
 
-function open-session() {
-  local session="$1"
+function attach() {
+  local type="${1?}"
+  local name="${2?}"
+  local host="$3"
+
   local class=tmux
 
-  [[ -n "$HOST" ]] && class=rmux
+  [[ -n "$host" ]] && class=rmux
 
   shift
 
+  mksession "$type" "$name" "$host" ||
+    failwith "Failed to create $type session '$name' on ${host:-localhost}"
+
   if on_xsession; then
-    gui awm runonce fg instance="$session" -- \
-      alacritty --class "$class,$session" --command gui tmux new "$session" "$@"
-
-  #tmux attach -t "$session"
-
-
-  elif [[ -n "$TMUX" ]]; then
-    exec gui tmux new "$@"
+    gui awm runonce fg "instance=$name" -- \
+      alacritty --class "$class,$name" --command tmux attach -dxt "$name"
 
   elif [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
-    exec env TERM=fbterm gui tmux new "$@"
+    TERM=fbterm tmux attach -dxt "$session"
+
+  elif [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$name" && tmux detach-client -s "$name"
   fi
 }
 

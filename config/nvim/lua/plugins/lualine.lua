@@ -72,19 +72,17 @@ end
 
 local top = {
   lualine_a = {
-    'mode',
     updates,
-    'tabs',
   },
   lualine_b = {
   },
   lualine_c = {
-    --{
-    --  'windows',
-    --  fmt = function(str)
-    --    return '%=' .. str
-    --  end,
-    --},
+    {
+      'tabs',
+      fmt = function(str)
+        return '%=' .. str
+      end,
+    },
   },
   lualine_x = {
   },
@@ -97,7 +95,13 @@ local top = {
 }
 local bottom = {
   lualine_a = {
-    'filename',
+    {
+      'mode',
+      fmt = function(str)
+        str:sub(1,1)
+        return str
+      end
+    },
   },
   lualine_b = {
     'branch',
@@ -105,6 +109,12 @@ local bottom = {
     'diagnostics',
   },
   lualine_c = {
+    {
+      'filename',
+      fmt = function(str)
+        return '%=' .. str
+      end
+    },
   },
   lualine_x = {
   },

@@ -107,13 +107,25 @@ function shell() {
   connect "$host" && ssh -S "$sock" -t "$host" zsh -il
 }
 
+function mount() {
+  :
+}
+
+function cd() {
+  mount && cd
+}
+
+function authorize() {
+  ssh-copy-id ???
+}
+
 function ttyexec() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
 
   shift
 
-  connect "$host" && verbose ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
+  connect "$host" && ssh -S "$sock" -t "$host" bash -lc "'$*'"
 }
 
 function rexec() {
@@ -122,7 +134,7 @@ function rexec() {
 
   shift
 
-  connect "$host" && verbose ssh -S "$sock" "$host" zsh -ilc "'$*'"
+  connect "$host" && ssh -S "$sock" "$host" bash -lc "'$*'"
 }
 
 function sync() {
@@ -134,6 +146,6 @@ function sync() {
   read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
   if rexec "$host" bash "$cmd" install master; then
-    verbose rexec "$host" bash "$cmd" pull master
+    rexec "$host" bash "$cmd" pull master
   fi
 }
