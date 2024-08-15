@@ -46,11 +46,10 @@ function failwith() {
 function verbose() {
   local msg
 
-  read -r msg < <(printf '[%s] %s' "$PWD" "$*")
+  read -r msg < <(printf '%s [FOLDER: %s]' "$*" "$PWD")
 
   sepline >&2
   echo "$msg" >&2
-  sepline '-' >&2
 
   if [[ -n "$DEBUG" ]]; then
     local answer
