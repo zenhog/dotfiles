@@ -2,4 +2,4 @@
 
 KEY='W:Return'
 
-COMMAND=(gui tmux open-session "$(hostname)")
+COMMAND=(gui tmux open "session:$(hostname)")

@@ -104,86 +104,73 @@ function rotate_mode() {
   rotate_opt mode
 }
 
+function new-session() {
+  mute tmux has-session -t "$1" || tmux new-session -ds "$1" "${@:2}"
+}
+
+function mksession() {
+  local type="$1"
+  local name="$2"
+
+  shift 2
+
+  case "$type" in
+    local)
+      new-session "$name" || return
+      set_opt "session-${name}-kind" local
+      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
+      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+      ;;
+    master)
+      local port host="$1"
+
+      shift
+
+      verbose gui ssh sync "$host" || return
+
+      verbose new-session "$name" gui ssh ttyexec "$host" \
+        gui tmux mksession slave "$name" || return
+
+      read -r port < <(gui ssh revport "$host")
+
+      set_opt "session-${name}-kind" master
+      set_opt "session-${name}-host" "$host"
+
+      tmux setenv -t "$name" TMUX_SESSION_KIND master
+      tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
+      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+
+      verbose gui ssh rexec "$host" \
+        gui tmux set_opt "session-${name}-port" "$port"
+      verbose rmux "$host" setenv -t "$name" TMUX_SESSION_PORT "$port"
+      ;;
+  esac
+}
+
 function is_remote() {
   local sid="$1"
 
   [[ -z "$sid" ]] && read -r sid < <(tmux display -p '#S')
 
-  [[ -n "$sid" ]] && get_opt "host-$session"
+  [[ -n "$sid" ]] && get_opt "host-$sid"
 }
 
 function rmux() {
-  local host sid="${1?}"
-
-  read -r host < <(is_remote "$sid")
+  local host="$1"
 
   shift
 
-  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@"
+  gui ssh rexec "$host" tmux "$@"
 }
 
 function dmux() {
-  local session host
-
-  if [[ "$1" == session:* ]]; then
-    IFS=: read -r _ session <<< "$1"
-    shift
-  else
-    read -r session < <(tmux display -p '#S')
-  fi
-
-  read -r host < <(get_opt "host-$session")
-
-  if [[ -n "$host" ]]; then
-    rmux "$host" "$@"
-  else
-    tmux "$@"
-  fi
-}
-
-function session() {
-  local name="$1"
+  local host="$(is_remote "$1")"
 
   shift
 
-  mute tmux has-session -t "$name" || tmux new-session -ds "$name" "$@"
+  [[ -n "$host" ]] && rmux "$host" "$@" || tmux "$@"
 }
 
-function new() {
-  local session="$1"
-  local port
-
-  if [[ -n "$HOST" ]]; then
-    set -e
-    gui ssh sync "$HOST"
-
-    session "$session" gui ssh ttyexec "$HOST" gui tmux session "$session"
-
-    read -r port < <(gui ssh revport "$HOST")
-
-    set_opt "host-$session" "$HOST"
-
-    tmux set-environment -t "$session" TMUX_SESSION_KIND remote
-    tmux set-environment -t "$session" TMUX_SESSION_HOST "$HOST"
-
-    dmux set-environment -t "$session" TMUX_SESSION_KIND slave
-    dmux set-environment -t "$session" TMUX_SESSION_PORT "$port"
-
-    gui ssh rexec "$HOST" gui tmux set_opt "port-$session" "$port"
-
-    set +e
-  else
-    set -e
-    session "$session"
-    tmux set-environment -t "$session" TMUX_SESSION_KIND local
-    set +e
-  fi
-
-  tmux set-environment -t "$session" TMUX_SESSION_NAME "$session"
-  dmux set-environment -t "$session" TMUX_SESSION_NAME "$session"
-
-  tmux attach -t "$session"
-}
 
 function on_xsession() {
     local rtty ctty
@@ -205,14 +192,15 @@ function open-session() {
   if on_xsession; then
     gui awm runonce fg instance="$session" -- \
       alacritty --class "$class,$session" --command gui tmux new "$session" "$@"
-  fi
 
-  if [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
-    exec env TERM=fbterm gui tmux new "$@"
-  fi
+  #tmux attach -t "$session"
 
-  if [[ -n "$TMUX" ]]; then
+
+  elif [[ -n "$TMUX" ]]; then
     exec gui tmux new "$@"
+
+  elif [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
+    exec env TERM=fbterm gui tmux new "$@"
   fi
 }
 

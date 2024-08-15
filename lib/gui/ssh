@@ -97,7 +97,7 @@ function tmux() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
 
-  HOST="$host" gui tmux open-session "${host##*/}"
+  gui tmux open-session "${host##*/}" "$host"
 }
 
 function shell() {
