@@ -104,10 +104,6 @@ function rotate_mode() {
   rotate_opt mode
 }
 
-function new-session() {
-  mute tmux has-session -t "$1" || tmux new-session -ds "$1" "${@:2}"
-}
-
 function mksession() {
   local type="$1"
   local name="$2"
@@ -116,33 +112,41 @@ function mksession() {
 
   case "$type" in
     local)
-      new-session "$name" || return
+      tmux has-session -t "$name" || tmux new-session -ds "$name"
+
+      tmux has-session -t "$name" || failwith "Failed creating session '$name'"
+
       set_opt "session-${name}-kind" local
+
       tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
       tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
       ;;
-    master)
+    remote)
       local port host="$1"
 
       shift
 
-      verbose gui ssh sync "$host" || return
+      tmux has-session -t "$name" || exitwith "Session '$name' already exists"
 
-      verbose new-session "$name" gui ssh ttyexec "$host" \
-        gui tmux mksession slave "$name" || return
+      gui ssh sync "$host" || failwith "Failed to sync host '$host'"
+
+      gui ssh rexec "$host" gui tmux mksession local "$name" ||
+        failwith "Failed creating remote session '$name'"
 
       read -r port < <(gui ssh revport "$host")
 
-      set_opt "session-${name}-kind" master
-      set_opt "session-${name}-host" "$host"
+      gui ssh rexec "$host" gui tmux set_opt "session-${name}-port" "$port"
+      rmux "$host" setenv -t "$name" TMUX_SESSION_PORT "$port"
 
-      tmux setenv -t "$name" TMUX_SESSION_KIND master
-      tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
-      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
+      #new-session "$name" gui ssh rexec "$host" \
+      #  gui tmux mksession slave "$name" || return
 
-      verbose gui ssh rexec "$host" \
-        gui tmux set_opt "session-${name}-port" "$port"
-      verbose rmux "$host" setenv -t "$name" TMUX_SESSION_PORT "$port"
+      #set_opt "session-${name}-kind" remote
+      #set_opt "session-${name}-host" "$host"
+
+      #tmux setenv -t "$name" TMUX_SESSION_KIND remote
+      #tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
+      #tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
       ;;
   esac
 }

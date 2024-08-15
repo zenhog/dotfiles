@@ -113,7 +113,7 @@ function ttyexec() {
 
   shift
 
-  connect "$host" && ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
+  connect "$host" && verbose ssh -S "$sock" -t "$host" zsh -ilc "'$*'"
 }
 
 function rexec() {
@@ -122,7 +122,7 @@ function rexec() {
 
   shift
 
-  connect "$host" && ssh -S "$sock" "$host" zsh -ilc "'$*'"
+  connect "$host" && verbose ssh -S "$sock" "$host" zsh -ilc "'$*'"
 }
 
 function sync() {
@@ -134,6 +134,6 @@ function sync() {
   read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
   if rexec "$host" bash "$cmd" install master; then
-    rexec "$host" bash "$cmd" pull master
+    verbose rexec "$host" bash "$cmd" pull master
   fi
 }
