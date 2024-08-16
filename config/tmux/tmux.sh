@@ -9,15 +9,17 @@ VMUX_SCRIPT="$TMUX_CONFIG_DIR/vmux.sh"
 
 shopt -s nullglob
 
-"$VMUX_SCRIPT"
+#"$VMUX_SCRIPT"
 
 #source "$HOME/.profile"
 
-StartDate=$(date -u +%S.%N)
+START="$(date -u +%S.%N)"
 
 for config in "$DIR"/??-*.conf; do
-  source "$config"
-  #newdate=$(date -u +%S.%N)
-  #echo "$config took: $(echo "scale=6; $newdate - $StartDate" | bc)"
-  #StartDate="$newdate"
+  if source "$config"; then
+    NOW="$(date -u +%S.%N)"
+    TIME="$(echo "scale=6; $NOW - $START" | bc)"
+    START="$NOW"
+    echo "'$config' took $TIME to load"
+  fi
 done

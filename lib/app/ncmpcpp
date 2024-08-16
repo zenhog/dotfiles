@@ -2,4 +2,6 @@
 
 KEY='C-M:t'
 
-COMMAND=(gui tmux open "window:$(hostname):@:ncmpcpp" ncmpcpp)
+function runner() {
+  gui tmux window local "$(hostname)" ncmpcpp ncmpcpp
+}

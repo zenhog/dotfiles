@@ -2,4 +2,6 @@
 
 KEY='C-M:r'
 
-COMMAND=(gui tmux open "window:$(hostname):@:newsboat" newsboat)
+function runner() {
+  gui tmux window "$(hostname)" newsboat newsboat
+}

@@ -2,4 +2,6 @@
 
 KEY='S-W:Return'
 
-COMMAND=(gui ssh tmux "incus ctfbox")
+function runner() {
+  gui ssh tmux incus/ctfbox
+}

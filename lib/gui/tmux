@@ -104,7 +104,15 @@ function rotate_mode() {
   rotate_opt mode
 }
 
-COMMANDS+=(mksession)
+function extract-pane() {
+  # pane, window, session
+  local pane="$1"
+
+  read -r pane < <(tmux display -p '#S:#I.#P')
+    tmux new-window -n grep bash -c \
+        "tmux capture-pane -pNq -t ${pane} | fzfgrep"
+}
+
 function mksession() {
   local kind="${1?}"
   local name="${2?}"
@@ -122,6 +130,12 @@ function mksession() {
 
       tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
       tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
+
+      if [[ "$kind" == menu ]]; then
+        tmux set -t "$name" status off
+      fi
+
+      tmux set -t "$name" key-table "$kind"
       ;;
     remote)
       local port host="$1"
@@ -160,8 +174,7 @@ function mksession() {
   esac
 }
 
-COMMANDS+=(mkwindow)
-function mkwindow() {
+function window() {
   local kind="${1?}"
   local session="${2?}"
   local window="${3?}"
@@ -220,40 +233,44 @@ function forward_buffer() {
 }
 
 function setup_session() {
-  local name="$(tmux display -p '#S')"
-  local kind="$(get_opt "session-${name}-kind")"
+  #local name="$(tmux display -p '#S')"
+  #local kind="$(get_opt "session-${name}-kind")"
 
-  case "$kind" in
-    menu)
-      tmux set status off
-      tmux set key-table menu
-      ;;
-    remote)
-      tmux set status off
-      ;;
-  esac
+  #case "$kind" in
+  #  menu)
+  #    tmux set status off
+  #    tmux set key-table menu
+  #    ;;
+  #  remote)
+  #    tmux set status off
+  #    ;;
+  #esac
+  :
 }
 
 function cleanup_session() {
-  local name="$(tmux display -p '#S')"
-  local kind="$(get_opt "session-${name}-kind")"
+  :
+  #local name="$(tmux display -p '#S')"
+  #local kind="$(get_opt "session-${name}-kind")"
 
-  case "$kind" in
-    menu|local)
-      unset_opt "session-${name}-name"
-      unset_opt "session-${name}-kind"
-      ;;
-    remote)
-      local host="$(get_opt "session-${name}-host")"
+  #echo cleanup-session:$name:$kind > /tmp/test
 
-      unset_opt "session-${name}-name"
-      unset_opt "session-${name}-kind"
-      unset_opt "session-${name}-host"
+  #case "$kind" in
+  #  menu|local)
+  #    unset_opt "session-${name}-name"
+  #    unset_opt "session-${name}-kind"
+  #    ;;
+  #  remote)
+  #    local host="$(get_opt "session-${name}-host")"
 
-      gui ssh rexec "$host" gui tmux unset_opt "session-${name}-port"
-      gui ssh cancel "$host"
-      ;;
-  esac
+  #    unset_opt "session-${name}-name"
+  #    unset_opt "session-${name}-kind"
+  #    unset_opt "session-${name}-host"
+
+  #    gui ssh rexec "$host" gui tmux unset_opt "session-${name}-port"
+  #    gui ssh cancel "$host"
+  #    ;;
+  #esac
 }
 
 function is_remote() {
@@ -397,8 +414,4 @@ function close() {
       tmux kill-window -t "$session:$winflag"
       ;;
   esac
-}
-
-function commands() {
-  printf "%s\n" "${COMMANDS[@]}"
 }

@@ -2,4 +2,6 @@
 
 KEY='W:Return'
 
-COMMAND=(gui tmux open "session:$(hostname)")
+function runner() {
+  gui tmux attach local "$(hostname)"
+}

@@ -2,4 +2,6 @@
 
 KEY='C-M:w'
 
-COMMAND=(gui tmux open "window:$(hostname):@:neomutt" neomutt)
+function runner() {
+  gui tmux window local "$(hostname)" neomutt neomutt
+}

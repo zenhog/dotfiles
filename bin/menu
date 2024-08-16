@@ -4,7 +4,8 @@ source "$HOME/.bin/gui"
 
 function atexit() {
   silent declare -F atfinish && atfinish
-  silent awm set class=@tmux instance=@menu -- hidden=true minimized=true
+  silent gui awm setattributes class=tmux instance=menu -- \
+    @hidden=true @minimized=true
   #remove_env
 }
 
@@ -217,11 +218,14 @@ function dispatch() {
 
       forward_env
 
-      gui tmux open window:menu:@:menu menu input "$2" "$fifo"
+      gui tmux window menu menu menu menu input "$2" "$fifo"
       cat < "$fifo" && rm "$fifo"
     else
       forward_env
-      exec gui tmux open window:menu:@:menu menu "$@"
+      # exec gui tmux window kind name window command args
+      # which makes it
+      # exec gui tmux menu   menu menu menu   menu "$@"
+      exec gui tmux window menu menu menu menu "$@"
     fi
   fi
 }
