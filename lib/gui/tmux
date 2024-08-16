@@ -104,23 +104,24 @@ function rotate_mode() {
   rotate_opt mode
 }
 
+COMMANDS+=(mksession)
 function mksession() {
-  local type="${1?}"
+  local kind="${1?}"
   local name="${2?}"
 
   shift 2
 
-  case "$type" in
+  case "$kind" in
     local|menu)
       tmux has-session -t "$name" || tmux new-session -ds "$name"
 
       tmux has-session -t "$name" || failwith "Failed creating session '$name'"
 
       set_opt "session-${name}-name" "$name"
-      set_opt "session-${name}-kind" "$type"
+      set_opt "session-${name}-kind" "$kind"
 
       tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
-      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
+      tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
       ;;
     remote)
       local port host="$1"
@@ -153,21 +154,106 @@ function mksession() {
       tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
       set_opt "session-${name}-host" "$host"
 
-      tmux setenv -t "$name" TMUX_SESSION_KIND "$type"
-      set_opt "session-${name}-kind" "$type"
+      tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
+      set_opt "session-${name}-kind" "$kind"
       ;;
   esac
 }
 
-function fixstatus() {
-  local name="$(tmux display -p '#S')"
+COMMANDS+=(mkwindow)
+function mkwindow() {
+  local kind="${1?}"
+  local session="${2?}"
+  local window="${3?}"
 
-  if [[ "$(get_opt "session-${name}-kind")" == menu ]]; then
-    tmux set status off
-    tmux set key-table menu
+  shift 3
+
+  case "$kind" in
+    local|menu)
+      attach "$kind" "$session" || return
+      tmux new-window -S -n "$window" -t "=${session}:" "$@"
+      ;;
+    remote)
+      local host="${1?}"
+
+      shift
+
+      attach "$kind" "$session" "$host" || return
+      rmux "$host" new-window -S -n "$window" -t "=${session}:" "$@"
+      ;;
+  esac
+}
+
+function sync_clipboard() {
+  if [[ -n "$DISPLAY" ]]; then
+    local tmuxdata=$(tmux show-buffer | base64)
+    local xseldata=$(xsel -ob | base64)
+
+    if [[ "$tmuxdata" != "$xseldata" ]]; then
+      echo -n "$tmuxdata" | base64 -d | xsel -ib
+    fi
   fi
+}
 
-  [[ "$(get_opt "session-${name}-kind")" == remote ]] && tmux set status off
+function forward_buffer() {
+  local name="$(tmux display -p '#S')"
+  local kind="$(get_opt "session-${name}-kind")"
+  local port="$(get_opt "session-${name}-port")"
+
+  if [[ -n "$port" ]]; then
+
+    local data=$(tmux show-buffer | base64)
+
+    tmux delete-buffer
+
+    exec 3<>"/dev/tcp/localhost/$port"
+
+    echo "$data" >&3
+
+    exec 3>&-
+    exec 3<&-
+
+    return
+  else
+    sync_clipboard
+  fi
+}
+
+function setup_session() {
+  local name="$(tmux display -p '#S')"
+  local kind="$(get_opt "session-${name}-kind")"
+
+  case "$kind" in
+    menu)
+      tmux set status off
+      tmux set key-table menu
+      ;;
+    remote)
+      tmux set status off
+      ;;
+  esac
+}
+
+function cleanup_session() {
+  local name="$(tmux display -p '#S')"
+  local kind="$(get_opt "session-${name}-kind")"
+
+  case "$kind" in
+    menu|local)
+      unset_opt "session-${name}-name"
+      unset_opt "session-${name}-kind"
+      ;;
+    remote)
+      local host="$(get_opt "session-${name}-host")"
+
+      unset_opt "session-${name}-name"
+      unset_opt "session-${name}-kind"
+      unset_opt "session-${name}-host"
+
+      gui ssh rexec "$host" gui tmux unset_opt "session-${name}-port"
+      gui ssh cancel "$host"
+      ;;
+  esac
 }
 
 function is_remote() {
@@ -212,7 +298,7 @@ function on_xsession() {
 }
 
 function attach() {
-  local type="${1?}"
+  local kind="${1?}"
   local name="${2?}"
   local host="$3"
 
@@ -222,8 +308,8 @@ function attach() {
 
   shift
 
-  mksession "$type" "$name" "$host" ||
-    failwith "Failed to create $type session '$name' on ${host:-localhost}"
+  mksession "$kind" "$name" "$host" ||
+    failwith "Failed to create $kind session '$name' on ${host:-localhost}"
 
   if on_xsession; then
     gui awm runonce fg "instance=$name" -- \
@@ -311,4 +397,8 @@ function close() {
       tmux kill-window -t "$session:$winflag"
       ;;
   esac
+}
+
+function commands() {
+  printf "%s\n" "${COMMANDS[@]}"
 }

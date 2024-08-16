@@ -90,14 +90,24 @@ function revport() {
   fi
 }
 
+function cancel() {
+  local host="$(get host "$1")"
+  local sock="$(get sock "$1")"
+
+  if connected "$host"; then
+    ssh -S "$sock" -O cancel "$host"
+  fi
+}
+
 BINDS[tmux]=enter
 HOOKS[tmux]=accept
 DESCS[tmux]='New remote tmux session'
 function tmux() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
+  local name="${host##*/}"
 
-  gui tmux open-session "${host##*/}" "$host"
+  gui tmux attach remote "$name" "$host"
 }
 
 function shell() {

@@ -237,38 +237,43 @@ function sendback
 
 function hook:session-created
 {
-    if [[ -z "$REMOTE_CONNECTION" ]]; then
-        local session=$(tmux display -p '#S')
-        local host dummy
+  gui tmux setup_client
+    #if [[ -z "$REMOTE_CONNECTION" ]]; then
+    #    local session=$(tmux display -p '#S')
+    #    local host dummy
 
-        IFS=$'/\n' read -r -d '' host dummy <<< "$session"
+    #    IFS=$'/\n' read -r -d '' host dummy <<< "$session"
 
-        tmux set -s "@host-$session" "$host"
-        if [[ "$host" != $(hostname) ]]; then
-            tmux set -s "@remote-$session" 1
-        fi
-    fi
+    #    tmux set -s "@host-$session" "$host"
+    #    if [[ "$host" != $(hostname) ]]; then
+    #        tmux set -s "@remote-$session" 1
+    #    fi
+    #fi
 }
 
 function hook:session-closed
 {
     # do remote down
-    local session=$(tmux display -p '#S')
+    #local session=$(tmux display -p '#S')
+    gui tmux cleanup_session
 }
 
 function hook:client-attached
 {
-    fixclient
-    sendtty
-    onlyclient
-    tmux set -g set-titles-string '#{client_session}'
+    #fixclient
+    #sendtty
+    #onlyclient
+    #tmux set -g set-titles-string '#{client_session}'
+    gui tmux setup_session
+
 }
 
 function hook:client-session-changed
 {
-    fixclient
-    sendtty
-    onlyclient
+    #fixclient
+    #sendtty
+    #onlyclient
+    gui tmux setup_session
 }
 
 function hook:after-set-buffer
