@@ -97,63 +97,86 @@ end
 local function set_clientimg(c)
     local cairo = require("lgi").cairo
     local homedir = os.getenv('HOME')
-    local class = c.class
-    if class == 'qutebrowser' then
-        class = c.instance
-    end
-    local default_icon = homedir .. "/.icons/" .. class .. ".png"
+
     if c and c.valid then
-        local s = gears.surface(default_icon)
-        local img = cairo.ImageSurface.create(cairo.Format.ARGB32, s:get_width(), s:get_height())
+        local icon
+
+        if c.profile then
+          icon = string.format('%s/.icons/%s.png', homedir, c.profile)
+        else
+          icon = homedir .. '/.icons/default.png'
+        end
+
+        local s = gears.surface(icon)
+
+        local img = cairo.ImageSurface.create(
+          cairo.Format.ARGB32, s:get_width(), s:get_height())
         local cr = cairo.Context(img)
+
         cr:set_source_surface(s, 0, 0)
         cr:paint()
+
         c.icon = img._native
     end
 end
 
 local function set_clienttag(c)
     local tags = c.screen.tags
+    local homedir = os.getenv('HOME')
 
     if c.instance == 'menu' then
         c:move_to_tag(tags[5])
         return
     end
 
-    if not c.profile and not c.class and not c.instance then
-        return
+    local path = function(p)
+      local homedir = os.getenv('HOME')
+      return string.format('%s/.icons/%s.png', homedir, p)
     end
 
-    c.profile = c.profile or string.lower(c.class)
+    c.profile = c.profile or string.lower(c.instance)
 
-    if c.profile == 'qutebrowser' then
-        c.profile = string.lower(c.instance)
+    if not gears.filesystem.file_readable(path(c.profile)) then
+      c.profile = string.lower(c.instance)
+    end
+
+    local hostname = os.getenv('HOSTNAME')
+
+    if c.profile == hostname then
+      c.profile = 'hostname'
+    end
+
+    if not gears.filesystem.file_readable(path(c.profile)) then
+      c.profile = string.lower(c.class)
+    end
+
+    if not gears.filesystem.file_readable(path(c.profile)) then
+      c.profile = nil
     end
 
     local tagmap = {
+        hostname  = 1,
         tmux      = 1,
         urxvt     = 1,
         alacritty = 1,
         kitty     = 1,
-
-        ctfbox    = 5,
-        cutter    = 5,
+        ctfbox    = 1,
+        cutter    = 1,
 
         Navigator = 2,
         firefox   = 2,
         wanfox    = 2,
         wanqute   = 2,
         mupdf     = 2,
-        chromium  = 2,
 
         vpnfox    = 3,
         vpnqute   = 3,
         feh       = 3,
         nsxiv     = 3,
+        chromium  = 3,
 
         discord   = 4,
         spotify   = 4,
-        spotube   = 4,
         vlc       = 4,
 
         stremio   = 5,
@@ -207,12 +230,10 @@ local roundedrect = function(cr, w, h, r)
 end
 
 client.connect_signal("manage", function(c)
-  c.profile = c.profile or string.lower(c.class or '')
   c.shape = roundedrect
 
-  --set_clienticon(c)
   set_clienttag(c)
-  --set_titlebars(c)
+  set_titlebars(c)
   set_attributes(c)
   set_clientimg(c)
 

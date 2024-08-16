@@ -8,14 +8,16 @@ local modkey = "Mod4"
 
 local mods = {}
 
-mods['E'] = {}
-mods['W'] = { modkey }
-mods['S-M'] = { altkey, "Shift" }
-mods['C-M'] = { altkey, "Control" }
-
 local nmod = { modkey }
 local smod = { modkey, "Shift"   }
 local cmod = { modkey, "Control" }
+
+mods['E'] = {}
+mods['W'] = nmod
+mods['S-W'] = smod
+mods['S-M'] = { altkey, "Shift" }
+mods['C-M'] = { altkey, "Control" }
+
 
 local mapkey = function(mod, key, cmd, group, desc)
     return awful.key(mod, key, cmd, {
