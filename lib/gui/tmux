@@ -29,17 +29,38 @@ function label() {
 }
 
 function init() {
-  silent get_opt mode || set_opt mode 0
-  set_opt mode-mod 3
+  silent get_opt mode || set_opt mode sessions
 }
 
 function list() {
-  local mode="$(get_opt mode)"
+  local mode="${1:-$(get_opt mode)}"
+
+  eval "list-$mode"
+}
+
+function format() {
+  local mode="$1"
+
+  shift
 
   case "$mode" in
-    0) list-sessions ;;
-    1) list-windows ;;
-    2) list-panes ;;
+    session)
+      local session="$1"
+
+      local host icon
+
+      if read -r host < <(is_remote "$session"); then
+        icon=󰣀
+      else
+        icon=󰆦
+      fi
+
+      printf "%s %s %s\n" "$icon" "$session" "${host:-localhost}"
+      ;;
+    window)
+      ;;
+    pane)
+      ;;
   esac
 }
 
@@ -47,7 +68,9 @@ function list-sessions() {
   local sessions
   readarray -t sessions < <(tmux ls -F '#S')
 
-  printf "%s\n" "${sessions[@]}"
+  for session in "${sessions[@]}"; do
+    format session "$session"
+  done | column -t
 }
 
 function list-windows() {
@@ -56,7 +79,11 @@ function list-windows() {
   readarray -t sessions < <(list-sessions)
 
   for session in "${sessions[@]}"; do
-    dmux "session:$session" list-windows -t "$session" -F '#S:#I #W'
+    local windows host icon
+
+    readarray -t windows < <(dmux "session:$session" list-windows \
+      -t "$session" -F '#S:#I #W')
+
   done | column -t
 }
 
@@ -83,10 +110,14 @@ function view() {
 }
 
 function view-session() {
-  local ids
-  readarray -t ids < <(dmux list-windows -t "$1" -F '#S:#I')
-  for id in "${ids[@]}"; do
-    view-window "$id"
+  local icon session host windows
+
+  read -r icon session host _ <<< "$1"
+
+  readarray -t windows < <(list-windows "session:$session")
+
+  for window in "${windows[@]}"; do
+    view-window "$window"
   done
 }
 
@@ -109,7 +140,13 @@ BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 function rotate_mode() {
-  rotate_opt mode
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    sessions) set_opt mode windows ;;
+    windows) set_opt mode panes ;;
+    panes) set_opt mode sessions ;;
+  esac
 }
 
 function status() {
@@ -357,7 +394,7 @@ function is_remote() {
 
   [[ -z "$sid" ]] && read -r sid < <(tmux display -p '#S')
 
-  [[ -n "$sid" ]] && tmux show -vt "$sid" @host
+  [[ -n "$sid" ]] && quiet tmux show -vt "$sid" @host
 }
 
 function rmux() {

@@ -56,6 +56,14 @@ case "$1" in
   zsh)
     zsh_update
     ;;
+  tor)
+    hostname="$(sudo cat /var/lib/tor/ssh/hostname)"
+
+    [[ -n "$hostname" ]] || exit
+
+    echo "Host onion/$(hostname)" > "$HOME/.ssh/hosts/onion/$(hostname)"
+    echo "Hostname $hostname" >> "$HOME/.ssh/hosts/onion/$(hostname)"
+    ;;
   incus)
     incus_update
     ;;

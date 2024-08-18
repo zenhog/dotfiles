@@ -105,6 +105,8 @@ function main() {
 
   source "$MODULES_DIR/$1" || exit 1
 
+  shift 1
+
   while read -r _ _ func _; do
     export -f "$func"
   done < <(declare -F) || exit 1
@@ -182,7 +184,8 @@ function main() {
   [[ -n "$DEBUG" ]] ; echo "${COMMAND[@]}" > "$HOME/.menu_debug"
 
   init
-  list | "${COMMAND[@]}"
+
+  list "${@:2}" | "${COMMAND[@]}"
 }
 
 function forward_env() {

@@ -32,7 +32,7 @@ function period() {
 }
 
 function timeout() {
-  awm timeout "${BASH_ARGV[1]}"
+  gui awm timeout "${BASH_ARGV[1]}"
 }
 
 function output() {

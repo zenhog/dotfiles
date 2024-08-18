@@ -188,7 +188,7 @@ class NotificationQueue:
         self._last_id += 1
         print(f'Adding: {notification.id}')
         self._mapping[notification.id] = notification
-        os.system("awm timeout push mail news download")
+        os.system("gui awm timeout push mail news download")
 
     def cleanup(self) -> None:
         now = time.time()

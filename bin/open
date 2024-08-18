@@ -12,53 +12,52 @@ category="${mime%%/*}"
 kind="${mime##*/}"
 
 if [[ "$mime" == inode/directory ]]; then
-    if [[ -r "$1/.dirtype" ]]; then
-        read -r mime < "$1/.dirtype"
-    else
-        cd "$1" &&
-            exec gui tmux open "window:$(hostname):@:$(basename "$1")" "${@:2}"
-        #exec gui tmux open "window:$(hostname):@:$(basename "$1")" "$SHELL"
-    fi
+  if [[ -r "$1/.dirtype" ]]; then
+    read -r mime < "$1/.dirtype"
+  else
+    cd "$1" &&
+      exec gui tmux window local "$(hostname)" "$(basename "$1")" "${@:2}"
+  fi
 fi
 
 case "${mime}" in
-    text/*)
-        gui tmux open "window:$(hostname):@:$(basename "$1")" vim "$1"
+  text/*)
+    gui tmux window local "$(hostname)" "$(basename "$1")" nvim "$1"
+    ;;
+  image/*)
+    gui awm runonce fg -- nsxiv -a -s f -- "$(realpath -s "$1")"
+    ;;
+  video/*)
+    gui awm runonce fg -- vlc "$1"
+    ;;
+  application/pdf)
+    gui awm runonce fg -- mupdf "$(realpath -s "$1")"
+    ;;
+  *)
+    case "$1" in
+      file://*)
+        gui tmux window local "$(hostname)" "$(basename "$1")" \
+          nvim "${1#file://}"
         ;;
-    image/*)
-        awm exec -- nsxiv -a -s f -- "$(realpath -s "$1")"
+      irc:*)
+          ;;
+      ircs:*)
+          ;;
+      mailto:*)
+        gui tmux window local "$(hostname)" neomutt neomutt "${1#mailto:}"
         ;;
-    video/*)
-        awm exec -- vlc "$@"
+      magnet:*)
+        aria2p add "$1"
+        #gui aria add "$1"
         ;;
-    application/pdf)
-        awm exec -- mupdf "$(realpath -s "$1")"
+      ftp://*)
+        browser "$1"
         ;;
-    *)
-        case "$1" in
-            file://*)
-                gui tmux open "window:$(hostname):@:$(basename "$1")" vim \
-                    "${1#file://}"
-                ;;
-            irc:*)
-                ;;
-            ircs:*)
-                ;;
-            mailto:*)
-                gui tmux open "window:$(hostname):@:neomutt" \
-                    neomutt "${1#mailto:}"
-                ;;
-            magnet:*)
-                aria2p add "$@"
-                ;;
-            ftp://*)
-                browser "$@"
-                ;;
-            http://*)
-                browser "$@"
-                ;;
-            https://*)
-                browser "$@"
-                ;;
-        esac
+      http://*)
+        browser "$1"
+        ;;
+      https://*)
+        browser "$1"
+        ;;
+      esac
 esac
