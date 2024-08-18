@@ -5,13 +5,9 @@ DIR=$(cd $(dirname "$SCRIPT") && pwd)
 
 TMUX_CONFIG_DIR="$DIR"
 
-VMUX_SCRIPT="$TMUX_CONFIG_DIR/vmux.sh"
-
 shopt -s nullglob
 
-#"$VMUX_SCRIPT"
-
-#source "$HOME/.profile"
+source "$HOME/.profile"
 
 START="$(date -u +%S.%N)"
 
@@ -20,6 +16,6 @@ for config in "$DIR"/??-*.conf; do
     NOW="$(date -u +%S.%N)"
     TIME="$(echo "scale=6; $NOW - $START" | bc)"
     START="$NOW"
-    echo "'$config' took $TIME to load"
+    echo "'$config' took $TIME to load" >&2
   fi
 done

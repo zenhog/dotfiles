@@ -2,4 +2,11 @@
 
 KEY='E:Print'
 
-COMMAND=(gui action open screenshot)
+function runner() {
+  local name dir="$HOME/.screenshots"
+
+  mkdir -p "$dir"
+  name="$dir/screenshot-$(date "+%F_%T")"-'$wx$h.png'
+
+  scrot -zio -F "$name" && notify "Screen shot!"
+}

@@ -3,7 +3,10 @@
 KEY='W:t'
 
 ATTRIBUTES=(profile=spotify)
-#COMMAND=(vpn 2 spotify
-#  --username="$(gui pass grab spotify.com username)"
-#  --password="$(gui pass grab spotify.com password)"
-#)
+
+function runner() {
+  local username="$(gui pass grab spotify.com username)"
+  local password="$(gui pass grab spotify.com password)"
+
+  exec vpn 2 spotify --username="$username" --password="$password"
+}

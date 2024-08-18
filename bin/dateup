@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-sudo ntpdate pool.ntp.org
-sudo hwclock --systohc --utc

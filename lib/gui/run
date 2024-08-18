@@ -34,7 +34,7 @@ function edit() {
   open "$APP_DIR/$1"
 }
 
-function irun() {
+function run() {
   source "$HOME/.lib/app/$1"
   if silent declare -F runner; then
     runner
@@ -46,18 +46,14 @@ HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 function fg() {
   source "$HOME/.lib/app/$1"
-  if silent declare -F runner; then
-    gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run irun "$1"
-  else
-    gui awm runonce fg "${ATTRIBUTES[@]}" -- "${COMMAND[@]}"
-  fi
+  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 function bg() {
   source "$HOME/.lib/app/$1"
-  gui awm runonce bg "${ATTRIBUTES[@]}" -- "${COMMAND[@]}"
+  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1"
 }
 
 BINDS[close]=alt-d

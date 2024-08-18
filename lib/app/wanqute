@@ -3,4 +3,7 @@
 KEY='W:w'
 
 ATTRIBUTES=(profile=wanqute)
-COMMAND=(qutebrowser --qt-arg name wanqute)
+
+function runner() {
+  qutebrowser --qt-arg name wanqute
+}

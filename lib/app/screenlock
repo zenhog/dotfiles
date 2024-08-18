@@ -2,4 +2,8 @@
 
 KEY='E:Scroll_Lock'
 
-COMMAND=(gui action open screenlock)
+function runner() {
+  local image="$HOME/.wallpapers/whysosleepy.png"
+
+  gui awm spawn -- i3lock -nuei "$image"
+}

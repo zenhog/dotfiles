@@ -2,4 +2,6 @@
 
 KEY='W:a'
 
-COMMAND=(gui action open toggletheme)
+function runner() {
+  gui action open toggletheme
+}

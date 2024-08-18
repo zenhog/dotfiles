@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-lxd init --preseed < <(envsubst < "$HOME/.lxd-config.yaml")

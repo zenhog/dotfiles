@@ -3,6 +3,9 @@
 KEY='S-W:e'
 
 ATTRIBUTES=(profile=vpnqute)
-COMMAND=(cgexec -g net_cls:vpn1
-  qutebrowser --qt-arg name vpnqute --target private-window --temp-basedir
-  --config-py "$HOME/.config/qutebrowser/config.py")
+
+function runner() {
+  cgexec -g net_cls:vpn1 \
+    qutebrowser --qt-arg name vpnqute --target private-window --temp-basedir \
+      --config-py "$HOME/.config/qutebrowser/config.py"
+}

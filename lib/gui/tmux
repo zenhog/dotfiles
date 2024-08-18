@@ -6,6 +6,10 @@ ICON=
 
 NOWRAP=1
 
+export CMDSYM=➡
+export CMDPAT="^.*$CMDSYM.*$"
+export TMUX_DIR="$HOME/.config/tmux"
+export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
 
 function label() {
@@ -18,10 +22,14 @@ function label() {
   esac
 
   echo " mode: $mode "
+  # echo host
+  # echo port
+  # echo kind
+  # echo state?
 }
 
 function init() {
-  set_opt mode 0
+  silent get_opt mode || set_opt mode 0
   set_opt mode-mod 3
 }
 
@@ -39,28 +47,27 @@ function list-sessions() {
   local sessions
   readarray -t sessions < <(tmux ls -F '#S')
 
-  for s in "${sessions[@]}"; do
-    mute is_remote "$s" && s="$(ansi --yellow "$s")"
-    echo "$s"
-  done
+  printf "%s\n" "${sessions[@]}"
 }
 
 function list-windows() {
-  local sid="$1"
-  if [[ -n "$sid" ]]; then
-    dmux list-windows -t "$sid" -F '#S:#I #W' | column -t
-  else
-    dmux list-windows -a -F '#S:#I #W' | column -t
-  fi
+  local sessions
+
+  readarray -t sessions < <(list-sessions)
+
+  for session in "${sessions[@]}"; do
+    dmux "session:$session" list-windows -t "$session" -F '#S:#I #W'
+  done | column -t
 }
 
 function list-panes() {
-  local wid="$1"
-  if [[ -n "$wid" ]]; then
-    dmux list-panes -t "$wid" -F '#S:#I.#P' | column -t
-  else
-    dmux list-panes -a -F '#S:#I.#P' | column -t
-  fi
+  local panes
+
+  readarray -t windows < <(list-windows)
+
+  for window in "${windows[@]}"; do
+    dmux "session:${window%:*}" list-panes -t "${window%:*}" -F '#S:#I.#P'
+  done | column -t
 }
 
 function view() {
@@ -99,9 +106,21 @@ function view-pane() {
 }
 
 BINDS[rotate_mode]=alt-t
+HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 function rotate_mode() {
   rotate_opt mode
+}
+
+function status() {
+  local type="${1?}"
+
+  case "$type" in
+    left)
+      ;;
+    right)
+      ;;
+  esac
 }
 
 function extract-pane() {
@@ -125,17 +144,16 @@ function mksession() {
 
       tmux has-session -t "$name" || failwith "Failed creating session '$name'"
 
-      set_opt "session-${name}-name" "$name"
-      set_opt "session-${name}-kind" "$kind"
-
       tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
       tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
 
       if [[ "$kind" == menu ]]; then
         tmux set -t "$name" status off
+        tmux set -t "$name" key-table menu
       fi
 
-      tmux set -t "$name" key-table "$kind"
+      tmux set -t "$name" @kind "$kind"
+
       ;;
     remote)
       local port host="$1"
@@ -154,22 +172,17 @@ function mksession() {
 
       read -r port < <(gui ssh revport "$host")
 
-      gui ssh rexec "$host" gui tmux set_opt "session-${name}-port" "$port"
-      rmux "$host" setenv -t "$name" TMUX_SESSION_PORT "$port"
+      gui ssh rexec "$host" tmux set -t "$name" @port "$port"
 
       tmux new-session -ds "$name" \
         gui ssh ttyexec "$host" tmux attach -t "$name"
 
       tmux has-session -t "$name" || failwith "Failed creating session '$name'"
 
-      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
-      set_opt "session-${name}-name" "$name"
+      tmux set -t "$name" status off
 
-      tmux setenv -t "$name" TMUX_SESSION_HOST "$host"
-      set_opt "session-${name}-host" "$host"
-
-      tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
-      set_opt "session-${name}-kind" "$kind"
+      tmux set -t "$name" @kind "$kind"
+      tmux set -t "$name" @host "$host"
       ;;
   esac
 }
@@ -197,6 +210,105 @@ function window() {
   esac
 }
 
+function cursor() {
+  local word="$(tmux display -p '#{copy_cursor_word}')"
+  local x="$(tmux display -p '#{copy_cursor_x}')"
+  local y="$(tmux display -p '#{copy_cursor_y}')"
+  local match="$(tmux display -p '#{search_match}')"
+
+  tmux send-keys -X
+  tmux display "Word under cursor: '$word' at ($x, $y), match: '$match'"
+}
+
+function lastcmd() {
+  tmux copy-mode
+  tmux send-keys -X search-backward "$CMDPAT"
+  tmux send-keys -X search-again
+}
+
+function pagecmd() {
+  tmux copy-mode
+  tmux send-keys -X search-backward "$CMDPAT"
+  tmux send-keys -X begin-selection
+  tmux send-keys -X search-again
+  tmux send-keys -X copy-selection-and-cancel
+  tmux show-buffer | less
+}
+
+function nextcmd() {
+  # send-keys -X previous-prompt/next-prompt
+  local word="$(tmux display -p '#{copy_cursor_word}')"
+  if [[ "$word" != "$CMDSYM" ]]; then
+    #tmux send-keys -X cursor-right
+    tmux send-keys -X end-of-line
+  fi
+  tmux send-keys -X search-forward "$CMDPAT"
+}
+
+function prevcmd() {
+  local word="$(tmux display -p '#{copy_cursor_word}')"
+
+  if [[ "$word" != "$CMDSYM" ]]; then
+    #tmux send-keys -X cursor-left
+    tmux send-keys -X start-of-line
+  fi
+  tmux send-keys -X search-backward "$CMDPAT"
+}
+
+function reload() {
+  tmux source "$TMUX_CONFIG"
+}
+
+function colors() {
+  source "$DIR/10-theme.conf"
+  source "$DIR/30-options.conf"
+}
+
+function copytk() {
+  tmux run "copytk easycopy --search-nkeys 1"
+}
+
+function hintcopy() {
+  # capture the target pane
+  # set the alternate screen
+  # tmux command-prompt -1 'display -p %%'
+  # readlines -t matches < <(rg -o --column -- "$key" "$capture")
+  #   IFS=: read -r line col <<< "$match"
+  # mapfile -t ${lines[@]} < <(capture-pane)
+  # replace ${lines[$line]:$col:1} with $key
+
+  local matches lines lines1 lines2 cap key
+
+  IFS= read -d '' cap < <(tmux capture-pane -t "$pane" -p)
+
+  readlines -t inlines  <<< "$cap"
+  readlines -t outlines <<< "$cap"
+
+  local hintkeys=qwertyuiopasdfghjklzxcvbnm
+  local hintchars="$hintkeys"
+
+  readlines -t matches < <(rg -o --column -- "$key" <<< "$cap")
+
+  local i=0 roundchars="$hintkeys"
+  local hints hintchars
+
+  local rounds=$(( (${#matches[@]} + $#hintkeys - 1) / $#hintkeys ))
+
+  for match in "${matches[@]}"; do
+    local line col char hints output
+    IFS=: read -r line col char <<< "$match"
+    read -r hints < <(genhints "$char")
+    read -r output < <(printf "%s%s%s" "${outlines[$line]:0:$col}" "$hints" \
+      "${outlines[$line]:$(($col+${#hints}))}")
+    outlines[$line]="$output"
+  done
+}
+
+function extract() {
+  local pane="$(tmux display -p '#S:#I.#P')"
+  tmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | fzfgrep"
+}
+
 function sync_clipboard() {
   if [[ -n "$DISPLAY" ]]; then
     local tmuxdata=$(tmux show-buffer | base64)
@@ -210,8 +322,8 @@ function sync_clipboard() {
 
 function forward_buffer() {
   local name="$(tmux display -p '#S')"
-  local kind="$(get_opt "session-${name}-kind")"
-  local port="$(get_opt "session-${name}-port")"
+  local kind="$(mute tmux show -vt "$name" @kind)"
+  local port="$(mute tmux show -vt "$name" @port)"
 
   if [[ -n "$port" ]]; then
 
@@ -233,44 +345,11 @@ function forward_buffer() {
 }
 
 function setup_session() {
-  #local name="$(tmux display -p '#S')"
-  #local kind="$(get_opt "session-${name}-kind")"
-
-  #case "$kind" in
-  #  menu)
-  #    tmux set status off
-  #    tmux set key-table menu
-  #    ;;
-  #  remote)
-  #    tmux set status off
-  #    ;;
-  #esac
   :
 }
 
 function cleanup_session() {
   :
-  #local name="$(tmux display -p '#S')"
-  #local kind="$(get_opt "session-${name}-kind")"
-
-  #echo cleanup-session:$name:$kind > /tmp/test
-
-  #case "$kind" in
-  #  menu|local)
-  #    unset_opt "session-${name}-name"
-  #    unset_opt "session-${name}-kind"
-  #    ;;
-  #  remote)
-  #    local host="$(get_opt "session-${name}-host")"
-
-  #    unset_opt "session-${name}-name"
-  #    unset_opt "session-${name}-kind"
-  #    unset_opt "session-${name}-host"
-
-  #    gui ssh rexec "$host" gui tmux unset_opt "session-${name}-port"
-  #    gui ssh cancel "$host"
-  #    ;;
-  #esac
 }
 
 function is_remote() {
@@ -278,7 +357,7 @@ function is_remote() {
 
   [[ -z "$sid" ]] && read -r sid < <(tmux display -p '#S')
 
-  [[ -n "$sid" ]] && get_opt "host-$sid"
+  [[ -n "$sid" ]] && tmux show -vt "$sid" @host
 }
 
 function rmux() {
@@ -292,15 +371,19 @@ function rmux() {
 function dmux() {
   local session="$(tmux display -p '#S')"
 
+  if [[ "$1" == session:* ]]; then
+    session="${1#session:}"
+    shift
+  fi
+
   [[ -n "$session" ]] || return
 
-  local kind="$(get_opt "session-${session}-kind")"
-  local host="$(get_opt "session-${session}-host")"
+  local kind="$(tmux show -vt "$session" @kind)"
 
   if [[ "$kind" == remote ]]; then
+    local host="$(tmux show -vt "$session" @host)"
     rmux "$host" "$@"
-    return
-  elif [[ "$kind" == local ]]; then
+  elif [[ "$kind" == local ]] || [[ "$kind" == menu ]]; then
     tmux "$@"
   fi
 }
@@ -340,78 +423,6 @@ function attach() {
   fi
 }
 
-BINDS[open]=enter
-HOOKS[open]=accept
-DESCS[open]='Run or raise selected tmux session'
-function open() {
-  function open_session() {
-    local name="$1"
-    if on_xsession; then
-
-      [[ "$name" == menu ]] && VERB=exec || VERB=run
-
-      awm "$VERB" instance="@$name" -- alacritty --class "tmux,$name" --command \
-        tmux new-session -DX -As "$name" "${@:2}"
-
-      until tmux has-session -t "$session"; do
-        sleep 0.1
-        awm show instance="@$name"
-      done
-    else
-      if [[ -n "$TMUX" ]]; then
-        tmux has-session -t "$name" || tmux new-session -ds "$name" "${@:2}"
-        tmux switch-client -t "$name"
-      else
-        if [[ "$TERM" == linux && "$(tty)" =~ /dev/pts/.* ]]; then
-          PRE="TERM=fbterm"
-        fi
-        env "$PRE" tmux new-session -As "$name" "${@:2}"
-      fi
-    fi
-    tmux set-environment -t "$name" TMUX_SESSION_NAME "$name"
-  }
-
-  local kind="${1%%:*}"
-  local rest="${1#*:}"
-  case "$kind" in
-    session)
-      local session="$rest"
-      open_session "$session" "${@:2}"
-      ;;
-    window) # format: $session_name:$window_number:$window_name
-      local window_id="${rest%:*}"
-      local window_name="${rest##*:}"
-      local session="${rest%%:*}"
-      local winflag="${rest#*:}"
-      winflag="${winflag%%:*}"
-
-      open_session "$session"
-      if [[ "$winflag" == "@" ]]; then
-        tmux new-window -S -n "$window_name" -t "=${session}:" "${@:2}"
-      else
-        tmux select-window -t "$window_id"
-      fi
-      ;;
-  esac
-}
-
-BINDS[close]=alt-d
-DESCS[close]='Delete selected tmux session'
-function close() {
-  local kind="${1%%:*}"
-  local rest="${1#*:}"
-  case "$kind" in
-    session)
-      tmux kill-session -t "$rest"
-      ;;
-    window) # format: $session_name:$window_number:$window_name
-      local window_id="${rest%:*}"
-      local window_name="${rest##*:}"
-      local session="${rest%%:*}"
-      local winflag="${rest#*:}"
-      winflag="${winflag%%:*}"
-
-      tmux kill-window -t "$session:$winflag"
-      ;;
-  esac
-}
+# kill
+# 
+# rename

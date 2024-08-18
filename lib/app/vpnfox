@@ -3,5 +3,7 @@
 KEY='W:e'
 
 ATTRIBUTES=(profile=vpnfox)
-COMMAND=(cgexec -g net_cls:vpn1
-  firefox -p private --new-instance --class vpnfox)
+
+function runner() {
+  cgexec -g net_cls:vpn1 firefox -p private --new-instance --class vpnfox
+}

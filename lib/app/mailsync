@@ -2,4 +2,6 @@
 
 KEY='W:m'
 
-COMMAND=(gui action open mailsync)
+function runner() {
+  mailsync && notify 'Mail synced successfully!'
+}

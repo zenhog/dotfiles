@@ -3,4 +3,7 @@
 KEY='S-W:w'
 
 ATTRIBUTES=(profile=wanfox)
-COMMAND=(firefox -p main --new-instance --class wanfox)
+
+function runner() {
+  firefox -p main --new-instance --class wanfox
+}
