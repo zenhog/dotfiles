@@ -278,14 +278,15 @@ function mksession() {
 }
 
 function window() {
-  local kind="${1?}"
-  local session="${2?}"
-  local window="${3?}"
+  local mode="${1?}"
+  local kind="${2?}"
+  local session="${3?}"
+  local window="${4?}"
 
-  shift 3
+  shift 4
 
   case "$kind" in
-    local|menu)
+    local)
       attach "$mode" "$kind" "$session" || return
       tmux new-window -S -n "$window" -t "=${session}:" "$@"
       ;;

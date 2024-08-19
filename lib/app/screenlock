@@ -5,5 +5,5 @@ KEY='E:Scroll_Lock'
 function runner() {
   local image="$HOME/.wallpapers/whysosleepy.png"
 
-  gui awm spawn -- i3lock -nuei "$image"
+  gui awm spawn bg -- i3lock -nuei "$image"
 }

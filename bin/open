@@ -16,13 +16,13 @@ if [[ "$mime" == inode/directory ]]; then
     read -r mime < "$1/.dirtype"
   else
     cd "$1" &&
-      exec gui tmux window local "$(hostname)" "$(basename "$1")" "${@:2}"
+      exec gui tmux window fg local "$(hostname)" "$(basename "$1")" "${@:2}"
   fi
 fi
 
 case "${mime}" in
   text/*)
-    gui tmux window local "$(hostname)" "$(basename "$1")" nvim "$1"
+    gui tmux window fg local "$(hostname)" "$(basename "$1")" nvim "$1"
     ;;
   image/*)
     gui awm runonce fg -- nsxiv -a -s f -- "$(realpath -s "$1")"
@@ -36,7 +36,7 @@ case "${mime}" in
   *)
     case "$1" in
       file://*)
-        gui tmux window local "$(hostname)" "$(basename "$1")" \
+        gui tmux window fg local "$(hostname)" "$(basename "$1")" \
           nvim "${1#file://}"
         ;;
       irc:*)

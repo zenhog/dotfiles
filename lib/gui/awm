@@ -121,10 +121,10 @@ function runonce() {
 
   case "$mode" in
     fg)
-      raise "${lhs[@]}" || spawn "${lhs[@]}" -- "${rhs[@]}"
+      raise "${lhs[@]}" || spawn fg "${lhs[@]}" -- "${rhs[@]}"
       ;;
     bg)
-      exists "${lhs[@]}" || spawn "${lhs[@]}" -- "${rhs[@]}"
+      exists "${lhs[@]}" || spawn bg "${lhs[@]}" -- "${rhs[@]}"
       ;;
   esac
 }
@@ -285,6 +285,10 @@ EOF
 }
 
 function spawn() {
+  local mode="$1"
+
+  shift
+
   local lhs rhs attrs pid
 
   read -r -a lhs < <(parse lhs "$@")
@@ -301,6 +305,7 @@ EOF
   [[ "$rhs" == i3lock ]] && return
 
   if [[ -n "$lhs" ]]; then
-    gui awm waitfor "${lhs[@]}" && raise "${lhs[@]}"
+    gui awm waitfor "${lhs[@]}"
+    [[ "$mode" == fg ]] && raise "${lhs[@]}"
   fi
 }

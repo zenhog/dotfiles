@@ -61,8 +61,12 @@ HOOKS[qalc]=qalc
 GDESCS[qalc]='Evaluate qalc expressions'
 CALLS[qalc]='change-preview(eval qalc {q})'
 
+function inputpreview() {
+  tmux show-buffer -b preview 2>/dev/null
+}
+
 function input() {
-  local query="$1" fifo="$2"
+  local query="$1"
 
   local cmd
 
@@ -73,20 +77,12 @@ function input() {
   cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
   cmd+=('--info=inline-right')
   cmd+=('--no-separator')
+  cmd+=('--preview' 'inputpreview')
+  cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
 
-  if [[ -n "$MENU_INPUT_PREVIEW" ]]; then
-    function inputpreview() {
-      echo "$MENU_INPUT_PREVIEW"
-    }
-    export -f inputpreview
-  fi
+  export -f inputpreview
 
-  if silent declare -F inputpreview; then
-    cmd+=('--preview' 'inputpreview')
-    cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
-  fi
-
-  echo -n | "${cmd[@]}" 2>/dev/tty
+  echo -n | "${cmd[@]}" 2>/dev/tty | tee >(tmux load-buffer -b input -)
 }
 
 function main() {
@@ -214,34 +210,6 @@ function hide() {
 }
 
 function dispatch() {
-  [[ $# -eq 0 ]] && exit 1
-  # if we are in a tmux menu session, proceed with the main function
-  if tty -s && [[ "$(tmux showenv TMUX_SESSION_NAME)" =~ menu$ ]]; then
-    zug
-    main "$@"
-  # otherwise, we are in a non-interactive env and we need to setup
-  else
-    # seamless fzf input from script implementation with a fifo
-    if [[ "$1" == input ]]; then
-      local fifo="$(mktemp --dry-run --suffix "menu-$$-inputfifo")"
-
-      mkfifo "$fifo" && export MENU_INPUT_FIFO="$fifo"
-
-      forward_env
-
-      gui tmux window menu menu menu menu input "$2" "$fifo"
-      cat < "$fifo" && rm "$fifo"
-    else
-      forward_env
-      # exec gui tmux window kind name window command args
-      # which makes it
-      # exec gui tmux menu   menu menu menu   menu "$@"
-      exec gui tmux window menu menu menu menu "$@"
-    fi
-  fi
-}
-
-function dispatch() {
   local mode="$1"
 
   shift
@@ -250,26 +218,8 @@ function dispatch() {
 
   case "$mode" in
     input)
-      main input "${@:2}"
-      ;;
-    xinput)
-      #local fifo="$(mktemp --dry-run --suffix "menu-$$-inputfifo")"
-
-      #mkfifo "$fifo" && export MENU_INPUT_FIFO="$fifo"
-
-      #local session="$(tmux display -p '#S')"
-
-      #tmux setenv -t "${session:-$(hostname)}" MENU_INPUT_FIFO "$fifo"
-
-      #menu xsession input "$1"
-
-      show
-
-      local client="$(tmux list-clients -t "$(hostname)" -F '#{client_tty}')"
-
-      tmux popup -BE -w 100% -h 100% -t "$client" menu input "$@"
-
-      hide
+      menu xsession input "$@"
+      tmux show-buffer -b input
       ;;
     main)
       main "$@"

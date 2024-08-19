@@ -2,6 +2,12 @@
 
 KEY='S-W:Return'
 
+ATTRIBUTES=(profile=ctfbox)
+
 function runner() {
-  gui ssh tmux incus/ctfbox
+  local mode="$1"
+
+  shift
+
+  gui ssh attach "$mode" ctfbox incus/ctfbox
 }

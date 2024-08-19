@@ -3,5 +3,9 @@
 KEY='W:Return'
 
 function runner() {
-  gui tmux attach local "$(hostname)"
+  local mode="$1"
+
+  shift
+
+  gui tmux attach "$mode" local "$(hostname)"
 }

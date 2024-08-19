@@ -47,11 +47,11 @@ function check() {
   read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
 }
 
-BINDS[del]=alt-d
-DESCS[del]='Delete bookmark'
-function del() {
+BINDS[rm]=alt-d
+DESCS[rm]='Delete bookmark'
+function rm() {
   local id
-  read -r -d ' ' id dummy <<< "$1"
+  read -r id _ <<< "$1"
   sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
 }
 
@@ -83,11 +83,9 @@ function add() {
     exit 1
   fi
 
-  MENU_INPUT_PREVIEW="$(sqlite3 "$DB" "SELECT metadata FROM bookmarks" | sort)"
+  sqlite3 "$DB" "SELECT metadata FROM bookmarks" | tmux load-buffer -b preview -
 
-  export MENU_INPUT_PREVIEW=abc
-
-  read -r title < <(menu input)
+  local title="$(menu input)"
 
   [[ -n "$title" ]] && sqlite3 "$DB" \
     "INSERT INTO bookmarks (url, metadata) values ('$url', '$title')"
