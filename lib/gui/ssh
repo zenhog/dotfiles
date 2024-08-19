@@ -136,7 +136,9 @@ function ttyexec() {
   shift
 
   #connect "$host" && ssh -S "$sock" -t "$host" bash -lc "'$*'"
-  connect "$host" && ssh -S "$sock" -t "$host" bash -ls < <(printf " %q" "$@")
+  if connect "$host"; then
+    exec ssh -S "$sock" -t "$host" bash -lc "$(printf " %q" "$*")"
+  fi
 }
 
 function rexec() {

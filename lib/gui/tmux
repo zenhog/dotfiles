@@ -6,8 +6,11 @@ ICON=
 
 NOWRAP=1
 
+RATIO=75%
+
 export CMDSYM=➡
 export CMDPAT="^.*$CMDSYM.*$"
+export CMDPAT="$CMDSYM"
 export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
@@ -22,10 +25,6 @@ function label() {
   esac
 
   echo " mode: $mode "
-  # echo host
-  # echo port
-  # echo kind
-  # echo state?
 }
 
 function init() {
@@ -35,32 +34,48 @@ function init() {
 function list() {
   local mode="${1:-$(get_opt mode)}"
 
-  eval "list-$mode"
+  eval "list-$mode" "${@:2}"
 }
 
 function format() {
   local mode="$1"
+  local name="$2"
 
   shift
 
   case "$mode" in
     session)
-      local session="$1"
-
-      local host icon
-
-      if read -r host < <(is_remote "$session"); then
-        icon=󰣀
-      else
-        icon=󰆦
-      fi
-
-      printf "%s %s %s\n" "$icon" "$session" "${host:-localhost}"
+      printf "%s %s %s\n" "$(get icon "$name")" "$name" "$(get host "$name")"
       ;;
     window)
+      local s w
+      IFS=$': \t' read -r s i w <<< "$name"
+      printf "%s %s %s %s\n" "$(get icon "$s")" "$s:$i" "$w"
       ;;
     pane)
+      local s i p cmd
+      IFS=$':. \t' read -r s i p cmd <<< "$name"
+      printf "%s %s %s\n" "$(get icon "$s")" "$s:$i.$p" "$cmd"
       ;;
+  esac
+}
+
+function get() {
+  local key="$1"
+  local session="$2"
+
+  local host icon
+
+  if read -r host < <(is_remote "$session"); then
+    icon=󰣀
+  else
+    host=localhost
+    icon=󰆦
+  fi
+
+  case "$key" in
+    icon) echo -n "$icon" ;;
+    host) echo -n "$host" ;;
   esac
 }
 
@@ -76,64 +91,99 @@ function list-sessions() {
 function list-windows() {
   local sessions
 
-  readarray -t sessions < <(list-sessions)
+  readarray -t sessions < <(list-sessions | grep "${1:-.}")
 
-  for session in "${sessions[@]}"; do
-    local windows host icon
+  for s in "${sessions[@]}"; do
+    local icon session host
+
+    read -r icon session host <<< "$s"
 
     readarray -t windows < <(dmux "session:$session" list-windows \
       -t "$session" -F '#S:#I #W')
+
+    for window in "${windows[@]}"; do
+      format window "$window"
+    done
 
   done | column -t
 }
 
 function list-panes() {
-  local panes
+  local windows
 
-  readarray -t windows < <(list-windows)
+  readarray -t windows < <(list-windows | grep "${1:-.}")
 
-  for window in "${windows[@]}"; do
-    dmux "session:${window%:*}" list-panes -t "${window%:*}" -F '#S:#I.#P'
+  for w in "${windows[@]}"; do
+    local icon session wid wname panes
+    IFS=$': \t' read -r icon session wid wname <<< "$w"
+
+    readarray -t panes < <(dmux "session:$session" \
+      list-panes -t "$session:$wid" -F '#S:#I.#P #{pane_current_command}')
+
+    for pane in "${panes[@]}"; do
+      format pane "$pane"
+    done
   done | column -t
 }
 
 function view() {
-  local id mode="$(get_opt mode)"
+  local mode id
 
-  read -r id _ <<< "$1"
+  mode="$(get_opt mode)"
+
+  read -r _ id _ <<< "$1"
 
   case "$mode" in
-    0) view-session "$id";;
-    1) view-window "$id";;
-    2) view-pane "$id";;
+    sessions)
+      view-session "$id"
+      ;;
+    windows)
+      view-window "$id"
+      ;;
+    panes)
+      view-pane "$id"
+      ;;
   esac
 }
 
 function view-session() {
-  local icon session host windows
+  local session="$1" windows
 
-  read -r icon session host _ <<< "$1"
-
-  readarray -t windows < <(list-windows "session:$session")
+  readarray -t windows < <(list-windows "$session")
 
   for window in "${windows[@]}"; do
-    view-window "$window"
+    local id
+    read -r _ id _ <<< "$window"
+    view-window "$id"
   done
 }
 
 function view-window() {
-  local ids
-  readarray -t ids < <(dmux list-panes -t "$1" -F '#S:#I.#P')
+  local window="$1" panes
 
-  for id in "${ids[@]}"; do
+  readarray -t panes < <(list-panes "$window")
+
+  for pane in "${panes[@]}"; do
+    local id
+    read -r _ id _ <<< "$pane"
     view-pane "$id"
   done
 }
 
 function view-pane() {
+  local session host pane="$1"
+
+  IFS=: read -r session _ <<< "$pane"
+
+  read -r host < <(is_remote "$session")
+
   ansi --reset-color
-  sepline "> $id <"
-  dmux capture-pane -t "$1" -pe
+  sepline " $pane "
+  if [[ -n "$host" ]]; then
+    rmux "$host" capture-pane -t "$pane" -pe
+  else
+    tmux capture-pane -t "$pane" -pe
+  fi
 }
 
 BINDS[rotate_mode]=alt-t
@@ -172,40 +222,42 @@ function extract-pane() {
 function mksession() {
   local kind="${1?}"
   local name="${2?}"
+  local tmux=(tmux)
 
   shift 2
 
+  [[ -n "$HOST" ]] && tmux=(rmux "$HOST")
+
   case "$kind" in
     local|menu)
-      tmux has-session -t "$name" || tmux new-session -ds "$name"
 
-      tmux has-session -t "$name" || failwith "Failed creating session '$name'"
+      "${tmux[@]}" has-session -t "$name" ||
+        "${tmux[@]}" new-session -ds "$name"
 
-      tmux setenv -t "$name" TMUX_SESSION_NAME "$name"
-      tmux setenv -t "$name" TMUX_SESSION_KIND "$kind"
+      "${tmux[@]}" has-session -t "$name" ||
+        failwith "Failed creating local session '$name'"
+
+      "${tmux[@]}" setenv -t "$name" TMUX_SESSION_NAME "$name"
+      "${tmux[@]}" setenv -t "$name" TMUX_SESSION_KIND "$kind"
 
       if [[ "$kind" == menu ]]; then
-        tmux set -t "$name" status off
-        tmux set -t "$name" key-table menu
+        "${tmux[@]}" set -t "$name" status off
+        "${tmux[@]}" set -t "$name" key-table menu
       fi
 
-      tmux set -t "$name" @kind "$kind"
-
+      "${tmux[@]}" set -t "$name" @kind "$kind"
       ;;
     remote)
       local port host="$1"
 
       shift
 
-      if tmux has-session -t "$name"; then
+      if mute tmux has-session -t "$name"; then
         echo "Remote session '$name' already exists" >&2
         return
       fi
 
-      gui ssh sync "$host" || failwith "Failed to sync host '$host'"
-
-      gui ssh rexec "$host" gui tmux mksession local "$name" ||
-        failwith "Failed creating remote session '$name'"
+      HOST="$host" mksession local "$name"
 
       read -r port < <(gui ssh revport "$host")
 
@@ -214,7 +266,8 @@ function mksession() {
       tmux new-session -ds "$name" \
         gui ssh ttyexec "$host" tmux attach -t "$name"
 
-      tmux has-session -t "$name" || failwith "Failed creating session '$name'"
+      mute tmux has-session -t "$name" ||
+        failwith "Failed creating remote session '$name'"
 
       tmux set -t "$name" status off
 
@@ -402,7 +455,7 @@ function rmux() {
 
   shift
 
-  gui ssh rexec "$host" tmux "$@"
+  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@" || tmux "$@"
 }
 
 function dmux() {
