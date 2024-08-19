@@ -99,15 +99,16 @@ function cancel() {
   fi
 }
 
-BINDS[tmux]=enter
-HOOKS[tmux]=accept
-DESCS[tmux]='New remote tmux session'
-function tmux() {
+BINDS[attach]=enter
+HOOKS[attach]=accept
+DESCS[attach]='Attach a tmux session'
+function attach() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
   local name="${host##*/}"
+  local mode="${3:-fg}"
 
-  gui tmux attach remote "$name" "$host"
+  gui tmux attach "$mode" remote "$name" "$host"
 }
 
 function shell() {

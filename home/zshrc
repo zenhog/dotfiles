@@ -11,6 +11,16 @@ ZLE_RPROMPT_INDENT=0
 
 #[[ -r "$HOME/.profile" ]] && source "$HOME/.profile"
 
+prompt_netgrp () {
+  local cgroup="$(awk -F: '/net_cls/{print $3}' < /proc/$$/cgroup)"
+  cgroup="${cgroup#/}"
+	[[ -n "$cgroup" ]] && p10k segment -f 208 -i '󰛸' -t "$cgroup"
+}
+
+prompt_mark() {
+  printf '\033]133;A\033\\'
+}
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"

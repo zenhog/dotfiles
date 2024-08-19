@@ -4,9 +4,9 @@ source "$HOME/.bin/gui"
 
 function atexit() {
   silent declare -F atfinish && atfinish
-  silent gui awm setattributes class=tmux instance=menu -- \
-    @hidden=true @minimized=true
-  #remove_env
+  local session="$(tmux display -p '#S')"
+
+  tmux setenv -t "${session:-$(hostname)}" MENU_INPUT_FIFO "$fifo"
 }
 
 BINDS[help]=alt-h
@@ -64,7 +64,8 @@ CALLS[qalc]='change-preview(eval qalc {q})'
 function input() {
   local query="$1" fifo="$2"
 
-  local -a cmd
+  local cmd
+
   cmd=('fzf' '--print-query')
   cmd+=('--border' 'sharp')
   cmd+=('--prompt' "input($MODULE)> ")
@@ -72,9 +73,6 @@ function input() {
   cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
   cmd+=('--info=inline-right')
   cmd+=('--no-separator')
-
-  echo "$@" > /tmp/menu
-  tmux showenv -t menu >> /tmp/menu
 
   if [[ -n "$MENU_INPUT_PREVIEW" ]]; then
     function inputpreview() {
@@ -88,20 +86,18 @@ function input() {
     cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
   fi
 
-  if [[ -n "$fifo" ]]; then
-    exec 1>"$fifo"
-  fi
-
   echo -n | "${cmd[@]}" 2>/dev/tty
 }
 
 function main() {
   trap atexit EXIT
 
-  [[ "$1" == input ]] && {
+  if [[ "$1" == input ]]; then
     input "${@:2}"
     return
-  }
+  fi
+
+  export MODULE="$1"
 
   source "$MODULES_DIR/$1" || exit 1
 
@@ -192,7 +188,6 @@ function forward_env() {
   while read var; do
     local name value
     IFS='=' read -r name value <<< "$var"
-    echo Setting $name=$value >> /tmp/menu
     tmux setenv -t menu "$name" "$value"
   done < <(env | grep '^MENU_')
 }
@@ -203,6 +198,19 @@ function remove_env() {
     IFS='=' read -r name _ <<< "$var"
     tmux setenv -t menu -r "$name"
   done < <(tmux showenv -t menu | grep '^MENU_')
+}
+
+function show() {
+  gui run bg main
+  silent gui awm setattributes profile=main -- \
+    @skip_taskbar=true @above=true @sticky=true
+
+  gui awm raise profile=main
+}
+
+function hide() {
+  silent gui awm setattributes profile=main -- \
+    @skip_taskbar=false @above=false @sticky=false
 }
 
 function dispatch() {
@@ -231,6 +239,58 @@ function dispatch() {
       exec gui tmux window menu menu menu menu "$@"
     fi
   fi
+}
+
+function dispatch() {
+  local mode="$1"
+
+  shift
+
+  export DISPATCH_MODE="$mode"
+
+  case "$mode" in
+    input)
+      main input "${@:2}"
+      ;;
+    xinput)
+      #local fifo="$(mktemp --dry-run --suffix "menu-$$-inputfifo")"
+
+      #mkfifo "$fifo" && export MENU_INPUT_FIFO="$fifo"
+
+      #local session="$(tmux display -p '#S')"
+
+      #tmux setenv -t "${session:-$(hostname)}" MENU_INPUT_FIFO "$fifo"
+
+      #menu xsession input "$1"
+
+      show
+
+      local client="$(tmux list-clients -t "$(hostname)" -F '#{client_tty}')"
+
+      tmux popup -BE -w 100% -h 100% -t "$client" menu input "$@"
+
+      hide
+      ;;
+    main)
+      main "$@"
+      ;;
+    shell)
+      if [[ -n "$TMUX" ]]; then
+        tmux popup -BE -w 100% -h 100% menu main "$@"
+      else
+        main "$@"
+      fi
+      ;;
+    popup)
+      tmux popup -BE -w 100% -h 100% menu main "$@"
+      ;;
+    xsession)
+      show
+      local client="$(tmux list-clients -t "$(hostname)" -F '#{client_tty}')"
+      tmux popup -BE -w 100% -h 100% -t "$client" menu main "$@"
+      hide
+      ;;
+  esac
 }
 
 dispatch "$@"

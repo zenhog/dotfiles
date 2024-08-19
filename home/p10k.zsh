@@ -32,12 +32,14 @@
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # os_icon               # os identifier
     context                 # context?
+    netgrp                  # network cgroup (user-defined)
     dir                     # current directory
     vcs                     # git status
     status                  # exit code of the last command
     background_jobs
     direnv
     prompt_char             # prompt symbol
+    prompt_mark             # prompt marker (escape sequence for tmux)
   )
 
   # The list of segments shown on the right. Fill it with less important segments.

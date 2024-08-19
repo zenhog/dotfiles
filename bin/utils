@@ -60,6 +60,16 @@ function verbose() {
   "$@"
 }
 
+function on_xsession() {
+  local rtty ctty
+
+  read -r ctty < <(cat /sys/class/tty/tty0/active)
+  read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+
+  [[ "$ctty" == "$rtty" ]]
+}
+
+
 function checkbin() {
   for bin in "$@"; do
     silent which "$bin" || return

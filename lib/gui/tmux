@@ -286,7 +286,7 @@ function window() {
 
   case "$kind" in
     local|menu)
-      attach "$kind" "$session" || return
+      attach "$mode" "$kind" "$session" || return
       tmux new-window -S -n "$window" -t "=${session}:" "$@"
       ;;
     remote)
@@ -294,7 +294,7 @@ function window() {
 
       shift
 
-      attach "$kind" "$session" "$host" || return
+      attach "$mode" "$kind" "$session" "$host" || return
       rmux "$host" new-window -S -n "$window" -t "=${session}:" "$@"
       ;;
   esac
@@ -478,19 +478,11 @@ function dmux() {
   fi
 }
 
-function on_xsession() {
-    local rtty ctty
-
-    read -r ctty < <(cat /sys/class/tty/tty0/active)
-    read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
-
-    [[ "$ctty" == "$rtty" ]]
-}
-
 function attach() {
-  local kind="${1?}"
-  local name="${2?}"
-  local host="$3"
+  local mode="${1?}"
+  local kind="${2?}"
+  local name="${3?}"
+  local host="$4"
 
   local class=tmux
 
@@ -502,7 +494,7 @@ function attach() {
     failwith "Failed to create $kind session '$name' on ${host:-localhost}"
 
   if on_xsession; then
-    gui awm runonce fg "instance=$name" -- \
+    gui awm runonce "$mode" "instance=$name" -- \
       alacritty --class "$class,$name" --command tmux attach -dxt "$name"
 
   elif [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
@@ -514,5 +506,4 @@ function attach() {
 }
 
 # kill
-# 
 # rename

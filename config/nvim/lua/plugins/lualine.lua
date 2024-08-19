@@ -72,17 +72,14 @@ end
 
 local top = {
   lualine_a = {
+    'mode',
     updates,
+    'tabs',
   },
   lualine_b = {
   },
   lualine_c = {
-    {
-      'tabs',
-      fmt = function(str)
-        return '%=' .. str
-      end,
-    },
+    '%=',
   },
   lualine_x = {
   },
@@ -95,26 +92,20 @@ local top = {
 }
 local bottom = {
   lualine_a = {
-    {
-      'mode',
-      fmt = function(str)
-        str:sub(1,1)
-        return str
-      end
-    },
+    'filename',
   },
   lualine_b = {
     'branch',
-    'diff',
-    'diagnostics',
+    {
+      'diff',
+      colored = false,
+    },
+    {
+      'diagnostics',
+      colored = false,
+    },
   },
   lualine_c = {
-    {
-      'filename',
-      fmt = function(str)
-        return '%=' .. str
-      end
-    },
   },
   lualine_x = {
   },
@@ -125,7 +116,7 @@ local bottom = {
   },
   lualine_z = {
     location,
-    'lsp_progress',
+    --'lsp_progress',
   },
 }
 return {
