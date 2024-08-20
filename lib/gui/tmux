@@ -34,6 +34,8 @@ function init() {
 function list() {
   local mode="${1:-$(get_opt mode)}"
 
+  set_opt mode "$mode"
+
   eval "list-$mode" "${@:2}"
 }
 
@@ -278,16 +280,15 @@ function mksession() {
 }
 
 function window() {
-  local mode="${1?}"
-  local kind="${2?}"
-  local session="${3?}"
+  local kind="${1?}"
+  local session="${2?}"
   local window="${4?}"
 
-  shift 4
+  shift 3
 
   case "$kind" in
     local)
-      attach "$mode" "$kind" "$session" || return
+      attach "$kind" "$session" || return
       tmux new-window -S -n "$window" -t "=${session}:" "$@"
       ;;
     remote)
@@ -295,7 +296,7 @@ function window() {
 
       shift
 
-      attach "$mode" "$kind" "$session" "$host" || return
+      attach "$kind" "$session" "$host" || return
       rmux "$host" new-window -S -n "$window" -t "=${session}:" "$@"
       ;;
   esac
@@ -479,11 +480,33 @@ function dmux() {
   fi
 }
 
+function mod() {
+  local mode="$1"
+
+  shift
+
+  case "$mode" in
+    fg) mode=fg "$@" ;;
+    bg) mode=bg "$@" ;;
+  esac
+}
+
+function open() {
+  :
+}
+
+function kill() {
+  :
+}
+
+function rename() {
+  :
+}
+
 function attach() {
-  local mode="${1?}"
-  local kind="${2?}"
-  local name="${3?}"
-  local host="$4"
+  local kind="${1?}"
+  local name="${2?}"
+  local host="$3"
 
   local class=tmux
 
@@ -495,7 +518,7 @@ function attach() {
     failwith "Failed to create $kind session '$name' on ${host:-localhost}"
 
   if on_xsession; then
-    gui awm runonce "$mode" "instance=$name" -- \
+    gui awm runonce "${mode:-fg}" "instance=$name" -- \
       alacritty --class "$class,$name" --command tmux attach -dxt "$name"
 
   elif [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then
@@ -505,6 +528,3 @@ function attach() {
     tmux switch-client -t "$name" && tmux detach-client -s "$name"
   fi
 }
-
-# kill
-# rename

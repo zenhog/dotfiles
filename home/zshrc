@@ -3,9 +3,7 @@ source "$HOME/.bin/utils"
 setopt nullglob
 setopt extendedglob
 
-quiet stty -ixon
-
-echo -ne "\e[5 q"
+tty -s && stty -ixon
 
 ZLE_RPROMPT_INDENT=0
 

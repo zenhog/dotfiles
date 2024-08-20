@@ -4,9 +4,6 @@ source "$HOME/.bin/gui"
 
 function atexit() {
   silent declare -F atfinish && atfinish
-  local session="$(tmux display -p '#S')"
-
-  tmux setenv -t "${session:-$(hostname)}" MENU_INPUT_FIFO "$fifo"
 }
 
 BINDS[help]=alt-h
@@ -62,11 +59,12 @@ GDESCS[qalc]='Evaluate qalc expressions'
 CALLS[qalc]='change-preview(eval qalc {q})'
 
 function inputpreview() {
-  tmux show-buffer -b preview 2>/dev/null
+  tmux show-buffer -b preview 2>/dev/null && tmux delete-buffer -b preview
 }
 
 function input() {
   local query="$1"
+  local buffer="$2"
 
   local cmd
 
@@ -80,16 +78,20 @@ function input() {
   cmd+=('--preview' 'inputpreview')
   cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
 
-  export -f inputpreview
-
-  echo -n | "${cmd[@]}" 2>/dev/tty | tee >(tmux load-buffer -b input -)
+  if [[ -n "$buffer" ]]; then
+    echo -n | "${cmd[@]}" 2>/dev/tty | tmux load-buffer -b "$buffer" -
+  else
+    echo -n | "${cmd[@]}" 2>/dev/tty
+  fi
 }
 
 function main() {
   trap atexit EXIT
 
   if [[ "$1" == input ]]; then
-    input "${@:2}"
+    export -f inputpreview
+    local query="$2"
+    input "$query"
     return
   fi
 
@@ -180,22 +182,6 @@ function main() {
   list "${@:2}" | "${COMMAND[@]}"
 }
 
-function forward_env() {
-  while read var; do
-    local name value
-    IFS='=' read -r name value <<< "$var"
-    tmux setenv -t menu "$name" "$value"
-  done < <(env | grep '^MENU_')
-}
-
-function remove_env() {
-  while read var; do
-    local name
-    IFS='=' read -r name _ <<< "$var"
-    tmux setenv -t menu -r "$name"
-  done < <(tmux showenv -t menu | grep '^MENU_')
-}
-
 function show() {
   gui run bg main
   silent gui awm setattributes profile=main -- \
@@ -218,8 +204,9 @@ function dispatch() {
 
   case "$mode" in
     input)
-      menu xsession input "$@"
-      tmux show-buffer -b input
+      local query="$1"
+      menu xsession input "$query" input
+      quiet tmux show-buffer -b input && mute tmux delete-buffer -b input
       ;;
     main)
       main "$@"
@@ -237,7 +224,7 @@ function dispatch() {
     xsession)
       show
       local client="$(tmux list-clients -t "$(hostname)" -F '#{client_tty}')"
-      tmux popup -BE -w 100% -h 100% -t "$client" menu main "$@"
+      tmux popup -BE -w 100% -h 100% -c "$client" menu main "$@"
       hide
       ;;
   esac

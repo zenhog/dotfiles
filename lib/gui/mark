@@ -24,6 +24,7 @@ function list() {
 }
 
 BINDS[open]=enter
+HOOKS[open]=accept
 DESCS[open]='Open bookmark'
 function open() {
   local id url

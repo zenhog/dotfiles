@@ -115,7 +115,7 @@ function attach() {
   local name="$2"
   local host="$3"
 
-  gui tmux attach "$mode" remote "$name" "$host"
+  gui tmux mod "$mode" attach remote "$name" "$host"
 }
 
 function shell() {

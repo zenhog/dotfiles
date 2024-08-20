@@ -5,9 +5,5 @@ KEY='S-W:Return'
 ATTRIBUTES=(profile=ctfbox)
 
 function runner() {
-  local mode="$1"
-
-  shift
-
-  gui ssh attach "$mode" ctfbox incus/ctfbox
+  gui ssh attach ctfbox incus/ctfbox
 }

@@ -3,6 +3,5 @@
 KEY='C-M:t'
 
 function runner() {
-  local mode="$1"
-  gui tmux window "$mode" local "$(hostname)" ncmpcpp ncmpcpp
+  gui tmux window local "$(hostname)" ncmpcpp ncmpcpp
 }

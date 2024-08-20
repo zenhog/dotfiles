@@ -2,10 +2,12 @@
 
 KEY='W:Return'
 
+ATTRIBUTES=(profile=main)
+
 function runner() {
   local mode="$1"
 
   shift
 
-  gui tmux attach "$mode" local "$(hostname)"
+  gui tmux attach local "$(hostname)"
 }

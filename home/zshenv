@@ -11,6 +11,8 @@ case "$THEME" in
     ;;
 esac
 
+tty -s && echo -ne "\e[5 q"
+
 FZF_BASE_FLAGS=(
   "--color=$THEME"
 
@@ -58,7 +60,7 @@ FZF_TAB_FLAGS=()
 
 export FZF_DEFAULT_OPTS="${FZF_FLAGS[@]}"
 
-[[ -n "$TMUX" ]] && eval $(tmux show-environment -s DISPLAY)
+[[ -n "$TMUX" ]] && eval "$(tmux show-environment -s DISPLAY)"
 
 [[ -r "$HOME/.themes/lscolors/lscolors" ]] &&
   source "$HOME/.themes/lscolors/lscolors"

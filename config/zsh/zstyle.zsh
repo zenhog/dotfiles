@@ -11,6 +11,7 @@ zstyle ':completion:*:warnings'     format '[No matches for: %d]'
 
 ## Ignore completion functions for commands you don't have:
 zstyle ':completion:*:functions' ignored-patterns '_*'
+
 ## don't complete backup files as executables
 zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*\~'
 
@@ -25,4 +26,3 @@ zstyle ':fzf-tab:*' prefix ''
 #        fzf-preview 'echo ${(P)word}'
 
 zstyle ':fzf-tab:*:*:*' popup-pad 30 0
-FZF_MARKS_COMMAND=ftb-tmux-popup
