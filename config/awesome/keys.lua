@@ -96,7 +96,7 @@ for _, line in ipairs(pipexec('gui')) do
 
     globalkeys = gears.table.join(globalkeys,
         mapkey(mods[mod], key,
-            spawn(string.format('menu %s', command)), "menu", command)
+            spawn(string.format('menu xsession %s', command)), "menu", command)
     )
 end
 

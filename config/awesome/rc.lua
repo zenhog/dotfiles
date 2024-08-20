@@ -15,6 +15,7 @@ theme.init(os.getenv('HOME') .. '/.config/awesome/theme.lua')
 local keys = require('keys')
 local wibars = require('wibars')
 
+
 local function handle_errors()
     if awesome.startup_errors then
     naughty.notify {
@@ -143,7 +144,7 @@ local function set_clienttag(c)
     local hostname = os.getenv('HOSTNAME')
 
     if c.profile == hostname then
-      c.profile = 'hostname'
+      c.profile = 'main'
     end
 
     if not gears.filesystem.file_readable(path(c.profile)) then
@@ -155,8 +156,9 @@ local function set_clienttag(c)
     end
 
     local tagmap = {
-        hostname  = 1,
+        main      = 1,
         tmux      = 1,
+        rmux      = 1,
         urxvt     = 1,
         alacritty = 1,
         kitty     = 1,
@@ -245,7 +247,10 @@ end)
 
 local function focus_menu()
   for _, ct in ipairs(client.get()) do
-    if ct.instance == 'menu' and ct.hidden == false then
+    --if ct.instance == 'menu' and ct.hidden == false then
+    --  client.focus = ct
+    --end
+    if ct.profile == 'main' and ct.skip_taskbar == true then
       client.focus = ct
     end
   end
@@ -286,4 +291,4 @@ awful.rules.rules = {
   },
 }
 
-awful.spawn.with_shell('autostart', awful.rules.rules)
+--awful.spawn.with_shell('autostart', awful.rules.rules)

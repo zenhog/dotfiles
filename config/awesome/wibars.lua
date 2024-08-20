@@ -390,8 +390,12 @@ awful.screen.connect_for_each_screen(function(s)
         local icon, command, _, _ = line:match('^(%S+):(%S+):(%S+):(%S+)$')
         local buttons = {}
 
-        s.menus[command] = iconwidget(icon, command, command)
-        s.menus[command]:buttons(addbutton(buttons, 1, 'menu ' .. command))
+        os.execute(string.format('echo %s:%s >> /tmp/icon', line, icon))
+
+        if command then
+      s.menus[command] = iconwidget(icon, command, command)
+      s.menus[command]:buttons(addbutton(buttons, 1, 'menu xsession ' .. command))
+        end
     end
     pipe:close()
 
