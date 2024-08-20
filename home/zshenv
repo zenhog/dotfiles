@@ -11,7 +11,7 @@ case "$THEME" in
     ;;
 esac
 
-tty -s && echo -ne "\e[5 q"
+#tty -s && echo -ne "\e[5 q"
 
 FZF_BASE_FLAGS=(
   "--color=$THEME"

@@ -49,6 +49,12 @@ function format() {
     session)
       printf "%s %s %s\n" "$(get icon "$name")" "$name" "$(get host "$name")"
       ;;
+    name)
+      printf "%s %s\n" "$(get icon "$name")" "$name"
+      ;;
+    host)
+      printf "%s %s\n" "$(get icon "$name")" "$(get host "$name")"
+      ;;
     window)
       local s w
       IFS=$': \t' read -r s i w <<< "$name"
