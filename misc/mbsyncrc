@@ -1,8 +1,8 @@
 IMAPStore mailbox-remote
 Host imap.mailbox.org
-UserCmd "gui pass get www/mail/mailbox.org username"
+UserCmd "echo $EMAIL"
 PassCmd "pass show www/mail/mailbox.org/password"
-TLSType IMAPS
+SSLType IMAPS
 
 MaildirStore mailbox-local
 Path  ~/.mail/mailbox/
