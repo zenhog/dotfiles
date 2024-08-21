@@ -2,4 +2,4 @@
 
 exec 2>&1
 
-exec alacritty --class menu,loop --command menuloop
+exec alacritty --title menuloop --class menu,loop --command menuloop

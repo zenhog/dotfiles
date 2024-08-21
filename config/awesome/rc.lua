@@ -250,9 +250,6 @@ local function focus_menu()
     if ct.instance == 'loop' and ct.hidden == false then
       client.focus = ct
     end
-    --if ct.profile == 'main' and ct.skip_taskbar == true then
-    --  client.focus = ct
-    --end
   end
 end
 
