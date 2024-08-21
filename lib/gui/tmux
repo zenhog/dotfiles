@@ -9,8 +9,8 @@ NOWRAP=1
 RATIO=75%
 
 export CMDSYM=➡
-export CMDPAT="^.*$CMDSYM.*$"
 export CMDPAT="$CMDSYM"
+export CMDPAT="^.*$CMDSYM.*$"
 export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
@@ -364,6 +364,23 @@ function copytk() {
   tmux run "copytk easycopy --search-nkeys 1"
 }
 
+function gethint() {
+  local hintkeys=qwertyuiopasdfghjklzxcvbnm
+  local pane="$(tmux display -p '#S:#I.#P')"
+  local matches cap key inlines outlines
+
+  IFS= read -d '' cap < <(tmux capture-pane -t "$pane" -p)
+
+  tmux new-window -dn hintmap -t "$(hostname):"
+
+  readarray -t matches < <(rg -o --column -- "$key" <<< "$cap")
+
+  readlines -t inlines  <<< "$cap"
+  readlines -t outlines <<< "$cap"
+
+
+}
+
 function hintcopy() {
   # capture the target pane
   # set the alternate screen
@@ -375,15 +392,13 @@ function hintcopy() {
 
   local matches lines lines1 lines2 cap key
 
-  IFS= read -d '' cap < <(tmux capture-pane -t "$pane" -p)
-
   readlines -t inlines  <<< "$cap"
   readlines -t outlines <<< "$cap"
 
-  local hintkeys=qwertyuiopasdfghjklzxcvbnm
   local hintchars="$hintkeys"
 
-  readlines -t matches < <(rg -o --column -- "$key" <<< "$cap")
+
+  readlines -t hints genhints
 
   local i=0 roundchars="$hintkeys"
   local hints hintchars
