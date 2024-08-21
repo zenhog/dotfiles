@@ -216,7 +216,7 @@ awful.screen.connect_for_each_screen(function(s)
         local hasmenu = false
 
         for _, c in ipairs(tagclients) do
-            if c.instance == 'menu' then
+            if c.instance == 'loop' and c.class == 'menu' then
                 hasmenu = true
             end
         end

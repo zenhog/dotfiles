@@ -125,7 +125,7 @@ local function set_clienttag(c)
     local tags = c.screen.tags
     local homedir = os.getenv('HOME')
 
-    if c.instance == 'menu' then
+    if c.instance == 'loop' then
         c:move_to_tag(tags[5])
         return
     end
@@ -192,12 +192,12 @@ local function set_clienttag(c)
 end
 
 local function set_titlebars(c)
-    if c.instance == 'menu' then
+    if c.instance == 'loop' then
         return
     end
 
     awful.titlebar(c, {
-        size = 2,
+        size = 0,
         position = 'top',
         bg_normal = 'gray',
         bg_focus = 'darkgray',
@@ -208,7 +208,7 @@ local function set_attributes(c)
   local s = awful.screen.focused()
   local w, h = s.geometry.width, s.geometry.height
 
-  if c.instance == 'menu' then
+  if c.class == 'menu' and c.instance == 'loop' then
     c.opacity = 1
     c.hidden = true
     c.minimized = true
@@ -247,12 +247,12 @@ end)
 
 local function focus_menu()
   for _, ct in ipairs(client.get()) do
-    --if ct.instance == 'menu' and ct.hidden == false then
-    --  client.focus = ct
-    --end
-    if ct.profile == 'main' and ct.skip_taskbar == true then
+    if ct.instance == 'loop' and ct.hidden == false then
       client.focus = ct
     end
+    --if ct.profile == 'main' and ct.skip_taskbar == true then
+    --  client.focus = ct
+    --end
   end
 end
 
@@ -291,4 +291,4 @@ awful.rules.rules = {
   },
 }
 
---awful.spawn.with_shell('autostart', awful.rules.rules)
+awful.spawn.with_shell('autostart', awful.rules.rules)

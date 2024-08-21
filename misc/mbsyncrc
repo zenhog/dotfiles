@@ -2,7 +2,7 @@ IMAPStore mailbox-remote
 Host imap.mailbox.org
 UserCmd "echo $EMAIL"
 PassCmd "pass show www/mail/mailbox.org/password"
-SSLType IMAPS
+TLSType IMAPS
 
 MaildirStore mailbox-local
 Path  ~/.mail/mailbox/
