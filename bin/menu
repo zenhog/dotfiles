@@ -97,7 +97,7 @@ function main() {
 
   export MODULE="$1"
 
-  source "$MODULES_DIR/$1" || exit 1
+  source "$MODULES_DIR/$MODULE" || exit 1
 
   shift 1
 
@@ -112,7 +112,7 @@ function main() {
   read -r SGDESCS < <(declare -p GDESCS); export SGDESCS
 
   COMMAND+=(fzf)
-  COMMAND+=(--prompt="$1> ")
+  COMMAND+=(--prompt="$MODULE> ")
   COMMAND+=(--border=rounded)
   COMMAND+=(--info=inline-right)
   COMMAND+=(--no-separator)
