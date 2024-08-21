@@ -182,19 +182,6 @@ function main() {
   list "${@:2}" | "${COMMAND[@]}"
 }
 
-function show() {
-  gui run bg main
-  silent gui awm setattributes profile=main -- \
-    @skip_taskbar=true @above=true @sticky=true
-
-  gui awm raise profile=main
-}
-
-function hide() {
-  silent gui awm setattributes profile=main -- \
-    @skip_taskbar=false @above=false @sticky=false
-}
-
 function dispatch() {
   local mode="$1"
 
@@ -220,12 +207,6 @@ function dispatch() {
       ;;
     popup)
       tmux popup -BE -w 100% -h 100% menu main "$@"
-      ;;
-    xsession)
-      show
-      local client="$(tmux list-clients -t "$(hostname)" -F '#{client_tty}')"
-      tmux popup -BE -w 100% -h 100% -c "$client" menu main "$@"
-      hide
       ;;
     loop)
       socat STDIN UNIX-CONNECT:"$HOME/.menu.S" <<< "$*"
