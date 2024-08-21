@@ -1,15 +1,3 @@
-[font.bold]
-family = "MesloLGLDZ Nerd Font Mono"
-style = "Bold"
-
-[font.bold_italic]
-family = "MesloLGLDZ Nerd Font Mono"
-style = "Bold Italic"
-
-[font.italic]
-family = "MesloLGLDZ Nerd Font Mono"
-style = "Italic"
-
 [font.normal]
-family = "MesloLGLDZ Nerd Font Mono"
-style = "Regular"
+family = "iosevka nerd font mono"
+style = "regular"

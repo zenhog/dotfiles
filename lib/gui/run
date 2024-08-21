@@ -35,15 +35,14 @@ function edit() {
 }
 
 function run() {
-  local mode="$1"
-  local file="$2"
+  local file="$1" mode="$2"
 
   shift 2
 
   source "$HOME/.lib/app/$file"
 
   if silent declare -F runner; then
-    runner "$mode" "$@"
+    runner "${mode:-fg}" "$@"
   fi
 }
 
@@ -52,14 +51,14 @@ HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 function fg() {
   source "$HOME/.lib/app/$1"
-  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run fg "$@"
+  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 function bg() {
   source "$HOME/.lib/app/$1"
-  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run bg "$@"
+  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1"
 }
 
 BINDS[close]=alt-d

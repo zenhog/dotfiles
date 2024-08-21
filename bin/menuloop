@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+cleanup() {
+    rm "${SOCKET}" &>/dev/null
+}
+
+SOCKET="${HOME}/.menu.S"
+
+trap cleanup EXIT HUP
+
+if [[ -S "${SOCKET}" ]]; then
+    rm "${SOCKET}"
+fi
+
+while true; do
+  read -r module
+  gui awm setattributes class=menu instance=loop -- \
+    @hidden=false @minimized=false
+  gui awm raise class=menu instance=loop
+  menu main "$module"
+  gui awm setattributes class=menu instance=loop -- \
+    @hidden=true @minimized=true
+done < <(socat "UNIX-LISTEN:$SOCKET",fork STDOUT)

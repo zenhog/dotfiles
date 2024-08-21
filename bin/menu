@@ -227,6 +227,9 @@ function dispatch() {
       tmux popup -BE -w 100% -h 100% -c "$client" menu main "$@"
       hide
       ;;
+    loop)
+      socat STDIN UNIX-CONNECT:"$HOME/.menu.S" <<< "$*"
+      ;;
   esac
 }
 
