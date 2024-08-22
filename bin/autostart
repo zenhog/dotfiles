@@ -4,3 +4,6 @@ gui run bg wanqute
 gui run bg vpnfox
 gui run bg discord
 gui run bg spotify
+
+alacritty &
+disown %1

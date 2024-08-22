@@ -365,20 +365,58 @@ function copytk() {
 }
 
 function gethint() {
-  local hintkeys=qwertyuiopasdfghjklzxcvbnm
-  local pane="$(tmux display -p '#S:#I.#P')"
   local matches cap key inlines outlines
+
+  local pane="$1"
 
   IFS= read -d '' cap < <(tmux capture-pane -t "$pane" -p)
 
-  tmux new-window -dn hintmap -t "$(hostname):"
+  echo -n "$cap"
+
+  read -r key < <(tmux command-prompt -1 -p char 'display -p %%')
 
   readarray -t matches < <(rg -o --column -- "$key" <<< "$cap")
 
-  readlines -t inlines  <<< "$cap"
-  readlines -t outlines <<< "$cap"
+  readarray -t inlines <<< "$cap"
+  readarray -t outlines <<< "$cap"
+
+  #for m in "${matches[@]}"; do
+  #  tmux pipe-pane -I -t "$(hostname):cat" "echo $m"
+  #done
+  local hintkeys=qwertyuiopasdfghjklzxcvbnm
+  local hints
+  local hintcount=$(( ${#matches[@]} / ${#hintkeys} + 1 ))
 
 
+  for match in "${matches[@]}"; do
+    local line col char hints output
+    IFS=: read -r line col char <<< "$match"
+    line=$((line - 1))
+    col=$((col -1 ))
+    hints="$(ansi --blue "${hintkeys:0:1}")"
+    hintkeys="${hintkeys:1}"
+    read -r output < <(printf "%s%s%s" \
+      "${outlines[$line]:0:$col}" \
+      "$hints" \
+      "${outlines[$line]:$(($col+${#hints}))}")
+    outlines[$line]="$output"
+  done
+
+  tput clear
+  printf "%s\n" "${outlines[@]}"
+
+  cat -
+
+
+
+  #local tty="$(tmux list-panes -a -F '#{pane_tty}' -f '#{==:#W,cat}')"
+
+  #tmux swap-pane -s "$pane" -t "$(hostname):cat"
+
+  #tmux swap-pane -s "$(hostname):cat" -t "$pane"
+
+  #readarray -t inlines  <<< "$cap"
+  #readarray -t outlines <<< "$cap"
 }
 
 function hintcopy() {
@@ -390,29 +428,33 @@ function hintcopy() {
   # mapfile -t ${lines[@]} < <(capture-pane)
   # replace ${lines[$line]:$col:1} with $key
 
-  local matches lines lines1 lines2 cap key
+  local pane="$(tmux display -p '#S:#I.#P')"
 
-  readlines -t inlines  <<< "$cap"
-  readlines -t outlines <<< "$cap"
+  tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
 
-  local hintchars="$hintkeys"
+  #local matches lines lines1 lines2 cap key
+
+  #readlines -t inlines  <<< "$cap"
+  #readlines -t outlines <<< "$cap"
+
+  #local hintchars="$hintkeys"
 
 
-  readlines -t hints genhints
+  #readlines -t hints genhints
 
-  local i=0 roundchars="$hintkeys"
-  local hints hintchars
+  #local i=0 roundchars="$hintkeys"
+  #local hints hintchars
 
-  local rounds=$(( (${#matches[@]} + $#hintkeys - 1) / $#hintkeys ))
+  #local rounds=$(( (${#matches[@]} + $#hintkeys - 1) / $#hintkeys ))
 
-  for match in "${matches[@]}"; do
-    local line col char hints output
-    IFS=: read -r line col char <<< "$match"
-    read -r hints < <(genhints "$char")
-    read -r output < <(printf "%s%s%s" "${outlines[$line]:0:$col}" "$hints" \
-      "${outlines[$line]:$(($col+${#hints}))}")
-    outlines[$line]="$output"
-  done
+  #for match in "${matches[@]}"; do
+  #  local line col char hints output
+  #  IFS=: read -r line col char <<< "$match"
+  #  read -r hints < <(genhints "$char")
+  #  read -r output < <(printf "%s%s%s" "${outlines[$line]:0:$col}" "$hints" \
+  #    "${outlines[$line]:$(($col+${#hints}))}")
+  #  outlines[$line]="$output"
+  #done
 }
 
 function extract() {
