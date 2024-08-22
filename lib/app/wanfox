@@ -5,5 +5,5 @@ KEY='S-W:w'
 ATTRIBUTES=(profile=wanfox)
 
 function runner() {
-  firefox -p main --new-instance --class wanfox
+  cgexec -g net_cls:vpn2 firefox -p main --new-instance --class wanfox
 }

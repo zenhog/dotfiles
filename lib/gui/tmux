@@ -356,8 +356,8 @@ function reload() {
 }
 
 function colors() {
-  source "$DIR/10-theme.conf"
-  source "$DIR/30-options.conf"
+  source "$TMUX_DIR/10-theme.conf"
+  source "$TMUX_DIR/30-options.conf"
 }
 
 function copytk() {
@@ -365,96 +365,91 @@ function copytk() {
 }
 
 function gethint() {
-  local matches cap key inlines outlines
+  function hintup() {
+    local key matches hintkeys=qwertyuiopasdfghjklzxcvbnm
 
-  local pane="$1"
+    readarray -t hintkeys < <(grep -o . <<< "$hintkeys")
 
-  IFS= read -d '' cap < <(tmux capture-pane -t "$pane" -p)
+    # print the initial text
+    printf "%s" "$text"
 
-  echo -n "$cap"
+    # read the key
+    read -r key < <(tmux command-prompt -1 -p InputChar 'display -p %%')
 
-  read -r key < <(tmux command-prompt -1 -p char 'display -p %%')
+    # prompt was canceled, need to cancel the whole operation
+    [[ -z "$key" ]] && return
 
-  readarray -t matches < <(rg -o --column -- "$key" <<< "$cap")
+    # find matches
+    readarray -t matches < <(rg -o --column -- "$key" <<< "$text")
 
-  readarray -t inlines <<< "$cap"
-  readarray -t outlines <<< "$cap"
+    local hints
 
-  #for m in "${matches[@]}"; do
-  #  tmux pipe-pane -I -t "$(hostname):cat" "echo $m"
-  #done
-  local hintkeys=qwertyuiopasdfghjklzxcvbnm
-  local hints
-  local hintcount=$(( ${#matches[@]} / ${#hintkeys} + 1 ))
+    # fill in the the hints table
+    local j=$(( (${#matches[@]} - 1) / ${#hintkeys[@]} ))
+    local i=$j
 
+    for h in "${!hintkeys[@]}"; do
+      if (( h % 2 == 0 )) && (( j > 0 )); then
+        local c1="${hintkeys[$h]}"
+        local c2="${hintkeys[$((h+1))]}"
 
-  for match in "${matches[@]}"; do
-    local line col char hints output
-    IFS=: read -r line col char <<< "$match"
-    line=$((line - 1))
-    col=$((col -1 ))
-    hints="$(ansi --blue "${hintkeys:0:1}")"
-    hintkeys="${hintkeys:1}"
-    read -r output < <(printf "%s%s%s" \
-      "${outlines[$line]:0:$col}" \
-      "$hints" \
-      "${outlines[$line]:$(($col+${#hints}))}")
-    outlines[$line]="$output"
-  done
+        hints+=("{$c1,$c2}")
+        ((j--))
+      fi
+    done
 
-  tput clear
-  printf "%s\n" "${outlines[@]}"
+    hints+=("{$(IFS=,; printf "%s" "${hintkeys[*]:$((i*2))}")}")
 
-  cat -
+    read -r -a hints < <(eval echo $(IFS=; printf "%s" "${hints[*]}"))
 
+    # clone our original text
+    local rounds=$((i+1))
+    local round=0
 
+    while (( round < rounds )); do
+      local screen
 
-  #local tty="$(tmux list-panes -a -F '#{pane_tty}' -f '#{==:#W,cat}')"
+      readarray -t screen <<< "$text"
 
-  #tmux swap-pane -s "$pane" -t "$(hostname):cat"
+      for m in "${!matches[@]}"; do
+        local line col char hint altline
 
-  #tmux swap-pane -s "$(hostname):cat" -t "$pane"
+        IFS=: read -r line col char <<< "${matches[$m]}"
 
-  #readarray -t inlines  <<< "$cap"
-  #readarray -t outlines <<< "$cap"
+        line=$(( line - 1))
+        col=$(( col - 1 ))
+
+        hint="${hints[$m]:$round}"
+
+        altline="${screen[$line]:0:$col}"
+
+        altline+="$(ansi --red "${hint:0:1}")"
+
+        altline+="${screen[$line]:$((col+1))}"
+
+        screen[$line]="$altline"
+      done
+
+      tput clear
+
+      printf "%s\n" "${screen[@]}"
+
+      read -r key < <(tmux command-prompt -1 -p InputChar 'display -p %%')
+      (( round++ ))
+    done
+  }
+
+  local pane="$1" text
+
+  IFS= read -r -d '' text < <(tmux capture-pane -t "$pane" -p)
+
+  hintup
 }
 
 function hintcopy() {
-  # capture the target pane
-  # set the alternate screen
-  # tmux command-prompt -1 'display -p %%'
-  # readlines -t matches < <(rg -o --column -- "$key" "$capture")
-  #   IFS=: read -r line col <<< "$match"
-  # mapfile -t ${lines[@]} < <(capture-pane)
-  # replace ${lines[$line]:$col:1} with $key
-
   local pane="$(tmux display -p '#S:#I.#P')"
 
   tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
-
-  #local matches lines lines1 lines2 cap key
-
-  #readlines -t inlines  <<< "$cap"
-  #readlines -t outlines <<< "$cap"
-
-  #local hintchars="$hintkeys"
-
-
-  #readlines -t hints genhints
-
-  #local i=0 roundchars="$hintkeys"
-  #local hints hintchars
-
-  #local rounds=$(( (${#matches[@]} + $#hintkeys - 1) / $#hintkeys ))
-
-  #for match in "${matches[@]}"; do
-  #  local line col char hints output
-  #  IFS=: read -r line col char <<< "$match"
-  #  read -r hints < <(genhints "$char")
-  #  read -r output < <(printf "%s%s%s" "${outlines[$line]:0:$col}" "$hints" \
-  #    "${outlines[$line]:$(($col+${#hints}))}")
-  #  outlines[$line]="$output"
-  #done
 }
 
 function extract() {
