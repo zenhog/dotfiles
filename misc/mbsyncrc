@@ -1,6 +1,6 @@
 IMAPStore mailbox-remote
 Host imap.mailbox.org
-UserCmd "echo $EMAIL"
+UserCmd "cat $HOME/.password-store/.defaults/username"
 PassCmd "pass show www/mail/mailbox.org/password"
 TLSType IMAPS
 
