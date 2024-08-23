@@ -15,28 +15,46 @@ export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
 
+function trmode() {
+
+  local kind="$1"
+  local text="$2"
+
+  local modes=(sessions windows panes)
+
+  case "$kind" in
+    num)
+      for i in "${!modes[@]}"; do
+        if [[ "${modes[$i]}" == "$text" ]]; then
+          echo "$i" && return
+        fi
+      done
+      ;;
+    name)
+      echo "${modes[$text]}"
+      ;;
+  esac
+}
+
 function label() {
   local mode="$(get_opt mode)"
 
-  case "$mode" in
-    0) mode=sessions ;;
-    1) mode=windows ;;
-    2) mode=panes ;;
-  esac
-
-  echo " mode: $mode "
+  echo " mode: $(trmode name "$mode") "
 }
 
 function init() {
-  silent get_opt mode || set_opt mode sessions
+  set_opt mode 0
+  set_opt mode-mod 3
 }
 
 function list() {
   local mode="${1:-$(get_opt mode)}"
 
+  mode="$(trmode name "$mode")"
+
   set_opt mode "$mode"
 
-  eval "list-$mode" "${@:2}"
+  "list-$mode"
 }
 
 function format() {
@@ -198,13 +216,7 @@ BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 function rotate_mode() {
-  local mode="$(get_opt mode)"
-
-  case "$mode" in
-    sessions) set_opt mode windows ;;
-    windows) set_opt mode panes ;;
-    panes) set_opt mode sessions ;;
-  esac
+  rotate_opt mode
 }
 
 function status() {
@@ -365,13 +377,25 @@ function copytk() {
 }
 
 function gethint() {
+  function printscreen() {
+    tmux send-keys -X cancel
+    tput clear
+    if [[ -z "$screen" ]]; then
+      readarray -t screen <<< "$text"
+    fi
+    printf "%s\n" "${screen[@]}"
+    tmux copy-mode -H
+    tmux send-keys -X page-up
+  }
+
   function hintup() {
     local key matches hintkeys=qwertyuiopasdfghjklzxcvbnm
 
     readarray -t hintkeys < <(grep -o . <<< "$hintkeys")
 
+
     # print the initial text
-    printf "%s" "$text"
+    printscreen
 
     # read the key
     read -r key < <(tmux command-prompt -1 -p InputChar 'display -p %%')
@@ -411,6 +435,7 @@ function gethint() {
 
       readarray -t screen <<< "$text"
 
+      local shifts
       for m in "${!matches[@]}"; do
         local line col char hint altline
 
@@ -419,20 +444,24 @@ function gethint() {
         line=$(( line - 1))
         col=$(( col - 1 ))
 
-        hint="${hints[$m]:$round}"
+        shift[$line]=0
 
-        altline="${screen[$line]:0:$col}"
+        hint="${hints[$m]:$round:1}"
 
-        altline+="$(ansi --red "${hint:0:1}")"
+        read -r hint < <(ansi --red "$hint")
 
-        altline+="${screen[$line]:$((col+1))}"
+        altline="${screen[$line]:0:$((col - 4))}"
+
+        altline+="$hint"
+
+        altline+="${screen[$line]:$(( (col-3) + shift[$line] * 10 ))}"
+
+        shift[$line]=$(( shift[$line] + 1 ))
 
         screen[$line]="$altline"
       done
 
-      tput clear
-
-      printf "%s\n" "${screen[@]}"
+      printscreen
 
       read -r key < <(tmux command-prompt -1 -p InputChar 'display -p %%')
       (( round++ ))
@@ -444,6 +473,9 @@ function gethint() {
   IFS= read -r -d '' text < <(tmux capture-pane -t "$pane" -p)
 
   hintup
+
+  unset hintup
+  unset printscreen
 }
 
 function hintcopy() {

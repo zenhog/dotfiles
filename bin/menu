@@ -119,7 +119,7 @@ function main() {
   COMMAND+=(--ansi)
   COMMAND+=(--cycle)
   COMMAND+=(--no-multi)
-  COMMAND+=(--query "${*:2}")
+  #COMMAND+=(--query "${*:2}")
 
   if [[ -n "$PREVIEW_CMD" ]]; then
     COMMAND+=(--preview="$PREVIEW_CMD")
@@ -177,7 +177,7 @@ function main() {
 
   [[ -n "$DEBUG" ]] ; echo "${COMMAND[@]}" > "$HOME/.menu_debug"
 
-  init
+  mute declare -F init && init
 
   list "${@:2}" | "${COMMAND[@]}"
 }
@@ -192,7 +192,7 @@ function dispatch() {
   case "$mode" in
     input)
       local query="$1"
-      menu xsession input "$query" input
+      menu loop input
       quiet tmux show-buffer -b input && mute tmux delete-buffer -b input
       ;;
     main)

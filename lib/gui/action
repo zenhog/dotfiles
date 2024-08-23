@@ -156,7 +156,7 @@ function applytheme() {
   done
 
   # tmux
-  tmux reload
+  gui tmux reload
 }
 
 function action:mailsync() {

@@ -19,10 +19,14 @@ fi
 
 while true; do
   read -r module
+
   gui awm setattributes class=menu instance=loop -- \
     @hidden=false @minimized=false
   gui awm raise class=menu instance=loop
+
   menu main "$module"
+
   gui awm setattributes class=menu instance=loop -- \
     @hidden=true @minimized=true
+
 done < <(socat "UNIX-LISTEN:$SOCKET",fork STDOUT)
