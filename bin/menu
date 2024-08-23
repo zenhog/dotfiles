@@ -63,8 +63,12 @@ function inputpreview() {
 }
 
 function input() {
-  local query="$1"
-  local buffer="$2"
+  #local query="$1"
+  #local buffer="$2"
+
+  local fifo query
+
+  eval "$(IFS=\;; printf "%s" "$*")"
 
   local cmd
 
@@ -78,8 +82,8 @@ function input() {
   cmd+=('--preview' 'inputpreview')
   cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
 
-  if [[ -n "$buffer" ]]; then
-    echo -n | "${cmd[@]}" 2>/dev/tty | tmux load-buffer -b "$buffer" -
+  if [[ -n "$fifo" ]]; then
+    echo -n | "${cmd[@]}" 2>/dev/tty >"$fifo"
   else
     echo -n | "${cmd[@]}" 2>/dev/tty
   fi
@@ -192,8 +196,18 @@ function dispatch() {
   case "$mode" in
     input)
       local query="$1"
-      menu loop input
-      quiet tmux show-buffer -b input && mute tmux delete-buffer -b input
+
+      local fifo="$(mktemp --dry-run --suffix=fifo)"
+
+      mkfifo "$fifo"
+
+      menu loop input fifo="$fifo" query="$query"
+
+      local output
+
+      read -r output < "$fifo" && rm -f "$fifo"
+
+      echo "$output"
       ;;
     main)
       main "$@"
@@ -209,7 +223,7 @@ function dispatch() {
       tmux popup -BE -w 100% -h 100% menu main "$@"
       ;;
     loop)
-      socat STDIN UNIX-CONNECT:"$HOME/.menu.S" <<< "$*"
+      socat STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(IFS=:; printf "%s\n" "$*")
       ;;
   esac
 }

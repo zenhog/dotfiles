@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-exec >/proc/$PPID/fd/1
+#exec >/proc/$PPID/fd/1
 
-exec 2>&1
+#exec 2>&1
 
 cleanup() {
     rm "${SOCKET}" &>/dev/null
@@ -16,15 +16,14 @@ if [[ -S "${SOCKET}" ]]; then
     rm "${SOCKET}"
 fi
 
-
 while true; do
-  read -r module
+  IFS=: read -r -a args
 
   gui awm setattributes class=menu instance=loop -- \
     @hidden=false @minimized=false
   gui awm raise class=menu instance=loop
 
-  menu main "$module"
+  menu main "${args[@]}"
 
   gui awm setattributes class=menu instance=loop -- \
     @hidden=true @minimized=true
