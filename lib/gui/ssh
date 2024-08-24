@@ -170,9 +170,12 @@ function sync() {
 
   local cmd
 
-  read -r cmd < <(printf '<(curl -sL %s)' "$URL")
+  read -r cmd < <(printf '<(curl -sL %q)' "$URL")
 
-  if ttyexec "$host" bash "$cmd" install master; then
-    ttyexec "$host" bash "$cmd" pull master
-  fi
+  cmd=(bash "$cmd" install master)
+
+  #if rexec "$host" bash "$cmd" install master; then
+  #  rexec "$host" bash "$cmd" pull master
+  #fi
+  #rexec "$host" 
 }
