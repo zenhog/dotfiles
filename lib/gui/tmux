@@ -235,8 +235,9 @@ function extract-pane() {
   local pane="$1"
 
   read -r pane < <(tmux display -p '#S:#I.#P')
-    tmux new-window -n grep bash -c \
-        "tmux capture-pane -pNq -t ${pane} | fzfgrep"
+
+  tmux new-window -n grep bash -c \
+    "tmux capture-pane -pNq -t ${pane} | fzfgrep"
 }
 
 function mksession() {
@@ -249,21 +250,13 @@ function mksession() {
   [[ -n "$HOST" ]] && tmux=(rmux "$HOST")
 
   case "$kind" in
-    local|menu)
+    local)
 
       "${tmux[@]}" has-session -t "$name" ||
         "${tmux[@]}" new-session -ds "$name"
 
       "${tmux[@]}" has-session -t "$name" ||
         failwith "Failed creating local session '$name'"
-
-      "${tmux[@]}" setenv -t "$name" TMUX_SESSION_NAME "$name"
-      "${tmux[@]}" setenv -t "$name" TMUX_SESSION_KIND "$kind"
-
-      if [[ "$kind" == menu ]]; then
-        "${tmux[@]}" set -t "$name" status off
-        "${tmux[@]}" set -t "$name" key-table menu
-      fi
 
       "${tmux[@]}" set -t "$name" @kind "$kind"
       ;;

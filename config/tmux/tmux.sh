@@ -16,6 +16,8 @@ for config in "$DIR"/??-*.conf; do
     NOW="$(date -u +%S.%N)"
     TIME="$(echo "scale=6; $NOW - $START" | bc)"
     START="$NOW"
-    echo "'$config' took $TIME to load"
+    [[ "$1" == verbose ]] && echo "'$config' took $TIME to load"
   fi
 done
+
+exit 0
