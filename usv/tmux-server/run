@@ -1,13 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 exec 2>&1
 
-export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
-export XDG_RUNTIME_DIR="/tmp/user/$USER"
+source "$HOME/.profile"
+source "$HOME/.zshenv"
 
-export SVDIR=$HOME/.usv
-sv check dbus || exit 1
-
-mkdir -p /tmp/user/$USER
-
-exec pipewire
+exec tmux -D

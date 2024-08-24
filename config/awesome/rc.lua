@@ -135,10 +135,10 @@ local function set_clienttag(c)
       return string.format('%s/.icons/%s.png', homedir, p)
     end
 
-    c.profile = c.profile or string.lower(c.instance)
+    c.profile = c.profile or string.lower(c.instance or '')
 
     if not gears.filesystem.file_readable(path(c.profile)) then
-      c.profile = string.lower(c.instance)
+      c.profile = string.lower(c.instance or '')
     end
 
     local hostname = os.getenv('HOSTNAME')
