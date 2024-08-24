@@ -5,5 +5,5 @@ KEY='S-W:Return'
 ATTRIBUTES=(profile=ctfbox)
 
 function runner() {
-  gui ssh attach ctfbox incus/ctfbox
+  gui ssh mux incus/ctfbox
 }

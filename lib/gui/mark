@@ -42,7 +42,6 @@ function copy() {
   tmux load-buffer - <<< "$url"
 }
 
-
 function check() {
   local id
   read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")

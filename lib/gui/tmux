@@ -15,42 +15,18 @@ export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
 
-function trmode() {
-
-  local kind="$1"
-  local text="$2"
-
-  local modes=(sessions windows panes)
-
-  case "$kind" in
-    num)
-      for i in "${!modes[@]}"; do
-        if [[ "${modes[$i]}" == "$text" ]]; then
-          echo "$i" && return
-        fi
-      done
-      ;;
-    name)
-      echo "${modes[$text]}"
-      ;;
-  esac
-}
-
 function label() {
   local mode="$(get_opt mode)"
 
-  echo " mode: $(trmode name "$mode") "
+  echo " mode: $mode "
 }
 
 function init() {
-  set_opt mode 0
-  set_opt mode-mod 3
+  set_opt mode sessions
 }
 
 function list() {
   local mode="${1:-$(get_opt mode)}"
-
-  mode="$(trmode name "$mode")"
 
   set_opt mode "$mode"
 
@@ -76,12 +52,12 @@ function format() {
     window)
       local s w
       IFS=$': \t' read -r s i w <<< "$name"
-      printf "%s %s %s %s\n" "$(get icon "$s")" "$s:$i" "$w"
+      printf "%s %s %s\n" "$(get icon "$s")" "$s:$i" "$w"
       ;;
     pane)
       local s i p cmd
-      IFS=$':. \t' read -r s i p cmd <<< "$name"
-      printf "%s %s %s\n" "$(get icon "$s")" "$s:$i.$p" "$cmd"
+      IFS=$':. \t' read -r s i p w cmd <<< "$name"
+      printf "%s %s %s %s\n" "$(get icon "$s")" "$s:$i.$p" "$w" "$cmd"
       ;;
   esac
 }
@@ -144,7 +120,7 @@ function list-panes() {
     IFS=$': \t' read -r icon session wid wname <<< "$w"
 
     readarray -t panes < <(dmux "session:$session" \
-      list-panes -t "$session:$wid" -F '#S:#I.#P #{pane_current_command}')
+      list-panes -t "$session:$wid" -F '#S:#I.#P #W:#{pane_current_command}')
 
     for pane in "${panes[@]}"; do
       format pane "$pane"
@@ -216,7 +192,13 @@ BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 function rotate_mode() {
-  rotate_opt mode
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    sessions) set_opt mode windows ;;
+    windows)  set_opt mode panes ;;
+    panes)    set_opt mode sessions ;;
+  esac
 }
 
 function status() {
@@ -251,12 +233,17 @@ function mksession() {
 
   case "$kind" in
     local)
-
-      "${tmux[@]}" has-session -t "$name" ||
+      if mute "${tmux[@]}" has-session -t "$name"; then
+        echo "Local session '$name' already exists." >&2
+        return 0
+      else
         "${tmux[@]}" new-session -ds "$name"
+      fi
 
-      "${tmux[@]}" has-session -t "$name" ||
-        failwith "Failed creating local session '$name'"
+      if ! mute "${tmux[@]}" has-session -t "$name"; then
+        echo "Failed to create local session '$name'." >&2
+        return 1
+      fi
 
       "${tmux[@]}" set -t "$name" @kind "$kind"
       ;;
@@ -266,8 +253,8 @@ function mksession() {
       shift
 
       if mute tmux has-session -t "$name"; then
-        echo "Remote session '$name' already exists" >&2
-        return
+        echo "Remote session '$name' already exists." >&2
+        return 0
       fi
 
       HOST="$host" mksession local "$name"
@@ -279,8 +266,10 @@ function mksession() {
       tmux new-session -ds "$name" \
         gui ssh ttyexec "$host" tmux attach -t "$name"
 
-      mute tmux has-session -t "$name" ||
-        failwith "Failed creating remote session '$name'"
+      if ! mute tmux has-session -t "$name"; then
+        echo "Failed to create remote session '$name'." >&2
+        return 1
+      fi
 
       tmux set -t "$name" status off
 
@@ -556,7 +545,7 @@ function dmux() {
   if [[ "$kind" == remote ]]; then
     local host="$(tmux show -vt "$session" @host)"
     rmux "$host" "$@"
-  elif [[ "$kind" == local ]] || [[ "$kind" == menu ]]; then
+  elif [[ "$kind" == local ]]; then
     tmux "$@"
   fi
 }
@@ -572,12 +561,107 @@ function mod() {
   esac
 }
 
+BINDS[open]=enter
+HOOKS[open]=accept
+DESCS[open]='Open a session/window/pane'
 function open() {
-  :
+  local id mode="$(get_opt mode)"
+
+  read -r _ id _ <<< "$1"
+
+  "open-${mode:0:-1}" "$id"
 }
 
-function kill() {
-  :
+function open-session() {
+  local sid="$1"
+  local host="$(is_remote "$sid")"
+
+  if [[ -n "$host" ]]; then
+    gui tmux attach remote "$sid" "$host"
+  else
+    gui tmux attach local "$sid"
+  fi
+}
+
+function open-window() {
+  local sid host id="$1"
+
+  IFS=: read -r sid _ <<< "$id"
+
+  read -r host < <(is_remote "$sid")
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" select-window -t "$id"
+    open-session "$sid"
+  else
+    tmux select-window -t "$id"
+    open-session "$sid"
+  fi
+}
+
+function open-pane() {
+  local sid host id="$1"
+
+  IFS=.: read -r sid wid _ <<< "$id"
+
+  read -r host < <(is_remote "$sid")
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" select-pane -t "$id"
+    open-window "$sid:$wid"
+  else
+    tmux select-pane -t "$id"
+    open-window "$sid:$wid"
+  fi
+}
+
+BINDS[del]=alt-d
+DESCS[del]='Delete a session/window/pane'
+function del() {
+  local id mode="$(get_opt mode)"
+
+  read -r _ id _ <<< "$1"
+
+  "del-${mode:0:-1}" "$id"
+}
+
+function del-session() {
+  local sid="$1"
+  local host="$(is_remote "$sid")"
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" kill-session -t "$sid"
+  else
+    tmux kill-session -t "$sid"
+  fi
+}
+
+function del-window() {
+  local sid host id="$1"
+
+  IFS=: read -r sid _ <<< "$id"
+
+  read -r host < <(is_remote "$sid")
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" kill-window -t "$id"
+  else
+    tmux kill-window -t "$id"
+  fi
+}
+
+function del-pane() {
+  local sid host id="$1"
+
+  IFS=.: read -r sid wid _ <<< "$id"
+
+  read -r host < <(is_remote "$sid")
+
+  if [[ -n "$host" ]]; then
+    rmux "$host" kill-pane -t "$id"
+  else
+    tmux kill-pane -t "$id"
+  fi
 }
 
 function rename() {

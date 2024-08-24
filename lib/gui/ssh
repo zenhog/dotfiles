@@ -118,21 +118,25 @@ function attach() {
   gui tmux mod "$mode" attach remote "$name" "$host"
 }
 
+BINDS[shell]='alt-enter'
+HOOKS[shell]=accept
+DESCS[shell]='Open a new shell window in tmux'
 function shell() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
+  local name="${host##*/}"
 
-  connect "$host" && ssh -S "$sock" -t "$host" zsh -il
+  connect "$host" && gui tmux window local "$(hostname)" "$name" ssh -S "$sock" -t "$host" zsh -il
 }
 
 #function mount() {
 #  :
 #}
-#
+
 #function goto() {
 #  mount && cd
 #}
-#
+
 #function authorize() {
 #  ssh-copy-id ???
 #}
@@ -168,7 +172,7 @@ function sync() {
 
   read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
-  if rexec "$host" bash "$cmd" install master; then
-    rexec "$host" bash "$cmd" pull master
+  if ttyexec "$host" bash "$cmd" install master; then
+    ttyexec "$host" bash "$cmd" pull master
   fi
 }

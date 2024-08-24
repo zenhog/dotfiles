@@ -1,15 +1,3 @@
-[font.bold]
-family = "CaskaydiaCove Nerd Font Mono"
-style = "Bold"
-
-[font.bold_italic]
-family = "CaskaydiaCove Nerd Font Mono"
-style = "Bold Italic"
-
-[font.italic]
-family = "CaskaydiaCove Nerd Font Mono"
-style = "Italic"
-
 [font.normal]
-family = "CaskaydiaCove Nerd Font Mono"
-style = "Regular"
+family = "iosevka nerd font mono"
+style = "regular"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#exec >/proc/$PPID/fd/1
+exec >/proc/$PPID/fd/1
 
-#exec 2>&1
+exec 2>&1
 
 cleanup() {
     rm "${SOCKET}" &>/dev/null
