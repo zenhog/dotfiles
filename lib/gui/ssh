@@ -4,7 +4,7 @@ KEY=e
 MOD='S-M'
 ICON=
 
-export MUXSOCK="$HOME/.rmux.S"
+export MUXSOCK="$HOME/.vmux.S"
 export SOCKDIR="$HOME/.sockets"
 export HOSTDIR="$HOME/.ssh/hosts"
 

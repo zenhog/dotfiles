@@ -503,8 +503,8 @@ function sync_clipboard() {
 
 function forward_buffer() {
   local name="$(tmux display -p '#S')"
-  local kind="$(mute tmux show -vt "$name" @kind)"
-  local port="$(mute tmux show -vt "$name" @port)"
+  local kind="$(quiet tmux show -vt "$name" @kind)"
+  local port="$(quiet tmux show -vt "$name" @port)"
 
   if [[ -n "$port" ]]; then
 
