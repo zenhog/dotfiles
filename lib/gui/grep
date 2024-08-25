@@ -50,6 +50,22 @@ declare -A -x PATTERNS=(
     [BACK_QUOTE]='`([^`]+)`'
 )
 
+# quotes
+# brackets
+# hashes
+# diff
+# lines
+# all
+# paths
+# emails
+# urls
+# addrs
+# GR_ALL
+# GROUPS=(ALL LINES DIFFS URLS EMAILS WEBCONTENT ADDRESSES)
+# GR_ALL=(BACK_QUOTE PARENTHESIS)
+# PATTERNS=([BACK_QUOTE]=)
+# GROUP=DIFFS, for pats in GR_DIFFS[@]; do match PATTERS[$pat]
+
 function match() {
     local pattern="$1"
     local submatch_id=0
@@ -97,3 +113,6 @@ function list() {
 
 }
 
+function view() {
+  rg --passthru --color=always -F -- {3..} < "$INPUT"
+}

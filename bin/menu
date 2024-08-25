@@ -63,8 +63,6 @@ function inputpreview() {
 }
 
 function input() {
-  #local query="$1"
-  #local buffer="$2"
 
   local fifo query
 
@@ -94,8 +92,7 @@ function main() {
 
   if [[ "$1" == input ]]; then
     export -f inputpreview
-    local query="$2"
-    input "$query"
+    input "${@:2}"
     return
   fi
 
@@ -156,6 +153,7 @@ function main() {
   fi
 
   [[ -n "$RATIO" ]] && WINDOW+=",$RATIO" || WINDOW+=,65%
+
   [[ -z "$NOWRAP" ]] && WINDOW+=,wrap
   [[ -n "$FOLLOW" ]] && WINDOW+=,follow
 
@@ -179,8 +177,6 @@ function main() {
 
   [[ -n "$EXTRA" ]] && COMMAND+=("$EXTRA")
 
-  [[ -n "$DEBUG" ]] ; echo "${COMMAND[@]}" > "$HOME/.menu_debug"
-
   mute declare -F init && init
 
   list "${@:2}" | "${COMMAND[@]}"
@@ -195,17 +191,19 @@ function dispatch() {
 
   case "$mode" in
     input)
-      local query="$1"
+      local query="$*"
 
-      local fifo="$(mktemp --dry-run --suffix=fifo)"
+      local fifo="$(mktemp --dry-run --suffix=.fifo)"
 
-      mkfifo "$fifo"
+      mkfifo "$fifo" && export FIFO="$fifo"
 
-      menu loop input fifo="$fifo" query="$query"
+      menu loop input fifo="$fifo" query="'$query'"
 
       local output
 
-      read -r output < "$fifo" && rm -f "$fifo"
+      read -r output < "$fifo"
+
+      rm -f "$fifo"
 
       echo "$output"
       ;;

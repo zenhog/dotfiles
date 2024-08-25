@@ -486,7 +486,7 @@ function hintcopy() {
 }
 
 function extract() {
-  local pane="$(tmux display -p '#S:#I.#P')"
+  local pane="$(dmux display -p '#S:#I.#P')"
   dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | fzfgrep"
 }
 
