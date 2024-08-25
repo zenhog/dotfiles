@@ -97,7 +97,7 @@ case $# in
     for mod in "${modules[@]}"; do
       unset ICON MOD KEY
       source "$MODULES_DIR/$mod"
-      printf "%s:%s:%s:%s\n" "$ICON" "$mod" "$MOD" "$KEY"
+      [[ -n "$KEY" ]] && printf "%s:%s:%s:%s\n" "$ICON" "$mod" "$MOD" "$KEY"
     done
     ;;
   1) # list module functions

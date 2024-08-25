@@ -25,8 +25,8 @@ from datetime import datetime
 import time
 import platform
 
-#logdir = '/tmp/copytklog'
 logdir = None
+logdir = '/tmp/copytklog'
 
 python_command = 'python3'
 # Find full path to tmux command so it can be invoked without a shell
