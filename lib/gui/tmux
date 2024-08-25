@@ -225,42 +225,56 @@ function extract-pane() {
 function mksession() {
   local kind="${1?}"
   local name="${2?}"
-  local tmux=(tmux)
 
   shift 2
 
-  [[ -n "$HOST" ]] && tmux=(rmux "$HOST")
-
   case "$kind" in
     local)
-      if mute "${tmux[@]}" has-session -t "$name"; then
-        echo "Local session '$name' already exists." >&2
+      if mute tmux has-session -t "$name"; then
+        echo "Local session '$name' already exists" >&2
         return 0
       else
-        "${tmux[@]}" new-session -ds "$name"
+        tmux new-session -ds "$name"
       fi
 
-      if ! mute "${tmux[@]}" has-session -t "$name"; then
-        echo "Failed to create local session '$name'." >&2
+      if ! mute tmux has-session -t "$name"; then
+        echo "Failed to create local session '$name'" >&2
         return 1
       fi
 
-      "${tmux[@]}" set -t "$name" @kind "$kind"
+      tmux set -t "$name" @kind "$kind"
+      ;;
+    slave)
+      local host="${1?}"
+
+      if quiet rmux "$host" has-session -t "$name"; then
+        echo "Slave session '$name' already exists" >&2
+        return 0
+      else
+        rmux "$host" new-session -ds "$name"
+      fi
+
+      if ! rmux "$host" has-session -t "$name"; then
+        echo "Failed to create slave session '$name'" >&2
+        return 1
+      fi
+
+      rmux "$host" set -t "$name" @kind local
       ;;
     remote)
-      local port host="$1"
+      local port host="${1?}"
 
       shift
 
-      if mute tmux has-session -t "$name"; then
-        echo "Remote session '$name' already exists." >&2
+      if quiet tmux has-session -t "$name"; then
+        echo "Remote session '$name' already exists" >&2
         return 0
       fi
 
-      HOST="$host" mksession local "$name"
+      mksession slave "$name" "$host"
 
       if ! gui ssh rexec "$host" tmux has-session -t "$name"; then
-        echo "Failed to create remote slave session '$name'." >&2
+        echo "Failed to create remote slave session '$name'" >&2
         return 1
       fi
 
@@ -271,8 +285,8 @@ function mksession() {
       tmux new-session -ds "$name" \
         gui ssh ttyexec "$host" tmux attach -t "$name"
 
-      if ! mute tmux has-session -t "$name"; then
-        echo "Failed to create remote session '$name'." >&2
+      if ! tmux has-session -t "$name"; then
+        echo "Failed to create remote session '$name'" >&2
         return 1
       fi
 
@@ -360,7 +374,7 @@ function colors() {
 }
 
 function copytk() {
-  tmux run "copytk easycopy --search-nkeys 1"
+  dmux run "copytk easycopy --search-nkeys 1"
 }
 
 function gethint() {
@@ -528,11 +542,11 @@ function is_remote() {
 }
 
 function rmux() {
-  local host="$1"
+  local host="${1?}"
 
   shift
 
-  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@"
+  gui ssh rexec "$host" tmux "$@"
 }
 
 function dmux() {

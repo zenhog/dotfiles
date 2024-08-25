@@ -170,11 +170,17 @@ function sync() {
 
   local cmd
 
-  read -r cmd < <(printf '<(curl -sL %q)' "$URL")
+  read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
   cmd=(bash "$cmd" install master)
 
-  if rexec "$host" bash "$cmd" install master; then
-    rexec "$host" bash "$cmd" pull master
-  fi
+  local temp="$(mktemp --dry-run)"
+
+  connect "$host" && ssh -S "$sock" "$host" bash -ls << EOF
+    curl -sSL "$URL" -o "$temp"
+    if bash "$temp" install master; then
+      bash "$temp" pull master
+    fi
+    rm -f "$temp"
+EOF
 }
