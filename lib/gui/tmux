@@ -259,6 +259,11 @@ function mksession() {
 
       HOST="$host" mksession local "$name"
 
+      if ! gui ssh rexec "$host" tmux has-session -t "$name"; then
+        echo "Failed to create remote slave session '$name'." >&2
+        return 1
+      fi
+
       read -r port < <(gui ssh revport "$host")
 
       gui ssh rexec "$host" tmux set -t "$name" @port "$port"
@@ -527,7 +532,7 @@ function rmux() {
 
   shift
 
-  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@" || tmux "$@"
+  [[ -n "$host" ]] && gui ssh rexec "$host" tmux "$@"
 }
 
 function dmux() {

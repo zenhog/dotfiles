@@ -174,8 +174,7 @@ function sync() {
 
   cmd=(bash "$cmd" install master)
 
-  #if rexec "$host" bash "$cmd" install master; then
-  #  rexec "$host" bash "$cmd" pull master
-  #fi
-  #rexec "$host" 
+  if rexec "$host" bash "$cmd" install master; then
+    rexec "$host" bash "$cmd" pull master
+  fi
 }
