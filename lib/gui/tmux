@@ -326,7 +326,17 @@ function cursor() {
   local match="$(tmux display -p '#{search_match}')"
 
   tmux send-keys -X
-  tmux display "Word under cursor: '$word' at ($x, $y), match: '$match'"
+  tmux display "Word under cursor: '$word' at ($x, $y), match: '$word'"
+}
+
+function line() {
+  local line="$(tmux display -p '#{copy_cursor_line}')"
+  local x="$(tmux display -p '#{copy_cursor_x}')"
+  local y="$(tmux display -p '#{copy_cursor_y}')"
+  local match="$(tmux display -p '#{search_match}')"
+
+  tmux send-keys -X
+  tmux display "Line under cursor: '$word' at ($x, $y), line: '$line'"
 }
 
 function lastcmd() {
@@ -347,20 +357,25 @@ function pagecmd() {
 function nextcmd() {
   # send-keys -X previous-prompt/next-prompt
   local word="$(tmux display -p '#{copy_cursor_word}')"
-  if [[ "$word" != "$CMDSYM" ]]; then
+  local line="$(tmux display -p '#{copy_cursor_line}')"
+
+  if ! [[ "$line" =~ "$CMDPAT" ]]; then
     #tmux send-keys -X cursor-right
-    tmux send-keys -X end-of-line
+    tmux send-keys -X cursor-down
   fi
+
   tmux send-keys -X search-forward "$CMDPAT"
 }
 
 function prevcmd() {
   local word="$(tmux display -p '#{copy_cursor_word}')"
+  local line="$(tmux display -p '#{copy_cursor_line}')"
 
-  if [[ "$word" != "$CMDSYM" ]]; then
+  if ! [[ "$line" =~ "$CMDPAT" ]]; then
     #tmux send-keys -X cursor-left
-    tmux send-keys -X start-of-line
+    tmux send-keys -X cursor-up
   fi
+
   tmux send-keys -X search-backward "$CMDPAT"
 }
 

@@ -10,61 +10,83 @@ atfinish() {
     rm -f "$INPUT"
 }
 
-declare -A -x PATTERNS=(
-    [IP4]='\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
-    [IP6]='[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+'
+declare -Ax PATTERNS=()
 
-    [PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
-    [URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
-    [MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
+declare -ax GR_LINES=(LINE)
 
-    [NUM]='[0-9]{4,}'
-    [NUMCHAIN]='(([0-9]{4,})-)+[0-9]{4,}'
+PATTERNS[LINE]='^.*$'
 
-    [HEXSTR]='[0-9a-fA-F]{7,128}'
-    [HEXNUM]='0x[0-9a-fA-F]+'
+declare -ax GR_QUOTES=(SINGLE_QUOTE DOUBLE_QUOTE BACK_QUOTE)
 
-    [LONGOPT]='[[:blank:]]([-][-][-[:alnum:]]+)'
-    [SHORTOPT]='[[:blank:]]([-][-[:alnum:]]+)'
+PATTERNS[SINGLE_QUOTE]="'([^']+)'"
+PATTERNS[DOUBLE_QUOTE]='"([^"]+)"'
+PATTERNS[BACK_QUOTE]='`([^`]+)`'
 
-    [DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
-    [EMAIL]='\S+@\S+\.\S+'
+declare -ax GR_BRACKETS=(PARENTHESIS ANGLE_BRACKET SQUARE_BRACKET CURLY_BRACKET)
 
-    [LINE]='^.*$'
+PATTERNS[PARENTHESIS]='(?:\(([^()]+)\))'
+PATTERNS[ANGLE_BRACKET]='<([^<>]+)>'
+PATTERNS[SQUARE_BRACKET]='\[([^\[\]]+)\]'
+PATTERNS[CURLY_BRACKET]='\{([^{}]+)\}'
 
-    [SHA]='[0-9a-f]{7,40}'
-    [IPFS]='Qm[0-9a-zA-Z]{44}'
-    [UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
-    [COLOR]='#[0-9a-fA-F]{6}'
+declare -ax GR_PAIRS=("${GR_QUOTES[@]}" "${GR_BRACKETS[@]}")
 
-    [DOCKER]='sha256:([0-9a-f]{64})'
-    [DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++)'
+declare -ax GR_UIDS=(SHA IPFS UUID COLOR DOCKER)
 
-    [PARENTHESIS]='(?:\(([^()]+)\))'
-    [ANGLE_BRACKET]='<([^<>]+)>'
-    [SQUARE_BRACKET]='\[([^\[\]]+)\]'
-    [CURLY_BRACKET]='\{([^{}]+)\}'
+PATTERNS[SHA]='[0-9a-f]{7,40}'
+PATTERNS[IPFS]='Qm[0-9a-zA-Z]{44}'
+PATTERNS[UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+PATTERNS[COLOR]='#[0-9a-fA-F]{6}'
+PATTERNS[DOCKER]='sha256:([0-9a-f]{64})'
 
-    [SINGLE_QUOTE]="'([^']+)'"
-    [DOUBLE_QUOTE]='"([^"]+)"'
-    [BACK_QUOTE]='`([^`]+)`'
-)
+declare -ax GR_NAMES=(DOTNAME EMAIL)
 
-# quotes
-# brackets
-# hashes
-# diff
-# lines
-# all
-# paths
-# emails
-# urls
-# addrs
-# GR_ALL
-# GROUPS=(ALL LINES DIFFS URLS EMAILS WEBCONTENT ADDRESSES)
-# GR_ALL=(BACK_QUOTE PARENTHESIS)
-# PATTERNS=([BACK_QUOTE]=)
-# GROUP=DIFFS, for pats in GR_DIFFS[@]; do match PATTERS[$pat]
+PATTERNS[EMAIL]='\S+@\S+\.\S+'
+PATTERNS[DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
+
+declare -ax GR_URLS=(PATH URL MARKDOWN_URL)
+
+PATTERNS[MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
+PATTERNS[PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
+PATTERNS[URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
+
+declare -ax GR_ARGS=(LONGOPT SHORTOPT)
+
+PATTERNS[LONGOPT]='[[:blank:]]([-][-][-[:alnum:]]+)'
+PATTERNS[SHORTOPT]='[[:blank:]]([-][-[:alnum:]]+)'
+
+declare -ax GR_ADDRS=(IP4 IP6)
+
+PATTERNS[IP4]='\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+PATTERNS[IP6]='[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+'
+
+declare -ax GR_NUMBERS=(NUM NUMCHAIN HEXNUM HEXSTR)
+
+PATTERNS[NUM]='[0-9]{4,}'
+PATTERNS[NUMCHAIN]='(([0-9]{4,})-)+[0-9]{4,}'
+PATTERNS[HEXSTR]='[0-9a-fA-F]{7,128}'
+PATTERNS[HEXNUM]='0x[0-9a-fA-F]+'
+
+declare -ax GR_DIFFS=(DIFF_SUMMARY)
+
+PATTERNS[DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++)'
+
+declare -ax GR_ALL=("${!PATTERNS[@]}")
+
+declare -ax GROUPS=("$(set | awk -F= '/GR_/{print $1}')")
+
+for gr in "${GROUPS[@]}"; do
+  export "S${gr}"="$(declare -p "$gr")"
+done
+
+export SPATTERNS="$(declare -p PATTERNS)"
+export SGROUPS="$(declare -p GROUPS)"
+
+exit 0
+
+function init() {
+  [[ -n "$(get_opt group)" ]] || set_opt group ALL
+}
 
 function match() {
     local pattern="$1"
@@ -87,10 +109,10 @@ function match() {
         column -t -s$'\x01' -o$'\x01' | "${sortcmd[@]}"
 }
 
-
 function list() {
   read -r SPATS < <(declare -p PATTERNS)
   export SPATS
+
   [[ $# -eq 0 ]] && set "${!PATTERNS[@]}"
 
   export INPUT="$(mktemp --suffix fzfgrep-$$)"
@@ -101,15 +123,15 @@ function list() {
     match "$pat"
   done | column -t -s$'\x01'
 
-    #fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
-    #    --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
-    #    --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
-    #    --bind="tab:execute-silent(open {3..})" \
-    #    --bind="ctrl-o:execute-silent(open {3..})+accept" \
-    #    --bind="ctrl-/:reload-sync(match CUSTOM {q})" \
-    #    --bind="ctrl-\\:execute-silent(open {3..})+accept" \
-    #    --preview-label='enter:+clip ^\:clip tab:open' \
-    #    --prompt='fzfgrep> '
+  #fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
+  #    --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
+  #    --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
+  #    --bind="tab:execute-silent(open {3..})" \
+  #    --bind="ctrl-o:execute-silent(open {3..})+accept" \
+  #    --bind="ctrl-/:reload-sync(match CUSTOM {q})" \
+  #    --bind="ctrl-\\:execute-silent(open {3..})+accept" \
+  #    --preview-label='enter:+clip ^\:clip tab:open' \
+  #    --prompt='fzfgrep> '
 
 }
 
