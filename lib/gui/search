@@ -99,7 +99,14 @@ function state_update() {
 BINDS[list]=alt-w
 DESCS[list]='Reload current directory listing'
 function list() {
+  local dir="$1"
+
   state_update
+
+  if [[ -n "$dir" ]]; then
+    folder_cd "$dir" && folder_restore
+  fi
+
   "${LIST_CMD[@]}" "$FOLDER/"
 }
 

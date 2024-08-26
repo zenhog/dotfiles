@@ -1,0 +1,3 @@
+function search() {
+  menu main search list "$(pwd)"
+}

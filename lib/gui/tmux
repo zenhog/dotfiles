@@ -116,8 +116,8 @@ function list-panes() {
   readarray -t windows < <(list-windows | grep "${1:-.}")
 
   for w in "${windows[@]}"; do
-    local icon session wid wname panes
-    IFS=$': \t' read -r icon session wid wname <<< "$w"
+    local icon session wid panes
+    IFS=$': \t' read -r icon session wid _ <<< "$w"
 
     readarray -t panes < <(dmux "session:$session" \
       list-panes -t "$session:$wid" -F '#S:#I.#P #W:#{pane_current_command}')

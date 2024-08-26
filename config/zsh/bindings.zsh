@@ -13,6 +13,7 @@ bindkey "^I" envupdate-and-complete
 bindkey "^Q" zce
 bindkey "^S" zce
 bindkey "^Y" zce-kill
+bindkey "^Q" search
 
 # bindkey "^Q" add-space
 bindkey "^U" kill-whole-line
