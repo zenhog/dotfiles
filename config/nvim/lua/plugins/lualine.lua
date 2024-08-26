@@ -1,5 +1,6 @@
 local function lspname()
   local icon = ''
+  local icon = 'LSP:'
   local msg = icon
   local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
   local clients = vim.lsp.get_active_clients()
@@ -17,7 +18,8 @@ end
 
 local function session()
   --return require('possession.session').get_session_name() or ''
-  return vim.env.PWD
+  --return vim.env.PWD
+  return vim.fn.fnamemodify(vim.fn.expand(vim.fn.getenv('PWD')), ':~:.')
 end
 
 local function location()
@@ -73,10 +75,10 @@ end
 local top = {
   lualine_a = {
     'mode',
-    updates,
-    'tabs',
   },
   lualine_b = {
+    updates,
+    lspname,
   },
   lualine_c = {
     '%=',
@@ -84,7 +86,7 @@ local top = {
   lualine_x = {
   },
   lualine_y = {
-    lspname,
+    tabs,
   },
   lualine_z = {
     session,
@@ -141,9 +143,10 @@ return {
       require('lualine').setup({
         options = {
           theme = vim.g['lualine_theme_' .. theme],
-          icons_enabled = true,
-          --component_separators = { left = '∙', right = '∙' },
-          --section_separators = { left = '', right = '' },
+          icons_enabled = false,
+          section_separators = { left = '', right = '' },
+          component_separators = { left = '', right = '' },
+          component_separators = { left = '∙', right = '∙' },
           disabled_filetypes = {
             statusline = {
               'aerial',
