@@ -49,6 +49,7 @@ CMD=(
   --connect-retry 5 5
   --verb 1
   --ca "$CAFILE"
+  #--crl-verify "$CRLFILE"
 )
 
 export VPNUSER
