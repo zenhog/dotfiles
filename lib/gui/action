@@ -137,7 +137,10 @@ function applytheme() {
 
   settheme "$1"
 
-  qutebrowser :config-source
+  if gui awm exists profile=wanqute; then
+    qutebrowser :config-source
+  fi
+
   feh --bg-scale "$HOME/.wallpapers/main"
 
   # neovim
