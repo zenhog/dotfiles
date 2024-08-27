@@ -567,22 +567,17 @@ function rmux() {
 function dkey() {
   local session="$(tmux display -p '#S')"
 
-  if [[ "$1" == session:* ]]; then
-    session="${1#session:}"
-    shift
-  fi
-
   [[ -n "$session" ]] || return
 
   local kind="$(tmux show -vt "$session" @kind)"
 
   if [[ "$kind" == remote ]]; then
-    local host="$(tmux show -vt "$session" @host)"
-    rmux "$host" "$@"
-  elif [[ "$kind" == local ]]; then
-    tmux "$@"
+    return 0
   fi
+
+  return 1
 }
+
 function dmux() {
   local session="$(tmux display -p '#S')"
 
