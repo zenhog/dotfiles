@@ -500,9 +500,36 @@ function hintcopy() {
   tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
 }
 
+function xtract() {
+  local pane="$(dmux display -p '#S:#I.#P')"
+  dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | extract"
+}
+
 function extract() {
   local pane="$(dmux display -p '#S:#I.#P')"
   dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | fzfgrep"
+}
+
+function forward_style() {
+  local sessions
+
+  readarray -t sessions < <(tmux list-sessions -F '#S')
+
+  for session in "${sessions[@]}"; do
+    local opts wopts
+    readarray -t opts < <(tmux show -g | grep style)
+    readarray -t wopts < <(tmux show -gw | grep style)
+    for opt in "${opts[@]}"; do
+      local lhs rhs
+      read -r lhs rhs <<< "$opt"
+      dmux "session:$session" set -g "$lhs" "$rhs"
+    done
+    for opt in "${wopts[@]}"; do
+      local rhs lhs
+      read -r lhs rhs <<< "$opt"
+      dmux "session:$session" set -gw "$lhs" "$rhs"
+    done
+  done
 }
 
 function sync_clipboard() {
