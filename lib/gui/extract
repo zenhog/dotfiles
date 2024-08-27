@@ -10,28 +10,28 @@ atfinish() {
     rm -f "$INPUT"
 }
 
-declare -Ax PATTERNS=()
+declare -A PATTERNS=()
 
-declare -ax GR_LINES=(LINE)
+GR_LINES=(LINE)
 
 PATTERNS[LINE]='^.*$'
 
-declare -ax GR_QUOTES=(SINGLE_QUOTE DOUBLE_QUOTE BACK_QUOTE)
+GR_QUOTES=(SINGLE_QUOTE DOUBLE_QUOTE BACK_QUOTE)
 
 PATTERNS[SINGLE_QUOTE]="'([^']+)'"
 PATTERNS[DOUBLE_QUOTE]='"([^"]+)"'
 PATTERNS[BACK_QUOTE]='`([^`]+)`'
 
-declare -ax GR_BRACKETS=(PARENTHESIS ANGLE_BRACKET SQUARE_BRACKET CURLY_BRACKET)
+GR_BRACKETS=(PARENTHESIS ANGLE_BRACKET SQUARE_BRACKET CURLY_BRACKET)
 
 PATTERNS[PARENTHESIS]='(?:\(([^()]+)\))'
 PATTERNS[ANGLE_BRACKET]='<([^<>]+)>'
 PATTERNS[SQUARE_BRACKET]='\[([^\[\]]+)\]'
 PATTERNS[CURLY_BRACKET]='\{([^{}]+)\}'
 
-declare -ax GR_PAIRS=("${GR_QUOTES[@]}" "${GR_BRACKETS[@]}")
+GR_PAIRS=("${GR_QUOTES[@]}" "${GR_BRACKETS[@]}")
 
-declare -ax GR_UIDS=(SHA IPFS UUID COLOR DOCKER)
+GR_UIDS=(SHA IPFS UUID COLOR DOCKER)
 
 PATTERNS[SHA]='[0-9a-f]{7,40}'
 PATTERNS[IPFS]='Qm[0-9a-zA-Z]{44}'
@@ -39,50 +39,48 @@ PATTERNS[UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 PATTERNS[COLOR]='#[0-9a-fA-F]{6}'
 PATTERNS[DOCKER]='sha256:([0-9a-f]{64})'
 
-declare -ax GR_NAMES=(DOTNAME EMAIL)
+GR_NAMES=(DOTNAME EMAIL)
 
 PATTERNS[EMAIL]='\S+@\S+\.\S+'
 PATTERNS[DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
 
-declare -ax GR_URLS=(PATH URL MARKDOWN_URL)
+GR_URLS=(PATH URL MARKDOWN_URL)
 
 PATTERNS[MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
 PATTERNS[PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
 PATTERNS[URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
 
-declare -ax GR_ARGS=(LONGOPT SHORTOPT)
+GR_ARGS=(LONGOPT SHORTOPT)
 
 PATTERNS[LONGOPT]='[[:blank:]]([-][-][-[:alnum:]]+)'
 PATTERNS[SHORTOPT]='[[:blank:]]([-][-[:alnum:]]+)'
 
-declare -ax GR_ADDRS=(IP4 IP6)
+GR_ADDRS=(IP4 IP6)
 
 PATTERNS[IP4]='\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 PATTERNS[IP6]='[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+'
 
-declare -ax GR_NUMBERS=(NUM NUMCHAIN HEXNUM HEXSTR)
+GR_NUMBERS=(NUM NUMCHAIN HEXNUM HEXSTR)
 
 PATTERNS[NUM]='[0-9]{4,}'
 PATTERNS[NUMCHAIN]='(([0-9]{4,})-)+[0-9]{4,}'
 PATTERNS[HEXSTR]='[0-9a-fA-F]{7,128}'
 PATTERNS[HEXNUM]='0x[0-9a-fA-F]+'
 
-declare -ax GR_DIFFS=(DIFF_SUMMARY)
+GR_DIFFS=(DIFF_SUMMARY)
 
 PATTERNS[DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++)'
 
-declare -ax GR_ALL=("${!PATTERNS[@]}")
+GR_ALL=("${!PATTERNS[@]}")
 
-declare -ax GROUPS=("$(set | awk -F= '/GR_/{print $1}')")
+PATTERN_GROUPS=($(set | awk -F= '/GR_/{print $1}'))
 
-for gr in "${GROUPS[@]}"; do
-  export "S${gr}"="$(declare -p "$gr")"
+for gr in "${PATTERN_GROUPS[@]}"; do
+  eval "export SERIALIZED_${gr}"="\$(declare -p "$gr")"
 done
 
 export SPATTERNS="$(declare -p PATTERNS)"
 export SGROUPS="$(declare -p GROUPS)"
-
-exit 0
 
 function init() {
   [[ -n "$(get_opt group)" ]] || set_opt group ALL
