@@ -552,8 +552,6 @@ function forward_buffer() {
 
     local data=$(tmux show-buffer | base64)
 
-    tmux delete-buffer
-
     exec 3<>"/dev/tcp/localhost/$port"
 
     echo "$data" >&3

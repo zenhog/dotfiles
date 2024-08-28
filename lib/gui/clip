@@ -16,6 +16,25 @@ function list() {
   tmux list-buffers -F '#{buffer_name} #{buffer_sample}'
 }
 
+BINDS[del]=alt-d
+DESCS[del]='Delete buffer'
+function del() {
+  local buf
+  read -r buf _ <<< "$1"
+  tmux delete-buffer -b "$buf"
+}
+
+BINDS[delall]=alt-a
+DESCS[dellall]='Delete buffer'
+function delall() {
+  local buffers
+  readarray -t buffers < <(tmux list-buffers -F '#{buffer_name}')
+
+  for buf in "${buffers[@]}"; do
+    tmux delete-buffer -b "$buf"
+  done
+}
+
 function clip() {
   tmux load-buffer - <<< "${1:1}"
   notify "Clipped '${1:1}'"
