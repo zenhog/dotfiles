@@ -35,6 +35,10 @@ PATTERNS[UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 PATTERNS[COLOR]='#[0-9a-fA-F]{6}'
 PATTERNS[DOCKER]='sha256:([0-9a-f]{64})'
 
+GR_PASSVAL=(PASSVAL)
+
+PATTERNS[PASSVAL]='^.*➡ (.*)$'
+
 GR_NAMES=(DOTNAME EMAIL)
 
 PATTERNS[EMAIL]='\S+@\S+\.\S+'
@@ -69,20 +73,11 @@ PATTERNS[DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@
 
 GR_ALL=("${!PATTERNS[@]}")
 
-PATTERN_GROUPS=($(set | awk -F= '/GR_/{print $1}'))
+PATTERN_GROUPS=($(set | awk -F= '/GR.?_/{print $1}'))
 
-for gr in "${PATTERN_GROUPS[@]}"; do
-  eval "export SERIALIZED_${gr}"="\$(declare -p "$gr")"
-done
-
-export SPATTERNS="$(declare -p PATTERNS)"
-export SGROUPS="$(declare -p GROUPS)"
-
-match() {
+function match() {
     local pattern="$1"
     local submatch_id=0
-
-    eval "$SPATS"
 
     #[[ -n "$2" ]] && submatch_id="$2"
 
@@ -99,30 +94,26 @@ match() {
         column -t -s$'\x01' -o$'\x01' | "${sortcmd[@]}"
 }
 
-read -r SPATS < <(declare -p PATTERNS)
-export SPATS
-
-[[ $# -eq 0 ]] && set "${!PATTERNS[@]}"
-
-export INPUT="$(mktemp --suffix fzfgrep-$$)"
+export INPUT="$(mktemp --suffix -extract-$$)"
 
 ansifilter > "$INPUT"
 
-export -f match
+declare -n PATS="${1:-GR_ALL}"
 
-for pat in "$@"; do
-    match "$pat"
+for pat in "${PATS[@]}"; do
+  match "$pat"
 done | column -t -s$'\x01' |
     fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
         --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
+        --border-label="$1" \
         --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
         --bind="tab:execute-silent(open {3..})" \
         --bind="ctrl-o:execute-silent(open {3..})+accept" \
         --bind="ctrl-t:become(extract match $NEXT_PATTERN < $INPUT)" \
         --bind="ctrl-/:become(extract match CUSTOM {q} < $INPUT)" \
         --bind="ctrl-\\:execute-silent(open {3..})+accept" \
-        --preview-label='enter:+clip ^\:clip tab:open' \
-        --prompt='fzfgrep> '
+        --preview-label="$1" \
+        --prompt='extract> '
 
 # open
 # copy
