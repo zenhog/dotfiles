@@ -10,7 +10,7 @@ RATIO=75%
 
 export CMDSYM=➡
 export CMDPAT="$CMDSYM"
-export CMDPAT="^.*$CMDSYM.*$"
+export CMDPAT="^.*$CMDPAT.*$"
 export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
@@ -212,16 +212,6 @@ function status() {
   esac
 }
 
-function extract-pane() {
-  # pane, window, session
-  local pane="$1"
-
-  read -r pane < <(tmux display -p '#S:#I.#P')
-
-  tmux new-window -n grep bash -c \
-    "tmux capture-pane -pNq -t ${pane} | fzfgrep"
-}
-
 function mksession() {
   local kind="${1?}"
   local name="${2?}"
@@ -384,7 +374,6 @@ function reload() {
 }
 
 function colors() {
-  source "$TMUX_DIR/10-theme.conf"
   source "$TMUX_DIR/30-options.conf"
 }
 
@@ -500,14 +489,9 @@ function hintcopy() {
   tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
 }
 
-function xtract() {
+function extract-pane() {
   local pane="$(dmux display -p '#S:#I.#P')"
   dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | extract"
-}
-
-function extract() {
-  local pane="$(dmux display -p '#S:#I.#P')"
-  dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | fzfgrep"
 }
 
 function forward_style() {

@@ -15,8 +15,10 @@ prompt_netgrp () {
 	[[ -n "$cgroup" ]] && p10k segment -f 208 -i '󰛸' -t "$cgroup"
 }
 
+PROMPT_MARK=$'\033]133;A\033\\'
+
 prompt_mark() {
-  printf '\033]133;A\033\\'
+  printf "$PROMPT_MARK"
 }
 
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]

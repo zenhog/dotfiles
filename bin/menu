@@ -36,7 +36,7 @@ BINDS[extract]='alt-/'
 HOOKS[extract]=sclear
 GDESCS[extract]='Fzfgrep preview'
 function extract() {
-  view "$1" | fzfgrep 2>/dev/tty
+  view "$1" | command extract 2>/dev/tty
 }
 
 BINDS[change]=change

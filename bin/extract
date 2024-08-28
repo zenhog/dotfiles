@@ -8,72 +8,94 @@ trap finish EXIT
 
 declare -A PATTERNS=()
 
-GR_LINES=(LINE)
-
-PATTERNS[LINE]='^.*$'
-
+# GROUP: QUOTES
+PATTERN_GROUPS+=(GR_QUOTES)
 GR_QUOTES=(SINGLE_QUOTE DOUBLE_QUOTE BACK_QUOTE)
-
 PATTERNS[SINGLE_QUOTE]="'([^']+)'"
 PATTERNS[DOUBLE_QUOTE]='"([^"]+)"'
 PATTERNS[BACK_QUOTE]='`([^`]+)`'
 
+# GROUP: BRACKETS
+PATTERN_GROUPS+=(GR_BRACKETS)
 GR_BRACKETS=(PARENTHESIS ANGLE_BRACKET SQUARE_BRACKET CURLY_BRACKET)
-
 PATTERNS[PARENTHESIS]='(?:\(([^()]+)\))'
 PATTERNS[ANGLE_BRACKET]='<([^<>]+)>'
 PATTERNS[SQUARE_BRACKET]='\[([^\[\]]+)\]'
 PATTERNS[CURLY_BRACKET]='\{([^{}]+)\}'
 
+# SUPERGROUP: PAIRS
+PATTERN_GROUPS+=(GR_PAIRS)
 GR_PAIRS=("${GR_QUOTES[@]}" "${GR_BRACKETS[@]}")
 
-GR_UIDS=(SHA IPFS UUID COLOR DOCKER)
-
-PATTERNS[SHA]='[0-9a-f]{7,40}'
+# GROUP: UIDS
+PATTERN_GROUPS+=(GR_SIGS)
+GR_SIGS=(MD5 SHA160 SHA224 SHA256 SHA384 SHA512 IPFS UUID COLOR DOCKER)
+PATTERNS[MD5]='[0-9a-f]{32}'
+PATTERNS[SHA160]='[0-9a-fA-F]{40}'
+PATTERNS[SHA224]='[0-9a-f]{56}'
+PATTERNS[SHA256]='[0-9a-fA-F]{64}'
+PATTERNS[SHA384]='[0-9a-fA-F]{96}'
+PATTERNS[SHA512]='[0-9a-fA-F]{128}'
 PATTERNS[IPFS]='Qm[0-9a-zA-Z]{44}'
 PATTERNS[UUID]='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 PATTERNS[COLOR]='#[0-9a-fA-F]{6}'
 PATTERNS[DOCKER]='sha256:([0-9a-f]{64})'
 
+# GROUP: PASSVAL
+PATTERN_GROUPS+=(GR_PASSVAL)
 GR_PASSVAL=(PASSVAL)
+PATTERNS[PASSVAL]='^.*➡[[:blank:]]+(?:.*)$'
 
-PATTERNS[PASSVAL]='^.*➡ (.*)$'
-
-GR_NAMES=(DOTNAME EMAIL)
-
+# GROUP: EMAIL
+PATTERN_GROUPS+=(GR_EMAIL)
+GR_EMAIL=(DOTNAME)
 PATTERNS[EMAIL]='\S+@\S+\.\S+'
+
+# GROUP: DOTNAME
+PATTERN_GROUPS+=(GR_DOTNAME)
+GR_DOTNAME=(DOTNAME)
 PATTERNS[DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
 
+# GROUP: URLS
+PATTERN_GROUPS+=(GR_URLS)
 GR_URLS=(PATH URL MARKDOWN_URL)
-
 PATTERNS[MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
 PATTERNS[PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
 PATTERNS[URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
 
+# GROUP: ARGS
+PATTERN_GROUPS+=(GR_ARGS)
 GR_ARGS=(LONGOPT SHORTOPT)
-
 PATTERNS[LONGOPT]='[[:blank:]]([-][-][-[:alnum:]]+)'
 PATTERNS[SHORTOPT]='[[:blank:]]([-][-[:alnum:]]+)'
 
+# GROUP: ADDRS
+PATTERN_GROUPS+=(GR_ADDRS)
 GR_ADDRS=(IP4 IP6)
-
 PATTERNS[IP4]='\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 PATTERNS[IP6]='[A-f0-9:]+:+[A-f0-9:]+[%\w\d]+'
 
+# GROUP: NUMBERS
+PATTERN_GROUPS+=(GR_NUMBERS)
 GR_NUMBERS=(NUM NUMCHAIN HEXNUM HEXSTR)
-
 PATTERNS[NUM]='[0-9]{4,}'
 PATTERNS[NUMCHAIN]='(([0-9]{4,})-)+[0-9]{4,}'
 PATTERNS[HEXSTR]='[0-9a-fA-F]{7,128}'
 PATTERNS[HEXNUM]='0x[0-9a-fA-F]+'
 
+# GROUP: DIFFS
+PATTERN_GROUPS+=(GR_DIFFS)
 GR_DIFFS=(DIFF_SUMMARY)
-
 PATTERNS[DIFF_SUMMARY]='diff --git a/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++) b/([.\w\-@~\[\]]+?/[.\w\-@\[\]]++)'
 
-GR_ALL=("${!PATTERNS[@]}")
+# GROUP: LINES
+PATTERN_GROUPS+=(GR_LINES)
+GR_LINES=(LINE)
+PATTERNS[LINE]='^.*$'
 
-PATTERN_GROUPS=($(set | awk -F= '/GR.?_/{print $1}'))
+# SPECIAL GROUP: All patterns
+PATTERN_GROUPS+=(GR_ALL)
+GR_ALL=("${!PATTERNS[@]}")
 
 function match() {
     local pattern="$1"
@@ -96,23 +118,38 @@ function match() {
 
 export INPUT="$(mktemp --suffix -extract-$$)"
 
-ansifilter > "$INPUT"
+#ansifilter > "$INPUT"
+cat > "$INPUT"
 
-declare -n PATS="${1:-GR_ALL}"
+declare ARG="${1:-GR_ALL}"
+
+declare -n PATS="$ARG"
+
+for gr in "${!PATTERN_GROUPS[@]}"; do
+  if [[ "${PATTERN_GROUPS[$gr]}" == "$ARG" ]]; then
+    NEXT_PATTERN="${PATTERN_GROUPS[$(( (gr+1) % ${#PATTERN_GROUPS[@]} ))]}"
+  fi
+done
+
+for pat in "${PATTERN_GROUPS[@]}"; do
+  if [[ "$pat" == "$ARG" ]]; then
+    LABELS+=("$(ansi --red "${pat#GR_}")")
+  else
+    LABELS+=("${pat#GR_}")
+  fi
+done
 
 for pat in "${PATS[@]}"; do
   match "$pat"
 done | column -t -s$'\x01' |
     fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
         --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
-        --border-label="$1" \
+        --border \
+        --border-label="${LABELS[*]}" \
         --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
-        --bind="tab:execute-silent(open {3..})" \
+        --bind="tab:execute(open {3..})" \
         --bind="ctrl-o:execute-silent(open {3..})+accept" \
-        --bind="ctrl-t:become(extract match $NEXT_PATTERN < $INPUT)" \
-        --bind="ctrl-/:become(extract match CUSTOM {q} < $INPUT)" \
-        --bind="ctrl-\\:execute-silent(open {3..})+accept" \
-        --preview-label="$1" \
+        --bind="ctrl-t:become(command extract $NEXT_PATTERN < $INPUT)" \
         --prompt='extract> '
 
 # open

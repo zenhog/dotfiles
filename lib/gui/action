@@ -159,7 +159,7 @@ function applytheme() {
   done
 
   # tmux
-  gui tmux reload
+  gui tmux colors
 }
 
 function action:mailsync() {
