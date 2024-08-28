@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+logfile="/proc/$$/fd/1"
+
 cleanup() {
     rm "${SOCKET}" &>/dev/null
 }
@@ -16,6 +18,10 @@ fi
 socat UNIX-LISTEN:"${SOCKET}",fork STDOUT | while true; do
     read -r line
     if tmux ls &>/dev/null; then
-        echo -n "$line" | base64 -d | tmux load-buffer -
+        echo -n "$line" | base64 -d | tee >(
+          echo "===== COPYING =====" > "$logfile"
+          cat > "$logfile"
+          echo
+        ) | tmux load-buffer -
     fi
 done

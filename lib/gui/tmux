@@ -550,7 +550,7 @@ function forward_buffer() {
 
   if [[ -n "$port" ]]; then
 
-    local data=$(tmux show-buffer | base64)
+    local data=$(tmux show-buffer | base64 -w0)
 
     exec 3<>"/dev/tcp/localhost/$port"
 
