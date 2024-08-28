@@ -251,7 +251,7 @@ function mksession() {
         echo "Slave session '$name' already exists" >&2
         return 0
       else
-        rmux "$host" new-session -ds "$name"
+        gui ssh ttyexec "$host" tmux new-session -ds "$name"
       fi
 
       if ! rmux "$host" has-session -t "$name"; then

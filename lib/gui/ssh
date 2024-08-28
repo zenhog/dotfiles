@@ -129,9 +129,13 @@ function shell() {
   connect "$host" && gui tmux window local "$(hostname)" "$name" ssh -S "$sock" -t "$host" zsh -il
 }
 
-#function mount() {
-#  :
-#}
+function mount() {
+  local host="$(get host "$1")"
+
+  mkdir -p "$HOME/.sshfs/$host"
+
+  sshfs "$host":'$HOME' "$HOME/.sshfs/$host"
+}
 
 #function goto() {
 #  mount && cd
@@ -160,8 +164,8 @@ function rexec() {
   shift
 
   #connect "$host" && ssh -S "$sock" "$host" bash -lc "'$*'"
-  #connect "$host" && ssh -S "$sock" "$host" bash -ls <<< "${@@Q}"
-  connect "$host" && ssh -S "$sock" "$host" bash -ls < <(printf " %q" "$@")
+  connect "$host" && ssh -S "$sock" "$host" bash -ls <<< "${@@Q}"
+  #connect "$host" && ssh -S "$sock" "$host" bash -ls < <(printf " %q" "$@")
 }
 
 function sync() {
