@@ -241,7 +241,7 @@ function mksession() {
         echo "Slave session '$name' already exists" >&2
         return 0
       else
-        gui ssh ttyexec "$host" tmux new-session -ds "$name"
+        gui ssh rexec "$host" tmux new-session -ds "$name" zsh -l
       fi
 
       if ! rmux "$host" has-session -t "$name"; then
@@ -381,6 +381,13 @@ function copytk() {
   dmux run "copytk easycopy --search-nkeys 1"
 }
 
+function extract-pane() {
+  local pane="$(dmux display -p '#S:#I.#P')"
+  dmux run \
+    "bash -c \"tmux new-window -n grep bash -c '
+      tmux capture-pane -pNq -t $pane | extract'\""
+}
+
 function gethint() {
   function printscreen() {
     tmux send-keys -X cancel
@@ -435,6 +442,9 @@ function gethint() {
     local rounds=$((i+1))
     local round=0
 
+    local rscreen
+    readarray -t rscreen <<< "$text"
+
     while (( round < rounds )); do
       local screen
 
@@ -446,24 +456,15 @@ function gethint() {
 
         IFS=: read -r line col char <<< "${matches[$m]}"
 
-        line=$(( line - 1))
-        col=$(( col - 1 ))
-
-        shift[$line]=0
+        line=$((line - 1))
 
         hint="${hints[$m]:$round:1}"
 
         read -r hint < <(ansi --red "$hint")
 
-        altline="${screen[$line]:0:$((col - 4))}"
-
-        altline+="$hint"
-
-        altline+="${screen[$line]:$(( (col-3) + shift[$line] * 10 ))}"
-
-        shift[$line]=$(( shift[$line] + 1 ))
-
-        screen[$line]="$altline"
+        screen[$line]="$(cut -b 1-$((col-1)) <<< "${rscreen[$line]}")"
+        screen[$line]+="$hint"
+        screen[$line]+="$(cut -b ${col}- <<< "${rscreen[$line]}")"
       done
 
       printscreen
@@ -487,11 +488,6 @@ function hintcopy() {
   local pane="$(tmux display -p '#S:#I.#P')"
 
   tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
-}
-
-function extract-pane() {
-  local pane="$(dmux display -p '#S:#I.#P')"
-  dmux new-window -n grep bash -c "tmux capture-pane -pNq -t "$pane" | extract"
 }
 
 function forward_style() {
