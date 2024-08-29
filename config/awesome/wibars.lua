@@ -393,11 +393,10 @@ awful.screen.connect_for_each_screen(function(s)
         if command then
           s.menus[command] = iconwidget(icon, command, command)
           s.menus[command]:buttons(
-            addbutton(buttons, 1, 'menu xsession ' .. command))
+            addbutton(buttons, 1, 'menu loop ' .. command))
         end
     end
     pipe:close()
-
 
     s.topbar = awful.wibar {
         screen = s,

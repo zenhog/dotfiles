@@ -87,7 +87,7 @@ macro index,pager gt "<change-folder>=Trash<enter>" "go to trash"
 
 macro index,pager Q "<change-folder>sent<enter>"
 
-macro pager \Cb "<enter-command> set pipe_decode = yes<enter><pipe-message> fzfgrep<enter><enter-command> set pipe_decode = no<enter>"
+macro pager \Cb "<enter-command> set pipe_decode = yes<enter><pipe-message> extract GR_URLS<enter><enter-command> set pipe_decode = no<enter>"
 
 set sidebar_visible = false
 
