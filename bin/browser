@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+read -r CTTY < <(cat /sys/class/tty/tty0/active)
+read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+
+if [[ "$CTTY" == "$RTTY" ]]; then
+  gui run fg vpnfox
+  firefox -p private "$@"
+else
+  w3m "$@"
+fi

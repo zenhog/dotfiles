@@ -4,10 +4,6 @@ shopt -s nullglob
 
 read -r mime < <(file -bL --mime-type "$1")
 
-browser() {
-    [[ -z "$BROWSER" ]] && firefox -p main "$@" || $BROWSER "$@"
-}
-
 category="${mime%%/*}"
 kind="${mime##*/}"
 

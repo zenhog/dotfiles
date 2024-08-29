@@ -44,12 +44,13 @@ export PAGER=less
 export LESS="-rFX"
 export LESSQUIET=1
 
-export BROWSER=elinks
+export BROWSER=browser
 
-if [[ -n "$DISPLAY" ]]; then
-    export BROWSER="firefox -p main"
-    export BROWSER="qutebrowser --qt-arg name wanqute"
-fi
+#if [[ -n "$DISPLAY" ]]; then
+#    export BROWSER="firefox -p main"
+#    export BROWSER="qutebrowser --qt-arg name wanqute"
+#    export BROWSER="qutebrowser --qt-arg name wanqute"
+#fi
 
 if [[ -z "$PULSE_SERVER" ]]; then
     export PULSE_SERVER="/tmp/user/$USER/pulse/native"

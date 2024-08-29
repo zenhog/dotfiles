@@ -12,6 +12,10 @@ function label() {
   echo ${MENU_LOCATION}
 }
 
+function extract() {
+  view "$1" | command extract GR_PASSVAL 2>/dev/tty
+}
+
 function view() {
   local dir entries
 

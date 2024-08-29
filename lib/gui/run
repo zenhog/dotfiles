@@ -42,7 +42,7 @@ function run() {
   source "$HOME/.lib/app/$file"
 
   if silent declare -F runner; then
-    runner "${mode:-fg}" "$@"
+    runner "${@:3}"
   fi
 }
 
@@ -51,14 +51,14 @@ HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 function fg() {
   source "$HOME/.lib/app/$1"
-  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1"
+  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 function bg() {
   source "$HOME/.lib/app/$1"
-  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1"
+  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[close]=alt-d

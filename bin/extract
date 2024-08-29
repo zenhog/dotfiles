@@ -7,6 +7,7 @@ finish() {
 trap finish EXIT
 
 declare -A PATTERNS=()
+declare -A SUBMATCHES=()
 
 # GROUP: QUOTES
 PATTERN_GROUPS+=(GR_QUOTES)
@@ -44,7 +45,8 @@ PATTERNS[DOCKER]='sha256:([0-9a-f]{64})'
 # GROUP: PASSVAL
 PATTERN_GROUPS+=(GR_PASSVAL)
 GR_PASSVAL=(PASSVAL)
-PATTERNS[PASSVAL]='^.*➡[[:blank:]]+(?:.*)$'
+PATTERNS[PASSVAL]='^.*➡[[:blank:]]+(.*)$'
+SUBMATCHES[PASSVAL]=1
 
 # GROUP: EMAIL
 PATTERN_GROUPS+=(GR_EMAIL)
@@ -98,28 +100,23 @@ PATTERN_GROUPS+=(GR_ALL)
 GR_ALL=("${!PATTERNS[@]}")
 
 function match() {
-    local pattern="$1"
-    local submatch_id=0
+  local pattern="$1"
+  local submatch_id="${SUBMATCHES[$pattern]:-0}"
 
-    #[[ -n "$2" ]] && submatch_id="$2"
+  sortcmd=(sort -b -u -k3 -t$'\x01')
 
-    [[ "$pattern" == CUSTOM ]] && PATTERNS[CUSTOM]="$2"
+  [[ "$pattern" == LINE ]] && sortcmd=(cat)
 
-    sortcmd=(sort -b -u -k3 -t$'\x01')
-
-    [[ "$pattern" == LINE ]] && sortcmd=(cat)
-
-    while read -r line; do
-        IFS=$':\n' read -r index rest <<< "$line"
-        printf "%s\x01%s\x01%s\n" "$index" "$pattern" "$rest"
-    done < <(rg -o -r "\$$submatch_id" -P -n "${PATTERNS[$pattern]}" "$INPUT") |
-        column -t -s$'\x01' -o$'\x01' | "${sortcmd[@]}"
+  while read -r line; do
+    IFS=$':\n' read -r index rest <<< "$line"
+    printf "%s\x01%s\x01%s\n" "$index" "$pattern" "$rest"
+  done < <(rg -o -r "\$$submatch_id" -P -n "${PATTERNS[$pattern]}" "$INPUT") |
+    column -t -s$'\x01' -o$'\x01' | "${sortcmd[@]}"
 }
 
 export INPUT="$(mktemp --suffix -extract-$$)"
 
-#ansifilter > "$INPUT"
-cat > "$INPUT"
+sed 's/\x1b\[[0-9;]*[mGKF]//g' > "$INPUT"
 
 declare ARG="${1:-GR_ALL}"
 

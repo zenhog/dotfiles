@@ -8,9 +8,17 @@ HORIZONTAL=1
 
 export DB="$HOME/.db/bookmarks.db"
 
-# CATEGORY in all caps
-# Hashtags in #tag
-# #linux
+function newdb() {
+  sqlite3 "$DB" << EOF
+    CREATE TABLE bookmarks (
+      id integer PRIMARY KEY,
+      url text NOT NULL UNIQUE,
+      category text NOT NULL,
+      title text NOT NULL,
+      tags text NOT NULL,
+    )
+EOF
+}
 
 function view() {
   local id
@@ -21,11 +29,33 @@ function view() {
   #  sort -u | fmt --width="$FZF_PREVIEW_COLUMNS"
 }
 
+function printdb() {
+  local query="$1"
+  case "$query" in
+    titles)
+      sqlite3 "$DB" "SELECT title FROM bookmarks" | sort -u
+      ;;
+    categories)
+      sqlite3 "$DB" "SELECT category FROM bookmarks" | sort -u
+      ;;
+    tags)
+      sqlite3 "$DB" "SELECT tags FROM bookmarks" | sort -u
+      ;;
+    info)
+      local cats tags
+      readarray -t cats < <(printdb categories)
+      readarray -t tags < <(printdb tags)
+
+      ;;
+  esac
+}
 
 function list() {
   sqlite3 -separator "$iSEP" "$DB" \
     'select id, metadata from bookmarks' | sort -t "$iSEP" -k2 |
       column -t -s "$iSEP"
+
+  # format: CATEGORY title (#hashtags)
 }
 
 BINDS[open]=enter
@@ -67,10 +97,6 @@ function mod() {
   local id title
   read -r id title <<< "$1"
 
-  MENU_INPUT_PREVIEW="$(sqlite3 "$DB" "SELECT metadata FROM bookmarks" | sort)"
-
-  export MENU_INPUT_PREVIEW
-
   read -r title < <(input "$title")
 
   if [[ -n "$title" ]]; then
@@ -79,9 +105,17 @@ function mod() {
   fi
 }
 
+function parse() {
+  local cat tags title
+
+  read -r -a text <<< "$1"
+
+  cat="${text[0]}"
+
+}
+
 function add() {
   local url="$1"
-  #local title="$2"
 
   if check "$url"; then
     notify "'$url' already exists"
