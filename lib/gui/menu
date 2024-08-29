@@ -18,7 +18,7 @@ function list() {
 }
 
 BINDS[open]=enter
-CALLS[open]='become(menu {2})'
+CALLS[open]='become(menu main {2})'
 DESCS[open]='Open menu entry'
 function open() {
   local icon menu dummy
