@@ -1,3 +1,7 @@
 function search() {
-  menu main search list "$(pwd)"
+  menu popup search list "$(pwd)"
+
+  local dir="$(tmux show -sv @menu-search-cdir)"
+
+  [[ -n "$dir" ]] && cd "$dir" && zle accept-line
 }

@@ -119,12 +119,12 @@ function search() {
   cd "$FOLDER" && "${SEARCH_CMD[@]}" "$2"
 }
 
-BINDS[goto]=alt-m
+BINDS[goto]=ctrl-t
 HOOKS[goto]=accept
 DESCS[goto]='Cd to FOLDER in shell'
 function goto() {
   state_update
-  echo "$FOLDER"
+  set_opt cdir "$FOLDER"
 }
 
 BINDS[rotate_mode]=alt-y
