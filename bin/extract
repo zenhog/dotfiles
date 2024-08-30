@@ -13,16 +13,22 @@ declare -A SUBMATCHES=()
 PATTERN_GROUPS+=(GR_QUOTES)
 GR_QUOTES=(SINGLE_QUOTE DOUBLE_QUOTE BACK_QUOTE)
 PATTERNS[SINGLE_QUOTE]="'([^']+)'"
+SUBMATCHES[SINGLE_QUOTE]=1
 PATTERNS[DOUBLE_QUOTE]='"([^"]+)"'
+SUBMATCHES[DOUBLE_QUOTE]=1
 PATTERNS[BACK_QUOTE]='`([^`]+)`'
+SUBMATCHES[BACK_QUOTE]=1
 
 # GROUP: BRACKETS
 PATTERN_GROUPS+=(GR_BRACKETS)
 GR_BRACKETS=(PARENTHESIS ANGLE_BRACKET SQUARE_BRACKET CURLY_BRACKET)
 PATTERNS[PARENTHESIS]='(?:\(([^()]+)\))'
 PATTERNS[ANGLE_BRACKET]='<([^<>]+)>'
+SUBMATCHES[ANGLE_BRACKET]=1
 PATTERNS[SQUARE_BRACKET]='\[([^\[\]]+)\]'
+SUBMATCHES[SQUARE_BRACKET]=1
 PATTERNS[CURLY_BRACKET]='\{([^{}]+)\}'
+SUBMATCHES[CURLY_BRACKET]=1
 
 # SUPERGROUP: PAIRS
 PATTERN_GROUPS+=(GR_PAIRS)
@@ -125,6 +131,10 @@ declare -n PATS="$ARG"
 for gr in "${!PATTERN_GROUPS[@]}"; do
   if [[ "${PATTERN_GROUPS[$gr]}" == "$ARG" ]]; then
     NEXT_PATTERN="${PATTERN_GROUPS[$(( (gr+1) % ${#PATTERN_GROUPS[@]} ))]}"
+    PREV_PATTERN="${PATTERN_GROUPS[$(( (gr-1) % ${#PATTERN_GROUPS[@]} ))]}"
+    if (( PREV_PATTERN < 0 )); then
+      PREV_PATTERN+=$((PREV_PATTERN + ${#PATTERN_GROUPS[@]}))
+    fi
   fi
 done
 
@@ -140,14 +150,15 @@ for pat in "${PATS[@]}"; do
   match "$pat"
 done | column -t -s$'\x01' |
     fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
-        --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
-        --border \
-        --border-label="${LABELS[*]}" \
-        --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
-        --bind="tab:execute(open {3..})" \
-        --bind="ctrl-o:execute-silent(open {3..})+accept" \
-        --bind="ctrl-t:become(command extract $NEXT_PATTERN < $INPUT)" \
-        --prompt='extract> '
+      --border \
+      --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
+      --prompt='extract> '
+      --border-label="${LABELS[*]}" \
+      --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
+      --bind="tab:execute(open {3..})" \
+      --bind="ctrl-o:execute-silent(open {3..})+accept" \
+      --bind="ctrl-n:become(command extract $NEXT_PATTERN < $INPUT 2>/dev/tty)" \
+      --bind="ctrl-p:become(command extract $PREV_PATTERN < $INPUT 2>/dev/tty)" \
 
 # open
 # copy
