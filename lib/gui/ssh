@@ -68,7 +68,7 @@ function connect() {
 
   rm -f "$sock"
 
-  timeout 5 ssh -fMNS "$sock" "$host"
+  timeout 2 ssh -fMNS "$sock" "$host" || exit 1
 }
 
 function disconnect() {
@@ -126,7 +126,10 @@ function shell() {
   local sock="$(get sock "$1")"
   local name="${host##*/}"
 
-  connect "$host" && gui tmux window local "$(hostname)" "$name" ssh -S "$sock" -t "$host" zsh -il
+  if connected "$host"; then
+    gui tmux window local "$(hostname)" "$name" \
+      ssh -S "$sock" -t "$host" zsh -il
+  fi
 }
 
 function mount() {
@@ -152,7 +155,7 @@ function ttyexec() {
   shift
 
   #connect "$host" && ssh -S "$sock" -t "$host" bash -lc "'$*'"
-  if connect "$host"; then
+  if connected "$host"; then
     exec ssh -S "$sock" -t "$host" bash -lc "$(printf " %q" "$*")"
   fi
 }
@@ -164,8 +167,11 @@ function rexec() {
   shift
 
   #connect "$host" && ssh -S "$sock" "$host" bash -lc "'$*'"
-  connect "$host" && ssh -S "$sock" "$host" bash -ls <<< "${@@Q}"
   #connect "$host" && ssh -S "$sock" "$host" bash -ls < <(printf " %q" "$@")
+
+  if connected "$host"; then
+    ssh -S "$sock" "$host" bash -ls <<< "${@@Q}"
+  fi
 }
 
 function sync() {
@@ -180,11 +186,13 @@ function sync() {
 
   local temp="$(mktemp --dry-run)"
 
-  connect "$host" && ssh -S "$sock" "$host" bash -ls << EOF
+  if connected "$host"; then
+    ssh -S "$sock" "$host" bash -ls << EOF
     curl -sSL "$URL" -o "$temp"
     if bash "$temp" install master; then
       bash "$temp" pull master
     fi
     rm -f "$temp"
 EOF
+  fi
 }

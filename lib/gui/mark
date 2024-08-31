@@ -6,19 +6,40 @@ ICON=
 
 HORIZONTAL=1
 
-export DB="$HOME/.db/bookmarks.db"
+export DB="$HOME/.db/marks.db"
 
 function newdb() {
   sqlite3 "$DB" << EOF
-    CREATE TABLE bookmarks (
-      id integer PRIMARY KEY,
-      url text NOT NULL UNIQUE,
-      category text NOT NULL,
-      title text NOT NULL,
-      tags text NOT NULL,
-    )
+    CREATE TABLE IF NOT EXISTS bookmarks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      url TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      category_id INTEGER NOT NULL,
+      FOREIGN KEY (category_id) REFERENCES categories (id)
+    );
+    CREATE UNIQUE INDEX bookmarks_index ON bookmarks (title);
+    CREATE TABLE IF NOT EXISTS categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    );
+    CREATE UNIQUE INDEX categories_index ON categories (name);
+    CREATE TABLE IF NOT EXISTS tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    );
+    CREATE UNIQUE INDEX tags_index ON tags(name);
+    CREATE TABLE IF NOT EXISTS bookmark_tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bookmark_id INTEGER NOT NULL,
+      tag_id INTEGER NOT NULL,
+      FOREIGN KEY (bookmark_id) REFERENCES bookmarks (id),
+      FOREIGN KEY (tag_id) REFERENCES tags (id)
+    );
+    CREATE UNIQUE INDEX bookmark_tags_index ON bookmark_tags (bookmark_id);
+    CREATE UNIQUE INDEX tag_bookmarks_index ON bookmark_tags (tag_id);
 EOF
 }
+
 
 function view() {
   local id
@@ -97,7 +118,11 @@ function mod() {
   local id title
   read -r id title <<< "$1"
 
-  read -r title < <(input "$title")
+  echo -n "$title" | tmux load-buffer -b preview -
+
+  read -r title < <(input)
+
+  mute tmux delete-buffer -b preview
 
   if [[ -n "$title" ]]; then
     sqlite3 "$DB" \
