@@ -7,7 +7,7 @@ tty -s && stty -ixon
 
 ZLE_RPROMPT_INDENT=0
 
-#[[ -r "$HOME/.profile" ]] && source "$HOME/.profile"
+[[ -r "$HOME/.profile" ]] && source "$HOME/.profile"
 
 prompt_netgrp () {
   local cgroup="$(awk -F: '/net_cls/{print $3}' < /proc/$$/cgroup)"
@@ -62,7 +62,7 @@ autoload -U edit-command-line
 
 ZSH_DIR="$HOME/.config/zsh"
 
-fpath+=("${ZSHCONFIG_PATH}"/{functions,widgets})
+fpath+=("${ZSH_DIR}"/{functions,widgets})
 
 for d in "$ZSH_DIR"/*(/); do
     fpath+=("$d")

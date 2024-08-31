@@ -40,10 +40,11 @@ function newdb() {
 EOF
 }
 
-
 function view() {
   local id
+
   read -r -d ' ' id dummy <<< "$1"
+
   sqlite3 "$DB" "select url from bookmarks where id == $id"
   sepline
   #sqlite3 "$DB" "select metadata from bookmarks" | sed -r 's/[[:blank:][:punct:]]/\n/g' |

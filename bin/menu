@@ -120,7 +120,7 @@ function main() {
   COMMAND+=(--ansi)
   COMMAND+=(--cycle)
   COMMAND+=(--no-multi)
-  #COMMAND+=(--query "${*:2}")
+  COMMAND+=(--query "$*")
 
   if [[ -n "$PREVIEW_CMD" ]]; then
     COMMAND+=(--preview="$PREVIEW_CMD")
@@ -222,6 +222,13 @@ function dispatch() {
       ;;
     loop)
       socat STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(IFS=:; printf "%s\n" "$*")
+      ;;
+    auto)
+      if on_xsession; then
+        exec menu loop "$@"
+      else
+        exec menu shell "$@"
+      fi
       ;;
   esac
 }

@@ -9,7 +9,7 @@ NOWRAP=1
 export STORE="$HOME/.password-store"
 
 function label() {
-  echo ${MENU_LOCATION}
+  quiet tmux show-buffer -b label
 }
 
 function extract() {
@@ -176,7 +176,7 @@ HOOKS[add]=sclear
 DESCS[add]='Add directory entry'
 function add() {
   local dir
-  read -r dir < <(input "www/")
+  read -r dir < <(input query="www/")
   mkdir -p "${STORE}/${dir}"
 }
 
@@ -243,11 +243,11 @@ function open() {
 function new() {
   local domain="${1}" location="${2}" force="${3}" dir dom
 
-  export MENU_LOCATION="$location"
+  echo -n "$location" | tmux load-buffer -b label -
 
   read -r dir < <(dom "${domain}" || baseurl "${domain}")
 
-  [[ -d "${STORE}/${dir}" ]] && exec menu "$MODULE" "$dir"
+  [[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" "$dir"
 
   read -r dir < <(menu input "${dir}")
 

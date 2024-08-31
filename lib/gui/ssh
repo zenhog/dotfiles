@@ -126,7 +126,7 @@ function shell() {
   local sock="$(get sock "$1")"
   local name="${host##*/}"
 
-  if connected "$host"; then
+  if connect "$host"; then
     gui tmux window local "$(hostname)" "$name" \
       ssh -S "$sock" -t "$host" zsh -il
   fi
