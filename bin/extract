@@ -149,16 +149,16 @@ done
 for pat in "${PATS[@]}"; do
   match "$pat"
 done | column -t -s$'\x01' |
-    fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
-      --border \
-      --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
-      --prompt='extract> '
-      --border-label="${LABELS[*]}" \
-      --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
-      --bind="tab:execute(open {3..})" \
-      --bind="ctrl-o:execute-silent(open {3..})+accept" \
-      --bind="ctrl-n:become(command extract $NEXT_PATTERN < $INPUT 2>/dev/tty)" \
-      --bind="ctrl-p:become(command extract $PREV_PATTERN < $INPUT 2>/dev/tty)" \
+  fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
+    --border \
+    --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
+    --prompt='extract> '
+    --border-label="${LABELS[*]}" \
+    --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
+    --bind="tab:execute(open {3..})" \
+    --bind="ctrl-o:execute-silent(open {3..})+accept" \
+    --bind="ctrl-n:become(command extract $NEXT_PATTERN < $INPUT 2>/dev/tty)" \
+    --bind="ctrl-p:become(command extract $PREV_PATTERN < $INPUT 2>/dev/tty)" \
 
 # open
 # copy
