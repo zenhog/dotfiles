@@ -197,6 +197,7 @@ function del() {
 }
 
 BINDS[open]=tab
+HOOKS[open]=noclear
 DESCS[open]='Open entry'
 function open() {
   command open "$(path "$1")"

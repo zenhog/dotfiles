@@ -6,9 +6,10 @@ ICON=
 
 HORIZONTAL=1
 
+export DB="$HOME/.db/bookmarks.db"
 export DB="$HOME/.db/marks.db"
 
-function newdb() {
+function initdb() {
   sqlite3 "$DB" << EOF
     CREATE TABLE IF NOT EXISTS bookmarks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +39,67 @@ function newdb() {
     CREATE UNIQUE INDEX bookmark_tags_index ON bookmark_tags (bookmark_id);
     CREATE UNIQUE INDEX tag_bookmarks_index ON bookmark_tags (tag_id);
 EOF
+
+  local tags=(
+    linux bash windows programming c cpp ruby c++ web git github gitlab
+    kubernetes ansible devops cicd google cloud cli security hacking dev
+    python kernel shell zsh aws gke eks aks voidlinux freebsd openbsd bsd
+    vmware virtualization libvirt
+  )
+
+  local categories=(
+    WIKI POST FAQ SUB LIST QREF SVC NEWS
+    GUIDE HELP DOC GIST SITE BLOG REPO
+  )
+
+  insert categories "${categories[@]}"
+  insert tags "${tags[@]}"
 }
+
+function insert() {
+  local kind="$1"
+
+  shift
+
+  case "$kind" in
+    categories)
+      for c in "$@"; do
+        sqlite3 "$DB" "INSERT INTO categories (name) VALUES ('$c')"
+      done
+      ;;
+    tags)
+      for t in "$@"; do
+        sqlite3 "$DB" "INSERT INTO tags (name) VALUES ('$t')"
+      done
+      ;;
+    bookmark)
+      local title="$1" category="$2" cat_id
+      read -r cat_id < <(getid category "$category")
+      sqlite3 "$DB" "INSERT INTO tags (name) VALUES ('$t')"
+      ;;
+  esac
+}
+
+function getid() {
+  local kind="$1"
+  local name="$2"
+
+  shift 2
+
+  case "$kind" in
+    tag)
+      mute insert category "$name"
+      quiet sqlite3 "$DB" "SELECT id FROM tags WHERE name == '${name}'"
+      ;;
+    category)
+      mute insert tag "$name"
+      quiet sqlite "$DB" "SELECT id FROM categories WHERE name == '${name}'"
+      ;;
+    bookmarks)
+      ;;
+  esac
+}
+
 
 function view() {
   local id
@@ -74,7 +135,7 @@ function printdb() {
 
 function list() {
   sqlite3 -separator "$iSEP" "$DB" \
-    'select id, metadata from bookmarks' | sort -t "$iSEP" -k2 |
+    'select id, title from bookmarks' | sort -t "$iSEP" -k2 |
       column -t -s "$iSEP"
 
   # format: CATEGORY title (#hashtags)

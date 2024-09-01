@@ -56,7 +56,7 @@ SUBMATCHES[PASSVAL]=1
 
 # GROUP: EMAIL
 PATTERN_GROUPS+=(GR_EMAIL)
-GR_EMAIL=(DOTNAME)
+GR_EMAIL=(EMAIL)
 PATTERNS[EMAIL]='\S+@\S+\.\S+'
 
 # GROUP: DOTNAME
@@ -153,6 +153,7 @@ done | column -t -s$'\x01' |
     --border \
     --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
     --border-label="${LABELS[*]}" \
+    --preview-label="${PATS[*]}" \
     --bind="enter:execute(echo -n {3..} | tmux load-buffer -)+accept" \
     --bind="tab:execute(open {3..})" \
     --bind="ctrl-o:execute-silent(open {3..})+accept" \

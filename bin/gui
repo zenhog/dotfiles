@@ -21,7 +21,7 @@ declare -A -x CALLS=(
   [qclear]='execute-silent(%s {} {q})+reload-sync(list)+clear-query'
   [sclear]='execute(%s {} {q})+clear-screen+reload-sync(list)'
   [clear]='execute(%s {} {q})+clear-screen+reload-sync(list)+clear-query'
-  [unclear]='execute-silent(%s {} {q})+reload-sync(list)'
+  [noclear]='execute-silent(%s {} {q})+reload-sync(list)'
   [preview]='change-preview(%s {} {q})'
 )
 
