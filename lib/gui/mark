@@ -73,9 +73,22 @@ function insert() {
       done
       ;;
     bookmark)
-      local title="$1" category="$2" cat_id
+      local url="$1" title="$2" category="$3" cat_id bookmark_id
       read -r cat_id < <(getid category "$category")
-      sqlite3 "$DB" "INSERT INTO tags (name) VALUES ('$t')"
+      sqlite3 "$DB" "
+        INSERT INTO bookmarks (url, title, category_id)
+        VALUES ('$url', '$title', $cat_id)
+      "
+      shift 3
+      read -r bookmark_id < <(getid bookmark "$url")
+      for t in "$@"; do
+        local tag_id
+        read -r tag_id < <(getid tag "$t")
+        sqlite3 "$DB" "
+          INSERT INTO bookmark_tags (bookmark_id, tag_id)
+          VALUES ($bookmark_id, $tag_id)
+        "
+      done
       ;;
   esac
 }
@@ -88,18 +101,18 @@ function getid() {
 
   case "$kind" in
     tag)
-      mute insert category "$name"
+      mute insert tags "$name"
       quiet sqlite3 "$DB" "SELECT id FROM tags WHERE name == '${name}'"
       ;;
     category)
-      mute insert tag "$name"
-      quiet sqlite "$DB" "SELECT id FROM categories WHERE name == '${name}'"
+      insert categories "$name"
+      sqlite3 "$DB" "SELECT id FROM categories WHERE name == '${name}'"
       ;;
-    bookmarks)
+    bookmark)
+      sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '${name}'"
       ;;
   esac
 }
-
 
 function view() {
   local id
@@ -134,10 +147,16 @@ function printdb() {
 }
 
 function list() {
-  sqlite3 -separator "$iSEP" "$DB" \
-    'select id, title from bookmarks' | sort -t "$iSEP" -k2 |
-      column -t -s "$iSEP"
-
+  sqlite3 -separator "$iSEP" "$DB" "
+    SELECT bookmarks.id, categories.name, bookmarks.title, x.name FROM
+    bookmarks
+    INNER JOIN categories ON bookmarks.category_id = categories.id
+    INNER JOIN (
+      SELECT bookmark_tags.bookmark_id, tags.name FROM bookmark_tags
+      INNER JOIN tags ON bookmark_tags.tag_id = tags.id
+    ) x ON x.bookmark_id = bookmarks.id
+    ORDER_BY categories.name
+  " | column -t -s "$iSEP"
   # format: CATEGORY title (#hashtags)
 }
 
