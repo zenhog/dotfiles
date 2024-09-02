@@ -18,6 +18,7 @@ declare -A -x GDESCS
 declare -A -x HOOKS=([default]=qclear)
 declare -A -x CALLS=(
   [accept]='execute-silent(%s {} {q})+accept'
+  [acceptsync]='execute(%s {} {q})+accept'
   [qclear]='execute-silent(%s {} {q})+reload-sync(list)+clear-query'
   [sclear]='execute(%s {} {q})+clear-screen+reload-sync(list)'
   [clear]='execute(%s {} {q})+clear-screen+reload-sync(list)+clear-query'

@@ -42,15 +42,137 @@ function initdb() {
 EOF
 
   local tags=(
-    linux bash windows programming c cpp ruby c++ web git github gitlab
-    kubernetes ansible devops cicd google cloud cli security hacking dev
-    python kernel shell zsh aws gke eks aks voidlinux freebsd openbsd bsd
-    vmware virtualization libvirt
+    '##cloud'
+      '#google'
+      '#amazon'
+      '#azure'
+      '#alibaba'
+      '#digitalocean'
+
+    '##shells'
+      '#posixsh'
+      '#bash'
+      '#ksh'
+      '#zsh'
+      '#fish'
+
+    '##languages'
+      '#c'
+      '#cpp'
+      '#java'
+      '#ruby'
+      '#python'
+      '#lua'
+      '#rust'
+      '#go'
+      '#javascript'
+
+    '#databases'
+    '##sql'
+      '#mysql'
+      '#psql'
+      '#sqlite'
+    '##nosql'
+      '#redis'
+      '#mangodb'
+      '#couchdb'
+
+    '##linux'
+      '#voidlinux'
+      '#gentoo'
+      '#archlinux'
+      '#alpine'
+      '#ubuntu'
+      '#debian'
+      '#opensuse'
+      '#mint'
+      '#rhel'
+      '#redhat'
+    '##filesystems'
+      '#btrfs'
+      '#zfs'
+      '#xfs'
+      '#ext4'
+      '#ext3'
+      '#ntfs'
+    '##hardening'
+    '##security'
+    '##kernel'
+      'ulimits'
+      'cgroups'
+      '#selinux'
+      '#apparmor'
+      '#compsec'
+      '#grsec'
+    '##bsd'
+      '#openbsd'
+      '#netbsd'
+      '#freebsd'
+
+    '##networking' '#iproute'
+
+    '##devops'
+    '##sysadmin'
+
+    '##iac'
+      '#terraform'
+      '#terragrunt'
+      '#terracost'
+    '##containerization'
+      '#docker'
+      '#podman'
+      '#lxc'
+      '#lxd'
+      '#incus'
+    '##virtualization'
+      '#vmware'
+      '#kvm'
+      '#qemu'
+      '#libvirt'
+      '#virtualbox'
+    '##configuration'
+      '#ansible'
+      '#chef'
+      '#puppet'
+    '##CI/CD'
+      '#github-pages'
+      '#gitlab-ci'
+      '#cloud-build'
+      '#cloud-deploy'
+    '##orchestration'
+      '#kubernetes'
+      '#openshift'
+      '#helm'
+    '##continous-deployment'
+      '#argocd'
+    '##monitoring'
+      '#rancher'
+      '#hubble'
+    '##observability'
+      '#prometheus'
+      '#datadog'
+    '##log-aggregation'
+      '#logstash'
+    '##correlation'
+      '#elasticsearch'
+    '##visualization'
+    '##dashboarding'
+      '#grafana'
+      '#kibana'
+    '##tracing'
+      '#zipkin'
+      '#jaeger'
+      '#haystack'
+    '##service-mesh'
+      '#istio'
   )
 
   local categories=(
-    WIKI POST FAQ SUB LIST QREF SVC NEWS
-    GUIDE HELP DOC GIST SITE BLOG REPO
+    WIKI POST FAQ LIST
+    QUICKREF SERVICE NEWS GUIDE
+    HELP DOC PASTE SITE
+    BLOG REPO BOOK THREAD
+    FORUM TUTORIAL
   )
 
   insert categories "${categories[@]}"
@@ -118,16 +240,39 @@ function getid() {
 function view() {
   local id
 
-  read -r -d ' ' id dummy <<< "$1"
+  read -r id _ <<< "$1"
 
-  sqlite3 "$DB" "select url from bookmarks where id == $id"
-  sepline
-  #sqlite3 "$DB" "select metadata from bookmarks" | sed -r 's/[[:blank:][:punct:]]/\n/g' |
-  #  sort -u | fmt --width="$FZF_PREVIEW_COLUMNS"
+  (
+    printf "URL %s %s\n" "$iSEP" \
+      "$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
+
+    printf "TITLE %s %s\n" "$iSEP" \
+      "$(sqlite3 "$DB" "SELECT title FROM bookmarks WHERE id = $id")"
+
+    printf "CATEGORY %s %s\n" "$iSEP" \
+      "$(sqlite3 "$DB" "
+        SELECT name FROM bookmarks
+        INNER JOIN categories ON bookmarks.category_id = categories.id
+        WHERE bookmarks.id = $id
+      ")"
+
+    local tags
+    readarray -t tags < <(sqlite3 "$DB" "
+      SELECT name FROM bookmark_tags
+      INNER JOIN tags ON bookmark_tags.tag_id = tags.id
+      WHERE bookmark_tags.bookmark_id = $id
+    ")
+
+    printf "TAGS %s %s\n" "$iSEP" "${tags[*]}"
+  ) | column -t -s "$iSEP"
+
+  sepline " All tags and categories "
+  printdb info
 }
 
 function printdb() {
   local query="$1"
+  shift
   case "$query" in
     titles)
       sqlite3 "$DB" "SELECT title FROM bookmarks"
@@ -136,20 +281,37 @@ function printdb() {
       sqlite3 "$DB" "SELECT name FROM categories"
       ;;
     tags)
-      sqlite3 "$DB" "SELECT name FROM tags"
+      local tags=("$@")
+
+      if [[ -z "$tags" ]]; then
+        readarray -t tags < <(sqlite3 "$DB" "SELECT name FROM tags")
+      fi
+
+      for tag in "${tags[@]}"; do
+        if [[ "$tag" == \#\#* ]]; then
+          tag="$(ansi --blue "$tag")"
+        elif [[ "$tag" == \#* ]]; then
+          tag="$(ansi --green "$tag")"
+        fi
+        printf "%s\n" "$tag"
+      done
       ;;
     info)
-      echo "CATEGORY TITLE -- [TAG] ..."
-      [[ -n "$2" ]] && echo "URL: $2"
-      sepline
       local cats tags
+
       readarray -t cats < <(printdb categories)
       readarray -t tags < <(printdb tags)
-      paste \
-        <(printf "%s %s\n" "${cats[@]}" |column -t) \
-        <(printf "%s %s %s %s %s\n" "${tags[@]}" | column -t)
+
+      paste -d, \
+        <(printf "%s\n" "${cats[@]}") \
+        <(printf "%s %s %s %s %s %s\n" "${tags[@]}" | column -t) |
+          column -t -s, -o' | '
       ;;
   esac
+}
+
+function label() {
+  echo " FORMAT: CATEGORY TITLE -- [TAG] ... "
 }
 
 function list() {
@@ -168,13 +330,19 @@ function list() {
       INNER JOIN bookmark_tags ON tags.id = bookmark_tags.tag_id
       WHERE bookmark_tags.bookmark_id = ${id}
     ")
-    taglines+=("$(IFS=,; printf "%s\n" "${tags[*]}")")
+    if [[ -n "$tags" ]]; then
+      taglines+=("$(IFS=,; printf "%s\n" "${tags[*]}")")
+    else
+      taglines+=('')
+    fi
   done
 
-  paste \
-    <(printf "%s\n" "${lines[@]}") \
-    <(for _ in "${lines[@]}"; do printf "|\n"; done) \
-    <(printf "%s\n" "${taglines[@]}" | column -t -s,)
+  if [[ -n "$lines" ]]; then
+    paste -d'|' \
+      <(printf "%s\n" "${lines[@]}") \
+      <(printf "%s\n" "${taglines[@]}" | column -Lt -s,) |
+        column -t -s'|' -o ' | '
+  fi
 }
 
 BINDS[open]=enter
@@ -214,7 +382,7 @@ HOOKS[mod]=sclear
 DESCS[mod]='Rename bookmark'
 function mod() {
   local id title
-  read -r id title <<< "$1"
+  read -r id _ <<< "$1"
 
   echo -n "$title" | tmux load-buffer -b preview -
 
@@ -228,36 +396,6 @@ function mod() {
   fi
 }
 
-function parse() {
-  local cat tags title
-
-  read -r -a text <<< "$1"
-
-  cat="${text[0]}"
-
-}
-
-function parse() {
-  local lhs rhs side=lhs type="$1"
-
-  shift
-
-  for item in "$@"; do
-    if [[ "$item" == "--" ]]; then
-      side=rhs
-      continue
-    fi
-
-    [[ "$side" == lhs ]] && lhs+=("$item")
-    [[ "$side" == rhs ]] && rhs+=("$item")
-  done
-
-  case "$type" in
-    lhs) echo "${lhs[@]}" ;;
-    rhs) echo "${rhs[@]}" ;;
-  esac
-}
-
 function add() {
   local url="$1"
 
@@ -268,29 +406,24 @@ function add() {
 
   printdb info "$url" | tmux load-buffer -b preview -
 
-  local data="$(menu input)"
+  local data
+  read -r -a data < <(menu input)
 
   [[ -z "$data" ]] && return
 
-  echo "data: $data" >> /tmp/t
-  read -a $data <<< $data
-  echo "data: ${data[0]}" >> /tmp/t
-
   local lhs rhs cat title
 
-  read -a lhs < <(parse $data)
-  read -a rhs < <(parse $data)
+  read -a lhs < <(parse lhs "${data[@]}")
+  read -a rhs < <(parse rhs "${data[@]}")
 
-  echo bookmark "$url" "${lhs[*]:1}" "$lhs" "${rhs[@]}" >> /tmp/t
   insert bookmark "$url" "${lhs[*]:1}" "$lhs" "${rhs[@]}"
 
-  if check "$1"; then
+  if check "$url"; then
     notify "Added '$url'"
   else
     notify "Failed to add '$url'"
   fi
 }
-
 
 function del() {
   local url="$1"

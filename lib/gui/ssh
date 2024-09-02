@@ -100,7 +100,7 @@ function cancel() {
 }
 
 BINDS[mux]=enter
-HOOKS[mux]=accept
+HOOKS[mux]=acceptsync
 DESCS[mux]='Attach a tmux session'
 function mux() {
   local host="$(get host "$1")"
@@ -119,7 +119,7 @@ function attach() {
 }
 
 BINDS[shell]='alt-enter'
-HOOKS[shell]=accept
+HOOKS[shell]=acceptsync
 DESCS[shell]='Open a new shell window in tmux'
 function shell() {
   local host="$(get host "$1")"

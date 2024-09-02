@@ -189,27 +189,6 @@ function cmdfmt() {
   esac
 }
 
-function parse() {
-  local lhs rhs side=lhs type="$1"
-
-  shift
-
-  for item in "$@"; do
-    if [[ "$item" == "--" ]]; then
-      side=rhs
-      continue
-    fi
-
-    [[ "$side" == lhs ]] && lhs+=("$item")
-    [[ "$side" == rhs ]] && rhs+=("$item")
-  done
-
-  case "$type" in
-    lhs) echo "${lhs[@]}" ;;
-    rhs) echo "${rhs[@]}" ;;
-  esac
-}
-
 function getattributes() {
   local lhs rhs conds props output
 
