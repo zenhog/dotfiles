@@ -18,26 +18,27 @@ function initdb() {
       category_id INTEGER NOT NULL,
       FOREIGN KEY (category_id) REFERENCES categories (id)
     );
-    CREATE UNIQUE INDEX bookmarks_index ON bookmarks (title);
+    CREATE INDEX bookmarks_index ON bookmarks (title);
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE
     );
-    CREATE UNIQUE INDEX categories_index ON categories (name);
+    CREATE INDEX categories_index ON categories (name);
     CREATE TABLE IF NOT EXISTS tags (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE
     );
-    CREATE UNIQUE INDEX tags_index ON tags(name);
+    CREATE INDEX tags_index ON tags(name);
     CREATE TABLE IF NOT EXISTS bookmark_tags (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bookmark_id INTEGER NOT NULL,
       tag_id INTEGER NOT NULL,
       FOREIGN KEY (bookmark_id) REFERENCES bookmarks (id),
-      FOREIGN KEY (tag_id) REFERENCES tags (id)
+      FOREIGN KEY (tag_id) REFERENCES tags (id),
+      UNIQUE(bookmark_id, tag_id)
     );
-    CREATE UNIQUE INDEX bookmark_tags_index ON bookmark_tags (bookmark_id);
-    CREATE UNIQUE INDEX tag_bookmarks_index ON bookmark_tags (tag_id);
+    CREATE INDEX bookmark_tags_index ON bookmark_tags (bookmark_id);
+    CREATE INDEX tag_bookmarks_index ON bookmark_tags (tag_id);
 EOF
 
   local tags=(
@@ -129,35 +130,51 @@ function printdb() {
   local query="$1"
   case "$query" in
     titles)
-      sqlite3 "$DB" "SELECT title FROM bookmarks" | sort -u
+      sqlite3 "$DB" "SELECT title FROM bookmarks"
       ;;
     categories)
-      sqlite3 "$DB" "SELECT category FROM bookmarks" | sort -u
+      sqlite3 "$DB" "SELECT name FROM categories"
       ;;
     tags)
-      sqlite3 "$DB" "SELECT tags FROM bookmarks" | sort -u
+      sqlite3 "$DB" "SELECT name FROM tags"
       ;;
     info)
+      echo "CATEGORY TITLE -- [TAG] ..."
+      [[ -n "$2" ]] && echo "URL: $2"
+      sepline
       local cats tags
       readarray -t cats < <(printdb categories)
       readarray -t tags < <(printdb tags)
-
+      paste \
+        <(printf "%s %s\n" "${cats[@]}" |column -t) \
+        <(printf "%s %s %s %s %s\n" "${tags[@]}" | column -t)
       ;;
   esac
 }
 
 function list() {
-  sqlite3 -separator "$iSEP" "$DB" "
-    SELECT bookmarks.id, categories.name, bookmarks.title, x.name FROM
-    bookmarks
+  local lines taglines
+
+  readarray -t lines < <(sqlite3 -separator "$iSEP" "$DB" "
+    SELECT bookmarks.id, categories.name, bookmarks.title FROM bookmarks
     INNER JOIN categories ON bookmarks.category_id = categories.id
-    INNER JOIN (
-      SELECT bookmark_tags.bookmark_id, tags.name FROM bookmark_tags
-      INNER JOIN tags ON bookmark_tags.tag_id = tags.id
-    ) x ON x.bookmark_id = bookmarks.id
-    ORDER_BY categories.name
-  " | column -t -s "$iSEP"
-  # format: CATEGORY title (#hashtags)
+  " | column -t -s "$iSEP")
+
+  for line in "${lines[@]}"; do
+    local id tags
+    read -r id _ <<< "$line"
+    readarray -t tags < <(sqlite3 "$DB" "
+      SELECT tags.name FROM tags
+      INNER JOIN bookmark_tags ON tags.id = bookmark_tags.tag_id
+      WHERE bookmark_tags.bookmark_id = ${id}
+    ")
+    taglines+=("$(IFS=,; printf "%s\n" "${tags[*]}")")
+  done
+
+  paste \
+    <(printf "%s\n" "${lines[@]}") \
+    <(for _ in "${lines[@]}"; do printf "|\n"; done) \
+    <(printf "%s\n" "${taglines[@]}" | column -t -s,)
 }
 
 BINDS[open]=enter
@@ -166,7 +183,7 @@ DESCS[open]='Open bookmark'
 function open() {
   local id url
   read -r id _ <<< "$1"
-  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
   command open "$url"
 }
 
@@ -175,7 +192,7 @@ DESCS[copy]='Clipboard bookmark URL'
 function copy() {
   local id url
   read -r id _ <<< "$1"
-  read -r url < <(sqlite3 "$DB" "select url from bookmarks where id == $id")
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
   tmux load-buffer - <<< "$url"
 }
 
@@ -220,20 +237,52 @@ function parse() {
 
 }
 
+function parse() {
+  local lhs rhs side=lhs type="$1"
+
+  shift
+
+  for item in "$@"; do
+    if [[ "$item" == "--" ]]; then
+      side=rhs
+      continue
+    fi
+
+    [[ "$side" == lhs ]] && lhs+=("$item")
+    [[ "$side" == rhs ]] && rhs+=("$item")
+  done
+
+  case "$type" in
+    lhs) echo "${lhs[@]}" ;;
+    rhs) echo "${rhs[@]}" ;;
+  esac
+}
+
 function add() {
   local url="$1"
 
   if check "$url"; then
     notify "'$url' already exists"
-    exit 1
+    return 1
   fi
 
-  sqlite3 "$DB" "SELECT metadata FROM bookmarks" | tmux load-buffer -b preview -
+  printdb info "$url" | tmux load-buffer -b preview -
 
-  local title="$(menu input)"
+  local data="$(menu input)"
 
-  [[ -n "$title" ]] && sqlite3 "$DB" \
-    "INSERT INTO bookmarks (url, metadata) values ('$url', '$title')"
+  [[ -z "$data" ]] && return
+
+  echo "data: $data" >> /tmp/t
+  read -a $data <<< $data
+  echo "data: ${data[0]}" >> /tmp/t
+
+  local lhs rhs cat title
+
+  read -a lhs < <(parse $data)
+  read -a rhs < <(parse $data)
+
+  echo bookmark "$url" "${lhs[*]:1}" "$lhs" "${rhs[@]}" >> /tmp/t
+  insert bookmark "$url" "${lhs[*]:1}" "$lhs" "${rhs[@]}"
 
   if check "$1"; then
     notify "Added '$url'"
