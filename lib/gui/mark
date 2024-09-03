@@ -355,6 +355,28 @@ function open() {
   command open "$url"
 }
 
+BINDS[_open]=alt-enter
+HOOKS[_open]=accept
+DESCS[_open]='Open bookmark with vpnfox'
+function _open() {
+  local id url
+  read -r id _ <<< "$1"
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+  command browser vpn 1 "$url"
+}
+
+BINDS[bopen]=tab
+DESCS[bopen]='Open bookmark in the background with vpnfox'
+function bopen() {
+  open "$@"
+}
+
+BINDS[_bopen]=alt-tab
+DESCS[_bopen]='Open bookmark in the background with vpnfox'
+function _bopen() {
+  bopen "$@"
+}
+
 BINDS[copy]=alt-c
 DESCS[copy]='Clipboard bookmark URL'
 function copy() {

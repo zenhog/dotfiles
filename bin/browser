@@ -3,9 +3,30 @@
 read -r CTTY < <(cat /sys/class/tty/tty0/active)
 read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
 
+kind="${1:-wanqute}"
+
+shift
+
 if [[ "$CTTY" == "$RTTY" ]]; then
-  gui run fg vpnfox
-  firefox -p private "$@"
+  case "$kind" in
+    wanqute)
+      gui run fg wanqute
+      qutebrowser --qt-arg name wanqute "$@"
+      ;;
+    vpnqute)
+      gui run fg vpnqute
+      qutebrowser --qt-arg name vpnqute "$@"
+      ;;
+    wanfox)
+      gui run fg wanfox
+      firefox -p main "$@"
+      ;;
+    vpnfox)
+      gui run fg vpnfox "$netcg"
+      firefox -p private "$@"
+      ;;
+  esac
+
 else
   w3m "$@"
 fi
