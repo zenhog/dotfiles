@@ -365,14 +365,14 @@ function _open() {
   command browser vpn 1 "$url"
 }
 
-BINDS[bopen]=tab
-DESCS[bopen]='Open bookmark in the background with vpnfox'
-function bopen() {
+BINDS[bgopen]=tab
+DESCS[bgopen]='Open bookmark in the background with vpnfox'
+function bgopen() {
   open "$@"
 }
 
-BINDS[_bopen]=alt-tab
-DESCS[_bopen]='Open bookmark in the background with vpnfox'
+BINDS[_bgopen]=shift-tab
+DESCS[_bgopen]='Open bookmark in the background with vpnfox'
 function _bopen() {
   bopen "$@"
 }

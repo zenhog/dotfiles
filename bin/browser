@@ -10,6 +10,8 @@ shift
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
     wanqute)
+      gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+      gui awm runonce fg profile=wanqute -- qutebrowser --qt-arg name wanqute "$@"
       gui run fg wanqute
       qutebrowser --qt-arg name wanqute "$@"
       ;;
@@ -26,7 +28,6 @@ if [[ "$CTTY" == "$RTTY" ]]; then
       firefox -p private "$@"
       ;;
   esac
-
 else
   w3m "$@"
 fi
