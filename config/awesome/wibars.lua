@@ -516,7 +516,7 @@ awful.screen.connect_for_each_screen(function(s)
             {
                 layout = wibox.layout.fixed.vertical,
                 spacing = 1,
-                block(M.group(s.menus.screenshot)),
+                --block(M.group(s.menus.screenshot)),
                 block(M.group(s.menus.cheat)),
                 block(M.group(s.menus.vocab)),
                 block(M.group(s.menus.clip)),
@@ -524,7 +524,7 @@ awful.screen.connect_for_each_screen(function(s)
                 block(M.group(s.menus.mark)),
                 block(M.group(s.menus.contact)),
                 block(M.group(s.menus.settings)),
-                block(M.group(s.menus.power)),
+                --block(M.group(s.menus.power)),
             },
         },
         left = 1,
