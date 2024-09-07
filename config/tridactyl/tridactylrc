@@ -27,8 +27,8 @@ unbind --mode=browser <CS-6>
 
 bind --mode=browser <A-w> escapehatch
 bind --mode=browser <A-o> jsb escapehatch(); fillcmdline('open')
-bind --mode=browser <A-.> tabnext
 bind --mode=browser <A-,> tabprev
+bind --mode=browser <A-.> tabnext
 bind --mode=browser <A-q> tabclose
 bind --mode=browser <A-t> jsb escapehatch(); fillcmdline('tabopen')
 bind --mode=browser <A-u> undo

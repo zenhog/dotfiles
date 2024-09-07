@@ -11,11 +11,8 @@ export HOSTDIR="$HOME/.ssh/hosts"
 export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 
 function view() {
-  local hostfile
-  read -r _ hostfile < <(ansifilter <<< "$1")
-  echo "$HOSTDIR/$hostfile"
-  sepline
-  preview "$HOSTDIR/$hostfile"
+  local host="$(ansifilter "$1")"
+  ssh -G "$host" 2>/dev/null
 }
 
 function list() {
