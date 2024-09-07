@@ -28,8 +28,8 @@ function list() {
     if connected "$alias"; then
       alias="$(ansi --green "$alias")"
     fi
-    printf "%s%s%s\n" "$alias" "$iSEP" "$hostfile"
-  done | sort | column -t -s "$iSEP"
+    printf "%s\n" "$alias"
+  done | sort
 }
 
 function get() {
@@ -107,7 +107,7 @@ DESCS[mux]='Attach a tmux session'
 function mux() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
-  local name="${host##*/}"
+  local name="${host%%.*}"
 
   attach fg "$name" "$host"
 }
@@ -126,7 +126,7 @@ DESCS[shell]='Open a new shell window in tmux'
 function shell() {
   local host="$(get host "$1")"
   local sock="$(get sock "$1")"
-  local name="${host##*/}"
+  local name="${host%%.*}"
 
   if connect "$host"; then
     gui tmux window local "$(hostname)" "$name" \
