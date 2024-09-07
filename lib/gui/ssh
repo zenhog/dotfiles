@@ -23,7 +23,7 @@ function list() {
   readarray -t hostfiles < <(cd "$HOSTDIR" && find * -type f)
 
   for hostfile in "${hostfiles[@]}"; do
-    local alias
+    local alias state
     read -r _ alias < <(grep '^Host ' "$HOSTDIR/$hostfile")
     if connected "$alias"; then
       alias="$(ansi --green "$alias")"
