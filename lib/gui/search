@@ -14,11 +14,6 @@ function init() {
   set_opt mode-mod 3
 }
 
-function filter() {
-  # filters out unprintable and multicell chars like nerdfont icons
-  perl -pe 's|^[^[:graph:]].*?[ ]||p' <<< "$1"
-}
-
 function folder_save() {
   set_opt pwd "$(pwd)"
 }
@@ -28,7 +23,7 @@ function folder_restore() {
 }
 
 function path() {
-  local path="$(filter "$1")"
+  local path="$(filter all "$1")"
 
   folder_restore
 
@@ -146,7 +141,7 @@ HOOKS[rename]=sclear
 DESCS[rename]='Prompt rename entry'
 function rename() {
   folder_restore
-  local entry="$(filter "$1")"
+  local entry="$1"
 
   export MENU_INPUT_PREVIEW="$entry"
 

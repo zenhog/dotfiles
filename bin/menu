@@ -36,12 +36,12 @@ BINDS[extract]='alt-/'
 HOOKS[extract]=sclear
 GDESCS[extract]='Fzfgrep preview'
 function extract() {
-  view "$1" | command extract 2>/dev/tty
+  preview "$1" | command extract 2>/dev/tty
 }
 
 BINDS[change]=change
 HOOKS[change]=change
-CALLS[change]='change-preview(view {})'
+CALLS[change]='change-preview(preview {})'
 
 BINDS[paste]=alt-b
 HOOKS[paste]=paste
@@ -125,20 +125,29 @@ function main() {
   if [[ -n "$PREVIEW_CMD" ]]; then
     COMMAND+=(--preview="$PREVIEW_CMD")
   elif silent declare -F view; then
-    COMMAND+=(--preview="view {}")
+    COMMAND+=(--preview="preview {}")
   fi
 
   if silent declare -F label; then
-    COMMAND+=(--bind 'load:transform-border-label:label {}')
-    COMMAND+=(--bind 'focus:change-preview(view {})+transform-border-label:label {}')
+    COMMAND+=(--bind 'load:transform-border-label:do_call label {}')
+    COMMAND+=(
+      --bind
+      'focus:change-preview(preview {})+transform-border-label:label {}'
+    )
   fi
 
   WINDOW=right,border-rounded
-  EXTRA='--bind=ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
+  EXTRA=(
+    --bind
+    'ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
+  )
 
   if [[ -n "$HORIZONTAL" ]]; then
     WINDOW=bottom,border-rounded
-    EXTRA='--bind=ctrl-x:change-preview-window(right,border-rounded|bottom,border-rounded)'
+    EXTRA=(
+      --bind
+      'ctrl-x:change-preview-window(right,border-rounded|bottom,border-rounded)'
+    )
   else
     case "$POSITION" in
       TOP)
@@ -175,7 +184,7 @@ function main() {
     COMMAND+=("$cmd")
   done
 
-  [[ -n "$EXTRA" ]] && COMMAND+=("$EXTRA")
+  [[ -n "$EXTRA" ]] && COMMAND+=("${EXTRA[@]}")
 
   mute declare -F init && init
 

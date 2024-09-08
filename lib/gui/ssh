@@ -11,44 +11,35 @@ export HOSTDIR="$HOME/.ssh/hosts"
 export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
 
 function view() {
-  local host="$(ansifilter "$1")"
-  ssh -G "$host" 2>/dev/null
+  ssh -G "$1"
 }
 
 function list() {
-  local hostfiles
-  readarray -t hostfiles < <(cd "$HOSTDIR" && find * -type f)
+  local hosts
 
-  for hostfile in "${hostfiles[@]}"; do
-    local alias state
-    read -r _ alias < <(grep '^Host ' "$HOSTDIR/$hostfile")
-    if connected "$alias"; then
-      alias="$(ansi --green "$alias")"
+  readarray -t hosts < <(find "$HOSTDIR" -type f -exec grep '^Host ' {} \;)
+
+  for host in "${hosts[@]}"; do
+    read -r _ host <<< "$host"
+
+    if connected "$host"; then
+      host="$(ansi --green "$host")"
     fi
-    printf "%s\n" "$alias"
+
+    printf "%s\n" "$host"
   done | sort
 }
 
-function get() {
-  local kind="$1" namespace host sock
-
-  IFS=$'/\n' read -r host _ < <(ansifilter <<< "$2")
-
-  [[ "$kind" == host ]] && echo "$host"
-  [[ "$kind" == sock ]] && echo "$SOCKDIR/$host.S"
-}
-
 function connected() {
-  local host="$(get host "$1")"
-  local sock="$(get sock "$1")"
+  local host="$1"
 
-  mute ssh -S "$sock" -O check "$host"
+  ssh -S "$host.S" -O check "$host"
 }
 
 BINDS[toggle]=tab
 DESCS[toggle]='Toggle ssh master connection'
 function toggle() {
-  local host="$(get host "$1")"
+  local host="$1"
 
   if connected "$host"; then
     disconnect "$1"

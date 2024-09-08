@@ -139,6 +139,7 @@ function reloc() {
 }
 
 BINDS[cleanup]=alt-c
+HOOKS[cleanup]=noclear
 DESCS[cleanup]='Clean old password entries'
 function cleanup() {
   local dir="$1"

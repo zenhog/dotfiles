@@ -17,14 +17,49 @@ declare -A -x DESCS
 declare -A -x GDESCS
 declare -A -x HOOKS=([default]=qclear)
 declare -A -x CALLS=(
-  [accept]='execute-silent(%s {} {q})+accept'
-  [acceptsync]='execute(%s {} {q})+accept'
-  [qclear]='execute-silent(%s {} {q})+reload-sync(list)+clear-query'
-  [sclear]='execute(%s {} {q})+clear-screen+reload-sync(list)'
-  [clear]='execute(%s {} {q})+clear-screen+reload-sync(list)+clear-query'
-  [noclear]='execute-silent(%s {} {q})+reload-sync(list)'
-  [preview]='change-preview(%s {} {q})'
+  [accept]='execute-silent(do_call %s {} {q})+accept'
+  [acceptsync]='execute(do_call %s {} {q})+accept'
+  [qclear]='execute-silent(do_call %s {} {q})+reload-sync(list)+clear-query'
+  [sclear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)'
+  [clear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)+clear-query'
+  [noclear]='execute-silent(do_call %s {} {q})+reload-sync(list)'
+  [preview]='change-preview(do_call %s {} {q})'
 )
+
+function do_call() {
+  local func="$1"
+  local entry="$(filter all "$2")"
+  local query="$(filter all "$3")"
+
+  "$func" "$entry" "$query"
+}
+
+function preview() {
+  mute declare -F view && do_call view "$1" "$2"
+}
+
+function filter() {
+  local kind="$1" input="$2"
+
+  case "$kind" in
+    unprintable)
+      # filters out unprintable and multicell chars like nerdfont icons
+      perl -pe 's|^[^[:graph:]].*?[ ]||p' <<< "$input"
+      ;;
+    ansicolors)
+      # filters out ansi color sequences and more?
+      sed 's/\x1b\[[0-9;]*[mGKHF]//g' <<< "$input"
+      ;;
+    all)
+      local out="$input"
+
+      out="$(filter unprintable "$out")"
+      out="$(filter ansicolors "$out")"
+
+      echo "$out"
+      ;;
+  esac
+}
 
 function notify() {
   notify-send -t 5000 -a menu "$MODULE" "$@"
