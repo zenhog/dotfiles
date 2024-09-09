@@ -3,30 +3,70 @@
 read -r CTTY < <(cat /sys/class/tty/tty0/active)
 read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
 
-kind="${1:-wanqute}"
+kind="$1"
+type="$2"
 
-shift
+shift 2
 
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
-    wanqute)
-      gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
-      gui awm runonce fg profile=wanqute -- \
-        qutebrowser --qt-arg name wanqute "$@"
-      gui run fg wanqute
-      qutebrowser --qt-arg name wanqute "$@"
+    qutebrowser)
+      case "$type" in
+        wan)
+          gui awm runonce fg profile=wanqute -- qutebrower --qt-arg name wanqute
+
+          if [[ $# -gt 0 ]]; then
+            qutebrowser "$@"
+          fi
+          ;;
+        vpn)
+          vpn="$1"
+          shift
+
+          tmpdir="/tmp/qutebrowser/instances/$vpn/config"
+
+          mkdir -p "$tmpdir"
+
+          readarray -t files < <(find "$HOME/.config/quteconfig" \
+
+          for f in $HOME/.config/quteconfig/*; do
+            ln -svf "$f" "$tmpdir"
+          done
+
+          gui awm runonce fg profile="${vpn}qute" -- \
+            qutebrower --qt-arg name "${vpn}qute" -B "$tmpdir"
+
+          if [[ $# -gt 0 ]]; then
+            qutebrowser -B "$tmpdir" "$@"
+          fi
+          ;;
+      esac
       ;;
-    vpnqute)
-      gui run fg vpnqute
-      qutebrowser --qt-arg name vpnqute "$@"
+    firefox)
+      case "$type" in
+        wan)
+          gui awm runonce fg profile=wanfox -- \
+            firefox -p main --new-instance --class wanfox
+
+          if [[ $# -gt 0 ]]; then
+            firefox -p main "${@:2}"
+          fi
+          ;;
+        vpn)
+          vpn="$1"
+
+          gui awm runonce fg profile="${vpn}fox" -- \
+            cgexec -g net_cls:"$vpn" \
+              firefox -p "${vpn}fox" --new-instance --class "${vpn}fox"
+
+          if [[ $# -gt 0 ]]; then
+            firefox -p "${vpn}fox" "${@:2}"
+          fi
+          ;;
+      esac
       ;;
-    wanfox)
-      gui run fg wanfox
-      firefox -p main "$@"
-      ;;
-    vpnfox)
-      gui run fg vpnfox "$netcg"
-      firefox -p private "$@"
+    *)
+      browser qutebrowser wan "$@"
       ;;
   esac
 else
