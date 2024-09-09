@@ -36,21 +36,9 @@ function connected() {
   ssh -S "$host.S" -O check "$host"
 }
 
-BINDS[toggle]=tab
-DESCS[toggle]='Toggle ssh master connection'
-function toggle() {
-  local host="$1"
-
-  if connected "$host"; then
-    disconnect "$1"
-  else
-    connect "$1"
-  fi
-}
-
 function connect() {
-  local host="$(get host "$1")"
-  local sock="$(get sock "$1")"
+  local host="$1"
+  local sock="$host.S"
 
   if [[ -n "$SSH_CONNECTION" ]] || connected "$host"; then
     return
@@ -62,12 +50,24 @@ function connect() {
 }
 
 function disconnect() {
-  local host="$(get host "$1")"
-  local sock="$(get sock "$1")"
+  local host="$1"
+  local sock="$host.S"
 
   if connected "$host"; then
     ssh -S "$sock" -O cancel "$host"
     ssh -S "$sock" -O exit   "$host"
+  fi
+}
+
+BINDS[toggle]=tab
+DESCS[toggle]='Toggle ssh master connection'
+function toggle() {
+  local host="$1"
+
+  if connected "$host"; then
+    disconnect "$1"
+  else
+    connect "$1"
   fi
 }
 
