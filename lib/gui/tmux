@@ -133,7 +133,7 @@ function view() {
 
   mode="$(get_opt mode)"
 
-  read -r _ id _ <<< "$1"
+  read -r id _ _ <<< "$1"
 
   case "$mode" in
     sessions)

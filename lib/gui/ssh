@@ -33,25 +33,25 @@ function list() {
 function connected() {
   local host="$1"
 
-  ssh -S "$host.S" -O check "$host"
+  mute ssh -S "$SOCKDIR/$host.S" -O check "$host"
 }
 
 function connect() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   if [[ -n "$SSH_CONNECTION" ]] || connected "$host"; then
     return
   fi
 
-  rm -f "$sock"
+  rm -f "$SOCKDIR/$sock"
 
   timeout 2 ssh -fMNS "$sock" "$host"
 }
 
 function disconnect() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$HOSTDIR/$host.S"
 
   if connected "$host"; then
     ssh -S "$sock" -O cancel "$host"
@@ -73,7 +73,7 @@ function toggle() {
 
 function revport() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   if connected "$host"; then
     ssh -S "$sock" -O forward -R "localhost:0:$MUXSOCK" "$host"
@@ -82,7 +82,7 @@ function revport() {
 
 function cancel() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   if connected "$host"; then
     ssh -S "$sock" -O cancel "$host"
@@ -94,7 +94,7 @@ HOOKS[mux]=acceptsync
 DESCS[mux]='Attach a tmux session'
 function mux() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
   local name="${host%%.*}"
 
   attach fg "$name" "$host"
@@ -105,7 +105,7 @@ function attach() {
   local name="$2"
   local host="$3"
 
-  gui tmux mod "$mode" attach remote "$name" "$host"
+  verbose gui tmux mod "$mode" attach remote "$name" "$host"
 }
 
 BINDS[shell]='alt-enter'
@@ -113,7 +113,7 @@ HOOKS[shell]=acceptsync
 DESCS[shell]='Open a new shell window in tmux'
 function shell() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
   local name="${host%%.*}"
 
   if connect "$host"; then
@@ -140,7 +140,7 @@ function mount() {
 
 function ttyexec() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   shift
 
@@ -152,7 +152,7 @@ function ttyexec() {
 
 function rexec() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   shift
 
@@ -166,7 +166,7 @@ function rexec() {
 
 function sync() {
   local host="$1"
-  local sock="$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   local cmd
 

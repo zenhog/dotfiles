@@ -104,13 +104,14 @@ function main() {
 
   while read -r _ _ func _; do
     export -f "$func"
-  done < <(declare -F) || exit 1
+  done < <(declare -F)
 
   read -r SBINDS < <(declare -p BINDS); export SBINDS
   read -r SHOOKS < <(declare -p HOOKS); export SHOOKS
   read -r SCALLS < <(declare -p CALLS); export SCALLS
   read -r SDESCS < <(declare -p DESCS); export SDESCS
   read -r SGDESCS < <(declare -p GDESCS); export SGDESCS
+
 
   COMMAND+=(fzf)
   COMMAND+=(--prompt="$MODULE> ")
@@ -120,7 +121,12 @@ function main() {
   COMMAND+=(--ansi)
   COMMAND+=(--cycle)
   COMMAND+=(--no-multi)
-  COMMAND+=(--query "$*")
+
+  if [[ "$1" == -- ]]; then
+    COMMAND+=(--query "${*:2}")
+  else
+    LIST_ARGS=("${@:2}")
+  fi
 
   if [[ -n "$PREVIEW_CMD" ]]; then
     COMMAND+=(--preview="$PREVIEW_CMD")
@@ -188,7 +194,7 @@ function main() {
 
   mute declare -F init && init
 
-  list "${@:2}" | "${COMMAND[@]}"
+  list "${LIST_ARGS[@]}" | "${COMMAND[@]}"
 }
 
 function dispatch() {
