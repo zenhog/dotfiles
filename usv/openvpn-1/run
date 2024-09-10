@@ -21,16 +21,16 @@ ipt() {
 
 set -e
 
-ipt OUTPUT -t mangle -m cgroup --cgroup "$MARK" -j MARK --set-mark "$MARK"
-ipt POSTROUTING -t nat -m mark --mark "$MARK" -o "$DEV" -j MASQUERADE
+#ipt OUTPUT -t mangle -m cgroup --cgroup "$MARK" -j MARK --set-mark "$MARK"
+#ipt POSTROUTING -t nat -m mark --mark "$MARK" -o "$DEV" -j MASQUERADE
 
-sudo cgcreate -t root:users -a root:users -d 770 -f 660 -s 660 \
-  -g "net_cls:/$DEV"
+#sudo cgcreate -t root:users -a root:users -d 770 -f 660 -s 660 \
+#  -g "net_cls:/$DEV"
 
-sudo bash -c "echo $MARK > /sys/fs/cgroup/net_cls/$DEV/net_cls.classid"
+#sudo bash -c "echo $MARK > /sys/fs/cgroup/net_cls/$DEV/net_cls.classid"
 sudo bash -c "echo $TABLE $DEV > /etc/iproute2/rt_tables.d/${DEV}.conf"
 
-sudo ip rule add priority 2000 fwmark "$MARK" blackhole
+#sudo ip rule add priority 2000 fwmark "$MARK" blackhole
 sudo ip rule add priority 1999 fwmark "$MARK" table "$DEV"
 
 CMD=(
