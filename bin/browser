@@ -27,14 +27,13 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
           mkdir -p "$tmpdir"
 
-          readarray -t files < <(find "$HOME/.config/quteconfig" \
-
-          for f in $HOME/.config/quteconfig/*; do
+          for f in $HOME/.config/qutebrowser/*; do
             ln -svf "$f" "$tmpdir"
           done
 
           gui awm runonce fg profile="${vpn}qute" -- \
-            qutebrower --qt-arg name "${vpn}qute" -B "$tmpdir"
+            cgexec -g net_cls:"$vpn" \
+              qutebrowser --qt-arg name "${vpn}qute" -B "$tmpdir"
 
           if [[ $# -gt 0 ]]; then
             qutebrowser -B "$tmpdir" "$@"
