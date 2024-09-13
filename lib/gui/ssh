@@ -51,7 +51,7 @@ function connect() {
 
 function disconnect() {
   local host="$1"
-  local sock="$HOSTDIR/$host.S"
+  local sock="$SOCKDIR/$host.S"
 
   if connected "$host"; then
     ssh -S "$sock" -O cancel "$host"
