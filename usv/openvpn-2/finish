@@ -11,12 +11,12 @@ ipt() {
   sudo iptables -v -w -C "$@" && sudo iptables -v -w -D "$@"
 }
 
-ipt OUTPUT -t mangle -m cgroup --cgroup "$MARK" -j MARK --set-mark "$MARK"
-ipt POSTROUTING -t nat -m mark --mark "$MARK" -o "$DEV" -j MASQUERADE
+#ipt OUTPUT -t mangle -m cgroup --cgroup "$MARK" -j MARK --set-mark "$MARK"
+#ipt POSTROUTING -t nat -m mark --mark "$MARK" -o "$DEV" -j MASQUERADE
 
-sudo ip rule del priority 2000 fwmark "$MARK" blackhole
+#sudo ip rule del priority 2000 fwmark "$MARK" blackhole
 sudo ip rule del priority 1999 fwmark "$MARK" table "$DEV"
 
-sudo cgdelete -g "net_cls:/$DEV"
+#sudo cgdelete -g "net_cls:/$DEV"
 
 sudo rm -f "/etc/iproute2/rt_tables.d/${DEV}.conf"
