@@ -176,6 +176,26 @@ function zug() {
   mute which ueberzug || return
 }
 
+function colorize() {
+  local -A colors=(
+    [reset]=$'\e[39m'
+    [black]=$'\e[30m'
+    [red]=$'\e[31m'
+    [green]=$'\e[32m'
+    [yellow]=$'\e[33m'
+    [blue]=$'\e[34m'
+    [magenta]=$'\e[35m'
+    [cyan]=$'\e[36m'
+    [white]=$'\e[37m'
+  )
+
+  local color="$1"
+
+  shift
+
+  printf "%s%s%s\n" "${colors[$color]}" "$*" "${colors[reset]}"
+}
+
 function enc() {
   gpg -q --yes --pinentry-mode=loopback --symmetric \
     --passphrase-file=<(passphrase) "$@"

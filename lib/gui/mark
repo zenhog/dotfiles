@@ -289,9 +289,9 @@ function printdb() {
 
       for tag in "${tags[@]}"; do
         if [[ "$tag" == \#\#* ]]; then
-          tag="$(ansi --blue "$tag")"
+          tag="$(colorize blue "$tag")"
         elif [[ "$tag" == \#* ]]; then
-          tag="$(ansi --green "$tag")"
+          tag="$(colorize green "$tag")"
         fi
         printf "%s\n" "$tag"
       done
@@ -427,6 +427,7 @@ function add() {
   fi
 
   printdb info "$url" | tmux load-buffer -b preview -
+  printdb info "$url" | tmux load-buffer -b test -
 
   local data
   read -r -a data < <(menu input)

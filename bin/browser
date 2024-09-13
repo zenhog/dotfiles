@@ -13,30 +13,46 @@ if [[ "$CTTY" == "$RTTY" ]]; then
     qutebrowser)
       case "$type" in
         wan)
-          gui awm runonce fg profile=wanqute -- qutebrower --qt-arg name wanqute
+          profile=wanqute
 
-          if [[ $# -gt 0 ]]; then
+          cmd=(
+            gui awm runonce fg "profile=$profile" --
+            qutebrowser --qt-arg name wanqute
+          )
+
+          if gui awm exists "profile=$profile"; then
+            "${cmd[@]}"
             qutebrowser "$@"
+          else
+            "${cmd[@]}" "$@"
           fi
           ;;
         vpn)
           vpn="$1"
+
           shift
 
-          tmpdir="/tmp/qutebrowser/instances/$vpn/config"
+          tmpdir="/tmp/qutebrowser/instances/$vpn"
 
           mkdir -p "$tmpdir"
 
           for f in $HOME/.config/qutebrowser/*; do
-            ln -svf "$f" "$tmpdir"
+            ln -s "$f" "$tmpdir/config/"
           done
 
-          gui awm runonce fg profile="${vpn}qute" -- \
-            cgexec -g net_cls:"$vpn" \
-              qutebrowser --qt-arg name "${vpn}qute" -B "$tmpdir"
+          profile="${vpn}qute"
 
-          if [[ $# -gt 0 ]]; then
+          cmd=(
+            gui awm runonce fg "profile=$profile" --
+            cgexec -g "net_cls:$vpn"
+            qutebrowser --qt-arg name "$profile" -B "$tmpdir"
+          )
+
+          if gui awm exists "profile=$profile"; then
+            "${cmd[@]}"
             qutebrowser -B "$tmpdir" "$@"
+          else
+            "${cmd[@]}" "$@"
           fi
           ;;
       esac
@@ -44,22 +60,38 @@ if [[ "$CTTY" == "$RTTY" ]]; then
     firefox)
       case "$type" in
         wan)
-          gui awm runonce fg profile=wanfox -- \
-            firefox -p main --new-instance --class wanfox
+          profile=wanfox
 
-          if [[ $# -gt 0 ]]; then
-            firefox -p main "${@:2}"
+          cmd=(
+            gui awm runonce fg "profile=$profile" --
+            firefox -p main --new-instance --class "$profile"
+          )
+
+          if gui awm exists "profile=$profile"; then
+            "${cmd[@]}"
+            firefox -p main "$@"
+          else
+            "${cmd[@]}" "$@"
           fi
           ;;
         vpn)
           vpn="$1"
 
-          gui awm runonce fg profile="${vpn}fox" -- \
-            cgexec -g net_cls:"$vpn" \
-              firefox -p "${vpn}fox" --new-instance --class "${vpn}fox"
+          shift
 
-          if [[ $# -gt 0 ]]; then
-            firefox -p "${vpn}fox" "${@:2}"
+          profile="${vpn}fox"
+
+          cmd=(
+            gui awm runonce fg "profile=$profile" --
+            cgexec -g "net_cls:$vpn"
+            firefox -p private --new-instance --class "$profile"
+          )
+
+          if gui awm exists "profile=$profile"; then
+            "${cmd[@]}"
+            firefox -p private "$@"
+          else
+            "${cmd[@]}" "$@"
           fi
           ;;
       esac

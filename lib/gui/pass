@@ -36,8 +36,8 @@ function view() {
       local charspec
       read -r charspec < <(get "${dir}" charspec)
       silent check "${val}" "${charspec}" &&
-        read -r val < <(ansi --green "$val") ||
-          read -r val < <(ansi --red "$val")
+        read -r val < <(colorize green "$val") ||
+          read -r val < <(colorize red "$val")
     fi
     printf "%s%s%s\n" "${entry}" "${iSEP}" "${val}"
   done | column -t -s "${iSEP}" -o "${oSEP}"

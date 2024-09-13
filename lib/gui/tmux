@@ -179,8 +179,10 @@ function view-pane() {
 
   read -r host < <(is_remote "$session")
 
-  ansi --reset-color
+  colorize reset
+
   sepline " $pane "
+
   if [[ -n "$host" ]]; then
     rmux "$host" capture-pane -t "$pane" -pe
   else
@@ -460,7 +462,7 @@ function gethint() {
 
         hint="${hints[$m]:$round:1}"
 
-        read -r hint < <(ansi --red "$hint")
+        read -r hint < <(colorize red "$hint")
 
         screen[$line]="$(cut -b 1-$((col-1)) <<< "${rscreen[$line]}")"
         screen[$line]+="$hint"
