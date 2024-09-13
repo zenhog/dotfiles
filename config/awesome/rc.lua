@@ -170,7 +170,11 @@ local function set_clienttag(c)
         wanfox    = 2,
         wanqute   = 2,
         mupdf     = 2,
+        vpn1qute  = 2,
+        vpn2qute  = 2,
 
+        vpn1fox   = 3,
+        vpn2fox   = 3,
         vpnfox    = 3,
         vpnqute   = 3,
         feh       = 3,
