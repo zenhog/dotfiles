@@ -98,8 +98,8 @@ EOF
     '##hardening'
     '##security'
     '##kernel'
-      'ulimits'
-      'cgroups'
+      '#ulimits'
+      '#cgroups'
       '#selinux'
       '#apparmor'
       '#compsec'
@@ -238,11 +238,11 @@ function getid() {
 }
 
 function view() {
-  local id
+  local id tags
 
   read -r id _ <<< "$1"
 
-  (
+  {
     printf "URL %s %s\n" "$iSEP" \
       "$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
 
@@ -256,7 +256,6 @@ function view() {
         WHERE bookmarks.id = $id
       ")"
 
-    local tags
     readarray -t tags < <(sqlite3 "$DB" "
       SELECT name FROM bookmark_tags
       INNER JOIN tags ON bookmark_tags.tag_id = tags.id
@@ -264,10 +263,10 @@ function view() {
     ")
 
     printf "TAGS %s %s\n" "$iSEP" "${tags[*]}"
-  ) | column -t -s "$iSEP"
+  } | column -t -s "$iSEP"
 
   sepline " All tags and categories "
-  printdb info
+  printdb info "${tags[@]}"
 }
 
 function printdb() {
@@ -281,17 +280,29 @@ function printdb() {
       sqlite3 "$DB" "SELECT name FROM categories"
       ;;
     tags)
-      local tags=("$@")
+      local tags
 
-      if [[ -z "$tags" ]]; then
-        readarray -t tags < <(sqlite3 "$DB" "SELECT name FROM tags")
-      fi
+      readarray -t tags < <(sqlite3 "$DB" "SELECT name FROM tags")
 
       for tag in "${tags[@]}"; do
+        local found
+        for t in "$@"; do
+          if [[ "$t" == "$tag" ]]; then
+            found=1
+          fi
+        done
         if [[ "$tag" == \#\#* ]]; then
-          tag="$(colorize blue "$tag")"
+          if [[ -n "$found" ]]; then
+            tag="$(colorize blue "$tag")"
+          else
+            tag="$(colorize cyan "$tag")"
+          fi
         elif [[ "$tag" == \#* ]]; then
-          tag="$(colorize green "$tag")"
+          if [[ -n "$found" ]]; then
+            tag="$(colorize red "$tag")"
+          else
+            tag="$(colorize magenta "$tag")"
+          fi
         fi
         printf "%s\n" "$tag"
       done
@@ -300,7 +311,7 @@ function printdb() {
       local cats tags
 
       readarray -t cats < <(printdb categories)
-      readarray -t tags < <(printdb tags)
+      readarray -t tags < <(printdb tags "$@")
 
       paste -d, \
         <(printf "%s\n" "${cats[@]}") \
@@ -362,7 +373,7 @@ function _open() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-  command browser vpn 1 "$url"
+  command browser firefox vpn vpn1 "$url"
 }
 
 BINDS[bgopen]=tab
@@ -373,8 +384,8 @@ function bgopen() {
 
 BINDS[_bgopen]=shift-tab
 DESCS[_bgopen]='Open bookmark in the background with vpnfox'
-function _bopen() {
-  bopen "$@"
+function _bgopen() {
+  bgopen "$@"
 }
 
 BINDS[copy]=alt-c
