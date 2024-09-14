@@ -23,7 +23,7 @@ function list() {
     read -r _ host <<< "$host"
 
     if connected "$host"; then
-      host="$(colorize blue "$host")"
+      host="$(colorize green "$host")"
     fi
 
     printf "%s\n" "$host"

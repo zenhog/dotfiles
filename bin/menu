@@ -134,12 +134,28 @@ function main() {
     COMMAND+=(--preview="preview {}")
   fi
 
+  focusbinds+=("change-preview(preview {})")
+
   if silent declare -F label; then
-    COMMAND+=(--bind 'load:transform-border-label:do_call label {}')
-    COMMAND+=(
-      --bind
-      'focus:change-preview(preview {})+transform-border-label:label {}'
-    )
+    loadbinds+=("transform-border-label(do_call label {} {q})")
+    focusbinds+=("${loadbinds[@]}")
+  fi
+
+  if silent declare -F previewlabel; then
+    loadbinds+=("transform-preview-label(do_call previewlabel {} {q})")
+    focusbinds+=("${loadbinds[@]}")
+  fi
+
+  if [[ -n "$focusbinds" ]]; then
+    COMMAND+=(--bind "focus:$(IFS=+; printf "%s" "${focusbinds[*]}")")
+  fi
+
+  if [[ -n "$PREVIEW_LABEL_OFFSET" ]]; then
+    COMMAND+=(--preview-label-pos="$PREVIEW_LABEL_OFFSET")
+  fi
+
+  if [[ -n "$loadbinds" ]]; then
+    COMMAND+=(--bind "load:$(IFS=+; printf "%s" "${loadbinds[*]}")")
   fi
 
   WINDOW=right,border-rounded

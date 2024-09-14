@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='S-W:w'
-
-ATTRIBUTES=(profile=wanfox)
-
-function runner() {
-  cgexec -g net_cls:vpn2 firefox -p main --new-instance --class wanfox
-}

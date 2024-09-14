@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='W:w'
-
-ATTRIBUTES=(profile=wanqute)
-
-function runner() {
-  qutebrowser --qt-arg name wanqute
-}
