@@ -15,6 +15,7 @@ local cmod = { modkey, "Control" }
 mods['E'] = {}
 mods['W'] = nmod
 mods['S-W'] = smod
+mods['C-W'] = cmod
 mods['S-M'] = { altkey, "Shift" }
 mods['C-M'] = { altkey, "Control" }
 

@@ -165,21 +165,14 @@ local function set_clienttag(c)
         ctfbox    = 1,
         cutter    = 1,
 
-        Navigator = 2,
-        firefox   = 2,
-        wanfox    = 2,
-        wanqute   = 2,
-        mupdf     = 2,
-        vpn1qute  = 2,
-        vpn2qute  = 2,
+        Navigator     = 2,
+        firefox       = 2,
+        chromium      = 2,
+        qutebrowser   = 2,
+        mupdf         = 2,
 
-        vpn1fox   = 3,
-        vpn2fox   = 3,
-        vpnfox    = 3,
-        vpnqute   = 3,
         feh       = 3,
         nsxiv     = 3,
-        chromium  = 3,
 
         discord   = 4,
         spotify   = 4,
@@ -189,6 +182,10 @@ local function set_clienttag(c)
         steam     = 5,
         retroarch = 5,
     }
+    tagmap['firefox-vpn1'] = 3
+    tagmap['firefox-vpn2'] = 3
+    tagmap['qutebrowser-vpn1'] = 3
+    tagmap['qutebrowser-vpn2'] = 3
 
     local tagnum = tagmap[c.profile] or 5
 
