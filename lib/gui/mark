@@ -242,6 +242,12 @@ function view() {
 
   read -r id _ <<< "$1"
 
+  readarray -t tags < <(sqlite3 "$DB" "
+    SELECT name FROM bookmark_tags
+    INNER JOIN tags ON bookmark_tags.tag_id = tags.id
+    WHERE bookmark_tags.bookmark_id = $id
+  ")
+
   {
     printf "URL %s %s\n" "$iSEP" \
       "$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
@@ -256,16 +262,10 @@ function view() {
         WHERE bookmarks.id = $id
       ")"
 
-    readarray -t tags < <(sqlite3 "$DB" "
-      SELECT name FROM bookmark_tags
-      INNER JOIN tags ON bookmark_tags.tag_id = tags.id
-      WHERE bookmark_tags.bookmark_id = $id
-    ")
-
     printf "TAGS %s %s\n" "$iSEP" "${tags[*]}"
   } | column -t -s "$iSEP"
 
-  sepline " All tags and categories "
+  sepline
   printdb info "${tags[@]}"
 }
 
@@ -280,12 +280,12 @@ function printdb() {
       sqlite3 "$DB" "SELECT name FROM categories"
       ;;
     tags)
-      local tags
+      local tags found
 
       readarray -t tags < <(sqlite3 "$DB" "SELECT name FROM tags")
 
       for tag in "${tags[@]}"; do
-        local found
+        unset found
         for t in "$@"; do
           if [[ "$t" == "$tag" ]]; then
             found=1
@@ -293,15 +293,15 @@ function printdb() {
         done
         if [[ "$tag" == \#\#* ]]; then
           if [[ -n "$found" ]]; then
-            tag="$(colorize blue "$tag")"
+            tag="$(colorize red "$tag")"
           else
-            tag="$(colorize cyan "$tag")"
+            tag="$(colorize yellow "$tag")"
           fi
         elif [[ "$tag" == \#* ]]; then
           if [[ -n "$found" ]]; then
             tag="$(colorize red "$tag")"
           else
-            tag="$(colorize magenta "$tag")"
+            tag="$(colorize green "$tag")"
           fi
         fi
         printf "%s\n" "$tag"
@@ -373,7 +373,7 @@ function _open() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-  command browser firefox vpn vpn1 "$url"
+  command browser firefox vpn1 "$url"
 }
 
 BINDS[bgopen]=tab
@@ -385,7 +385,7 @@ function bgopen() {
 BINDS[_bgopen]=shift-tab
 DESCS[_bgopen]='Open bookmark in the background with vpnfox'
 function _bgopen() {
-  bgopen "$@"
+  _open "$@"
 }
 
 BINDS[copy]=alt-c

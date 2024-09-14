@@ -32,20 +32,51 @@ function dolist() {
 
   case "$kind" in
     ssids)
-      nmcli -c yes -f active,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+      nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
         device wifi list --rescan yes | tail +2
       ;;
     ssids-header)
-      nmcli -c yes -f BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+      nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
         device wifi list --rescan yes | head -1
       ;;
     connections)
-      nmcli -c yes -f NAME,UUID,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+      nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
         connection show | tail +2
       ;;
     connections-header)
-      nmcli -c yes -f NAME,UUID,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+      nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
         connection show | head -1
+      ;;
+  esac
+}
+
+BINDS[rescan]=alt-r
+DESCS[rescan]='Rescan'
+function reload() {
+  sudo nmcli device wifi rescan
+}
+
+BINDS[open]=enter
+DESCS[open]='Toggle connection or wifi'
+function open() {
+  local mode="$(get_opt mode)"
+
+  local active id
+
+  read -r active id _ <<< "$1"
+
+  case "$mode" in
+    connections)
+      case "$active" in
+        yes) sudo nmcli con down "$id" ;;
+        no) sudo nmcli con up "$id" ;;
+      esac
+      ;;
+    ssids)
+      case "$active" in
+        yes) sudo nmcli con down "$id" ;;
+        no) sudo nmcli con up "$id" ;;
+      esac
       ;;
   esac
 }
