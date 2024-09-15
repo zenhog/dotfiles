@@ -4,7 +4,7 @@ function marks() {
   answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |
     fzf --bind 'enter:execute-silent(echo {})+accept')
 
-  cd "$(realpath "$HOME/.marks/$answer/")"
+  [[ -n "$answer" ]] && cd "$(realpath "$HOME/.marks/$answer/")"
 
   zle accept-line
 }

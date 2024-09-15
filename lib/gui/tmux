@@ -334,7 +334,7 @@ function line() {
 function lastcmd() {
   tmux copy-mode
   tmux send-keys -X search-backward "$CMDPAT"
-  tmux send-keys -X search-again
+  dmux set -p @direction prev
 }
 
 function pagecmd() {
@@ -347,28 +347,19 @@ function pagecmd() {
 }
 
 function nextcmd() {
-  # send-keys -X previous-prompt/next-prompt
-  local word="$(tmux display -p '#{copy_cursor_word}')"
-  local line="$(tmux display -p '#{copy_cursor_line}')"
+  local direction="$(dmux show -pv @direction)"
 
-  if ! [[ "$line" =~ "$CMDPAT" ]]; then
-    #tmux send-keys -X cursor-right
-    tmux send-keys -X cursor-down
-  fi
-
-  tmux send-keys -X search-forward "$CMDPAT"
+  [[ "$direction" == prev ]] && dmux send-keys -X search-forward "$CMDPAT"
+  dmux send-keys -X search-forward "$CMDPAT"
+  dmux set -p @direction next
 }
 
 function prevcmd() {
-  local word="$(tmux display -p '#{copy_cursor_word}')"
-  local line="$(tmux display -p '#{copy_cursor_line}')"
+  local direction="$(dmux show -pv @direction)"
 
-  if ! [[ "$line" =~ "$CMDPAT" ]]; then
-    #tmux send-keys -X cursor-left
-    tmux send-keys -X cursor-up
-  fi
-
-  tmux send-keys -X search-backward "$CMDPAT"
+  [[ "$direction" == next ]] && dmux send-keys -X search-backward "$CMDPAT"
+  dmux send-keys -X search-backward "$CMDPAT"
+  dmux set -p @direction prev
 }
 
 function reload() {
