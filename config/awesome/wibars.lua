@@ -152,7 +152,7 @@ end
 
 awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
-    awful.tag({"1", "2", "3", "4", "5"}, s, awful.layout.layouts[1])
+    --awful.tag({"1", "2", "3", "4", "5"}, s, awful.layout.layouts[1])
 
     s.tasklist_buttons = awful.util.table.join(
         awful.button({}, 1, function(c)
@@ -198,14 +198,14 @@ awful.screen.connect_for_each_screen(function(s)
     )
 
     local taglist_callback = function(self, t, index, tags)
-        local star_outline = '󰓒'  -- empty
-        local star         = '󰓎'  -- normal
-        local starface     = '󰦥'  -- focus
-        local shuriken     = '󰫢'  -- urgent
-        -- local star         = '󰐾'  -- normal
-        -- local star_outline = ''  -- empty
-        -- local starface     = ''  -- focus
-        -- local shuriken     = '󱥸'  -- urgent
+        --local star_outline = '󰓒'  -- empty
+        --local star         = '󰓎'  -- normal
+        --local starface     = '󰦥'  -- focus
+        --local shuriken     = '󰫢'  -- urgent
+         local star         = '󰐾'  -- normal
+         local star_outline = ''  -- empty
+         local starface     = ''  -- focus
+         local shuriken     = '󱥸'  -- urgent
 
         local colors = { "deepskyblue", "yellow", "red", "cyan", "magenta" }
 
@@ -239,11 +239,11 @@ awful.screen.connect_for_each_screen(function(s)
             ir.markup = starface
         end
 
-        ir.font = theme.iconfont_name .. ' 10'
         ir.font = theme.iconfont_name .. ' 12'
+        ir.font = theme.iconfont_name .. ' 10'
 
         ir.markup = string.format('<span color="%s">%s</span>',
-            colors[index], ir.markup)
+            colors[tags[index].idx], ir.markup)
 
         local br = self:get_children_by_id('outsidebox')[1]
 

@@ -3,6 +3,7 @@ local wibox = require('wibox')
 --dbus = nil
 local naughty = require('naughty')
 local theme = require('beautiful')
+local sharedtags = require('sharedtags')
 
 local commands = {}
 
@@ -54,9 +55,16 @@ end
 
 commands.gototag = function(tagnum)
   return function()
-    local screen = awful.screen.focused()
-    local tag = screen.tags[tagnum]
-    if tag then tag:view_only() end
+    --local screen = awful.screen.focused()
+    --local tag = screen.tags[tagnum]
+    --if tag then tag:view_only() end
+    local tag = _G.tags[tagnum]
+
+    if tag then
+      local screen = _G.tags[tagnum].screen
+      awful.screen.focus(screen)
+      sharedtags.viewonly(tag, screen)
+    end
 
   end
 end
@@ -64,7 +72,9 @@ end
 commands.movetotag = function(tagnum)
   return function()
     if client.focus then
-      local tag = client.focus.screen.tags[tagnum]
+      --local tag = client.focus.screen.tags[tagnum]
+      local tag = _G.tags[tagnum]
+      --if tag then client.focus:move_to_tag(tag) end
       if tag then client.focus:move_to_tag(tag) end
     end
   end
@@ -72,9 +82,16 @@ end
 
 commands.toggletag = function(tagnum)
   return function()
-    local screen = awful.screen.focused()
-    local tag = screen.tags[tagnum]
-    if tag then awful.tag.viewtoggle(tag) end
+    --local screen = awful.screen.focused()
+    --local tag = screen.tags[tagnum]
+    local tag = _G.tags[tagnum]
+    --if tag then awful.tag.viewtoggle(tag) end
+    --if tag then sharedtags.viewtoggle(tag, screen) end
+    if tag then
+      local screen = _G.tags[tagnum].screen
+      --awful.screen.focus(screen)
+      sharedtags.viewtoggle(tag, screen)
+    end
   end
 end
 

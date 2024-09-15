@@ -3,6 +3,8 @@ local awful = require('awful')
 local wibox = require('wibox')
 local gears = require('gears')
 
+local sharedtags = require('sharedtags')
+
 require('awful.autofocus')
 
 local theme = require('beautiful')
@@ -15,6 +17,36 @@ theme.init(os.getenv('HOME') .. '/.config/awesome/theme.lua')
 local keys = require('keys')
 local wibars = require('wibars')
 
+_G.tags = sharedtags {
+    {
+      name = "1",
+      idx = 1,
+      layout = awful.layout.layouts[1],
+    },
+    {
+      name = "2",
+      idx = 2,
+      layout = awful.layout.layouts[1],
+    },
+    {
+      name = "3",
+      idx = 3,
+      layout = awful.layout.layouts[1],
+      screen = 2,
+    },
+    {
+      name = "4",
+      idx = 4,
+      layout = awful.layout.layouts[1],
+      screen = 2,
+    },
+    {
+      name = "5",
+      idx = 5,
+      screen = 2,
+      layout = awful.layout.layouts[1],
+    },
+}
 
 local function handle_errors()
     if awesome.startup_errors then
@@ -123,6 +155,7 @@ end
 
 local function set_clienttag(c)
     local tags = c.screen.tags
+    tags = _G.tags
     local homedir = os.getenv('HOME')
 
     if c.instance == 'loop' then
@@ -182,6 +215,7 @@ local function set_clienttag(c)
         steam     = 5,
         retroarch = 5,
     }
+
     tagmap['firefox-vpn1'] = 3
     tagmap['firefox-vpn2'] = 3
     tagmap['qutebrowser-vpn1'] = 3
