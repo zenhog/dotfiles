@@ -202,9 +202,9 @@ awful.screen.connect_for_each_screen(function(s)
         --local star         = '󰓎'  -- normal
         --local starface     = '󰦥'  -- focus
         --local shuriken     = '󰫢'  -- urgent
-         local star         = '󰐾'  -- normal
+         local star         = ''  -- normal
          local star_outline = ''  -- empty
-         local starface     = ''  -- focus
+         local starface     = '󰐾'  -- focus
          local shuriken     = '󱥸'  -- urgent
 
         local colors = { "deepskyblue", "yellow", "red", "cyan", "magenta" }
