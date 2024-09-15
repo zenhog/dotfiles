@@ -6,7 +6,7 @@ category=${mime%%/*}
 kind=${mime##*/}
 
 if [[ "$(basename "$1")" =~ tar.gz.gpg$ ]]; then
-  dot gpgtar_cat "$1"
+  utils dumpsecret "$1"
 elif [[ -d "$1" ]]; then
   lsd -1Al --no-symlink "$1/"
 elif [[ "$category" = image ]]; then
