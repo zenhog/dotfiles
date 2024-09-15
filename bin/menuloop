@@ -20,6 +20,7 @@ while true; do
   IFS=: read -r -a args
 
   echo "INPUT_COMMAND: ${args[*]}" >&2
+  [[ -z "$args" ]] && break
 
   gui awm setattributes class=menu instance=loop -- \
     @hidden=false @minimized=false >&2
