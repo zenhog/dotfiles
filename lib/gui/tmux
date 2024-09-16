@@ -332,8 +332,8 @@ function line() {
 }
 
 function lastcmd() {
-  tmux copy-mode
-  tmux send-keys -X search-backward "$CMDPAT"
+  dmux copy-mode
+  dmux send-keys -X search-backward "$CMDPAT"
   dmux set -p @direction prev
 }
 
