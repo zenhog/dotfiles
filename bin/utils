@@ -48,7 +48,7 @@ function verbose() {
 
   read -r msg < <(printf '%s [FOLDER: %s]' "$*" "$PWD")
 
-  sepline '' "${SEPCHAR:-*}" >&2
+  sepline >&2
   echo "$msg" >&2
 
   if [[ -n "$DEBUG" ]]; then

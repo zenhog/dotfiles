@@ -244,7 +244,7 @@ function all() {
   local mod="${1?}"
 
   for branch in "${BRANCHES[@]}"; do
-    SEPCHAR="$(colorize red '*')" verbose "$mod" "$branch" "${@:2}"
+    verbose "$mod" "$branch" "${@:2}"
   done
 }
 
