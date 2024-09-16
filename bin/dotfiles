@@ -56,7 +56,7 @@ function manifest_pull() {
     find "${dir:?}" -exec rm -rf {}/files \;
 
     opts=(
-      --verbose
+      #--verbose
       --recursive
       --relative
       --links
@@ -89,7 +89,7 @@ function manifest_push() {
     read -r dir < <(dirname "$f")
 
     opts=(
-      --verbose
+      #--verbose
       --recursive
       --relative
       --links
@@ -330,7 +330,7 @@ function mklive() {
   verbose xbps-install -S --yes --dry-run "${packages[@]}"
 
   local opts=(
-    --verbose
+    #--verbose
     --recursive
     --relative
     --links

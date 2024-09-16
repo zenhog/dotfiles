@@ -317,7 +317,7 @@ function tarlist() {
 
   readarray -t lines < <(tar "${opts[@]}")
 
-  COLUMNS=80 sepline '> Archive contents <' '-'
+  COLUMNS=80 sepline ' Archive contents ' '*'
   for line in "${lines[@]}"; do
     local mode ownership size date time path
     read -r mode ownership size date time path <<< "$line"
