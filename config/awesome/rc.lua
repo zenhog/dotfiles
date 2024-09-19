@@ -181,7 +181,7 @@ local function set_clienttag(c)
     end
 
     if not gears.filesystem.file_readable(path(c.profile)) then
-      c.profile = string.lower(c.class)
+      c.profile = string.lower(c.class or '')
     end
 
     if not gears.filesystem.file_readable(path(c.profile)) then
@@ -197,6 +197,7 @@ local function set_clienttag(c)
         kitty     = 1,
         ctfbox    = 1,
         cutter    = 1,
+        dota2     = 1,
 
         Navigator     = 2,
         firefox       = 2,
