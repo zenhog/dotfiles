@@ -124,7 +124,8 @@ function pull() {
   verbose cdgit "$branch" rebase
   sync "$branch"
   # stash pop manually in case there are conflicts
-  #verbose cdgit "$branch" stash pop
+  verbose cdgit "$branch" stash pop
+  verbose cdgit "$branch" status
 }
 
 function push() {
@@ -134,6 +135,7 @@ function push() {
   # stash pop in case a stash was left by push
   mute cdgit "$branch" stash show && verbose cdgit "$branch" stash pop
   verbose cdgit "$branch" push
+  verbose cdgit "$branch" "$status"
 }
 
 function update() {
