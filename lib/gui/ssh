@@ -8,7 +8,7 @@ export MUXSOCK="$HOME/.vmux.S"
 export SOCKDIR="$HOME/.sockets"
 export HOSTDIR="$HOME/.ssh/hosts"
 
-export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles
+export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot
 
 function view() {
   ssh -G "$1"

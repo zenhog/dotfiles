@@ -60,6 +60,10 @@ function verbose() {
   "$@"
 }
 
+function gitlog() {
+  echo ab
+}
+
 function on_xsession() {
   local rtty ctty
 

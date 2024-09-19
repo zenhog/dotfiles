@@ -10,7 +10,7 @@ function SOURCE() {
   source <(curl -sSL "$GH_UTILS")
 }
 
-GITURL=https://github.com/zenhog/dotfiles
+GITURL=https://github.com/zenhog/dot
 
 BASEDIR="$HOME/.dotfiles"
 
@@ -125,7 +125,6 @@ function pull() {
   sync "$branch"
   # stash pop manually in case there are conflicts
   verbose cdgit "$branch" stash pop
-  verbose cdgit "$branch" status
 }
 
 function push() {

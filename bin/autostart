@@ -3,7 +3,3 @@
 gui run bg qutebrowser
 gui run bg firefox-vpn1
 gui run bg discord
-gui run bg spotify
-
-alacritty &
-disown %1

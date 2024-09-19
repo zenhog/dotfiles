@@ -56,7 +56,7 @@ config:
       - systemctl enable --now ssh
       - ln -svf /usr/bin/batcat /usr/local/bin/bat
       - ln -svf /usr/bin/fdfind /usr/local/bin/fd
-      - su -l ${USER} -s /bin/bash -c "bash <(curl -s https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles) install master"
+      - su -l ${USER} -s /bin/bash -c "bash <(curl -s https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot) install master"
       - su -l ${USER} -s /bin/bash -c "bash '/home/maiz/.bin/update'"
 description: ${USER} profile
 devices: {}

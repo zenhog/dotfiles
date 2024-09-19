@@ -29,7 +29,7 @@ function incus_update() {
   TIMEZONE="$(readlink /etc/localtime)"
   TIMEZONE="${TIMEZONE#/usr/share/zoneinfo/}"
 
-  URL="https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dotfiles"
+  URL="https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot"
 
   PUBKEY="$(ssh-add -L)"
 

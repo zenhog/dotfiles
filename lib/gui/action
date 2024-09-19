@@ -137,7 +137,7 @@ function applytheme() {
 
   settheme "$1"
 
-  if gui awm exists profile=wanqute; then
+  if gui awm exists profile=qutebrowser; then
     qutebrowser :config-source
   fi
 
