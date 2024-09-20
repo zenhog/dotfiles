@@ -39,5 +39,14 @@ function list() {
     tail -n +2 | tac
 }
 
+BINDS[del]=alt-d
+HOOKS[del]=noclear
+DESCS[del]='Kill process'
+function del() {
+  local pid
+  read -r pid _
+  sudo kill -9 "$pid"
+}
+
 # kill
 # htop-style

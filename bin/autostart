@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
 gui run bg qutebrowser
-gui run bg firefox-vpn1
 gui run bg discord
