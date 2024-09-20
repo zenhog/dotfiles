@@ -32,7 +32,6 @@ _G.tags = sharedtags {
       name = "3",
       idx = 3,
       layout = awful.layout.layouts[1],
-      screen = 2,
     },
     {
       name = "4",
@@ -43,6 +42,12 @@ _G.tags = sharedtags {
     {
       name = "5",
       idx = 5,
+      screen = 2,
+      layout = awful.layout.layouts[1],
+    },
+    {
+      name = "6",
+      idx = 6,
       screen = 2,
       layout = awful.layout.layouts[1],
     },

@@ -207,7 +207,14 @@ awful.screen.connect_for_each_screen(function(s)
          local starface     = '󰐾'  -- focus
          local shuriken     = '󱥸'  -- urgent
 
-        local colors = { "deepskyblue", "yellow", "red", "cyan", "magenta" }
+        local colors = {
+          "deepskyblue",
+          "yellow",
+          "red",
+          "cyan",
+          "magenta",
+          "green",
+        }
 
         local ir = self:get_children_by_id('index_role')[1]
 
