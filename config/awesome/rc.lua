@@ -205,17 +205,18 @@ local function set_clienttag(c)
         dota2     = 1,
 
         Navigator     = 2,
-        firefox       = 2,
         chromium      = 2,
+        firefox       = 2,
         qutebrowser   = 2,
-        mupdf         = 2,
 
         feh       = 3,
         nsxiv     = 3,
+        mupdf     = 3,
 
         discord   = 4,
         spotify   = 4,
         vlc       = 4,
+        mpv       = 4,
 
         stremio   = 5,
         steam     = 5,
