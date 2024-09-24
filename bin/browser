@@ -25,6 +25,10 @@ if [[ "$CTTY" == "$RTTY" ]]; then
             ln -svf "$f" "$tmpdir/data/sessions/"
           done
 
+          for f in $HOME/.local/share/qutebrowser/{blocked-hosts,adblock-cache.dat}; do
+            ln -svf "$f" "$tmpdir/data/"
+          done
+
           profile="$kind-$type"
 
           cmd=(
