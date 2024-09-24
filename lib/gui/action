@@ -137,9 +137,11 @@ function applytheme() {
 
   settheme "$1"
 
-  if gui awm exists profile=qutebrowser; then
-    qutebrowser :config-source
-  fi
+  for d in /tmp/qutebrowser/instances/*; do
+    if gui awm exists profile=qutebrowser; then
+      qutebrowser -B "$d" :config-source
+    fi
+  done
 
   feh --bg-scale "$HOME/.wallpapers/main"
 
