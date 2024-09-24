@@ -120,9 +120,6 @@ commands.maximize = function(c)
 end
 
 commands.close = function(c)
-    if c.instance == 'discord' then
-        awful.spawn.with_shell('killall -9 Discord')
-    end
     c:kill()
 end
 

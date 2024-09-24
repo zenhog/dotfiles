@@ -92,7 +92,7 @@ macro pager \Cb "<enter-command> set pipe_decode = yes<enter><pipe-message> extr
 set sidebar_visible = false
 
 set status_chars = " *%A"
-set status_format = "[ Folder: %f  ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed  )?"
+set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
 set date_format = "%d.%m.%Y %H:%M"
 set sort = threads
 set sort_aux = reverse-last-date-received
