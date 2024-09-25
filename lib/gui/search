@@ -6,6 +6,8 @@ ICON=
 
 NOWRAP=1
 
+export UEBERZUG_PREVIEW=1
+
 function init() {
   #set_opt pwd "$HOME/.marks"
   [[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"

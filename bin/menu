@@ -2,8 +2,12 @@
 
 source "$HOME/.bin/gui"
 
+export UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
+
 function atexit() {
   silent declare -F atfinish && atfinish
+  [[ -r "$UEBERZUG_FIFO" ]] &&
+    declare -A -p cmd=([action]=remove [identifier]=preview) > "$UEBERZUG_FIFO"
 }
 
 BINDS[help]=alt-h

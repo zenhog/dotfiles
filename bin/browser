@@ -9,106 +9,76 @@ type="$2"
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
     qutebrowser)
-      case "$type" in
-        vpn*)
-          tmpdir="/tmp/qutebrowser/instances/$type"
+      shift
 
-          mkdir -p "$tmpdir/config"
+      if [[ "$type" == vpn* ]]; then
+        shift
+      else
+        type=wan
+      fi
 
-          for f in $HOME/.config/qutebrowser/*; do
-            ln -svf "$f" "$tmpdir/config/"
-          done
+      tmpdir="/tmp/qutebrowser/instances/$type"
 
-          mkdir -p "$tmpdir/data/sessions"
+      mkdir -p "$tmpdir/config"
 
-          for f in $HOME/.local/share/qutebrowser/sessions/*; do
-            ln -svf "$f" "$tmpdir/data/sessions/"
-          done
+      for f in $HOME/.config/qutebrowser/*; do
+        ln -s "$f" "$tmpdir/config/" 2>/dev/null
+      done
 
-          for f in $HOME/.local/share/qutebrowser/{blocked-hosts,adblock-cache.dat}; do
-            ln -svf "$f" "$tmpdir/data/"
-          done
+      mkdir -p "$tmpdir/data/sessions"
 
-          profile="$kind-$type"
+      QUTEDATA="$HOME/.local/share/qutebrowser"
 
-          cmd=(
-            gui awm runonce fg "profile=$profile" --
-            cgexec -g "net_cls:$type"
-            qutebrowser --qt-arg name "$profile" -B "$tmpdir"
-          )
+      for f in "$QUTEDATA"/sessions/*; do
+        ln -s "$f" "$tmpdir/data/sessions/" 2>/dev/null
+      done
 
-          if gui awm exists "profile=$profile"; then
-            "${cmd[@]}"
-            [[ -n "${*:3}" ]] && qutebrowser -B "$tmpdir" "${@:3}"
-          else
-            "${cmd[@]}" "${@:3}"
-          fi
-          ;;
-        *)
-          tmpdir="/tmp/qutebrowser/instances/wan"
+      for f in "$QUTEDATA"/{blocked-hosts,adblock-cache.dat}; do
+        ln -s "$f" "$tmpdir/data/" 2>/dev/null
+      done
 
-          mkdir -p "$tmpdir/config"
+      profile="$kind-$type"
 
-          for f in $HOME/.config/qutebrowser/*; do
-            ln -svf "$f" "$tmpdir/config/"
-          done
+      [[ "$type" == wan ]] && profile=qutebrowser
 
-          mkdir -p "$tmpdir/data/sessions"
+      cmd+=(gui awm runonce fg "profile=$profile" --)
 
-          for f in $HOME/.local/share/qutebrowser/sessions/*; do
-            ln -svf "$f" "$tmpdir/data/sessions/"
-          done
+      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-          profile=qutebrowser
+      cmd+=(qutebrowser --qt-arg name "$profile" -B "$tmpdir")
 
-          cmd=(
-            gui awm runonce fg "profile=$profile" --
-            qutebrowser --qt-arg name "$profile" -B "$tmpdir"
-          )
-
-          if gui awm exists "profile=$profile"; then
-            "${cmd[@]}"
-            [[ -n "${*:2}" ]] && qutebrowser --target tab "${@:2}"
-          else
-            "${cmd[@]}" "${@:2}"
-          fi
-          ;;
-      esac
+      if gui awm exists "profile=$profile"; then
+        "${cmd[@]}"
+        [[ -n "$*" ]] && qutebrowser -B "$tmpdir" --target tab "$@"
+      else
+        "${cmd[@]}" --target tab "$@"
+      fi
       ;;
     firefox)
-      case "$type" in
-        vpn*)
-          profile="firefox-$type"
+      shift
 
-          cmd=(
-            gui awm runonce fg "profile=$profile" --
-            cgexec -g "net_cls:$type"
-            firefox -p private --new-instance --class "$profile"
-          )
+      if [[ "$type" == vpn* ]]; then
+        shift
+      else
+        type=wan
+      fi
 
-          if gui awm exists "profile=$profile"; then
-            "${cmd[@]}"
-            [[ -n "${*:3}" ]] && firefox -p private "${@:3}"
-          else
-            "${cmd[@]}" "${@:3}"
-          fi
-          ;;
-        *)
-          profile=firefox
+      profile="firefox-$type"
 
-          cmd=(
-            gui awm runonce fg "profile=$profile" --
-            firefox -p private --new-instance --class "$profile"
-          )
+      [[ "$type" == wan ]] && profile=firefox
 
-          if gui awm exists "profile=$profile"; then
-            "${cmd[@]}"
-            [[ -n "${*:2}" ]] && firefox -p private "${@:2}"
-          else
-            "${cmd[@]}" "${@:2}"
-          fi
-          ;;
-      esac
+      cmd+=(gui awm runonce fg "profile=$profile" --)
+
+      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
+
+      cmd+=(firefox -p private --new-instance --class "$profile")
+
+      if gui awm exists "profile=$profile"; then
+        "${cmd[@]}"
+        [[ -n "$*" ]] && firefox -p private "$@"
+      else
+        "${cmd[@]}" "$@"
+      fi
       ;;
     *)
       browser qutebrowser "$@"

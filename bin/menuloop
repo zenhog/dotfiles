@@ -4,9 +4,24 @@ exec >/proc/$PPID/fd/1
 
 exec 2>&1
 
-cleanup() {
-    rm "${SOCKET}" &>/dev/null
+UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
+
+function cleanup() {
+  exec 3>&-
+  rm "$SOCKET" &>/dev/null
+  rm "$UEBERZUG_FIFO" &>/dev/null
+  kill $(jobs -p) &>/dev/null
 }
+
+function start_ueberzug() {
+  mkfifo "${UEBERZUG_FIFO}"
+
+  ueberzug layer --parser bash --silent < "$UEBERZUG_FIFO" &
+
+  exec 3>"$UEBERZUG_FIFO"
+}
+
+start_ueberzug
 
 SOCKET="${HOME}/.menu.S"
 
