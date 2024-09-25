@@ -365,8 +365,4 @@ function checkbin() {
   done
 }
 
-function main() {
-  mute declare -F "$1" && "$@" || git "$@"
-}
-
-checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && SOURCE && main "$@"
+checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && SOURCE && "$@"
