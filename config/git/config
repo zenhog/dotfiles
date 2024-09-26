@@ -17,6 +17,7 @@
 	autocrlf = input
 	pager = delta --dark
 	compression = 0
+	attributesFile = ~/.config/git/attributes
 [init]
 	defaultBranch = master
 	#templatedir = ~/.config/git/templates
@@ -33,15 +34,18 @@
 	plog = log --all --graph --oneline --decorate
 	se = !git rev-list --all | xargs git grep -F
 	unstage = reset HEAD --
-	cleanup = !dotfiles cleanup
-	remaster = !dotfiles rebranch
-  log = !utils gitlog
+	cleanup = !dot cleanup
+	remaster = !dot rebranch
 [delta]
 	navigate = true
 	side-by-side = true
 	line-numbers = true
 [diff]
 	colorMoved = default
+[diff "less"]
+	textconv = less
+	binary = true
+	cachetextconv = true
 [diff "gpg"]
 	textconv = gpg --batch -qd /dev/stdin -o -
 	binary = true
