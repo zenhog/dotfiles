@@ -16,7 +16,8 @@ set pipe_decode = no
 
 alternative_order text/calendar application/ics text/plain text/enriched text/html
 #auto_view text/plain
-auto_view text/html
+#auto_view text/html
+auto_view text/* application/* image/* audio/* video/*
 
 set allow_ansi
 set pager_index_lines = 10
