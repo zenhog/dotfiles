@@ -227,8 +227,10 @@ function exists() {
 }
 
 function waitfor() {
-  until exists "$@"; do
+  local totaltime=0
+  until exists "$@" || (( totaltime > 30 )); do
     sleep 0.1
+    (( totaltime += 1 ))
   done
 }
 
