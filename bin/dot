@@ -41,6 +41,16 @@ function init() {
   clone "$dir" "$GITURL" "$branch"
 }
 
+function extract() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+  local tar="$dir/$branch.tar.gz.gpg"
+
+  if [[ -r "$dir/.gitremote" && -r "$tar" ]]; then
+    decsecret "$tar"
+  fi
+}
+
 function manifest_pull() {
   local branch="${1?}"
 
