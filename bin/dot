@@ -41,16 +41,6 @@ function init() {
   clone "$dir" "$GITURL" "$branch"
 }
 
-function extract() {
-  local branch="${1?}"
-  local dir="$BASEDIR/$branch"
-  local tar="$dir/$branch.tar.gz.gpg"
-
-  if [[ -r "$dir/.gitremote" && -r "$tar" ]]; then
-    decsecret "$tar"
-  fi
-}
-
 function manifest_pull() {
   local branch="${1?}"
 
@@ -116,7 +106,8 @@ function manifest_push() {
 function stage() {
   local branch="${1?}"
 
-  manifest_pull "$branch" && encrypt "$branch"
+  manifest_pull "$branch"
+  encrypt "$branch"
   cdgit "$branch" add --all .
 }
 
@@ -286,9 +277,8 @@ function diff() {
 function commit() {
   local branch="${1?}"
 
-  stage "$branch" &&
-    cdgit "$branch" commit -m \
-      "autocommit of $(date "+%F") at $(date "+%T") on $(hostname)"
+  stage "$branch"
+  cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
 }
 
 function rebranch() (
