@@ -10,11 +10,19 @@ function SOURCE() {
   source <(curl -sSL "$GH_UTILS")
 }
 
-GITURL=https://github.com/zenhog/dot
+GITURL=https://github.com/zenhog/dotfiles
 
 BASEDIR="$HOME/.dotfiles"
 
 BRANCHES=(master public private system)
+
+function init() {
+  local branch="${1?}"
+  local dir="$BASEDIR/$branch"
+
+  clone "$dir" "$GITURL" "$branch"
+  pull "$branch"
+}
 
 function clone() {
 
@@ -34,114 +42,43 @@ function clone() {
   )
 }
 
-function init() {
-  local branch="${1?}"
-  local dir="$BASEDIR/$branch"
-
-  clone "$dir" "$GITURL" "$branch"
-}
-
-function manifest_pull() {
-  local branch="${1?}"
-
-  local files
-
-  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
-
-  for f in "${files[@]}"; do
-    local dir opts
-
-    read -r dir < <(dirname "$f")
-
-    find "${dir:?}" -exec rm -rf {}/files \;
-
-    opts=(
-      #--verbose
-      --recursive
-      --relative
-      --links
-      --perms
-      --no-group
-      --no-owner
-      --files-from="$f"
-      --delete
-    )
-
-    if [[ -r "$dir/ignore" ]]; then
-      opts+=(--exclude-from="$dir/ignore")
-    fi
-
-    verbose sudo rsync "${opts[@]}" / "$dir/files"
-    verbose sudo chown -R "$USER:$USER" "$dir/files"
-  done
-}
-
-function manifest_push() {
-  local branch="${1?}"
-
-  local files
-
-  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
-
-  for f in "${files[@]}"; do
-    local dir opts
-
-    read -r dir < <(dirname "$f")
-
-    opts=(
-      #--verbose
-      --recursive
-      --relative
-      --links
-      --perms
-      --no-group
-      --no-owner
-      --backup-dir=/.backup
-    )
-
-    (cd "$dir" && verbose sudo rsync "${opts[@]}" files/./ /)
-  done
-}
-
-function stage() {
-  local branch="${1?}"
-
-  manifest_pull "$branch"
-  encrypt "$branch"
-  cdgit "$branch" add --all .
-}
-
-function sync() {
-  local branch="${1?}"
-
-  decrypt "$branch" && manifest_push "$branch" && link "$branch"
-}
-
 function pull() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" fetch origin "$branch"
-  verbose cdgit "$branch" stash
-  verbose cdgit "$branch" rebase
-  sync "$branch"
-  # stash pop manually in case there are conflicts
-  verbose cdgit "$branch" stash pop
+  verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
+  decrypt "$branch"
+
+  if isremote "$branch"; then
+    clone "$BASEDIR/$branch/$branch" "$BASEDIR/$branch/remote" master
+    verbose cdgit "$branch/$branch" pull --rebase --autostash origin master
+  fi
+
+  rcs2fs "$branch"
+  link "$branch"
 }
 
 function push() {
   local branch="${1?}"
 
   verbose pull "$branch"
-  # stash pop in case a stash was left by push
-  mute cdgit "$branch" stash show && verbose cdgit "$branch" stash pop
+
+  if isremote "$branch"; then
+    commit "$branch/$branch" && cdgit "$branch/$branch" push origin master
+  fi
+
+  commit "$branch"
+
   verbose cdgit "$branch" push
   verbose cdgit "$branch" status
 }
 
-function update() {
+function commit() {
   local branch="${1?}"
 
-  commit "$branch" && push "$branch"
+  fs2rcs "$branch"
+  encrypt "$branch"
+  cdgit "$branch" add --all .
+  cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
 }
 
 function linktarget() {
@@ -184,7 +121,7 @@ function link() {
 
         local files
         readarray -t files < <(cd "$BASEDIR/$branch/$reladir" &&
-          find * -type f -or -type l)
+          find * -maxdepth 0)
 
         for file in "${files[@]}"; do
           linktarget "$dir/$file" "${prefix}${file}"
@@ -195,10 +132,10 @@ function link() {
   done
 }
 
-function install() {
+function isremote() {
   local branch="${1?}"
 
-  init "$branch" && sync "$branch"
+  [[ -f "$BASEDIR/$branch/.gitremote" ]]
 }
 
 function encrypt() {
@@ -242,6 +179,68 @@ function decrypt() {
   done
 }
 
+function fs2rcs() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    find "${dir:?}" -exec rm -rf {}/files \;
+
+    opts=(
+      #--verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --files-from="$f"
+      --delete
+    )
+
+    if [[ -r "$dir/ignore" ]]; then
+      opts+=(--exclude-from="$dir/ignore")
+    fi
+
+    verbose sudo rsync "${opts[@]}" / "$dir/files"
+    verbose sudo chown -R "$USER:$USER" "$dir/files"
+  done
+}
+
+function rcs2fs() {
+  local branch="${1?}"
+
+  local files
+
+  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+
+  for f in "${files[@]}"; do
+    local dir opts
+
+    read -r dir < <(dirname "$f")
+
+    opts=(
+      #--verbose
+      --recursive
+      --relative
+      --links
+      --perms
+      --no-group
+      --no-owner
+      --backup-dir=/.backup
+    )
+
+    (cd "$dir" && verbose sudo rsync "${opts[@]}" files/./ /)
+  done
+}
+
 function all() {
   local mod="${1?}"
 
@@ -259,7 +258,11 @@ function cdgit() (
 function status() {
   local branch="${1?}"
 
-  stage "$branch" && cdgit "$branch" status
+  if isremote "$branch"; then
+    verbose cdgit "$branch/$branch" status
+  fi
+
+  cdgit "$branch" status
 }
 
 function lastdiff() {
@@ -271,14 +274,7 @@ function lastdiff() {
 function diff() {
   local branch="${1?}"
 
-  stage "$branch" && cdgit "$branch" diff "$branch"
-}
-
-function commit() {
-  local branch="${1?}"
-
-  stage "$branch"
-  cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
+  cdgit "$branch" diff "$branch"
 }
 
 function rebranch() (
