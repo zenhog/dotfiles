@@ -1,0 +1,13 @@
+alsa-utils
+cdrtools
+collectd-utils
+dateutils
+cpufrequtils
+conntrack-tools
+desktop-file-utils
+libcgroup-utils
+pulseaudio-utils
+rng-tools
+sg3_utils
+xdg-user-dirs
+xdg-utils

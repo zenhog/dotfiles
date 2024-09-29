@@ -1,0 +1,6 @@
+#!/bin/sh
+
+font="VictorMono Nerd Font Mono"
+
+exec /bin/fbterm --font-size=18 --font-names="$font" \
+  --cursor-shape=1 -- /usr/local/bin/login-wrapper "$1"

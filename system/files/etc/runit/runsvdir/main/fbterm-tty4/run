@@ -1,0 +1,6 @@
+#!/bin/sh
+
+tty=${PWD##*-}
+
+exec 2>&1
+exec /bin/agetty -n -l /usr/local/bin/fbterm-wrapper -o "$tty" "$tty"

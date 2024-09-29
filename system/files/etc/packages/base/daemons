@@ -1,0 +1,17 @@
+audit
+earlyoom
+rsyslog
+slim
+bluez
+
+docker
+docker-cli
+docker-compose
+
+qemu
+qemu-ga
+qemu-user-static
+qemuconf
+
+incus
+incus-client

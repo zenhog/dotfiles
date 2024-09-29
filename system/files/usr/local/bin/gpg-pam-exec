@@ -1,0 +1,7 @@
+#!/bin/bash
+read token
+if [[ $PAM_USER = root ]]; then
+	exit 0
+fi
+su $PAM_USER -c "/usr/local/bin/gpg-preset-passphrase" <<< "$token"
+exit 0

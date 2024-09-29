@@ -1,0 +1,12 @@
+#!/bin/sh
+
+exec 2>&1
+
+export USER="$(getent passwd "$UID" | awk -F: '{print $1}')"
+export HOME="$(getent passwd "$UID" | awk -F: '{print $6}')"
+
+snooze -v -s 1d -t "$PWD/timefile"
+
+/usr/local/bin/UPDATE
+
+touch "$PWD/timefile"

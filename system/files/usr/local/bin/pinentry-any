@@ -1,0 +1,20 @@
+#!/bin/bash
+
+ACTIVE="$(</sys/class/tty/tty0/active)"
+
+if [[ "${ACTIVE}" == tty1 ]]; then
+    export DISPLAY="$(</tmp/.X11-unix/registrations/"${USER}")"
+    exec /usr/local/bin/pinentry-rofi "$@"
+else
+    export DISPLAY=
+    export DBUS_SESSION_BUS_ADDRESS=/dev/null
+    export TERM="$(tmux display -p '#{client_termname}')"
+    export GPG_TTY="$(tmux display -p '#{pane_tty}')"
+    #exec 3<>"${GPG_TTY}"
+    #exec >&3
+    #exec 2>&1
+    #exec <&3
+    #stty -raw echo
+    # --ttyname="${GPG_TTY}"
+    exec /usr/sbin/pinentry-tty >"${GPG_TTY}" 2>&1 <&1
+fi

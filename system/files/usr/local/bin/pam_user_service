@@ -1,0 +1,17 @@
+#!/bin/bash
+
+case "$PAM_TYPE" in
+	open_session)
+		sv start runsvdir-"$PAM_USER"
+		;;
+	close_session)
+		read -r tty < <(tty)
+		read -r stillup < <(w -h "$PAM_USER" | grep -v "${tty#/dev/}")
+		[[ -z "$stillup" ]] && (
+			sv stop runsvdir-"$PAM_USER"
+			su $PAM_USER -c "gpgconf --kill gpg-agent"
+		)
+		;;
+esac
+
+exit 0

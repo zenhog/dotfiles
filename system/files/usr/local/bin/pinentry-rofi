@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+read -r CTTY < <(cat /sys/class/tty/tty0/active)
+read -r DISPLAY < <(cat "/tmp/.X11-unix/registrations/$USER/display")
+read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+
+getpin() {
+    if [[ "$CTTY" == "$RTTY" ]]; then
+        export DISPLAY
+        rofi -input /dev/null -dmenu -password -theme pinentry-dark \
+            -p "$PROMPT" -mesg "$DESC"
+    else
+        export TERM="$(tmux display -p '#{client_termname}')"
+        export TTY="$(tmux display -p '#{pane_tty}')"
+        tmux popup -E bash -c \
+            "echo -n 'PIN: ' ;stty -echo; head -n1 > /proc/$$/fd/0"
+    fi
+}
+
+echo "OK"
+
+while read -r cmd rest; do
+
+    if [ -z "$cmd" ]; then
+        continue;
+    fi
+
+    case "$cmd" in
+        \#*)
+            ;;
+        SETPROMPT)
+            PROMPT="$rest"
+            echo "OK"
+            ;;
+        SETDESC)
+            DESC="$rest"
+            read -r DESC < <(sed -rn 's/%[[:xdigit:]]{2}//p' <<< "$rest")
+            echo "OK"
+            ;;
+        GETPIN)
+            read -r PIN < <(getpin)
+            echo "D ${PIN}"
+            [[ -n "$QUIT" ]] && exit 1
+            echo "OK"
+            ;;
+        BYE)
+            echo "OK"
+            exit 0
+            ;;
+        *)
+            echo "OK"
+            ;;
+    esac
+done

@@ -1,0 +1,3 @@
+#!/bin/sh
+exec 2>&1
+exec earlyoom -m 10,5 -s 100 -N /usr/local/bin/oom-notify

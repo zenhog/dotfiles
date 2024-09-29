@@ -1,0 +1,5 @@
+- supervise
+- system-connections
+- credentials.txt
+- *~
+- *.new-*

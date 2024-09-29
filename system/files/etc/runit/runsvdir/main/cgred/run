@@ -1,0 +1,7 @@
+#!/bin/sh
+# Default logs to syslog with facility DAEMON
+# man cgrulesengd for options list and descriptions.
+exec 2>&1
+[ -r conf ] && . ./conf
+cgconfigparser ${PARSEOPTS:=-l /etc/cgconfig.conf}
+exec cgrulesengd ${OPTS} -g cgred --logfile=- --nodaemon -v 2>&1

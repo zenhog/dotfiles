@@ -1,0 +1,11 @@
+background_style        stretch
+background_color        #ffffff
+
+input_panel_x           50%
+input_panel_y           50%
+input_name_x            25
+input_name_y            25
+input_pass_x            25
+input_pass_y            74
+input_font              Iosevka:size=14:dpi=75
+input_color             #ffffff
