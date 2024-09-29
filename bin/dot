@@ -14,7 +14,7 @@ GITURL=https://github.com/zenhog/dotfiles
 
 BASEDIR="$HOME/.dotfiles"
 
-BRANCHES=(master public private system)
+BRANCHES=(master public private)
 
 function init() {
   local branch="${1?}"
@@ -40,12 +40,21 @@ function clone() {
         backup "$dir" && verbose "${cmd[@]}"
       fi
   )
+
+  if [[ -d "$dir/.githooks" ]]; then
+    (cd "$dir" && git config --local core.hooksPath .githooks)
+  fi
 }
 
 function pull() {
   local branch="${1?}"
 
-  verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
+  if isremote "$branch"; then
+    verbose cdgit "$branch" pull --rebase --autostash --force origin "$branch"
+  else
+    verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
+  fi
+
   decrypt "$branch"
 
   if isremote "$branch"; then
@@ -68,7 +77,12 @@ function push() {
 
   commit "$branch"
 
-  verbose cdgit "$branch" push
+  if isremote "$branch"; then
+    verbose rebranch "$branch"
+  else
+    verbose cdgit "$branch" push
+  fi
+
   verbose cdgit "$branch" status
 }
 
@@ -280,8 +294,6 @@ function diff() {
 function rebranch() (
   local repo="${1?}"
   local branch
-
-  set -e
 
   read -r branch < <(cdgit "$repo" branch --show-current)
 
