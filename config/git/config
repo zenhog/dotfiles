@@ -43,11 +43,15 @@
 [diff]
 	colorMoved = default
 [diff "less"]
-	textconv = less
+  textconv = LESSQUIET=1 lesspipe.sh
+	binary = true
+	cachetextconv = true
+[diff "db"]
+  textconv = sh -c 'sqlite3 $0 .dump'
 	binary = true
 	cachetextconv = true
 [diff "gpg"]
-	textconv = gpg --batch -qd /dev/stdin -o -
+	textconv = gpg --batch -qd -o -
 	binary = true
 [diff "gpgtar"]
 	textconv = utils dumpsecret
