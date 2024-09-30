@@ -15,6 +15,17 @@ prompt_netgrp () {
 	[[ -n "$cgroup" ]] && p10k segment -f 208 -i '󰛸' -t "$cgroup"
 }
 
+prompt_dotstats () {
+  local dotfiles="$HOME/.dotfiles"
+
+  for r in master public private; do
+    if [[ -n "$(cd "$dotfiles/$r" && git status --porcelain=v1)" ]]; then
+      p10k segment -f 3 -i 
+      break
+    fi
+  done
+}
+
 PROMPT_MARK=$'\033]133;A\033\\'
 
 prompt_mark() {
