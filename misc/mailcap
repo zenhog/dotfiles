@@ -1,12 +1,11 @@
-#text/html; text/html; ~/.config/neomutt/scripts/view_attachment %s html; test=test -n "$DISPLAY"
-#text/html; elinks -dump -dump-color-mode 2; copiousoutput
-#text/html; glow -w 120; copiousoutput
-#text/plain; glow -w 120; copiousoutput
-#text/plain; elinks -dump -dump-color-mode 2; copiousoutput
-#image/*; open %s; test=test -n "$DISPLAY"
-#application/pdf; open %s; test=test -n "$DISPLAY"
-text/*;                           LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
-application/*;                    LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
-image/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
-audio/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
-video/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
+text/html; text/html; ~/.config/neomutt/scripts/view_attachment %s html; test=test -n "$DISPLAY"
+text/html; glow -w 120; copiousoutput
+text/plain; glow -w 120; copiousoutput
+text/plain; elinks -dump -dump-color-mode 2; copiousoutput
+image/*; open %s; test=test -n "$DISPLAY"
+application/pdf; open %s; test=test -n "$DISPLAY"
+#text/*;                           LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
+#application/*;                    LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
+#image/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
+#audio/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
+#video/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
