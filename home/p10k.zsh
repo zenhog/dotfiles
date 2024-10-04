@@ -33,7 +33,7 @@
     # os_icon               # os identifier
     context                 # context?
     netgrp                  # network cgroup (user-defined)
-    dotstats
+    dotpush
     dir                     # current directory
     vcs                     # git status
     status                  # exit code of the last command
