@@ -21,7 +21,7 @@ prompt_dotpush () {
   for r in master public private/private; do
     if [[ -n "$(bash -c "cd $dotfiles/$r && git status --porcelain=v1")" ]]
     then
-      p10k segment -f 3 -i ⬇
+      p10k segment -f 3 -i 
       break
     fi
   done
