@@ -209,6 +209,7 @@ function fs2rcs() {
 
     opts=(
       #--verbose
+      --times
       --recursive
       --relative
       --links
@@ -233,7 +234,7 @@ function rcs2fs() {
 
   local files
 
-  readarray -t files < <(find "$BASEDIR/$branch" -name 'manifest')
+  readarray -t files < <(find "$BASEDIR/$branch" -name manifest)
 
   for f in "${files[@]}"; do
     local dir opts
@@ -242,6 +243,7 @@ function rcs2fs() {
 
     opts=(
       #--verbose
+      --times
       --recursive
       --relative
       --links
