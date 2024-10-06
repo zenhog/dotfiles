@@ -5,6 +5,7 @@ MOD='S-M'
 ICON=󰍁
 
 NOWRAP=1
+RATIO=75
 
 export STORE="$HOME/.password-store"
 
@@ -146,12 +147,42 @@ function cleanup() {
   [[ -d "${STORE}/${dir}" ]] && rm -f "${STORE}/${dir}"/*.old.*.gpg
 }
 
+BINDS[mod]=alt-w
+HOOKS[mod]=sclear
+DESCS[mod]='Modify entries'
+function mod() {
+  local dir="$1" entries
+
+  view "$dir" | tmux load-buffer -b preview -
+
+  read -r -a entries < <(input)
+
+  tmux delete-buffer -b preview
+
+  for entry in "${entries[@]}"; do
+    if [[ "$entry" == -* ]]; then
+      pass rm -f "$dir/${entry:1}"
+    else
+      local lhs rhs
+      IFS='=' read -r lhs rhs <<< "$entry"
+      rename "$dir/$lhs"
+      insert "$dir" "$lhs" "$rhs"
+    fi
+  done
+}
+
 BINDS[edit]=alt-e
 HOOKS[edit]=sclear
 DESCS[edit]='Rename directory entry'
 function edit() {
   local dir="$1" newdir
-  read -r newdir < <(MENU_INPUT_PREVIEW=$(view "${dir}") input "$dir")
+
+  view "$dir" | tmux load-buffer -b preview -
+
+  read -r newdir < <(input query="$dir")
+
+  tmux delete-buffer -b preview
+
   [[ ! -d "$STORE/$newdir" ]] &&
     ( mkdir -p "$STORE/$newdir" && mv -Tvf -- "$STORE/$dir" "$STORE/$newdir" )
 }
@@ -185,7 +216,9 @@ BINDS[del]=alt-d
 DESCS[del]='Remove directory entry'
 function del() {
   local dir="${1}"
+
   rm -rf "${STORE}/${dir}"
+  (cd "$STORE" && find * -type d -empty -delete)
 }
 
 function dom() {
@@ -250,7 +283,11 @@ function new() {
 
   [[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" "$dir"
 
-  read -r dir < <(menu input "${dir}")
+  list | tmux load-buffer -b preview -
+
+  read -r dir < <(menu input "$dir")
+
+  tmux delete-buffer -b preview
 
   [[ -n "$dir" ]] &&
     insert "$dir" location "$location" "$force" &&
