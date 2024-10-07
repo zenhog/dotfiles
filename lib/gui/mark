@@ -430,7 +430,7 @@ function mod() {
 }
 
 function add() {
-  local url="$1"
+  local url="$1" data
 
   if check "$url"; then
     notify "'$url' already exists"
@@ -438,9 +438,7 @@ function add() {
   fi
 
   printdb info "$url" | tmux load-buffer -b preview -
-  printdb info "$url" | tmux load-buffer -b test -
 
-  local data
   read -r -a data < <(menu input)
 
   [[ -z "$data" ]] && return

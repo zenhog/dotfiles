@@ -7,16 +7,63 @@ ICON=󰝨
 FOLLOW=1
 NOWRAP=1
 RATIO=80%
+HORIZONTAL=1
+
+export ULOG_DIR="$HOME/.local/share/log/runit"
+export SLOG_DIR=/var/log/runit
 
 function view() {
-  local service
+  local service logd="$(get_opt logd)"
   read -r service _ <<< "$1"
-  grc --colour=on tail -n +1 -f "/var/log/runit/$service/current"
+  grc --colour=on tail -n +1 -f "$logd/$service/current"
+}
+
+function label() {
+  local mode="$(get_opt mode)"
+  local logd="$(get_opt logd)"
+
+  echo " mode: $mode, logd: $logd "
+}
+
+function init() {
+  set_opt mode user
+  set_opt logd "$ULOG_DIR"
+}
+
+BINDS[rotate_mode]=alt-t
+HOOKS[rotate_mode]=clear
+DESCS[rotate_mode]='Rotate mode'
+function rotate_mode() {
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    system) set_opt mode user; set_opt logd "$SLOG_DIR" ;;
+    user)   set_opt mode xorg; set_opt logd "$ULOG_DIR" ;;
+    xorg)   set_opt mode system; set_opt logd "$ULOG_DIR" ;;
+  esac
 }
 
 function list() {
-  sudo vsv 2>&1 | sed -rn '3,$p' | awk '{print $2,$3}'  | column -t
+  local mode="${1:-$(get_opt mode)}"
+
+  set_opt mode "$mode"
+
+  "list-$mode"
 }
+
+function list-user() {
+  local logd="$(get_opt logd)"
+  vsv -d "$HOME/.usv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+}
+
+function list-xorg() {
+  vsv -d "$HOME/.xsv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+}
+
+function list-system() {
+  sudo vsv | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+}
+
 
 BINDS[restart]=alt-r
 DESCS[restart]='Restart service'
