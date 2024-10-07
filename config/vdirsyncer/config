@@ -14,6 +14,6 @@ fileext = ".vcf"
 
 [storage remotecontacts]
 type = "carddav"
-url = "https://dav.mailbox.org/carddav/"
-username.fetch = [ "command", "bash", "-c", "pass show www/mailbox.org/username" ]
-password.fetch = [ "command", "bash", "-c", "pass show www/mailbox.org/password" ]
+url = "http://localhost:8080"
+username.fetch = [ "command", "bash", "-c", "pass show www/mail/proton.me/username" ]
+password.fetch = [ "command", "bash", "-c", "pass show www/mail/proton.me/bridge" ]

@@ -17,3 +17,25 @@ Create Both
 Expunge Both
 SyncState *
 Sync All
+
+IMAPStore proton-remote
+Host localhost
+Port 1143
+UserCmd "pass show www/mail/proton.me/username"
+PassCmd "pass show www/mail/proton.me/bridge"
+AuthMechs LOGIN
+TLSType None
+
+MaildirStore proton-local
+Path  ~/.mail/proton/
+Inbox ~/.mail/proton/INBOX
+SubFolders Verbatim
+
+Channel proton
+Far :proton-remote:
+Near :proton-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
