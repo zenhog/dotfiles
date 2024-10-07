@@ -1,0 +1,6 @@
+#!/bin/sh
+
+exec 2>&1
+
+inotifywait -m -q -r --format '%e %w%f' \
+  -e create,modify,delete,moved_from,moved_to 
