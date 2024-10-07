@@ -198,7 +198,7 @@ function fs2rcs() {
 
   local files
 
-  readarray -t files < <(find "$BASEDIR/$branch" -type f -name 'manifest')
+  readarray -t files < <(find "$BASEDIR/$branch" -type f -name manifest)
 
   for f in "${files[@]}"; do
     local dir opts
