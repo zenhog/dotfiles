@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 mkdir -p "$HOME/.mail/mailbox"
+mkdir -p "$HOME/.mail/proton"
 
-mbsync -a && {
+if mbsync -a; then
   notmuch new 2>/dev/null
   notmuch tag +inbox +unread -new -- tag:new
   notmuch tag -new +sent -- from:"$EMAIL"
   widget mail timeout
-}
+fi

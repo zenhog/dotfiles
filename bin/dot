@@ -62,7 +62,7 @@ function pull() {
     verbose cdgit "$branch/$branch" pull --rebase --autostash origin master
   fi
 
-  rcs2fs "$branch"
+  #rcs2fs "$branch"
   link "$branch"
 }
 
@@ -89,7 +89,7 @@ function push() {
 function commit() {
   local branch="${1?}"
 
-  fs2rcs "$branch"
+  #fs2rcs "$branch"
   encrypt "$branch"
   cdgit "$branch" add --all .
   cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
