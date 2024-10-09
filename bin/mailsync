@@ -2,10 +2,20 @@
 
 mkdir -p "$HOME/.mail/mailbox"
 mkdir -p "$HOME/.mail/proton"
+mkdir -p "$HOME/.mail/gmail"
+
+declare -A addrs=(
+  [proton]=zemmouri.iskander@proton.me
+  [gmail]=zemmouri.iskander@gmail.com
+  [mailbox]=iskander.zemmouri@mailbox.org
+)
+
 
 if mbsync -a; then
   notmuch new 2>/dev/null
   notmuch tag +inbox +unread -new -- tag:new
-  notmuch tag -new +sent -- from:"$EMAIL"
+  for addr in "${!addrs[@]}"; do
+    notmuch tag -new -inbox -unread +sent +${addr} -- from:"${addrs[$addr]}"
+  done
   widget mail timeout
 fi
