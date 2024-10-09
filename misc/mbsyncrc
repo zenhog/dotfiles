@@ -39,3 +39,24 @@ Create Both
 Expunge Both
 SyncState *
 Sync All
+
+IMAPStore gmail-remote
+Host imap.gmail.com
+UserCmd "pass show www/svc/google.com/username"
+PassCmd "pass show www/svc/google.com/password"
+TLSType IMAPS
+AuthMechs LOGIN
+
+MaildirStore gmail-local
+Path  ~/.mail/gmail/
+Inbox ~/.mail/gmail/INBOX
+SubFolders Verbatim
+
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
