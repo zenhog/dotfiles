@@ -1,6 +1,6 @@
 IMAPStore mailbox-remote
 Host imap.mailbox.org
-UserCmd "cat $HOME/.password-store/.defaults/username"
+UserCmd "pass show www/mail/mailbox.org/username"
 PassCmd "pass show www/mail/mailbox.org/password"
 TLSType IMAPS
 
@@ -42,8 +42,8 @@ Sync All
 
 IMAPStore gmail-remote
 Host imap.gmail.com
-UserCmd "pass show www/svc/google.com/username"
-PassCmd "pass show www/svc/google.com/imap"
+UserCmd "pass show www/mail/google.com/username"
+PassCmd "pass show www/mail/google.com/imap"
 TLSType IMAPS
 AuthMechs LOGIN
 

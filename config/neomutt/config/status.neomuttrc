@@ -1,3 +1,7 @@
+set sidebar_format = "%B%?F? [%F]?%* %?N?%N/?%S"
+set status_chars = " *%A"
+set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
+
 set index_format = " %zs %zc %zt %{!%d %b} . %-28.28L %?M?(%1M)& ? %?X?&·? %s"
 
 set pager_format = " %n %zc ∙ %T %s%*  %{!%d %b · %H:%M} ∙ %?X?  %X ?  %P  "

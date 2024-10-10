@@ -1,5 +1,8 @@
 kubernetes
+kubernetes-helm
+kubernetes-kind
 minikube
+k3d
 terraform
 terragrunt
 kubecfg

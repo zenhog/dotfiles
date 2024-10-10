@@ -1,0 +1,17 @@
+bind attach <return> view-mailcap
+
+bind index <Space> noop
+macro index <Space>q ":source ~/.config/neomutt/scripts/mailboxes|<enter>"
+
+bind index,pager k previous-entry
+bind index,pager j next-entry
+
+bind index,pager K half-up
+bind index,pager J half-down
+
+#macro compose H "<attach-file>`/usr/bin/fzf`<enter>"
+
+macro attach 'V' "<pipe-entry>iconv -c --to-code=UTF8 > ~/.cache/mutt/mail.html<enter><shell-escape>$BROWSER ~/.cache/mutt/mail.html<enter>"
+macro index,pager V "<view-attachments><search>html<enter>Vq"
+
+macro pager \Cb "<enter-command> set pipe_decode = yes<enter><pipe-message> extract GR_URLS<enter><enter-command> set pipe_decode = no<enter>"

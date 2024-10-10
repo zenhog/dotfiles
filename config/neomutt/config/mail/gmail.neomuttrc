@@ -1,0 +1,12 @@
+set sendmail = "/usr/bin/msmtp -a google"
+set mbox_type = Maildir
+set editor = nvim
+set folder = "~/.mail/gmail"
+set header_cache = "~/.cache/neomutt"
+set spoolfile = +INBOX
+set postpone = yes
+set postponed = +"[Gmail]/Drafts"
+set record = +"[Gmail]/Sent Mail"
+set trash = +"[Gmail]/Trash"
+set maildir_trash = yes
+set from = `pass show www/mail/google.com/username`

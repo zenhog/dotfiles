@@ -21,12 +21,8 @@
 #		in the mail store.
 #
 [new]
-#	exclude_tags
-#		A ;-separated list of tags that will be excluded from
-#		search results by default.  Using an excluded tag in a
-#		query will override that exclusion.
 [search]
-exclude_tags=deleted;junk;spam;
+exclude_tags=deleted
 # Maildir compatibility configuration
 # The following option is supported here:
 #	synchronize_flags      Valid values are true and false.
@@ -38,10 +34,5 @@ exclude_tags=deleted;junk;spam;
 #		P	passed
 #		R	replied
 #		S	unread (added when 'S' flag is not present)
-#
-#	The "notmuch new" command will notice flag changes in filenames
-#	and update tags, while the "notmuch tag" and "notmuch restore"
-#	commands will notice tag changes and update flags in filenames
-#
 [maildir]
 synchronize_flags=true

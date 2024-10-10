@@ -1,0 +1,27 @@
+set status_on_top = false
+set sidebar_visible = false
+set my_mail=/tmp/mutt/mail.html
+set delete
+set pipe_decode = no
+set assumed_charset= "iso-8859-2:utf8"
+set assumed_charset= "utf8"
+set charset = "utf-8"
+set send_charset = "utf-8"
+set virtual_spoolfile = yes
+set mail_check_stats
+unset markers
+unset wait_key
+set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
+set quote_regexp = "^( {0,4}[>|:#%]| {0,4}[a-z0-9]+[>|]+ )+"
+set allow_ansi
+set pager_index_lines = 10
+set pager_context = 3
+set pager_stop
+set wrap = 120
+set smart_wrap
+set date_format = "%d.%m.%Y %H:%M"
+set sort = threads
+set sort_aux = reverse-last-date-received
+set uncollapse_jump
+set sort_re
+set arrow_cursor = "no"
