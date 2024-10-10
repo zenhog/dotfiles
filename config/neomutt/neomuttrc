@@ -39,10 +39,13 @@ set nm_default_url = `printf 'notmuch://%s/.mail' "$HOME"`
 set virtual_spoolfile = yes
 unmailboxes *
 
-virtual-mailboxes "inbox" "notmuch://?query=tag:inbox"
-virtual-mailboxes "unread" "notmuch://?query=tag:unread"
-virtual-mailboxes "sent" "notmuch://?query=tag:sent"
+virtual-mailboxes "inbox"   "notmuch://?query=tag:inbox"
+virtual-mailboxes "unread"  "notmuch://?query=tag:unread"
+virtual-mailboxes "sent"    "notmuch://?query=tag:sent"
 virtual-mailboxes "archive" "notmuch://?query=tag:archive"
+virtual-mailboxes "spam"    "notmuch://?query=tag:spam"
+virtual-mailboxes "drafts"  "notmuch://?query=tag:draft"
+virtual-mailboxes "trash"   "notmuch://?query=tag:trash"
 
 set sidebar_format = "%B%?F? [%F]?%* %?N?%N/?%S"
 set mail_check_stats
@@ -55,7 +58,7 @@ set my_mail=/tmp/mutt/mail.html
 
 bind index <Space> noop
 
-macro index <Space>q ":source ~/.config/neomutt/scripts/fzf-folder|<enter>"
+macro index <Space>q ":source ~/.config/neomutt/scripts/mailboxes|<enter>"
 
 bind index,pager k previous-entry
 bind index,pager j next-entry
@@ -63,12 +66,12 @@ bind index,pager j next-entry
 bind index,pager K half-up
 bind index,pager J half-down
 
-macro index S "<modify-labels-then-hide>-inbox -unread +junk<enter><sync-mailbox>"
 macro index + "<modify-labels>+*<enter><sync-mailbox>"
 macro index - "<modify-labels>-*<enter><sync-mailbox>"
 macro index I "<modify-labels>-inbox -unread<enter>"
-macro index d "<modify-labels>-inbox -unread +deleted<enter>"
-macro index A "<modify-labels>+archive -unread -inbox<enter>"
+macro index S "<modify-labels-then-hide>-inbox -unread +junk<enter><sync-mailbox>"
+macro index d "<modify-labels-then-hide>-inbox -unread +trash<enter><sync-mailbox>"
+macro index A "<modify-labels-then-hide>+archive -unread -inbox -trash<enter><sync-mailbox>"
 macro index \\\\ "<vfolder-from-query>"
 
 #macro compose H "<attach-file>`/usr/bin/fzf`<enter>"
@@ -81,6 +84,7 @@ macro index,pager V "<view-attachments><search>html<enter>Vq"
 bind index,pager g noop
 macro index,pager gi "<change-folder>inbox<enter>" "go to inbox"
 macro index,pager gs "<change-folder>sent<enter>" "go to sent"
+macro index,pager gu "<change-folder>unread<enter>" "go to unread"
 macro index,pager gd "<change-folder>=Drafts<enter>" "go to drafts"
 macro index,pager gt "<change-folder>=Trash<enter>" "go to trash"
 
@@ -105,5 +109,3 @@ set arrow_cursor = "no"
 
 source colors/gruvbox-powerline.neomuttrc
 source powerline.neomuttrc
-
-#shutdown-hook 'notmuch search tag:deleted | xargs rm -f'

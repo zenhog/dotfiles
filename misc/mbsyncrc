@@ -43,7 +43,7 @@ Sync All
 IMAPStore gmail-remote
 Host imap.gmail.com
 UserCmd "pass show www/svc/google.com/username"
-PassCmd "pass show www/svc/google.com/password"
+PassCmd "pass show www/svc/google.com/imap"
 TLSType IMAPS
 AuthMechs LOGIN
 

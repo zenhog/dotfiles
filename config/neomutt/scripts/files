@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+gui search
+
+cd "$HOME/.selections" || exit 1
+
+for attachment in *; do
+  attachment="$(realpath "$attachment")"
+  echo "push 'a$attachment<enter>'"
+done

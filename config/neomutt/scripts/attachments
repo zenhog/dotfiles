@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+folders=(inbox sent spam drafts trash)
+
+folder="$(printf "%s\n" "${folders[@]}" | fzf)"
+
+echo "push 'a$folder<enter>'"
