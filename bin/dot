@@ -275,7 +275,7 @@ function status() {
   local branch="${1?}"
 
   if isremote "$branch"; then
-    verbose cdgit "$branch/$branch" status
+    cdgit "$branch/$branch" status
   fi
 
   cdgit "$branch" status
