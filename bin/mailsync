@@ -10,12 +10,24 @@ declare -A addrs=(
   [mailbox]=iskander.zemmouri@mailbox.org
 )
 
-
 if mbsync -a; then
-  notmuch new 2>/dev/null
-  notmuch tag +inbox +unread -new -- tag:new
-  for addr in "${!addrs[@]}"; do
-    notmuch tag -new -inbox -unread +sent +${addr} -- from:"${addrs[$addr]}"
+
+  notmuch search --output=files --format=text0 tag:deleted | xargs -r0 rm
+  notmuch search --output=files --format=text0 tag:trash   | xargs -r0 rm
+
+  # move tagged files to appropriate dirs
+
+  notmuch new
+
+  # tag according to dir
+
+  notmuch tag +inbox +unread -- tag:new
+
+  for a in "${!addrs[@]}"; do
+    notmuch tag -new -inbox -unread +sent +${addr} -- from:"${addrs[$a]}" tag:new
+    notmuch tag "+$a" +sent -unread -inbox -- from:"${addrs[$a]}" tag:new
+    notmuch tag "+$a" -- to:"${addrs[$a]}" tag:new
   done
+
   widget mail timeout
 fi

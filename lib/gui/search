@@ -165,6 +165,14 @@ function mark() {
   (cd "$marksdir" && ln -svf "$target" "${link#.}")
 }
 
+BINDS[attach]=alt-f
+DESCS[attach]='Select entry'
+function attach() {
+  local path="$(path "$1")"
+  mkdir -p "$HOME/.selections"
+  ln -svf "$path" "$HOME/.selections"
+}
+
 BINDS[marks]=alt-space
 DESCS[marks]='Go to marks directory'
 function marks() {

@@ -50,7 +50,7 @@ CALLS[change]='change-preview(preview {})'
 BINDS[paste]=alt-b
 HOOKS[paste]=paste
 GDESCS[paste]='Paste clipboard'
-CALLS[paste]='transform-query(tmux showb)'
+CALLS[paste]='transform-query(echo -n {q}; tmux showb)'
 
 BINDS[eval]=btab
 HOOKS[eval]=eval
@@ -83,6 +83,7 @@ function input() {
   cmd+=('--no-separator')
   cmd+=('--preview' 'inputpreview')
   cmd+=('--preview-window' 'bottom,90%,border-top,wrap')
+  cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
 
   if [[ -n "$fifo" ]]; then
     echo -n | "${cmd[@]}" 2>/dev/tty >"$fifo"

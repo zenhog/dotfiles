@@ -4,32 +4,16 @@ KEY=a
 MOD='S-M'
 ICON=󰀆
 
-export DB="$HOME/.db/bookmarks.db"
-
 POSITION=BOTTOM
 
-declare -A -x KEYS
-
 function view() {
-  :
+  local id
+
+  read -r id _ <<< "$1"
+
+  khard show -u "$id"
 }
 
 function list() {
-  sqlite3 -separator $'\t' "$DB" \
-    'select id, metadata from bookmarks' | sort -t $'\t' -k2
-}
-
-KEYS[reload]='alt-r'
-function reload() {
-  :
-}
-
-KEYS[open]='enter'
-function open() {
-  :
-}
-
-KEYS[close]='alt-d'
-function close() {
-  :
+  khard list -F uid,formatted_name,phone,email | sed -rn '3,$p'
 }
