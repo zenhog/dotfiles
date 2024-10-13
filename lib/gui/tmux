@@ -381,6 +381,13 @@ function extract-pane() {
       tmux capture-pane -pNq -t $pane | extract'\""
 }
 
+function extract-pane-history() {
+  local pane="$(dmux display -p '#S:#I.#P')"
+  dmux run \
+    "bash -c \"tmux new-window -n grep bash -c '
+      tmux capture-pane -pNq -S- -E- -t $pane | extract'\""
+}
+
 function gethint() {
   function printscreen() {
     tmux send-keys -X cancel

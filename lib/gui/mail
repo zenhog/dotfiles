@@ -27,7 +27,7 @@ function view() {
 }
 
 function list() {
-  # @menu-mail-list inbox|sent|draft|sent
+  # @menu-mail-list inbox|sent|draft|archive
   notmuch search --sort=newest-first --output=summary tag:inbox
 }
 

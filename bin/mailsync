@@ -1,33 +1,14 @@
 #!/usr/bin/env bash
 
-mkdir -p "$HOME/.mail/mailbox"
 mkdir -p "$HOME/.mail/proton"
+mkdir -p "$HOME/.mail/mailbox"
 mkdir -p "$HOME/.mail/gmail"
 
-declare -A addrs=(
-  [proton]=zemmouri.iskander@proton.me
-  [gmail]=zemmouri.iskander@gmail.com
-  [mailbox]=iskander.zemmouri@mailbox.org
-)
-
-if mbsync -a; then
-
+if mbsync "${1:--a}"; then
   notmuch search --output=files --format=text0 tag:deleted | xargs -r0 rm
-  notmuch search --output=files --format=text0 tag:trash   | xargs -r0 rm
-
-  # move tagged files to appropriate dirs
 
   notmuch new
-
-  # tag according to dir
-
-  notmuch tag +inbox +unread -- tag:new
-
-  for a in "${!addrs[@]}"; do
-    notmuch tag -new -inbox -unread +sent +${addr} -- from:"${addrs[$a]}" tag:new
-    notmuch tag "+$a" +sent -unread -inbox -- from:"${addrs[$a]}" tag:new
-    notmuch tag "+$a" -- to:"${addrs[$a]}" tag:new
-  done
+  notmuch tag --batch --input="$HOME/.config/neomutt/tagmail.notmuch"
 
   widget mail timeout
 fi
