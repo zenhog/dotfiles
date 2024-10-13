@@ -1,5 +1,6 @@
 #save-hook ~r01/01/2019-31/12/2019 =Archives/2019
 
-folder-hook mailbox "source config/mail/mailbox.neomuttrc"
-folder-hook gmail   "source config/mail/gmail.neomuttrc"
-folder-hook proton  "source config/mail/proton.neomuttrc"
+folder-hook gmail   "source ~/.config/neomutt/config/accounts/gmail.neomuttrc"
+folder-hook '.*mailbox.*' "source ~/.config/neomutt/config/accounts/mailbox.neomuttrc"
+folder-hook proton  "source ~/.config/neomutt/config/accounts/proton.neomuttrc"
+folder-hook .  "source ~/.config/neomutt/config/accounts/gmail.neomuttrc"

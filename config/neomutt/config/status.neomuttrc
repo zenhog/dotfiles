@@ -1,45 +1,47 @@
-set sidebar_format = "%B%?F? [%F]?%* %?N?%N/?%S"
-set status_chars = " *%A"
-set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
-
-set index_format = " %zs %zc %zt %{!%d %b} . %-28.28L %?M?(%1M)& ? %?X?&·? %s"
-
-set pager_format = " %n %zc ∙ %T %s%*  %{!%d %b · %H:%M} ∙ %?X?  %X ?  %P  "
-
-set status_format = " %f%?r? %r? ∙  %m %?n?  %n ? ∙ %?d?  %d ?%?t?  %t ?%?F?  %F? %> ∙%?p?   %p ?"
-
-#set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
-
-set vfolder_format = " %N %?n?%3n&   ?  %8m  · %f"
-
 index-format-hook  iconflag  "~P"    "P"
 index-format-hook  iconflag  "~U"    "U"
 index-format-hook  iconflag  "~R"    "✉"
 
-# The formats must start with 'G' and the entire sequence is case sensitive.
-tag-formats "replied"    "GR" \
-            "encrypted"  "GE" \
-            "signed"     "GS" \
-            "attachment" "GA" \
-
 # no addressed to me, to me, group, cc, sent by me, mailing list
-set to_chars="▶"
+set to_chars="󰀒󰀄󰭃"
 
 # unchanged mailbox, changed, read only, attach mode
-set status_chars = " "
+
+set status_chars = " 󰌾󰢵"
 
 ifdef crypt_chars set crypt_chars = " "
 
 set flag_chars = "      "
 
-#set hidden_tags = "unread,draft,flagged,passed,replied,attachment,signed,encrypted"
-
 set hidden_tags = "inbox,sent"
+
+tag-formats          \
+    "replied"    "GR" \
+    "passed"     "GP" \
+    "important"  "GS" \
+    "encrytpted" "Gc" \
+    "signed"     "Gs" \
+    "attachment" "Ga" \
+    "sent"       "Ge" \
+    "unread"     "Gu" \
+    "proton"     "Gp" \
+    "gmail"      "Gg" \
+    "mailbox"    "Gb" \
+    "spam"       "Gj" \
+    "inbox"      "Gi" \
+    "draft"      "Gd" \
+    "flagged"    "Gf" \
+    "deleted"    "GD" \
+    "trash"      "GT" \
+    "invite"     "GI" \
+    "me"         "Gn" \
+    "moved"      "GM" \
+    "bug"        "GB" \
+    "archive"    "GA"
 
 tag-transforms       \
     "replied"    "↻" \
     "passed"     "" \
-    "starred"    "" \
     "important"  "" \
     "encrytpted" "" \
     "signed"     "" \
@@ -50,25 +52,114 @@ tag-transforms       \
     "gmail"      "󰊭" \
     "mailbox"    "󰛮" \
     "spam"       "" \
-    "junk"       "" \
-    "inbox"      "I" \
-    "draft"      "T" \
-    "flagged"    "󱎘" \
+    "inbox"      "" \
+    "draft"      "" \
+    "flagged"    "‼️" \
     "deleted"    "" \
     "trash"      "" \
-    "invite"     ""
+    "invite"     "" \
+    "me"         "󰀄" \
+    "moved"      "" \
+    "bug"        "" \
+    "archive"    "󱈎"
 
-set index_format='%-5.5g %-55.55F %s'
+color index_tag color202 default "gmail"
+color index_tag color202 default "mailbox"
+color index_tag color202 default "proton"
+color index_tag color202 default "bug"
+color index_tag color220 default "important"
 
-color status white black
-# powerline status bar hack
-color status green black  ''
-color status yellow black ''
-color status red black    ''
+color indicator default color235
+color status    color242 default
+
+#color index color223 color234 ~Q
+#color index color223 color234 ~P
+#color index color223 color234 ~T
+#color index color223 color234 ~O
+#color index color223 color234 ~F
+#color index color223 color234 ~N
+
+set sidebar_format = "%D%?F? [%F]?%* %?N?%N/?%S"
+
+set status_chars = " *%A"
+
+set pager_format = " %n %zc ∙ %T %s%*  %{!%d %b · %H:%M} ∙ %?X?  %X ?  %P  "
+
+set status_format = " %f%?r? %r? ∙  %m %?n?  %n ? ∙ %?d?  %d ?%?t?  %t ?%?F?  %F? %> ∙%?p?   %p ?"
+
+#set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
+
+set vfolder_format = " %N %?n?%3n&   ?  %8m  · %f"
+
+#set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
+
+set status_format = " %f%?r? %r?   %m %?n?  %n ?  %?d?  %d ?%?t?  %t ?%?F?  %F? %> %?p?   %p ?"
+set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
+set status_format = "%D %?u? %u ?%?R? %R ?%?d? %d ?%?t? %t ?%?F? %F ?%?p? %p? \n  \n"
+
+set pager_format=" %n %zc  %T %s%*  %{!%d %b · %H:%M} %?X?  %X ? %P  "
+
+set index_format = "%<M?(%1M)& > %<X?%X 󰁦&·>"
+set index_format = "\
+%<GB?%GB&%<Gg?%Gg&%<Gb?%Gb&%<Gp?%Gp& >>>>\
+ \
+%<GD?%GD&%<GT?%GT&%<GA?%GA&%<Gj?%Gj& >>>>\
+ \
+%<GS?%GS& >\
+ ∘ \
+%zs \
+ ∘ \
+%{!%d %b}\
+ ∘ \
+%T \
+%-35.35L\
+ ∘ \
+%s\
+"
+
+# General Colors   -------------------------------------------------------------
+color normal default default                            # general text
+color error color231 color212                           # error messages
+color message default default                           # messages at the bottom
+color prompt default default                            # prompt text
+color search black color10                              # search highlight
+
+#color status yellow blue
+
+# Statusbar Colors   ----------------------------------------------------------------
+color status color141 default
+color status color7 color8 '([a-zA-Z0-9\.,]|\[|\])(\s)'  # bubble content 1
+color status color7 color8 '(\s)([a-zA-Z0-9\.,]|\[|\])'  # bubble content 2
+color status color7 color8 '(\% )'                       # % symbol
+color status color7 color8 '(\S)'                        # empty spaces
+color status color100 default '(|)'                      # statusline "bubbles"
+color status color39 black '(\` )'                      # bubble account variation
+color status white color69 '([a-zA-Z0-9\.]+)( )'         # account text
+color status green color8 ''                            # Unread messages count
+color status blue color8 ''                             # Read messages count icon
+color status yellow color8 ''                           # Flagged icon
+color status red color8 ''                              # Pending delete icon
+
 #color status brightblack blue '(.*)∙' 1
 #color status blue black '.*()' 1
 #color status black blue '\s* [0-9]+\s*'
 #color status blue black '(∙).*$' 1
+#color status yellow black '()\s*\s*[0-9]+\s*' 1
+#color status black yellow '\s*\s*[0-9]+\s*'
+#color status blue yellow '() ([0-9]+%|all|end) \s*' 1
+#color status black blue ' ([0-9]+%|all|end) \s*'
+#color status yellow black '()\s*' 1
+#color status default black ''
+
+#color status yellow blue
+## powerline status bar hack
+#color status green black ''
+#color status yellow black ''
+#color status red black ''
+#color status brightblack blue '(.*)' 1
+#color status blue black '.*()' 1
+#color status black blue '\s* [0-9]+\s*'
+#color status blue black '().*$' 1
 #color status yellow black '()\s*\s*[0-9]+\s*' 1
 #color status black yellow '\s*\s*[0-9]+\s*'
 #color status blue yellow '() ([0-9]+%|all|end) \s*' 1

@@ -1,4 +1,4 @@
-set status_on_top = false
+set status_on_top = true
 set sidebar_visible = false
 set my_mail=/tmp/mutt/mail.html
 set delete
@@ -19,7 +19,7 @@ set pager_context = 3
 set pager_stop
 set wrap = 120
 set smart_wrap
-set date_format = "%d.%m.%Y %H:%M"
+set date_format = "%d-%m-%Y %H:%M"
 set sort = threads
 set sort_aux = reverse-last-date-received
 set uncollapse_jump

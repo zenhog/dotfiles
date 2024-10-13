@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+exec 2>&1
+
+while read -r event; do
+  if [[ "$event" == player ]]; then
+    echo "Received player event"
+    echo "New song is: $(mpc current)"
+    widget music timeout
+  fi
+done < <(mpc idleloop)

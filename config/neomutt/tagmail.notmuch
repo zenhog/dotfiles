@@ -1,0 +1,28 @@
++me tag:new and to:iskander.zemmouri@mailbox.org
++me tag:new and to:zemmouri.iskander@proton.me
++me tag:new and to:zemmouri.iskander@gmail.com
+
++sent tag:new and from:iskander.zemmouri@mailbox.org
++sent tag:new and from:zemmouri.iskander@proton.me
++sent tag:new and from:zemmouri.iskander@gmail.com
+
+-inbox -unread +sent      tag:new and folder:/.*Sent/
++inbox +unread            tag:new and tag:sent and tag:me
+
+-inbox -unread +draft     tag:new and folder:/.*Drafts/
+-inbox -unread +archive   tag:new and folder:/.*Archive/
+-inbox -unread +trash     tag:new and folder:/.*Trash/
+
+-inbox +spam              tag:new and folder:/.*Junk/
+-inbox +spam              tag:new and folder:/.*Spam/
+
++important                tag:new and folder:/.*Starred/
++important                tag:new and folder:/.*Important/
+
++gmail                    tag:new and folder:/.*gmail/
++proton                   tag:new and folder:/.*proton/
++mailbox                  tag:new and folder:/.*mailbox/
+
++bug                      tag:new and tag:sent and tag:me
+
+-new tag:new

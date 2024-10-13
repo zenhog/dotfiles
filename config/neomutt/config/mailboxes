@@ -1,0 +1,8 @@
+virtual-mailboxes "Inbox"   "notmuch://?query=tag:inbox"
+virtual-mailboxes "Unread"  "notmuch://?query=tag:unread"
+virtual-mailboxes "Sent"    "notmuch://?query=tag:sent"
+virtual-mailboxes "Starred" "notmuch://?query=tag:important"
+virtual-mailboxes "Archive" "notmuch://?query=tag:archive"
+virtual-mailboxes "Spam"    "notmuch://?query=tag:spam"
+virtual-mailboxes "Drafts"  "notmuch://?query=tag:draft"
+virtual-mailboxes "Trash"   "notmuch://?query=tag:trash"

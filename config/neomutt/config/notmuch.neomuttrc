@@ -1,28 +1,11 @@
 set nm_default_url = `printf 'notmuch://%s/.mail' "$HOME"`
 
-unmailboxes *
-
-virtual-mailboxes "inbox"   "notmuch://?query=tag:inbox"
-virtual-mailboxes "unread"  "notmuch://?query=tag:unread"
-virtual-mailboxes "sent"    "notmuch://?query=tag:sent"
-virtual-mailboxes "archive" "notmuch://?query=tag:archive"
-virtual-mailboxes "spam"    "notmuch://?query=tag:spam"
-virtual-mailboxes "drafts"  "notmuch://?query=tag:draft"
-virtual-mailboxes "trash"   "notmuch://?query=tag:trash"
-
-macro index + "<modify-labels>+*<enter><sync-mailbox>"
-macro index - "<modify-labels>-*<enter><sync-mailbox>"
-macro index I "<modify-labels>-inbox -unread<enter>"
-macro index S "<modify-labels-then-hide>-inbox -unread +junk<enter><sync-mailbox>"
-macro index d "<modify-labels-then-hide>-inbox -unread +trash<enter><sync-mailbox>"
-macro index A "<modify-labels-then-hide>+archive -unread -inbox -trash<enter><sync-mailbox>"
-macro index \\\\ "<vfolder-from-query>"
-
 bind index,pager g noop
-macro index,pager gi "<change-folder>inbox<enter>" "go to inbox"
-macro index,pager gs "<change-folder>sent<enter>" "go to sent"
-macro index,pager gu "<change-folder>unread<enter>" "go to unread"
-macro index,pager gd "<change-folder>=Drafts<enter>" "go to drafts"
-macro index,pager gt "<change-folder>=Trash<enter>" "go to trash"
 
-macro index,pager Q "<change-folder>sent<enter>"
+macro index f "<modify-labels>+moved !important<enter>"
+macro index s "<modify-labels-then-hide>+moved +spam -trash -archive -inbox<enter>"
+macro index d "<modify-labels-then-hide>+moved -spam +trash -archive -inbox<enter>"
+macro index a "<modify-labels-then-hide>+moved -spam -trash +archive -inbox<enter>"
+macro index i "<modify-labels-then-hide>+moved -spam -trash -archive +inbox<enter>"
+
+macro index \\\\ "<vfolder-from-query>"

@@ -1,7 +1,7 @@
 bind attach <return> view-mailcap
 
 bind index <Space> noop
-macro index <Space>q ":source ~/.config/neomutt/scripts/mailboxes|<enter>"
+macro index <Space><Space> ":source ~/.config/neomutt/scripts/mailboxes|<enter>"
 
 bind index,pager k previous-entry
 bind index,pager j next-entry

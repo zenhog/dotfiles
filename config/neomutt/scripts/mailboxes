@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-folders=(inbox sent spam drafts trash)
+F="$HOME/.config/neomutt/config/mailboxes"
 
-folder="$(printf "%s\n" "${folders[@]}" | fzf)"
+readarray -t mailboxes < <(awk '/^.+/{print $2}' "$F" | tr -d '"')
 
-echo "push 'c$folder<enter>'"
+mailbox="$(printf "%s\n" "${mailboxes[@]}" | fzf)"
+
+if [[ "$mailbox" == */* ]]; then
+  folder="$(sed -rn 's/\[(.*)\].*/\1/p' <<< "$mailbox")"
+fi
+
+echo "push 'c$mailbox<enter>'"
+
+#[[ -n "$folder" ]] &&
+#echo "push ':source ~/.config/neomutt/config/accounts/${folder~}.neomuttrc'"

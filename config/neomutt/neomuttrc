@@ -14,10 +14,17 @@ auto_view       \
 
 set query_command = "( khard email --parsable '%s' | sed -n '1!p'; mu cfind --format=mutt-ab '%s' )"
 
-source config/mail/google.neomuttrc
+unmailboxes *
+
+source config/mailboxes
+
 source config/options.neomuttrc
 source config/notmuch.neomuttrc
+
 source config/status.neomuttrc
 source config/colors.neomuttrc
-source config/bindings.neomuttrc
+
 source config/hooks.neomuttrc
+source config/bindings.neomuttrc
+
+source config/accounts/gmail.neomuttrc
