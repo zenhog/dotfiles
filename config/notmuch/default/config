@@ -11,6 +11,9 @@
 [user]
 #name=$NAME
 #primary_email=$EMAIL
+name=Zemmouri Iskander
+primary_email=zemmouri.iskander@proton.me
+other_email=zemmouri.iskander@gmail.com;iskander.zemmouri@mailbox.org
 #	tags	A list (separated by ';') of the tags that will be
 #		added to all messages incorporated by "notmuch new".
 #	ignore	A list (separated by ';') of file and directory names
@@ -21,6 +24,7 @@
 #		in the mail store.
 #
 [new]
+tags=new;inbox
 [search]
 exclude_tags=deleted
 # Maildir compatibility configuration
