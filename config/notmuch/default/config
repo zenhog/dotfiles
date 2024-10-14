@@ -25,6 +25,7 @@ other_email=zemmouri.iskander@gmail.com;iskander.zemmouri@mailbox.org
 #
 [new]
 tags=new;inbox
+ignore=All Mail;.mbsyncstate;.uidvalidity
 [search]
 exclude_tags=deleted
 # Maildir compatibility configuration

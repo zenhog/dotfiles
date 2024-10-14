@@ -63,21 +63,22 @@ tag-transforms       \
     "bug"        "" \
     "archive"    "󱈎"
 
-color index_tag color202 default "gmail"
-color index_tag color202 default "mailbox"
-color index_tag color202 default "proton"
-color index_tag color202 default "bug"
-color index_tag color220 default "important"
+color index_tag color193 default "gmail"
+color index_tag color193 default "mailbox"
+color index_tag color193 default "proton"
+color index_tag color193 default "bug"
+color index_tag color193 default "important"
 
 color indicator default color235
 color status    color242 default
 
-#color index color223 color234 ~Q
-#color index color223 color234 ~P
-#color index color223 color234 ~T
-#color index color223 color234 ~O
-#color index color223 color234 ~F
-#color index color223 color234 ~N
+color index color223 color234 ~Q
+color index color223 color234 ~P
+color index color223 color234 ~T
+color index color223 color234 ~O
+color index color223 color234 ~F
+color index color223 color234 ~N
+color index red color234 ~U
 
 set sidebar_format = "%D%?F? [%F]?%* %?N?%N/?%S"
 
@@ -93,10 +94,6 @@ set vfolder_format = " %N %?n?%3n&   ?  %8m  · %f"
 
 #set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
 
-set status_format = " %f%?r? %r?   %m %?n?  %n ?  %?d?  %d ?%?t?  %t ?%?F?  %F? %> %?p?   %p ?"
-set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
-set status_format = "%D %?u? %u ?%?R? %R ?%?d? %d ?%?t? %t ?%?F? %F ?%?p? %p? \n  \n"
-
 set pager_format=" %n %zc  %T %s%*  %{!%d %b · %H:%M} %?X?  %X ? %P  "
 
 set index_format = "%<M?(%1M)& > %<X?%X 󰁦&·>"
@@ -106,6 +103,8 @@ set index_format = "\
 %<GD?%GD&%<GT?%GT&%<GA?%GA&%<Gj?%Gj& >>>>\
  \
 %<GS?%GS& >\
+ ∘ \
+%S\
  ∘ \
 %zs \
  ∘ \
@@ -117,6 +116,10 @@ set index_format = "\
 %s\
 "
 
+set status_format = " %f%?r? %r?   %m %?n?  %n ?  %?d?  %d ?%?t?  %t ?%?F?  %F? %> %?p?   %p ?"
+set status_format = "[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"
+set status_format = "%D %<u? %u >%<R? %R >%<d? %d >%<t? %t >%<F? %F >%<p? %p>"
+
 # General Colors   -------------------------------------------------------------
 color normal default default                            # general text
 color error color231 color212                           # error messages
@@ -127,16 +130,16 @@ color search black color10                              # search highlight
 #color status yellow blue
 
 # Statusbar Colors   ----------------------------------------------------------------
-color status color141 default
-color status color7 color8 '([a-zA-Z0-9\.,]|\[|\])(\s)'  # bubble content 1
-color status color7 color8 '(\s)([a-zA-Z0-9\.,]|\[|\])'  # bubble content 2
-color status color7 color8 '(\% )'                       # % symbol
-color status color7 color8 '(\S)'                        # empty spaces
-color status color100 default '(|)'                      # statusline "bubbles"
-color status color39 black '(\` )'                      # bubble account variation
+color status default color242
+color status color193 color242 '(|)'                      # statusline "bubbles"
+color status color193 color242 '(\` )'                      # bubble account variation
+color status color242 color193 '([a-zA-Z0-9\.,]|\[|\])(\s)'  # bubble content 1
+color status color242 color193 '(\s)([a-zA-Z0-9\.,]|\[|\])'  # bubble content 2
+color status color242 color193 '(\% )'                       # % symbol
+color status color242 color193 '(\S)'                        # empty spaces
 color status white color69 '([a-zA-Z0-9\.]+)( )'         # account text
 color status green color8 ''                            # Unread messages count
-color status blue color8 ''                             # Read messages count icon
+color status blue color8 ''                             # Read messages count icon
 color status yellow color8 ''                           # Flagged icon
 color status red color8 ''                              # Pending delete icon
 
