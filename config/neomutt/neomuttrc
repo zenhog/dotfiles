@@ -31,4 +31,4 @@ source config/colors.neomuttrc
 source config/hooks.neomuttrc
 source config/bindings.neomuttrc
 
-source config/accounts/gmail.neomuttrc
+source config/accounts/mailbox.neomuttrc

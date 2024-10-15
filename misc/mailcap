@@ -1,10 +1,10 @@
 #text/html; glow -w 120; copiousoutput
 #text/html; text/html; ~/.config/neomutt/scripts/view_attachment %s html; test=test -n "$DISPLAY"
 text/html; elinks -dump -dump-color-mode 2; copiousoutput
-text/plain; glow -w 120; copiousoutput
-text/plain; elinks -dump -dump-color-mode 2; copiousoutput
+text/plain; nvim %s
 image/*; open %s; test=test -n "$DISPLAY"
 application/pdf; open %s; test=test -n "$DISPLAY"
+#audio/*; open %s
 #text/*;                           LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
 #application/*;                    LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
 #image/*;                          LESSQUIET=1 lesspipe.sh '%s'; copiousoutput
