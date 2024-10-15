@@ -130,7 +130,7 @@ set pager_format = "\
 %n \
 %zc \
 %T \
-%s%* \
+%s \
 %zc \
 "
 
