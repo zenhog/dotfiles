@@ -10,3 +10,4 @@ set record = +"[Gmail]/Sent Mail"
 set trash = +"[Gmail]/Trash"
 set maildir_trash = yes
 set from = `pass show www/mail/google.com/username`
+set my_mailbox = '󰊭'

@@ -10,3 +10,4 @@ set record = +Sent
 set trash = +Trash
 set maildir_trash = yes
 set from = `pass show www/mail/mailbox.org/username`
+set my_mailbox = '󰛮'
