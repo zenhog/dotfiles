@@ -10,11 +10,11 @@ mkdir -p "$HOME/.mail/gmail"
 readarray -t files < <(notmuch search --output=files \
   --format=text0 tag:important tag:moved)
 
-# trash
-
 # spam/junk
-
+# archive
+# trash
 # deleted
+
 notmuch search --output=files --format=text0 tag:deleted | xargs -r0 rm
 
 mbsync "${1:--a}"

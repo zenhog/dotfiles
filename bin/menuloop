@@ -47,4 +47,4 @@ while true; do
   gui awm setattributes class=menu instance=loop -- \
     @hidden=true @minimized=true >&2
 
-done < <(socat "UNIX-LISTEN:$SOCKET",fork STDOUT)
+done < <(socat -u "UNIX-LISTEN:$SOCKET",fork STDOUT)
