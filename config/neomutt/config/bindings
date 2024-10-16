@@ -11,7 +11,29 @@ bind index,pager J half-down
 
 #macro compose H "<attach-file>`/usr/bin/fzf`<enter>"
 
-macro attach 'V' "<pipe-entry>iconv -c --to-code=UTF8 > ~/.cache/mutt/mail.html<enter><shell-escape>$BROWSER ~/.cache/mutt/mail.html<enter>"
+set my_cmd_browser = "<pipe-entry>"
+set my_cmd_browser = "$my_cmd_browser iconv -c --to-code=UTF8 >"
+set my_cmd_browser = "$my_cmd_browser ~/.cache/mutt/mail.html<enter>"
+set my_cmd_browser = "$my_cmd_browser <shell-escape>"
+set my_cmd_browser = "$my_cmd_browser browser ~/.cache/mutt/mail.html<enter>"
+
+set my_cmd_firefox = "<pipe-entry>"
+set my_cmd_firefox = "$my_cmd_firefox iconv -c --to-code=UTF8 >"
+set my_cmd_firefox = "$my_cmd_firefox ~/.cache/mutt/mail.html<enter>"
+set my_cmd_firefox = "$my_cmd_firefox <shell-escape>"
+set my_cmd_firefox = "$my_cmd_firefox browser firefox ~/.cache/mutt/mail.html<enter>"
+
+macro attach V "$my_cmd_browser"
 macro index,pager V "<view-attachments><search>html<enter>Vq"
 
-macro pager \Cb "<enter-command> set pipe_decode = yes<enter><pipe-message> extract GR_URLS<enter><enter-command> set pipe_decode = no<enter>"
+macro attach X "$my_cmd_firefox"
+macro index,pager X "<view-attachments><search>html<enter>Xq"
+
+set my_cmd_extract = "<enter-command>"
+set my_cmd_extract = "$my_cmd_extract set pipe_decode = yes<enter>"
+set my_cmd_extract = "<pipe-message>"
+set my_cmd_extract = "$my_cmd_extract extract GR_URLS<enter>"
+set my_cmd_extract = "<enter-command>"
+set my_cmd_extract = "$my_cmd_extract set pipe_decoded = no<enter>"
+
+macro pager \Cb "$my_cmd_extract"
