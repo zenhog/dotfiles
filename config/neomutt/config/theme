@@ -1,0 +1,128 @@
+set my_icon_proton     = 󰝨
+set my_icon_mailbox    = 󰛮
+set my_icon_google     = 󰊭
+set my_icon_bug        = 󰨰
+set my_icon_unread     = 
+set my_icon_read       = 
+set my_icon_flagged    = 
+set my_icon_trash      = 
+set my_icon_deleted    = 󰗨
+set my_icon_draft      = 
+set my_icon_spam       = 󱎷
+set my_icon_archive    = 󱈎
+set my_icon_replied    = ↻
+set my_icon_encrypted  = 
+set my_icon_signed     = 
+set my_icon_passed     = 
+set my_icon_attachment = 󰁦
+set my_icon_calendar   = 
+set my_icon_edited     = 
+set my_icon_tome       = 󰀄
+set my_icon_sent       = 󱅥
+
+set my_color_unread  = color11
+set my_color_read    = red
+set my_color_flag    = brightyellow
+set my_color_trash   = color15
+set my_color_deleted = color15
+set my_color_draft   = cyan
+set my_color_spam    = blue
+
+index-format-hook important "~F"  $my_icon_flagged
+index-format-hook important "!~F" " "
+
+index-format-hook box "~Y bug"     $my_icon_bug
+index-format-hook box "~Y gmail"   $my_icon_google
+index-format-hook box "~Y mailbox" $my_icon_mailbox
+index-format-hook box "~Y proton"  $my_icon_proton
+
+reply-hook "~Y gmail"   "source ~/.config/neomutt/accounts/google"
+reply-hook "~Y proton"  "source ~/.config/neomutt/accounts/proton"
+reply-hook "~Y mailbox" "source ~/.config/neomutt/accounts/mailbox"
+
+# no addressed to me, to me, group, cc, sent by me, mailing list
+set to_chars="󰀒󰀄󰭃"
+
+# unchanged mailbox, changed, read only, attach mode
+
+set status_chars = " 󰌾󰢵"
+
+ifdef crypt_chars set crypt_chars = " "
+
+set flag_chars = "      "
+
+set hidden_tags = "inbox,sent"
+
+color index_tag color193 default "gmail"
+color index_tag color193 default "mailbox"
+color index_tag color193 default "proton"
+color index_tag color193 default "bug"
+
+color indicator default color235
+color status    color242 default
+
+color index default default ~Q             # replied messages
+color index default default ~P             # messages sent to me
+color index default default ~T             # tagged messages
+color index default default ~O             # old messages
+color index default default ~N             # new messages
+color index brightyellow  default ~F             # flagged messages
+color index cyan          default ~U             # unread messages
+color index brightred     default ~D             # unread messages
+color index red color234 "~Y bug"
+
+set sidebar_format = "%D%?F? [%F]?%* %?N?%N/?%S"
+
+set pager_format = " %n %zc ∙ %T %s%*  %{!%d %b · %H:%M} ∙ %?X?  %X ?  %P  "
+
+set status_format = " %f%?r? %r? ∙  %m %?n?  %n ? ∙ %?d?  %d ?%?t?  %t ?%?F?  %F? %> ∙%?p?   %p ?"
+
+#set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
+
+set vfolder_format = " %N %?n?%3n&   ?  %8m  · %f"
+
+#set attach_format = "%u%D  %T%-75.75d %?T?%&   ? %5s · %m/%M"
+
+set index_format = "%<M?(%1M)& > %<X?%X 󰁦&·>"
+
+color status $my_color_unread default $my_icon_unread
+color status $my_color_read   default $my_icon_read
+color status $my_color_flag   default $my_icon_flag
+color status $my_color_trash  default $my_icon_trash
+color status $my_color_draft  default $my_icon_draft
+
+set index_format = "%@box@ %T %-45.45L %-120.120s %{!%d %b}"
+
+set my_format_status = ""
+set my_format_status = "${my_format_status} %D (%l)"
+set my_format_status = "${my_format_status} %<u?${my_icon_unread} %u >"
+set my_format_status = "${my_format_status} %<R?${my_icon_read} %R >"
+set my_format_status = "${my_format_status} %<d?${my_icon_trash} %d >"
+set my_format_status = "${my_format_status} %<t?${my_icon_spam} %t >"
+set my_format_status = "${my_format_status} %<F?${my_icon_flagged} %F >"
+set my_format_status = "${my_format_status} %<p?${my_icon_draft} %p >"
+
+set status_format = $my_format_status
+
+set pager_format=" %n %zc  %T %s%*  %{!%d %b · %H:%M} %?X?  %X ? %P  "
+
+set pager_format = " %n %zc %T %s %zc "
+
+# General Colors   -------------------------------------------------------------
+color normal default default                            # general text
+color error red default                           # error messages
+color message default default                           # messages at the bottom
+color prompt default default                            # prompt text
+color search blue default                              # search highlight
+
+#color status yellow blue
+
+# Statusbar Colors   ----------------------------------------------------------------
+color status default color242
+color status color193 color242 '(|)'                      # statusline "bubbles"
+color status color193 color242 '(\` )'                      # bubble account variation
+color status color242 color193 '([a-zA-Z0-9\.,]|\[|\])(\s)'  # bubble content 1
+color status color242 color193 '(\s)([a-zA-Z0-9\.,]|\[|\])'  # bubble content 2
+color status color242 color193 '(\% )'                       # % symbol
+color status color242 color193 '(\S)'                        # empty spaces
+color status white color69 '([a-zA-Z0-9\.]+)( )'         # account text

@@ -20,16 +20,8 @@ alternates `pass show www/mail/proton.me/username`
 
 unmailboxes *
 
-source config/accounts/mailbox.neomuttrc
-
+source config/variables
 source config/mailboxes
-
-source config/options.neomuttrc
-source config/notmuch.neomuttrc
-
-source config/status.neomuttrc
-source config/colors.neomuttrc
-
-source config/hooks.neomuttrc
-source config/bindings.neomuttrc
-
+source config/bindings
+source config/theme
+source accounts/mailbox
