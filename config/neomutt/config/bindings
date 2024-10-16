@@ -31,9 +31,9 @@ macro index,pager X "<view-attachments><search>html<enter>Xq"
 
 set my_cmd_extract = "<enter-command>"
 set my_cmd_extract = "$my_cmd_extract set pipe_decode = yes<enter>"
-set my_cmd_extract = "<pipe-message>"
+set my_cmd_extract = "$my_cmd_extract <pipe-message>"
 set my_cmd_extract = "$my_cmd_extract extract GR_URLS<enter>"
-set my_cmd_extract = "<enter-command>"
+set my_cmd_extract = "$my_cmd_extract <enter-command>"
 set my_cmd_extract = "$my_cmd_extract set pipe_decode = no<enter>"
 
 macro pager \Cb "$my_cmd_extract"
