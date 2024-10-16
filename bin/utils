@@ -369,7 +369,7 @@ function diffsecret() {
   dirsrc="$(realpath -sm "${1?}")"
   tarsrc="${2:-${dirsrc}.tar.gz.gpg}"
 
-  tty -s && diff=delta
+  tty -s && diff=diff
 
   "$diff" \
     <(quiet dumpsecret "$tarsrc") \
