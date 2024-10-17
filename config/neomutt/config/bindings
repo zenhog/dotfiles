@@ -9,6 +9,8 @@ bind index,pager j next-entry
 bind index,pager K half-up
 bind index,pager J half-down
 
+macro index d "<delete-message><modify-labels>-inbox +trash<enter>"
+
 #macro compose H "<attach-file>`/usr/bin/fzf`<enter>"
 
 set my_var_mailpath = "~/.cache/mutt/mail.html"
