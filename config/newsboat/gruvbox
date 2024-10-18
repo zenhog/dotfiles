@@ -3,15 +3,21 @@
 # Tested with the Kitty gruvbox terminal colour scheme
 # https://github.com/wdomitrz/kitty-gruvbox-theme
 
+#color listfocus default red bold
+#color info default default reverse
+#color background white black
+#color listnormal_unread yellow default
+#color listfocus blue default reverse bold
+#color listfocus_unread blue default reverse bold
+
 color background          default    default
 color listnormal          default    default
 color listnormal_unread   default    default   bold
-color listfocus           blue       default   bold
-color listfocus_unread    color13    default   bold
+color listfocus           blue       green   bold
+color listfocus_unread    color13    green   bold
 color info                green      default
 color article             default    default
 color title               red        default   bold
-
 
 # highlights
 highlight article "^(Feed|Link):.*$" color13 default bold

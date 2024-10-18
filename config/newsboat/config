@@ -8,11 +8,6 @@ prepopulate-query-feeds yes
 
 text-width 80
 
-#color info default default reverse
-#color background white black
-#color listnormal_unread yellow default
-#color listfocus blue default reverse bold
-#color listfocus_unread blue default reverse bold
 
 show-read-feeds yes
 feed-sort-order unreadarticlecount-asc
