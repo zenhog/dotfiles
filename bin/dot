@@ -75,7 +75,7 @@ function push() {
     commit "$branch/$branch" && cdgit "$branch/$branch" push origin master
   fi
 
-  commit "$branch"
+  nodiff=1 commit "$branch"
 
   if isremote "$branch"; then
     verbose rebranch "$branch"

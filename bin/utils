@@ -390,7 +390,7 @@ function encsecret() {
   local src="$(realpath -sm "${1?}")"
   local dst="$src.tar.gz.gpg"
 
-  if ! mute diffsecret "$src"; then
+  if [[ -n "$nodiff" ]] || ! mute diffsecret "$src"; then
     if tarcreate "$src" | enc --output "$dst" -; then
       printf 'Successful encryption of %s into %s\n' "$src" "$dst" >&2
     fi
