@@ -324,18 +324,28 @@ function tarlist() {
 function tardump() {
   local extra_opts=(--to-command="${BASH_SOURCE[0]} tarformat")
 
-  coproc tarextract "$@"
+  #coproc tarextract "$@"
 
-  exec 3>&"${COPROC[1]}"
-  exec 4>&"${COPROC[0]}"
-  exec {COPROC[0]}>&-
-  exec {COPROC[1]}>&-
+  #exec 3>&"${COPROC[1]}"
+  #exec 4>&"${COPROC[0]}"
+  #exec {COPROC[0]}>&-
+  #exec {COPROC[1]}>&-
 
-  cat "${1:-/dev/stdin}" | tee >(tarlist) >&3
+  local fifo="$(mktemp --dry-run)"
 
-  exec 3>&-
-  cat <&4
-  exec 4>&-
+  tee "$fifo" | tarlist
+
+  tarextract "$@" < "$fifo"
+
+  rm -f "$fifo"
+
+  #tarextract "$@" < <(printf "%s\n" "${lines[@]}")
+
+  #cat "${1:-/dev/stdin}" | tee >(tarlist) >&3
+
+  #exec 3>&-
+  #cat <&4
+  #exec 4>&-
 }
 
 function tarpreview() {
@@ -344,7 +354,7 @@ function tarpreview() {
 
 function tardiff() {
   local diff=diff
-  tty -s && diff=delta
+  tty -s && diff=diff
 
   if [[ "${1?}" == *.tar.gz && "${2?}" == *.tar.gz ]]; then
     "$diff" <(quiet tardump "$1") <(quiet tardump "$2")
