@@ -89,3 +89,6 @@ for rcfile in "$ZSH_DIR"/*(.); do
 done
 
 mute gui action inittheme
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /usr/bin/terraform terraform

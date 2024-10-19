@@ -164,7 +164,7 @@ function mod() {
       pass rm -f "$dir/${entry:1}"
     else
       local lhs rhs
-      IFS='=' read -r lhs rhs <<< "$entry"
+      IFS=: read -r lhs rhs <<< "$entry"
       rename "$dir/$lhs"
       insert "$dir" "$lhs" "$rhs"
     fi
@@ -192,7 +192,7 @@ HOOKS[getuser]=accept
 DESCS[getuser]='Clip username field'
 function getuser() {
   local dir="$1"
-  get "$dir" username | xsel -ib
+  get "$dir" username | tmux load-buffer -
 }
 
 BINDS[getpass]=alt-y
@@ -200,7 +200,7 @@ HOOKS[getpass]=accept
 DESCS[getpass]='Clip password field'
 function getpass() {
   local dir="$1"
-  get "$dir" password | xsel -ib
+  get "$dir" password | tmux load-buffer -
 }
 
 BINDS[add]=alt-a
