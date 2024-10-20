@@ -41,7 +41,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       [[ "$type" == wan ]] && profile=qutebrowser
 
-      cmd+=(gui awm runonce fg "profile=$profile" --)
+      cmd+=(gui awm runonce bg "profile=$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
@@ -67,7 +67,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       [[ "$type" == wan ]] && profile=firefox
 
-      cmd+=(gui awm runonce fg "profile=$profile" --)
+      cmd+=(gui awm runonce bg "profile=$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
