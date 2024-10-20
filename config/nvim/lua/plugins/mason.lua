@@ -35,6 +35,7 @@ return {
           --'solargraph',             -- Ruby
           'lua-language-server',    -- Lua
           'bash-language-server',   -- Bash
+          'terraform-ls',             -- Terraform
           --'vim-language-server',    -- VimLang
           --'html-lsp',               -- HTML
           --'css-lsp',                -- CSS
@@ -124,6 +125,7 @@ return {
         pyright,
         bashls,
         solargraph,
+        terraform,
         html,
         cssls,
         ltex,
