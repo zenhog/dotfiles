@@ -3,6 +3,7 @@
 SVC="$1"
 HOST="$2"
 ENTRY="$3"
+TITLE="$4"
 
 case "$SVC" in
   grab)
@@ -10,10 +11,10 @@ case "$SVC" in
     echo 'fake-key <Ctrl-V>' > "$QUTE_FIFO"
     ;;
   passinit)
-    gui pass new "$HOST" "$ENTRY"
+    gui pass new "$HOST" "$ENTRY" "$TITLE"
     ;;
   mark)
-    gui mark add "$HOST"
+    gui mark add "$HOST" "$TITLE"
     ;;
   unmark)
     gui mark del "$HOST"

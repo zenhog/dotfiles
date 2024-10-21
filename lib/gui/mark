@@ -5,6 +5,7 @@ MOD='S-M'
 ICON=
 
 HORIZONTAL=1
+NOWRAP=1
 
 export DB="$HOME/.db/bookmarks.db"
 export DB="$HOME/.db/marks.db"
@@ -430,14 +431,19 @@ function mod() {
 }
 
 function add() {
-  local url="$1" data
+  local url="$1" title="$2" data
 
   if check "$url"; then
     notify "'$url' already exists"
     return 1
   fi
 
-  printdb info "$url" | tmux load-buffer -b preview -
+  (
+    echo "TITLE: $title"
+    echo "URL: $url"
+    sepline
+    printdb info "$url"
+  ) | tmux load-buffer -b preview -
 
   read -r -a data < <(menu input)
 

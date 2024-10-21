@@ -33,10 +33,10 @@ bind('<Ctrl-Return>', 'spawn --userscript reload')
 bind('<Ctrl-A>', 'spawn --userscript whitelist {url:host}')
 bind('<Ctrl-B>', 'spawn --userscript blacklist {url:host}')
 
-bind('<Ctrl-M>', 'spawn --userscript menurun mark {url}')
+bind('<Ctrl-M>', 'spawn --userscript menurun mark {url} {title}')
 bind('<Ctrl-O>', 'spawn --userscript menurun unmark {url}')
 
-bind('<Ctrl-Y>', 'spawn --userscript menurun passinit {url:host} {url}')
+bind('<Ctrl-Y>', 'spawn --userscript menurun passinit {url:host} {url} ${title}')
 
 bind('<Ctrl-E>', 'spawn --userscript menurun grab username {url:host}', mode = 'insert')
 bind('<Ctrl-R>', 'spawn --userscript menurun grab password {url:host}', mode = 'insert')

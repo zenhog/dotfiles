@@ -127,15 +127,18 @@ function regen() {
 }
 
 BINDS[reloc]=alt-u
+HOOKS[reloc]=noclear
 DESCS[reloc]='Overwrite location'
 function reloc() {
   local dir="$1"
   #eval "$(tmux show-environment -t menu LOCATION 2>/dev/null)"
   #tmux set-environment -t menu -u LOCATION
 
-  if [[ -n "$MENU_LOCATION" ]]; then
+  local newloc="$(tmux show-buffer -b label)"
+
+  if [[ -n "$newloc" ]]; then
     rename "$dir/location"
-    insert "$dir" location "$MENU_LOCATION" force
+    insert "$dir" location "$newloc" force
   fi
 }
 
@@ -281,7 +284,7 @@ function fopen() {
  
   read -r location < <(get "$dir" location)
 
-  browser firefox "$location"
+  browser firefox vpn2 "$location"
 }
 
 function new() {
