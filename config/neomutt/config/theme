@@ -107,7 +107,7 @@ set vfolder_format = " %N %?n?%3n&   ?  %8m  · %f"
 
 set index_format = "%<M?(%1M)& > %<X?%X 󰁦&·>"
 
-set index_format = "%@box@ ∘ %{!%d %b} ∘ %T %-40.40L %<X?%X 󰁦& > ∘ %@box@ %s"
+set index_format = "%@box@ ∘ %{!%d %b} ∘ %T %-30.30L %<X?%X 󰁦& > ∘ %@box@ %s"
 
 set my_format_status = ""
 set my_format_status = "${my_format_status} %D %r (%l)"
@@ -117,6 +117,10 @@ set my_format_status = "${my_format_status} %<d?${my_icon_trash} %d >"
 set my_format_status = "${my_format_status} %<t?${my_icon_spam} %t >"
 set my_format_status = "${my_format_status} %<F?${my_icon_flagged} %F >"
 set my_format_status = "${my_format_status} %<p?${my_icon_draft} %p >"
+# google emails count
+# proton emails count
+# mailbox emails count
+# sent emails count
 
 set status_format = $my_format_status
 
