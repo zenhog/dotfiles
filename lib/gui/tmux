@@ -529,7 +529,6 @@ function forward_buffer() {
   local port="$(quiet tmux show -vt "$name" @port)"
 
   if [[ -n "$port" ]]; then
-
     local data="$(tmux show-buffer | base64 -w0)"
 
     exec 3<>"/dev/tcp/localhost/$port"
@@ -538,11 +537,8 @@ function forward_buffer() {
 
     exec 3>&-
     exec 3<&-
-
-    return
-  else
-    sync_clipboard
   fi
+  sync_clipboard
 }
 
 function setup_session() {

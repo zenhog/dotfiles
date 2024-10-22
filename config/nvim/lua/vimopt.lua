@@ -27,8 +27,8 @@ opt.cursorline = true
 opt.termguicolors = true -- Enable 24-bit RGB colors
 
 opt.completeopt = 'menuone,noinsert,noselect'
-opt.sessionoptions = 'buffers,curdir,folds,globals,tabpages,winpos,winsize'
-opt.sessionoptions = 'curdir,folds,globals,tabpages,winpos,winsize'
+opt.sessionoptions = 'curdir,buffers,folds,globals,tabpages,winpos,winsize,'..
+  'options,localoptions,help,blank'
 
 opt.formatoptions:remove { "c", "r", "o" }
 
