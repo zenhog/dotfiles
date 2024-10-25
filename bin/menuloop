@@ -31,20 +31,22 @@ if [[ -S "${SOCKET}" ]]; then
     rm "${SOCKET}"
 fi
 
-while true; do
-  IFS=: read -r -a args
+socat -u "UNIX-LISTEN:$SOCKET",fork EXEC:socatmenu
 
-  echo "INPUT_COMMAND: ${args[*]}" >&2
-  [[ -z "$args" ]] && break
-
-  gui awm setattributes class=menu instance=loop -- \
-    @hidden=false @minimized=false >&2
-
-  gui awm raise class=menu instance=loop >&2
-
-  menu main "${args[@]}"
-
-  gui awm setattributes class=menu instance=loop -- \
-    @hidden=true @minimized=true >&2
-
-done < <(socat -u "UNIX-LISTEN:$SOCKET",fork STDOUT)
+#while true; do
+#  IFS=: read -r -a args
+#
+#  echo "INPUT_COMMAND: ${args[*]}" >&2
+#  [[ -z "$args" ]] && break
+#
+#  gui awm setattributes class=menu instance=loop -- \
+#    @hidden=false @minimized=false >&2
+#
+#  gui awm raise class=menu instance=loop >&2
+#
+#  menu main "${args[@]}"
+#
+#  gui awm setattributes class=menu instance=loop -- \
+#    @hidden=true @minimized=true >&2
+#
+#done < <(socat -u "UNIX-LISTEN:$SOCKET",fork STDOUT)

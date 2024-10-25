@@ -294,7 +294,7 @@ function new() {
 
   read -r dir < <(dom "${domain}" || baseurl "${domain}")
 
-  [[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" "$dir"
+  [[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" -- "$dir"
 
   list | tmux load-buffer -b preview -
 

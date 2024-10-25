@@ -111,6 +111,11 @@ function linktarget() {
 function link() {
   local branch="${1?}"
 
+  if isremote "$branch"; then
+    link "$branch/$branch"
+    return
+  fi
+
   local hints
 
   readarray -t hints < <(cd "$BASEDIR/$branch" &&
@@ -126,7 +131,7 @@ function link() {
 
     case "$type" in
       .linkdir)
-        eval "prefix=${prefix:-${HOME}/.}"
+        eval prefix="${prefix:-${HOME}/.}"
         link="${prefix}${reladir}"
         linktarget "$dir" "$link"
         ;;
