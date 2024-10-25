@@ -81,7 +81,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
       fi
       ;;
     *)
-      browser qutebrowser "$@"
+      browser firefox "$@"
       ;;
   esac
 else

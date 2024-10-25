@@ -1,0 +1,4 @@
+function git-status() {
+  BUFFER="git status"
+  zle accept-line
+}

@@ -15,6 +15,8 @@ bindkey "^S" zce
 bindkey "^Y" zce-kill
 bindkey "^Q" search
 
+bindkey "^X^S" git-status
+
 # bindkey "^Q" add-space
 bindkey "^U" kill-whole-line
 bindkey "^B" run-help
