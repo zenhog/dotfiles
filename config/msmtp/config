@@ -1,13 +1,3 @@
-account proton
-protocol smtp
-host localhost
-port 1025
-auth plain
-tls off
-eval "echo -n 'user '; pass show www/mail/proton.me/username"
-eval "echo -n 'from '; pass show www/mail/proton.me/username"
-passwordeval "pass show www/mail/proton.me/bridge"
-
 account mailbox
 protocol smtp
 host smtp.mailbox.org
@@ -19,15 +9,3 @@ tls_trust_file /etc/ssl/certs/ca-certificates.crt
 eval "echo -n 'user '; pass show www/mail/mailbox.org/username"
 eval "echo -n 'from '; pass show www/mail/mailbox.org/username"
 passwordeval "pass show www/mail/mailbox.org/password"
-
-account google
-protocol smtp
-host smtp.gmail.com
-port 465
-auth on
-tls on
-tls_starttls off
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "echo -n 'user '; pass show www/mail/google.com/username"
-eval "echo -n 'from '; pass show www/mail/google.com/username"
-passwordeval "pass show www/mail/google.com/smtp"
