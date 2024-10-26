@@ -7,9 +7,9 @@ kind=${mime##*/}
 
 UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
 
-#if [[ -n "$UEBERZUG_PREVIEW" ]]; then
-#  declare -A -p cmd=([action]=remove [identifier]=preview) > "$UEBERZUG_FIFO"
-#fi
+if [[ -n "$UEBERZUG_PREVIEW" ]]; then
+  declare -A -p cmd=([action]=remove [identifier]=preview) > "$UEBERZUG_FIFO"
+fi
 
 if [[ "$(basename "$1")" =~ tar.gz.gpg$ ]]; then
   utils dumpsecret "$1"

@@ -317,7 +317,7 @@ function printdb() {
       paste -d, \
         <(printf "%s\n" "${cats[@]}") \
         <(printf "%s %s %s %s %s %s\n" "${tags[@]}" | column -t) |
-          column -t -s, -o' | '
+          column -t -s, -o' -- '
       ;;
   esac
 }
@@ -353,7 +353,7 @@ function list() {
     paste -d'|' \
       <(printf "%s\n" "${lines[@]}") \
       <(printf "%s\n" "${taglines[@]}" | column -Lt -s,) |
-        column -t -s'|' -o ' | '
+        column -t -s'|' -o ' -- '
   fi
 }
 
