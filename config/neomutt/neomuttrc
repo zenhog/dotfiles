@@ -15,8 +15,6 @@ auto_view       \
 set query_command = "( khard email --parsable '%s' | sed -n '1!p'; mu cfind --format=mutt-ab '%s' )"
 
 alternates `pass show www/mail/mailbox.org/username`
-alternates `pass show www/mail/google.com/username`
-alternates `pass show www/mail/proton.me/username`
 
 unmailboxes *
 
