@@ -3,5 +3,5 @@
 KEY='C-M:r'
 
 function runner() {
-  gui tmux window local "$(hostname)" newsboat newsboat
+  gui tmux window local "$(hostname)" news newsboat
 }

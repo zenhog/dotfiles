@@ -3,5 +3,5 @@
 KEY='C-M:e'
 
 function runner() {
-  gui tmux window local "$(hostname)" weechat weechat
+  gui tmux window local "$(hostname)" chat weechat
 }

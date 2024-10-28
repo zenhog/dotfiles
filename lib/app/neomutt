@@ -3,5 +3,5 @@
 KEY='C-M:w'
 
 function runner() {
-  gui tmux window local "$(hostname)" neomutt neomutt
+  gui tmux window local "$(hostname)" mail neomutt
 }
