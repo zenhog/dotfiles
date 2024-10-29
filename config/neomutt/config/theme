@@ -23,11 +23,11 @@ set my_icon_sent       = 󱅥
 
 # color variables
 set my_color_unread     = color34
-set my_color_read       = default
-set my_color_flagged    = color178
-set my_color_trash      = color124
-set my_color_deleted    = color196
-set my_color_draft      = cyan
+set my_color_read       = brightmagenta
+set my_color_flagged    = yellow
+set my_color_trash      = red
+set my_color_deleted    = brightred
+set my_color_draft      = black
 set my_color_spam       = color240
 set my_color_bug        = black
 
@@ -85,7 +85,7 @@ reply-hook "~Y mailbox" "source ~/.config/neomutt/accounts/mailbox"
 set to_chars="󰀒󰀄󰭃"
 
 # unchanged mailbox, changed, read only, attach mode
-set status_chars = " 󰌾󰢵"
+set status_chars = "󰨔󰌾󰢵"
 
 ifdef crypt_chars set crypt_chars = " "
 
@@ -108,13 +108,13 @@ set index_format = "%<M?(%1M)& > %<X?%X 󰁦&·>"
 set index_format = "%{!%d %b} ∘ %T %-30.30L ∘ %@box@ %s %<X?(%X 󰁦)&>"
 
 set my_format_status = ""
-set my_format_status = "${my_format_status}%D %r (%l)"
-set my_format_status = "${my_format_status}%<u?${my_icon_unread} %u &>"
-set my_format_status = "${my_format_status}%<R?${my_icon_read} %R &>"
-set my_format_status = "${my_format_status}%<d?${my_icon_trash} %d &>"
-set my_format_status = "${my_format_status}%<t?${my_icon_spam} %t &>"
-set my_format_status = "${my_format_status}%<F?${my_icon_flagged} %F &>"
-set my_format_status = "${my_format_status}%<p?${my_icon_draft} %p &>"
+set my_format_status = "${my_format_status} %r %D (%l)"
+set my_format_status = "${my_format_status}%<u? ${my_icon_unread} %u&>"
+set my_format_status = "${my_format_status}%<R? ${my_icon_read} %R&>"
+set my_format_status = "${my_format_status}%<p? ${my_icon_draft} %p&>"
+set my_format_status = "${my_format_status}%<F? ${my_icon_flagged} %F&>"
+set my_format_status = "${my_format_status}%<t? ${my_icon_spam} %t&>"
+set my_format_status = "${my_format_status}%<d? ${my_icon_trash} %d&>"
 # google emails count
 # proton emails count
 # mailbox emails count
@@ -127,7 +127,7 @@ set status_format = $my_format_status
 set pager_format=" %n %zc %T %s%*  %{!%d %b · %H:%M} %?X?  %X ? %P  "
 
 # Statusbar Colors   ----------------------------------------------------------------
-color status black cyan
+color status white color244
 #color status color193 color242 '(|)'                      # statusline "bubbles"
 #color status color193 color242 '(\` )'                      # bubble account variation
 #color status color242 color193 '([a-zA-Z0-9\.,]|\[|\])(\s)'  # bubble content 1
