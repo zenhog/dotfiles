@@ -22,13 +22,13 @@ set my_icon_tome       = 󰀄
 set my_icon_sent       = 󱅥
 
 # color variables
-set my_color_unread     = color34
-set my_color_read       = brightmagenta
-set my_color_flagged    = yellow
+set my_color_unread     = blue
+set my_color_read       = black
+set my_color_flagged    = brightyellow
 set my_color_trash      = red
 set my_color_deleted    = brightred
-set my_color_draft      = black
-set my_color_spam       = color240
+set my_color_draft      = green
+set my_color_spam       = black
 set my_color_bug        = black
 
 # index_tag colors
@@ -61,11 +61,12 @@ color index             $my_color_bug     default "~Y bug"
 color index             $my_color_trash   default "~D"
 
 # icon colors
-color status $my_color_unread    default $my_icon_unread
-color status $my_color_read      default $my_icon_read
-color status $my_color_flagged   default $my_icon_flag
-color status $my_color_trash     default $my_icon_trash
-color status $my_color_draft     default $my_icon_draft
+color status $my_color_unread  default "$my_icon_unread [0-9]+"
+color status $my_color_read    default "$my_icon_read [0-9]+"
+color status $my_color_flagged default "$my_icon_flagged [0-9]+"
+color status $my_color_trash   default "$my_icon_trash [0-9]+"
+color status $my_color_draft   default "$my_icon_draft [0-9]+"
+#color status color193 color242 '(\` )'                      # bubble account variation
 
 # flagged index format
 index-format-hook important "~F"  $my_icon_flagged
