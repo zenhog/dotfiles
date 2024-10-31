@@ -33,10 +33,11 @@ theme.bg_wrap   = "#00000090"
 
 theme.margin_wrap = 5
 
-theme.tasklist_bg_focus    = '#f0f0f0'
+theme.tasklist_bg_focus    = '#e0e0e0'
 theme.tasklist_bg_normal   = '#606060'
 theme.tasklist_bg_urgent   = '#ff6600'
 theme.tasklist_bg_minimize = theme.bg_normal
+theme.tasklist_bg_minimize = "#00000080"
 
 theme.titlebar_bg_focus    = theme.bg_wrap
 theme.titlebar_bg_focus   = theme.bg_normal
