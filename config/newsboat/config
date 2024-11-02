@@ -26,3 +26,7 @@ bind-key k up article
 
 confirm-exit no
 cleanup-on-quit yes
+
+articlelist-format  "%4i %f %D   %?T?|%-40T|  ?%t"
+feedlist-format     "%4i %n %11u %t"
+notify-format       "%d new articles (%n unread articles, %f unread feeds)"
