@@ -277,6 +277,13 @@ function open() {
   command open "$location"
 }
 
+BINDS[bgopen]=tab
+HOOKS[bgopen]=noclear
+DESCS[bgopen]='Open location entry in the background'
+function bgopen() {
+  open "$@"
+}
+
 BINDS[fopen]=alt-enter
 DESCS[fopen]='Open location entry'
 function fopen() {
