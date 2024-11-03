@@ -71,10 +71,14 @@ PATTERNS[DOTNAME]='[[:blank:]]((\w+\.)+\w+)'
 
 # GROUP: URLS
 PATTERN_GROUPS+=(GR_URLS)
-GR_URLS=(PATH URL MARKDOWN_URL)
-PATTERNS[MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
-PATTERNS[PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
+GR_URLS=(URL MARKDOWN_URL)
 PATTERNS[URL]='(((http|https|ftp|gopher)|mailto):(\/\/)?[^ <>\"\t]*|(www|ftp)[0-9]?\\.[-a-z0-9.]+)[^ .,;\t\n\r<\">\\):]?[^, <>\"\t]*[^ .,;\t\n\r<\">\\):](\?[^ \t\n\r]+)?'
+PATTERNS[MARKDOWN_URL]='\[[^]]*\]\(([^)]+)\)'
+
+# GROUP: PATHS
+PATTERN_GROUPS+=(GR_PATHS)
+GR_PATHS=(PATH)
+PATTERNS[PATH]='(([.\w\-@~\[\]]+)?(/[.\w\-@\[\]]+)+)'
 
 # GROUP: ARGS
 PATTERN_GROUPS+=(GR_ARGS)

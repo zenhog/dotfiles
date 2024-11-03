@@ -40,11 +40,11 @@ function connect() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
-  if [[ -n "$SSH_CONNECTION" ]] || connected "$host"; then
+  if connected "$host"; then
     return
   fi
 
-  rm -f "$SOCKDIR/$sock"
+  rm -f "$sock"
 
   timeout 2 ssh -fMNS "$sock" "$host"
 }

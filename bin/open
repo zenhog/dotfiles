@@ -40,7 +40,7 @@ case "${mime}" in
       ircs:*)
           ;;
       mailto:*)
-        gui tmux window local "$(hostname)" neomutt neomutt "${1#mailto:}"
+        gui tmux window local "$(hostname)" mail neomutt "${1#mailto:}"
         ;;
       magnet:*)
         aria2p add "$1"
