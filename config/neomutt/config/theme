@@ -55,7 +55,7 @@ color index default default ~N             # new messages
 
 # advanced index colors
 color index bold italic $my_color_flagged default "~F ~U"
-color index             $my_color_flagged default "~F!~U"
+color index bold        $my_color_flagged default "~F!~U"
 color index             $my_color_unread  default "~U !~F"
 color index             $my_color_bug     default "~Y bug"
 color index             $my_color_trash   default "~D"
