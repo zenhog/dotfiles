@@ -55,7 +55,7 @@ function pull() {
     verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
   fi
 
-  decrypt "$branch"
+  mute decrypt "$branch"
 
   if isremote "$branch"; then
     clone "$BASEDIR/$branch/$branch" "$BASEDIR/$branch/remote" master
@@ -78,7 +78,9 @@ function push() {
   nodiff=1 commit "$branch"
 
   if isremote "$branch"; then
-    verbose rebranch "$branch"
+    if [[ -n "$(git status --porcelain=v1)" ]]; then
+      verbose rebranch "$branch"
+    fi
   else
     verbose cdgit "$branch" push
   fi
