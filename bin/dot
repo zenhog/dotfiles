@@ -78,9 +78,9 @@ function push() {
   nodiff=1 commit "$branch"
 
   if isremote "$branch"; then
-    if [[ -n "$(git status --porcelain=v1)" ]]; then
+    #if [[ -n "$(git status --porcelain=v1)" ]]; then
       verbose rebranch "$branch"
-    fi
+    #fi
   else
     verbose cdgit "$branch" push
   fi
