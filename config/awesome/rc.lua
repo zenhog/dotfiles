@@ -251,7 +251,7 @@ local function set_attributes(c)
   local w, h = s.geometry.width, s.geometry.height
 
   if c.class == 'menu' and c.instance == 'loop' then
-    c.opacity = 1
+    --c.opacity = 1
     c.hidden = true
     c.minimized = true
     c.titlebars_enabled = false
@@ -277,7 +277,7 @@ client.connect_signal("manage", function(c)
   c.shape = roundedrect
 
   set_clienttag(c)
-  set_titlebars(c)
+  --set_titlebars(c)
   set_attributes(c)
   set_clientimg(c)
 
