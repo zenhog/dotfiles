@@ -3,6 +3,7 @@
 mkdir -p "$HOME/.mail/proton"
 mkdir -p "$HOME/.mail/mailbox"
 mkdir -p "$HOME/.mail/gmail"
+mkdir -p "$HOME/.mail/disroot"
 
 # ignore All Mail and mv tagged mail to folders
 
