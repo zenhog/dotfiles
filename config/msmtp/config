@@ -9,3 +9,15 @@ tls_trust_file /etc/ssl/certs/ca-certificates.crt
 eval "echo -n 'user '; pass show www/mail/mailbox.org/username"
 eval "echo -n 'from '; pass show www/mail/mailbox.org/username"
 passwordeval "pass show www/mail/mailbox.org/password"
+
+account disroot
+protocol smtp
+host disroot.org
+port 465
+auth on
+tls on
+tls_starttls off
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+eval "printf 'user %s@disroot.org' `pass show www/mail/disroot.org/username`"
+eval "printf 'from %s@disroot.org' `pass show www/mail/disroot.org/username`"
+passwordeval "pass show www/mail/disroot.org/password"

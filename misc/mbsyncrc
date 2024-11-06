@@ -17,3 +17,23 @@ Create Both
 Expunge Both
 SyncState *
 Sync All
+
+IMAPStore disroot-remote
+Host disroot.org
+UserCmd "pass show www/mail/disroot.org/username"
+PassCmd "pass show www/mail/disroot.org/password"
+TLSType IMAPS
+
+MaildirStore disroot-local
+Path  ~/.mail/disroot/
+Inbox ~/.mail/disroot/INBOX
+SubFolders Verbatim
+
+Channel disroot
+Far :disroot-remote:
+Near :disroot-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
