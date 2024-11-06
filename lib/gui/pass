@@ -232,7 +232,8 @@ function dom() {
 
   while [[ $i -lt $((${#zones[@]}-1)) ]]; do
     #read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
-    read -r found < <(cd "$STORE" && find -type d -name "*${zones[*]:$i}" | tac)
+    read -r found < <(cd "$STORE" && find * -type d -name "*${zones[*]:$i}" |
+      tac)
     [[ -n "$found" ]] && break
     ((++i))
   done
