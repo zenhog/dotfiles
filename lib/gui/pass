@@ -103,6 +103,7 @@ function check() {
 }
 
 BINDS[regen]=alt-r
+HOOKS[regen]=noclear
 DESCS[regen]='Regenerate password conform to spec'
 function regen() {
   local dir="$1" password charspec length specs regex
@@ -216,6 +217,7 @@ function add() {
 }
 
 BINDS[del]=alt-d
+HOOKS[del]=noclear
 DESCS[del]='Remove directory entry'
 function del() {
   local dir="${1}"
@@ -230,7 +232,7 @@ function dom() {
 
   while [[ $i -lt $((${#zones[@]}-1)) ]]; do
     #read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
-    read -r found < <(cd "$STORE" && find www -type d -name "*${zones[*]:$i}")
+    read -r found < <(cd "$STORE" && find -type d -name "*${zones[*]:$i}" | tac)
     [[ -n "$found" ]] && break
     ((++i))
   done
