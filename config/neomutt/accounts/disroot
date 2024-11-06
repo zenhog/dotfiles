@@ -1,0 +1,12 @@
+set sendmail = "/usr/bin/msmtp -a disroot"
+set mbox_type = Maildir
+set editor = nvim
+set folder = "~/.mail/disroot"
+set header_cache = "~/.cache/neomutt"
+set spoolfile = +INBOX
+set postpone = yes
+set postponed = "+Drafts"
+set record = "+Sent"
+set trash = "+Trash"
+set maildir_trash = yes
+set from = `pass show www/mail/disroot.org/username`
