@@ -15,5 +15,5 @@ function view() {
 }
 
 function list() {
-  khard list -F uid,formatted_name,phone,email | sed -rn '3,$p'
+  khard list -p -F uid,formatted_name,phone,email
 }
