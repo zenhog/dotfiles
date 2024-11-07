@@ -1,7 +1,0 @@
-#!/bin/sh
-
-exec 2>&1
-
-export HYDROXIDE_BRIDGE_PASS="$(pass show www/mail/proton.me/bridge)"
-
-exec hydroxide serve

@@ -1,10 +1,10 @@
 [general]
 status_path = "~/.vdirsyncer/status/"
 
-[pair mailboxpair]
+[pair mailbox]
 a = "mailboxlocal"
 b = "mailboxremote"
-collections = [ "from a", "from b" ]
+collections = [ ["contacts", "contacts", "32"], ["friends", "friends", "51"] ]
 conflict_resolution = "a wins"
 
 [storage mailboxlocal]
