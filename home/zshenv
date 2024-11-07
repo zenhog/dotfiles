@@ -36,6 +36,7 @@ FZF_BASE_FLAGS=(
 
   "--bind=ctrl-o:toggle-preview-wrap"
   "--bind=ctrl-space:refresh-preview"
+  "--bind=ctrl-b:backward-word"
 )
 
 PREVIEW="bottom,border-rounded|right,border-rounded"
