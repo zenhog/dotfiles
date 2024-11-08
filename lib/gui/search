@@ -51,7 +51,8 @@ function mimetype() {
   # assuming valid absolute path
   local path="$(path "$1")"
 
-  printf "%s (%s)\n" "$path" "$(file -bL --mime-type "$path")"
+  printf "%s (%s - %s)\n" "$path" "$(file -bL --mime-type "$path")" \
+    "$(du -hs "$path" | awk '{print $1}')"
 }
 
 function view() {
