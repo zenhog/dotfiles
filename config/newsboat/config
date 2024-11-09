@@ -1,4 +1,8 @@
 include gruvbox
+urls-source newsblur
+newsblur-login maiz
+newsblur-passwordeval "pass show www/rss/newsblur.com/password"
+cookie-cache "~/.local/share/newsboat/cookies.txt"
 auto-reload yes
 reload-time 60
 reload-threads 4
