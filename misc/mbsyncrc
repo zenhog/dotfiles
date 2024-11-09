@@ -20,7 +20,7 @@ Sync All
 
 IMAPStore disroot-remote
 Host disroot.org
-UserCmd "pass show www/mail/disroot.org/username"
+UserCmd "pass show www/mail/disroot.org/email"
 PassCmd "pass show www/mail/disroot.org/password"
 TLSType IMAPS
 

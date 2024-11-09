@@ -16,7 +16,6 @@ prepopulate-query-feeds yes
 
 text-width 80
 
-
 show-read-feeds yes
 feed-sort-order unreadarticlecount-asc
 feed-sort-order title
@@ -36,5 +35,6 @@ confirm-exit no
 cleanup-on-quit yes
 
 articlelist-format  "%4i %f %D   %?T?|%-40T|  ?%t"
-feedlist-format     "%4i %n %11u %t"
+feedlist-format     "%15u %-75t %30T %>"
 notify-format       "%d new articles (%n unread articles, %f unread feeds)"
+feed-sort-order firsttag-asc
