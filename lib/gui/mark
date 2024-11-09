@@ -352,7 +352,7 @@ function list() {
   if [[ -n "$lines" ]]; then
     paste -d'|' \
       <(printf "%s\n" "${lines[@]}") \
-      <(printf "%s\n" "${taglines[@]}" | column -Lt -s,) |
+      <(printf "%s\n" "${taglines[@]}" | column -Lt -s,) | sort -k2,3 |
         column -t -s'|' -o ' -- '
   fi
 }
@@ -378,6 +378,7 @@ function _open() {
 }
 
 BINDS[bgopen]=tab
+HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open bookmark in the background with vpnfox'
 function bgopen() {
   open "$@"
