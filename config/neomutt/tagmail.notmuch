@@ -1,9 +1,11 @@
 +me tag:new and to:iskander.zemmouri@mailbox.org
-+me tag:new and to:zemmouri.iskander@proton.me
++me tag:new and to:zemmouri.iskander@mailbox.org
++me tag:new and to:prisoner@mailbox.org
 +me tag:new and to:prisoner@disroot.org
 
 +sent tag:new and from:iskander.zemmouri@mailbox.org
-+sent tag:new and from:zemmouri.iskander@proton.me
++sent tag:new and from:zemmouri.iskander@mailbox.org
++sent tag:new and from:prisoner@mailbox.org
 +sent tag:new and from:prisoner@disroot.org
 
 -inbox -unread +sent      tag:new and folder:/.*Sent/
@@ -22,6 +24,7 @@
 +gmail                    tag:new and folder:/.*gmail/
 +proton                   tag:new and folder:/.*proton/
 +mailbox                  tag:new and folder:/.*mailbox/
++disroot                  tag:new and folder:/.*disroot/
 
 +bug                      tag:new and tag:sent and tag:me
 

@@ -9,4 +9,4 @@ set postponed = "+Drafts"
 set record = "+Sent"
 set trash = "+Trash"
 set maildir_trash = yes
-set from = `pass show www/mail/disroot.org/username`
+set from = `pass show www/mail/disroot.org/email`

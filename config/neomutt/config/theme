@@ -2,6 +2,7 @@
 set my_icon_proton     = 󰝨
 set my_icon_mailbox    = 󰛮
 set my_icon_google     = 󰊭
+set my_icon_disroot    = 󰏩
 set my_icon_bug        = 󰨰
 set my_icon_unread     = 
 set my_icon_read       = 
@@ -22,7 +23,7 @@ set my_icon_tome       = 󰀄
 set my_icon_sent       = 󱅥
 
 # color variables
-set my_color_unread     = blue
+set my_color_unread     = color51
 set my_color_read       = black
 set my_color_flagged    = brightyellow
 set my_color_trash      = red
@@ -77,10 +78,12 @@ index-format-hook box "~Y bug"     $my_icon_bug
 index-format-hook box "~Y gmail"   $my_icon_google
 index-format-hook box "~Y mailbox" $my_icon_mailbox
 index-format-hook box "~Y proton"  $my_icon_proton
+index-format-hook box "~Y disroot" $my_icon_disroot
 
 reply-hook "~Y gmail"   "source ~/.config/neomutt/accounts/google"
 reply-hook "~Y proton"  "source ~/.config/neomutt/accounts/proton"
 reply-hook "~Y mailbox" "source ~/.config/neomutt/accounts/mailbox"
+reply-hook "~Y disroot" "source ~/.config/neomutt/accounts/disroot"
 
 # no addressed to me, to me, group, cc, sent by me, mailing list
 set to_chars="󰀒󰀄󰭃"

@@ -35,6 +35,7 @@ show-read-feeds yes
 #feed-sort-order firsttag-asc
 
 goto-next-feed no
+external-url-viewer "extract GR_URLS"
 
 bind-key j down feedlist
 bind-key k up feedlist
