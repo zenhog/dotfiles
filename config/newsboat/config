@@ -1,11 +1,23 @@
-include gruvbox
+color background          default   default
+color article             default   default
 
-urls-source newsblur
+color listnormal          default   default
+color listnormal_unread   default   default   bold
 
-newsblur-login maiz
-newsblur-passwordeval "pass show www/rss/newsblur.com/password"
+color listfocus           color51   color243
+color listfocus_unread    color51   color243  bold
 
-cookie-cache "~/.local/share/newsboat/cookies.txt"
+color info                green     default   bold
+color title               red       default   bold
+color end-of-text-marker  blue      default
+
+# highlights
+highlight article "^(Feed|Link):.*$" color13 default bold
+highlight article "^(Title|Date|Author):.*$" color13 default bold
+highlight article "https?://[^ ]+" blue default underline
+highlight article "\\[[0-9]+\\]" color2 default bold
+highlight article "\\[image\\ [0-9]+\\]" color2 default bold
+highlight feedlist "^─.*$" color6 color6 bold
 
 auto-reload yes
 reload-time 60
@@ -17,8 +29,10 @@ prepopulate-query-feeds yes
 text-width 80
 
 show-read-feeds yes
-feed-sort-order unreadarticlecount-asc
-feed-sort-order title
+
+#feed-sort-order unreadarticlecount-asc
+#feed-sort-order title
+#feed-sort-order firsttag-asc
 
 goto-next-feed no
 
@@ -34,7 +48,6 @@ bind-key k up article
 confirm-exit no
 cleanup-on-quit yes
 
-articlelist-format  "%4i %f %D   %?T?|%-40T|  ?%t"
-feedlist-format     "%15u %-75t %30T %>"
+feedlist-format     "%15u %-85t %30T %>"
+articlelist-format  "%4f %-10D %?T?%-25T  ?%-t"
 notify-format       "%d new articles (%n unread articles, %f unread feeds)"
-feed-sort-order firsttag-asc
