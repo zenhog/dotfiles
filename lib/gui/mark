@@ -217,6 +217,25 @@ function insert() {
   esac
 }
 
+function delete() {
+  local kind="$1"
+
+  shift
+
+  case "$kind" in
+    categories)
+      for c in "$@"; do
+        sqlite3 "$DB" "DELETE FROM categories WHERE name == '$t'"
+      done
+      ;;
+    tags)
+      for t in "$@"; do
+        sqlite3 "$DB" "DELETE FROM tags WHERE name == '$t'"
+      done
+      ;;
+  esac
+}
+
 function getid() {
   local kind="$1"
   local name="$2"
