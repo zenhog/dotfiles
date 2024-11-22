@@ -29,7 +29,7 @@ delete() {
 
 move() {
     readarray -t files
-    mv "${files[@]}" "$HOME/.tmp"
+    mv "${files[@]}" "$HOME/downloads"
 }
 
 save() {

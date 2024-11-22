@@ -18,10 +18,10 @@ set nm_default_url = `printf 'notmuch://%s/.mail' "$HOME"`
 
 bind index,pager g noop
 
-macro index f "<modify-labels>+moved !important<enter>"
-macro index s "<modify-labels-then-hide>+moved +spam -trash -archive -inbox<enter>"
-#macro index d "<modify-labels-then-hide>+moved -spam +trash -archive -inbox<enter>"
-macro index a "<modify-labels-then-hide>+moved -spam -trash +archive -inbox<enter>"
-macro index i "<modify-labels-then-hide>+moved -spam -trash -archive +inbox<enter>"
+# macro index f "<modify-labels>+moved !important<enter>"
+# macro index s "<modify-labels-then-hide>+moved +spam -trash -archive -inbox<enter>"
+# macro index d "<modify-labels-then-hide>+moved -spam +trash -archive -inbox<enter>"
+# macro index a "<modify-labels-then-hide>+moved -spam -trash +archive -inbox<enter>"
+# macro index i "<modify-labels-then-hide>+moved -spam -trash -archive +inbox<enter>"
 
 macro index \\\\ "<vfolder-from-query>"
