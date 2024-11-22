@@ -23,6 +23,8 @@ znap source joshskidmore/zsh-fzf-history-search
 znap install asdf-vm/asdf
 znap source asdf-vm/asdf
 
+znap eval iterm2 'curl -fsSL https://raw.githubusercontent.com/Azure/azure-cli/dev/az.completion'
+
 znap source Tarrasch/zsh-autoenv
 
 gcloud_compfile="$(asdf current gcloud | awk '{print $2}')"
