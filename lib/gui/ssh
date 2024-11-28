@@ -46,7 +46,7 @@ function connect() {
 
   rm -f "$sock"
 
-  timeout 2 ssh -fMNS "$sock" "$host"
+  timeout 5 ssh -fMNS "$sock" "$host"
 }
 
 function disconnect() {

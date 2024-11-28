@@ -49,7 +49,7 @@ function view() {
 function list() {
   #fd -H --strip-cwd-prefix --base-directory "${STORE}" -td -x \
   #  sh -c 'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort
-  (cd "$STORE" && find * .* -type d -exec sh -c \
+  (cd "$STORE" && find * .* \( -type d -or -type l \) -exec sh -c \
     'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
 }
 
@@ -232,8 +232,8 @@ function dom() {
 
   while [[ $i -lt $((${#zones[@]}-1)) ]]; do
     #read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
-    read -r found < <(cd "$STORE" && find * -type d -name "*${zones[*]:$i}" |
-      tac)
+    read -r found < <(cd "$STORE" && find * \( -type d -or -type l \) \
+      -name "*${zones[*]:$i}" | tac)
     [[ -n "$found" ]] && break
     ((++i))
   done
