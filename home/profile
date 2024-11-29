@@ -54,7 +54,7 @@ export BROWSER=browser
 #fi
 
 if [[ -z "$PULSE_SERVER" ]]; then
-    export PULSE_SERVER="/tmp/user/$USER/pulse/native"
+    export PULSE_SERVER="/tmp/user-$USER/$USER/pulse/native"
 fi
 
 export XDG_DATA_HOME="$HOME/.local/share"
