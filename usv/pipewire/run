@@ -5,9 +5,11 @@ exec 2>&1
 export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
 export XDG_RUNTIME_DIR="/tmp/user-$USER/$USER"
 
+mkdir -p "$XDG_RUNTIME_DIR"
+
 export SVDIR=$HOME/.usv
+
 sv check dbus || exit 1
 
-mkdir -p /tmp/user/$USER
 
 exec pipewire
