@@ -1,13 +1,16 @@
+# Use pulseaudio by default
 pcm.!default {
-    type pipewire
-    playback_node "-1"
-    capture_node  "-1"
-    hint {
-        show on
-        description "Default ALSA Output (currently PipeWire Media Server)"
-    }
+  type pulse
+  fallback "sysdefault"
+  hint {
+    show on
+    description "Default ALSA Output (currently PulseAudio Sound Server)"
+  }
 }
 
 ctl.!default {
-    type pipewire
+  type pulse
+  fallback "sysdefault"
 }
+
+# vim:set ft=alsaconf:
