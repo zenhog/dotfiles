@@ -8,17 +8,20 @@ read -r ID < <(pulsemixer --list-sources | sed -rn "$REGEX")
 
 KEYS[prev]='C-M:h'
 function prev() {
-  pulsemixer --id "$ID" --change-volume -5 --max-volume 100
+  #pulsemixer --id "$ID" --change-volume -5 --max-volume 100
+  wpctl set-volume @DEFAULT_SOURCE@ 5%-
 }
 
 KEYS[next]='C-M:l'
 function next() {
-  pulsemixer --id "$ID" --change-volume +5 --max-volume 100
+  #pulsemixer --id "$ID" --change-volume +5 --max-volume 100
+  wpctl set-volume @DEFAULT_SOURCE@ 5%+
 }
 
 KEYS[toggle]='C-M:i'
 function toggle() {
-  pulsemixer --id "$ID" --toggle-mute
+  #pulsemixer --id "$ID" --toggle-mute
+  wpctl set-volume @DEFAULT_SOURCE@ toggle
 }
 
 function run() {
@@ -28,17 +31,17 @@ function run() {
 function text() {
   local volume
   #read -r volume < <(pulsemixer --id "$ID" --get-volume | awk '{print $1}')
-  read -r _ volume < <(wpctl get-volume @DEFAULT_SOURCE@)
-  printf "%s" ${volume/./}
+  read -r _ volume _ < <(wpctl get-volume @DEFAULT_SOURCE@)
+  echo -n ${volume#*.}
 }
 
 function icon() {
   local ok=󰍬
   local ko=󰍭
 
-  read -r mute < <(pulsemixer --id "$ID" --get-mute)
+  read -r mute < <(wpctl get-volume @DEFAULT_SINK@)
   case "$mute" in
-    0) echo -n "$ok";;
-    1) echo -n "$ko";;
+    *MUTE*) echo -n "$ko";;
+    *) echo -n "$ok";;
   esac
 }

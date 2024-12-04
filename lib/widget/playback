@@ -4,25 +4,30 @@ PERIOD=10
 
 KEYS[prev]='C-M:j'
 function prev() {
-  pulsemixer --change-volume -5 --max-volume 100
+  #pulsemixer --change-volume -5 --max-volume 100
+  wpctl set-volume @DEFAULT_SINK@ 5%-
 }
 
 KEYS[next]='C-M:k'
 function next() {
-  pulsemixer --change-volume +5 --max-volume 100
+  #pulsemixer --change-volume +5 --max-volume 100
+  wpctl set-volume @DEFAULT_SINK@ 5%+
 }
 
 KEYS[toggle]='C-M:o'
 function toggle() {
-  pulsemixer --toggle-mute
+  #pulsemixer --toggle-mute
+  wpctl set-mute @DEFAULT_SINK@ toggle
 }
 
 function mute() {
-  pulsemixer --mute
+  #pulsemixer --mute
+  wpctl set-mute @DEFAULT_SINK@ 1
 }
 
 function unmute() {
-  pulsemixer --unmute
+  #pulsemixer --unmute
+  wpctl set-mute @DEFAULT_SINK@ 0
 }
 
 function run() {
@@ -31,16 +36,17 @@ function run() {
 
 function text() {
   local volume
-  read -r volume < <(pulsemixer --get-volume | awk '{print $1}')
-  echo -n $volume
+  #read -r volume < <(pulsemixer --get-volume | awk '{print $1}')
+  read -r _ volume _ < <(wpctl get-volume @DEFAULT_SINK@)
+  echo -n ${volume#*.}
 }
 
 function icon() {
   local ok=󰕾
   local ko=󰖁
-  read -r mute < <(pulsemixer --get-mute)
+  read -r mute < <(wpctl get-volume @DEFAULT_SINK@)
   case "$mute" in
-    0) echo -n "$ok";;
-    1) echo -n "$ko";;
+    *MUTE*) echo -n "$ko";;
+    *) echo -n "$ok";;
   esac
 }
