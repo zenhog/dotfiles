@@ -56,6 +56,9 @@ export BROWSER=browser
 if [[ -z "$PULSE_SERVER" ]]; then
     export PULSE_SERVER="/tmp/user-$USER/$USER/pulse/native"
 fi
+if [[ -z "$PIPEWIRE_RUNTIME_DIR" ]]; then
+  export PIPEWIRE_RUNTIME_DIR="/tmp/user-$USER/$USER"
+fi
 
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"

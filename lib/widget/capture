@@ -27,8 +27,9 @@ function run() {
 
 function text() {
   local volume
-  read -r volume < <(pulsemixer --id "$ID" --get-volume | awk '{print $1}')
-  echo -n $volume
+  #read -r volume < <(pulsemixer --id "$ID" --get-volume | awk '{print $1}')
+  read -r _ volume < <(wpctl get-volume @DEFAULT_SOURCE@)
+  printf "%s" ${volume/./}
 }
 
 function icon() {
