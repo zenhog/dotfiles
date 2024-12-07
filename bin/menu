@@ -64,6 +64,24 @@ function inputpreview() {
   tmux show-buffer -b preview 2>/dev/null && tmux delete-buffer -b preview
 }
 
+function choice() {
+
+  local cmd
+
+  cmd=('fzf')
+  cmd+=('--border' 'sharp')
+  cmd+=('--prompt' "choice($MODULE)> ")
+  cmd+=('--query' "$query")
+  cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
+  cmd+=('--info=inline-right')
+  cmd+=('--no-separator')
+  cmd+=('--preview' 'inputpreview')
+  cmd+=('--preview-window' 'bottom,90%,border-top')
+  cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
+
+  printf "%s\n" "$@" | "${cmd[@]}" 2>/dev/tty
+}
+
 function input() {
 
   local fifo query

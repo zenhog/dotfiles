@@ -12,6 +12,7 @@ function text() {
     [[ "$TYPE" =~ (wireless|ethernet)$ ]] || unset connection
 
     printf "%s" "$connection"
+    #printf "%s_%s" "C4:12:F5:CE:71:E1" "D-Link"
 }
 
 function icon() {

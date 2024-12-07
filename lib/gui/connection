@@ -56,7 +56,25 @@ function reload() {
   sudo nmcli device wifi rescan
 }
 
+function view() {
+  local mode="$(get_opt mode)"
+
+  local active id
+
+  read -r active id _ <<< "$1"
+
+  case "$mode" in
+    connections)
+      nmcli --show-secrets con show "$id"
+      ;;
+    ssids)
+      nmcli con show "$id"
+      ;;
+  esac
+}
+
 BINDS[open]=enter
+HOOKS[open]=clear
 DESCS[open]='Toggle connection or wifi'
 function open() {
   local mode="$(get_opt mode)"
