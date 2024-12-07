@@ -524,8 +524,6 @@ awful.screen.connect_for_each_screen(function(s)
                 layout = wibox.layout.fixed.vertical,
                 spacing = 1,
                 --block(M.group(s.menus.screenshot)),
-                block(M.group(widgets.mail)),
-                block(M.group(widgets.battery)),
                 block(M.group(s.menus.vocab)),
                 block(M.group(s.menus.cheat)),
                 block(M.group(s.menus.vocab)),
