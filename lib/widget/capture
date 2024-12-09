@@ -39,7 +39,7 @@ function icon() {
   local ok=󰍬
   local ko=󰍭
 
-  read -r mute < <(wpctl get-volume @DEFAULT_SINK@)
+  read -r mute < <(wpctl get-volume @DEFAULT_SOURCE@)
   case "$mute" in
     *MUTE*) echo -n "$ko";;
     *) echo -n "$ok";;
