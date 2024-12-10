@@ -202,13 +202,14 @@ local function set_clienttag(c)
         kitty     = 1,
         ctfbox    = 1,
         cutter    = 1,
-        dota2     = 1,
 
         Navigator     = 2,
         chromium      = 2,
         firefox       = 2,
         qutebrowser   = 2,
 
+        dota2     = 3,
+        steam     = 3,
         feh       = 3,
         nsxiv     = 3,
         mupdf     = 3,
@@ -219,7 +220,6 @@ local function set_clienttag(c)
         mpv       = 4,
 
         stremio   = 5,
-        steam     = 5,
         retroarch = 5,
     }
 
