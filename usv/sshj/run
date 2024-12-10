@@ -2,4 +2,5 @@
 
 exec 2>&1
 
-exec ssh -N -R $(hostname):22:localhost:22 "${USER}@serveo.net"
+#exec ssh -N -R $(hostname):22:localhost:22 "${USER}@ssh-j.com"
+exec ssh -t -R $(hostname):22:localhost:22 "${USER}@ssh-j.com"
