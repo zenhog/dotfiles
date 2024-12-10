@@ -72,6 +72,26 @@ function list() {
 
 function entries() {
   local kind="$1"
-  pactl -f json list "$kind" |
-    jq -r '.[] | (.index|tostring) + " " + .description + .volume."front-left".value_percent'
+  local json="$(pactl -f json list "$kind")"
+
+  local indices descs lvols rvols mutes
+  readarray -t indices < <(jq -r '.[] | (.index|tostring)' <<< "$json")
+
+  case "$kind" in
+    sinks|sources)
+      readarray -t descs < <(jq -r '.[] | .description' <<< "$json")
+      readarray -t lvols < \
+        <(jq -r '.[] | .volume."front-left".value_percent' <<< "$json")
+      readarray -t rvols < \
+        <(jq -r '.[] | .volume."front-right".value_percent' <<< "$json")
+      readarray -t mutes < <(jq -r '.[] | .mute' <<< "$json")
+
+      for i in "${!indices[@]}"; do
+        printf "%s%s[%s]%s%s\n" \
+          "${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}"
+      done | column -t -s "$iSEP"
+      ;;
+    sinks|sources)
+  esac
+
 }
