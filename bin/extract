@@ -173,6 +173,7 @@ done | column -t -s$'\x01' |
     --bind="ctrl-o:execute-silent(open {3..})+accept" \
     --bind="ctrl-n:become(command extract $NEXT_PATTERN < $INPUT 2>/dev/tty)" \
     --bind="ctrl-p:become(command extract $PREV_PATTERN < $INPUT 2>/dev/tty)" \
+    --bind="ctrl-e:execute-silent(echo -n {3..} | tmux load-buffer -)+execute-silent(tmux paste-buffer -t $PANE)+accept" \
     --prompt='extract> '
 
 # open

@@ -378,7 +378,7 @@ function extract-pane() {
   local pane="$(dmux display -p '#S:#I.#P')"
   dmux run \
     "bash -c \"tmux new-window -n grep bash -c '
-      tmux capture-pane -pNq -t $pane | extract'\""
+      tmux capture-pane -pNq -t $pane | PANE="$pane" extract'\""
 }
 
 function extract-pane-history() {
