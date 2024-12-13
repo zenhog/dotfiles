@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
 gui run bg firefox
-gui run bg discord
+gui run bg goofcord
+gui run bg teamspeak

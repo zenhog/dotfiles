@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=ts3client_linux_amd64)
+
+function runner() {
+  flatpak run com.teamspeak.TeamSpeak3
+}

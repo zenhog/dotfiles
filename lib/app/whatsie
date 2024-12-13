@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=whatsie)
+
+function runner() {
+  flatpak run com.ktechpit.whatsie
+}

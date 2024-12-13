@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=goofcord)
+
+function runner() {
+  flatpak run io.github.milkshiift.GoofCord
+}

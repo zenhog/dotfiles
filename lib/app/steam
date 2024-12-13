@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=steam)
+
+function runner() {
+  flatpak run com.valvesoftware.Steam
+}
