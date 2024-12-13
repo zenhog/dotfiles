@@ -218,6 +218,8 @@ local function set_clienttag(c)
         spotify   = 4,
         vlc       = 4,
         mpv       = 4,
+        goofcord  = 4,
+        ts3client_linux_amd64 = 4,
 
         stremio   = 5,
         retroarch = 5,
