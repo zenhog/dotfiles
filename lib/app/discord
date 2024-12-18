@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-ATTRIBUTES=(profile=discord)
-
-function runner() {
-  Discord
-}
