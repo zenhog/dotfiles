@@ -34,7 +34,7 @@ bind('<Ctrl-A>', 'spawn --userscript whitelist {url:host}')
 bind('<Ctrl-B>', 'spawn --userscript blacklist {url:host}')
 
 bind('<Ctrl-M>', 'spawn --userscript menurun mark {url} {title}')
-bind('<Ctrl-O>', 'spawn --userscript menurun unmark {url}')
+bind('gm', 'spawn --userscript menurun unmark {url}')
 
 bind('<Ctrl-Y>', 'spawn --userscript menurun passinit {url:host} {url} ${title}')
 
