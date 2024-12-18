@@ -8,6 +8,14 @@ type="$2"
 
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
+    list)
+      echo qutebrowser
+      echo qutebrowser-vpn1
+      echo qutebrowser-vpn2
+      echo firefox
+      echo firefox-vpn1
+      echo firefox-vpn2
+      ;;
     qutebrowser)
       shift
 

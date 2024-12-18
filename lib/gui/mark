@@ -8,372 +8,53 @@ HORIZONTAL=1
 NOWRAP=1
 
 export DB="$HOME/.db/bookmarks.db"
-export DB="$HOME/.db/marks.db"
 
 function initdb() {
   sqlite3 "$DB" << EOF
     CREATE TABLE IF NOT EXISTS bookmarks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       url TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      category_id INTEGER NOT NULL,
-      FOREIGN KEY (category_id) REFERENCES categories (id)
+      title TEXT NOT NULL
     );
     CREATE INDEX bookmarks_index ON bookmarks (title);
-    CREATE TABLE IF NOT EXISTS categories (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE
-    );
-    CREATE INDEX categories_index ON categories (name);
-    CREATE TABLE IF NOT EXISTS tags (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE
-    );
-    CREATE INDEX tags_index ON tags(name);
-    CREATE TABLE IF NOT EXISTS bookmark_tags (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      bookmark_id INTEGER NOT NULL,
-      tag_id INTEGER NOT NULL,
-      FOREIGN KEY (bookmark_id) REFERENCES bookmarks (id),
-      FOREIGN KEY (tag_id) REFERENCES tags (id),
-      UNIQUE(bookmark_id, tag_id)
-    );
-    CREATE INDEX bookmark_tags_index ON bookmark_tags (bookmark_id);
-    CREATE INDEX tag_bookmarks_index ON bookmark_tags (tag_id);
 EOF
-
-  local tags=(
-    '##cloud'
-      '#google'
-      '#amazon'
-      '#azure'
-      '#alibaba'
-      '#digitalocean'
-
-    '##shells'
-      '#posixsh'
-      '#bash'
-      '#ksh'
-      '#zsh'
-      '#fish'
-
-    '##languages'
-      '#c'
-      '#cpp'
-      '#java'
-      '#ruby'
-      '#python'
-      '#lua'
-      '#rust'
-      '#go'
-      '#javascript'
-
-    '#databases'
-    '##sql'
-      '#mysql'
-      '#psql'
-      '#sqlite'
-    '##nosql'
-      '#redis'
-      '#mangodb'
-      '#couchdb'
-
-    '##linux'
-      '#voidlinux'
-      '#gentoo'
-      '#archlinux'
-      '#alpine'
-      '#ubuntu'
-      '#debian'
-      '#opensuse'
-      '#mint'
-      '#rhel'
-      '#redhat'
-    '##filesystems'
-      '#btrfs'
-      '#zfs'
-      '#xfs'
-      '#ext4'
-      '#ext3'
-      '#ntfs'
-    '##hardening'
-    '##security'
-    '##kernel'
-      '#ulimits'
-      '#cgroups'
-      '#selinux'
-      '#apparmor'
-      '#compsec'
-      '#grsec'
-    '##bsd'
-      '#openbsd'
-      '#netbsd'
-      '#freebsd'
-
-    '##networking' '#iproute'
-
-    '##devops'
-    '##sysadmin'
-
-    '##iac'
-      '#terraform'
-      '#terragrunt'
-      '#terracost'
-    '##containerization'
-      '#docker'
-      '#podman'
-      '#lxc'
-      '#lxd'
-      '#incus'
-    '##virtualization'
-      '#vmware'
-      '#kvm'
-      '#qemu'
-      '#libvirt'
-      '#virtualbox'
-    '##configuration'
-      '#ansible'
-      '#chef'
-      '#puppet'
-    '##CI/CD'
-      '#github-pages'
-      '#gitlab-ci'
-      '#cloud-build'
-      '#cloud-deploy'
-    '##orchestration'
-      '#kubernetes'
-      '#openshift'
-      '#helm'
-    '##continous-deployment'
-      '#argocd'
-    '##monitoring'
-      '#rancher'
-      '#hubble'
-    '##observability'
-      '#prometheus'
-      '#datadog'
-    '##log-aggregation'
-      '#logstash'
-    '##correlation'
-      '#elasticsearch'
-    '##visualization'
-    '##dashboarding'
-      '#grafana'
-      '#kibana'
-    '##tracing'
-      '#zipkin'
-      '#jaeger'
-      '#haystack'
-    '##service-mesh'
-      '#istio'
-  )
-
-  local categories=(
-    WIKI POST FAQ LIST
-    QUICKREF SERVICE NEWS GUIDE
-    HELP DOC PASTE SITE
-    BLOG REPO BOOK THREAD
-    FORUM TUTORIAL
-  )
-
-  insert categories "${categories[@]}"
-  insert tags "${tags[@]}"
 }
 
 function insert() {
-  local kind="$1"
+  local url="$1"
+  local title="$2"
 
-  shift
-
-  case "$kind" in
-    categories)
-      for c in "$@"; do
-        sqlite3 "$DB" "INSERT INTO categories (name) VALUES ('$c')"
-      done
-      ;;
-    tags)
-      for t in "$@"; do
-        sqlite3 "$DB" "INSERT INTO tags (name) VALUES ('$t')"
-      done
-      ;;
-    bookmark)
-      local url="$1" title="$2" category="$3" cat_id bookmark_id
-      read -r cat_id < <(getid category "$category")
-      sqlite3 "$DB" "
-        INSERT INTO bookmarks (url, title, category_id)
-        VALUES ('$url', '$title', $cat_id)
-      "
-      shift 3
-      read -r bookmark_id < <(getid bookmark "$url")
-      for t in "$@"; do
-        local tag_id
-        read -r tag_id < <(getid tag "$t")
-        sqlite3 "$DB" "
-          INSERT INTO bookmark_tags (bookmark_id, tag_id)
-          VALUES ($bookmark_id, $tag_id)
-        "
-      done
-      ;;
-  esac
-}
-
-function delete() {
-  local kind="$1"
-
-  shift
-
-  case "$kind" in
-    categories)
-      for c in "$@"; do
-        sqlite3 "$DB" "DELETE FROM categories WHERE name == '$t'"
-      done
-      ;;
-    tags)
-      for t in "$@"; do
-        sqlite3 "$DB" "DELETE FROM tags WHERE name == '$t'"
-      done
-      ;;
-  esac
-}
-
-function getid() {
-  local kind="$1"
-  local name="$2"
-
-  shift 2
-
-  case "$kind" in
-    tag)
-      mute insert tags "$name"
-      quiet sqlite3 "$DB" "SELECT id FROM tags WHERE name == '${name}'"
-      ;;
-    category)
-      insert categories "$name"
-      sqlite3 "$DB" "SELECT id FROM categories WHERE name == '${name}'"
-      ;;
-    bookmark)
-      sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '${name}'"
-      ;;
-  esac
+  sqlite3 "$DB" "
+    INSERT INTO bookmarks (url, title)
+    VALUES ('$url', '$title')
+  "
 }
 
 function view() {
-  local id tags
+  local id
 
   read -r id _ <<< "$1"
 
-  readarray -t tags < <(sqlite3 "$DB" "
-    SELECT name FROM bookmark_tags
-    INNER JOIN tags ON bookmark_tags.tag_id = tags.id
-    WHERE bookmark_tags.bookmark_id = $id
-  ")
-
   {
-    printf "URL %s %s\n" "$iSEP" \
+    printf "URL: %s %s\n" "$iSEP" \
       "$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
 
-    printf "TITLE %s %s\n" "$iSEP" \
+    printf "Title: %s %s\n" "$iSEP" \
       "$(sqlite3 "$DB" "SELECT title FROM bookmarks WHERE id = $id")"
-
-    printf "CATEGORY %s %s\n" "$iSEP" \
-      "$(sqlite3 "$DB" "
-        SELECT name FROM bookmarks
-        INNER JOIN categories ON bookmarks.category_id = categories.id
-        WHERE bookmarks.id = $id
-      ")"
-
-    printf "TAGS %s %s\n" "$iSEP" "${tags[*]}"
   } | column -t -s "$iSEP"
-
-  sepline
-  printdb info "${tags[@]}"
-}
-
-function printdb() {
-  local query="$1"
-  shift
-  case "$query" in
-    titles)
-      sqlite3 "$DB" "SELECT title FROM bookmarks"
-      ;;
-    categories)
-      sqlite3 "$DB" "SELECT name FROM categories"
-      ;;
-    tags)
-      local tags found
-
-      readarray -t tags < <(sqlite3 "$DB" "SELECT name FROM tags")
-
-      for tag in "${tags[@]}"; do
-        unset found
-        for t in "$@"; do
-          if [[ "$t" == "$tag" ]]; then
-            found=1
-          fi
-        done
-        if [[ "$tag" == \#\#* ]]; then
-          if [[ -n "$found" ]]; then
-            tag="$(colorize red "$tag")"
-          else
-            tag="$(colorize yellow "$tag")"
-          fi
-        elif [[ "$tag" == \#* ]]; then
-          if [[ -n "$found" ]]; then
-            tag="$(colorize red "$tag")"
-          else
-            tag="$(colorize green "$tag")"
-          fi
-        fi
-        printf "%s\n" "$tag"
-      done
-      ;;
-    info)
-      local cats tags
-
-      readarray -t cats < <(printdb categories)
-      readarray -t tags < <(printdb tags "$@")
-
-      paste -d, \
-        <(printf "%s\n" "${cats[@]}") \
-        <(printf "%s %s %s %s %s %s\n" "${tags[@]}" | column -t) |
-          column -t -s, -o' -- '
-      ;;
-  esac
 }
 
 function label() {
-  echo " FORMAT: CATEGORY TITLE -- [TAG] ... "
+  local id
+
+  read -r id _ <<< "$1"
+
+  sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
 }
 
 function list() {
-  local lines taglines
-
-  readarray -t lines < <(sqlite3 -separator "$iSEP" "$DB" "
-    SELECT bookmarks.id, categories.name, bookmarks.title FROM bookmarks
-    INNER JOIN categories ON bookmarks.category_id = categories.id
-  " | column -t -s "$iSEP")
-
-  for line in "${lines[@]}"; do
-    local id tags
-    read -r id _ <<< "$line"
-    readarray -t tags < <(sqlite3 "$DB" "
-      SELECT tags.name FROM tags
-      INNER JOIN bookmark_tags ON tags.id = bookmark_tags.tag_id
-      WHERE bookmark_tags.bookmark_id = ${id}
-    ")
-    if [[ -n "$tags" ]]; then
-      taglines+=("$(IFS=,; printf "%s\n" "${tags[*]}")")
-    else
-      taglines+=('')
-    fi
-  done
-
-  if [[ -n "$lines" ]]; then
-    paste -d'|' \
-      <(printf "%s\n" "${lines[@]}") \
-      <(printf "%s\n" "${taglines[@]}" | column -Lt -s,) | sort -k2,3 |
-        column -t -s'|' -o ' -- '
-  fi
+  sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
+    column -t -s "$iSEP"
 }
 
 BINDS[open]=enter
@@ -387,13 +68,13 @@ function open() {
 }
 
 BINDS[_open]=alt-enter
-HOOKS[_open]=accept
+HOOKS[_open]=clear
 DESCS[_open]='Open bookmark with vpnfox'
 function _open() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-  command browser firefox vpn1 "$url"
+  urlopen "$url"
 }
 
 BINDS[bgopen]=tab
@@ -403,31 +84,31 @@ function bgopen() {
   open "$@"
 }
 
-BINDS[_bgopen]=shift-tab
-DESCS[_bgopen]='Open bookmark in the background with vpnfox'
-function _bgopen() {
-  _open "$@"
-}
-
 BINDS[copy]=alt-c
 DESCS[copy]='Clipboard bookmark URL'
 function copy() {
   local id url
+
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+
   tmux load-buffer - <<< "$url"
 }
 
 function check() {
   local id
+
   read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
 }
 
 BINDS[rm]=alt-d
+HOOKS[rm]=noclear
 DESCS[rm]='Delete bookmark'
 function rm() {
   local id
+
   read -r id _ <<< "$1"
+
   sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
 }
 
@@ -436,7 +117,8 @@ HOOKS[mod]=sclear
 DESCS[mod]='Rename bookmark'
 function mod() {
   local id title
-  read -r id _ <<< "$1"
+
+  read -r id title <<< "$1"
 
   echo -n "$title" | tmux load-buffer -b preview -
 
@@ -446,12 +128,12 @@ function mod() {
 
   if [[ -n "$title" ]]; then
     sqlite3 "$DB" \
-      "UPDATE bookmarks SET metadata = '${title}' WHERE id ==  ${id}"
+      "UPDATE bookmarks SET title = '${title}' WHERE id == ${id}"
   fi
 }
 
 function add() {
-  local url="$1" title="$2" data
+  local url="$1" title="$2" mytitle
 
   if check "$url"; then
     notify "'$url' already exists"
@@ -461,20 +143,13 @@ function add() {
   (
     echo "TITLE: $title"
     echo "URL: $url"
-    sepline
-    printdb info "$url"
   ) | tmux load-buffer -b preview -
 
-  read -r -a data < <(menu input)
+  read -r mytitle < <(menu input)
 
-  [[ -z "$data" ]] && return
+  [[ -z "$mytitle" ]] && return
 
-  local lhs rhs cat title
-
-  read -a lhs < <(parse lhs "${data[@]}")
-  read -a rhs < <(parse rhs "${data[@]}")
-
-  insert bookmark "$url" "${lhs[*]:1}" "$lhs" "${rhs[@]}"
+  insert "$url" "$mytitle"
 
   if check "$url"; then
     notify "Added '$url'"

@@ -288,13 +288,14 @@ function bgopen() {
 }
 
 BINDS[fopen]=alt-enter
+HOOKS[fopen]=clear
 DESCS[fopen]='Open location entry'
 function fopen() {
   local location dir="$1"
  
   read -r location < <(get "$dir" location)
 
-  browser firefox vpn2 "$location"
+  urlopen "$location"
 }
 
 function new() {

@@ -28,6 +28,20 @@ function help() {
   done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
 }
 
+function urlopen() {
+  local choice alternatives
+
+  readarray -t alternatives < <(browser list)
+
+  read -r choice < <(choice "${alternatives[@]}")
+
+  local cmd
+
+  IFS=$'-' read -r -a cmd <<< "$choice"
+
+  browser "${cmd[@]}" "$@"
+}
+
 BINDS[copyentry]='alt-\'
 GDESCS[copyentry]='Clip entry'
 function copyentry() {
@@ -76,7 +90,7 @@ function choice() {
   cmd+=('--info=inline-right')
   cmd+=('--no-separator')
   cmd+=('--preview' 'inputpreview')
-  cmd+=('--preview-window' 'bottom,90%,border-top')
+  cmd+=('--preview-window' 'bottom,30%,border-top')
   cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
 
   printf "%s\n" "$@" | "${cmd[@]}" 2>/dev/tty
