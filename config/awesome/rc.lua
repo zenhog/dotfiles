@@ -216,6 +216,7 @@ local function set_clienttag(c)
 
         discord   = 4,
         spotify   = 4,
+        whatsie   = 4,
         vlc       = 4,
         mpv       = 4,
         goofcord  = 4,
