@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KEY='W:r'
+KEY='S-W:r'
 
 ATTRIBUTES=(profile=ts3client_linux_amd64)
 
