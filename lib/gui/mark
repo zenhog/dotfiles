@@ -6,6 +6,7 @@ ICON=
 
 HORIZONTAL=1
 NOWRAP=1
+RATIO=20%
 
 export DB="$HOME/.db/bookmarks.db"
 

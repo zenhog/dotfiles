@@ -91,7 +91,7 @@ function entries() {
           "${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}"
       done | column -t -s "$iSEP"
       ;;
-    sinks|sources)
+    inputs|outputs)
   esac
 
 }
