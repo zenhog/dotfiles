@@ -20,35 +20,41 @@ function extract() {
 function view() {
   local dir entries
 
-  dir="${1}"
+  dir="$1"
 
-  [[ -z "${dir}" ]] && return
+  [[ -z "$dir" ]] && return
 
-  #readarray -t entries < <(fd -tf --base-directory "${STORE}/${dir}")
   readarray -t entries < <(cd "$STORE/$dir" && find * -type f)
 
   local val
   for entry in "${entries[@]}"; do
     unset val
-    [[ "$entry" == *.gpg ]] &&
-      read -r val < <(quiet pass show "${dir}/${entry%.gpg}") ||
-        read -r val < "$STORE/$dir/$entry"
-    if [[ "${entry}" == password* ]]; then
-      local charspec
-      read -r charspec < <(get "${dir}" charspec)
-      silent check "${val}" "${charspec}" &&
-        read -r val < <(colorize green "$val") ||
-          read -r val < <(colorize red "$val")
+
+    if [[ "$entry" == *.gpg ]]; then
+      read -r val < <(quiet pass show "$dir/${entry%.gpg}")
+    else
+      read -r val < "$STORE/$dir/$entry"
     fi
-    printf "%s%s%s\n" "${entry}" "${iSEP}" "${val}"
-  done | column -t -s "${iSEP}" -o "${oSEP}"
+
+    if [[ "$entry" == password* ]]; then
+      local charspec
+
+      read -r charspec < <(get "$dir" charspec)
+
+      if silent check "$val" "$charspec"; then
+        read -r val < <(colorize green "$val")
+      else
+        read -r val < <(colorize red "$val")
+      fi
+    fi
+
+    printf "%s%s%s\n" "$entry" "$iSEP" "$val"
+  done | column -t -s "$iSEP" -o "$oSEP"
   echo
   #qrencode -m1 -tANSI256 <<< "$val"
 }
 
 function list() {
-  #fd -H --strip-cwd-prefix --base-directory "${STORE}" -td -x \
-  #  sh -c 'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort
   (cd "$STORE" && find * .* \( -type d -or -type l \) -exec sh -c \
     'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
 }
@@ -56,12 +62,12 @@ function list() {
 function rename() {
   local rand
   read -r rand < <(tr -dc '[:alnum:]' < /dev/urandom | quiet dd bs=1 count=5)
-  mv -v -- "${STORE}/${1}.gpg" "${STORE}/${1}.old.${rand}.gpg"
+  mv -v -- "${STORE}/$1.gpg" "${STORE}/$1.old.$rand.gpg"
 }
 
 function get() {
   local dir="$1" key="$2"
-  quiet pass show "${dir}/${key}" || quiet cat "${STORE}/.defaults/${key}"
+  quiet pass show "$dir/$key" || quiet cat "$STORE/.defaults/$key"
 }
 
 function insert() {
