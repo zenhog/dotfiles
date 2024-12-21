@@ -91,7 +91,21 @@ function entries() {
           "${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}"
       done | column -t -s "$iSEP"
       ;;
-    inputs|outputs)
-  esac
+    sink-inputs|source-outputs)
+      readarray -t descs < <(jq -r '.[] | .properties."media.name"' <<< "$json")
+      readarray -t names < \
+        <(jq -r '.[] | .properties."application.name"' <<< "$json")
+      readarray -t lvols < \
+        <(jq -r '.[] | .volume."front-left".value_percent' <<< "$json")
+      readarray -t rvols < \
+        <(jq -r '.[] | .volume."front-right".value_percent' <<< "$json")
+      readarray -t mutes < <(jq -r '.[] | .mute' <<< "$json")
 
+      for i in "${!indices[@]}"; do
+        printf "%s%s[%s]%s%s (%s)\n" \
+          "${indices[$i]}" "$iSEP" "${lvols[$i]}" \
+          "$iSEP" "${names[$i]}" "${descs[$i]}"
+      done | column -t -s "$iSEP"
+      ;;
+  esac
 }
