@@ -45,12 +45,6 @@ _G.tags = sharedtags {
       screen = 2,
       layout = awful.layout.layouts[1],
     },
-    {
-      name = "6",
-      idx = 6,
-      screen = 2,
-      layout = awful.layout.layouts[1],
-    },
 }
 
 local function handle_errors()
@@ -202,14 +196,13 @@ local function set_clienttag(c)
         kitty     = 1,
         ctfbox    = 1,
         cutter    = 1,
+        dota2     = 1,
 
         Navigator     = 2,
         chromium      = 2,
         firefox       = 2,
         qutebrowser   = 2,
 
-        dota2     = 3,
-        steam     = 3,
         feh       = 3,
         nsxiv     = 3,
         mupdf     = 3,
@@ -224,6 +217,7 @@ local function set_clienttag(c)
 
         stremio   = 5,
         retroarch = 5,
+        steam     = 5,
     }
 
     tagmap['firefox-vpn1'] = 3

@@ -264,6 +264,7 @@ awful.screen.connect_for_each_screen(function(s)
         filter = awful.widget.taglist.filter.all,
         layout = wibox.layout.fixed.vertical,
         buttons = s.taglist_buttons,
+        source = function() return root.tags() end,
         style  = {
             spacing = theme.spacing / 2,
             spacing = 1,
