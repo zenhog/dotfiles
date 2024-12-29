@@ -37,7 +37,7 @@ function dolist() {
       ;;
     ssids-header)
       nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-        device wifi list --rescan yes | head -1
+        device wifi list --rescan yes | head -1 | tr ' ' '–'
       ;;
     connections)
       nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
@@ -45,7 +45,7 @@ function dolist() {
       ;;
     connections-header)
       nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-        connection show | head -1
+        connection show | head -1 | tr ' ' -
       ;;
   esac
 }

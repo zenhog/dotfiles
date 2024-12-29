@@ -150,7 +150,7 @@ function main() {
 
   COMMAND+=(fzf)
   COMMAND+=(--prompt="$MODULE> ")
-  COMMAND+=(--border=rounded)
+  COMMAND+=(--border=bold)
   COMMAND+=(--info=inline-right)
   COMMAND+=(--no-separator)
   COMMAND+=(--ansi)
@@ -193,7 +193,7 @@ function main() {
     COMMAND+=(--bind "load:$(IFS=+; printf "%s" "${loadbinds[*]}")")
   fi
 
-  WINDOW=right,border-rounded
+  WINDOW=right,border-double
   EXTRA=(
     --bind
     'ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
