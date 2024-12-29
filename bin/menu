@@ -193,17 +193,17 @@ function main() {
     COMMAND+=(--bind "load:$(IFS=+; printf "%s" "${loadbinds[*]}")")
   fi
 
-  WINDOW=right,border-double
+  WINDOW=right,border-bold
   EXTRA=(
     --bind
-    'ctrl-x:change-preview-window(bottom,border-rounded|right,border-rounded)'
+    'ctrl-x:change-preview-window(bottom,border-bold|right,border-bold)'
   )
 
   if [[ -n "$HORIZONTAL" ]]; then
     WINDOW=bottom,border-rounded
     EXTRA=(
       --bind
-      'ctrl-x:change-preview-window(right,border-rounded|bottom,border-rounded)'
+      'ctrl-x:change-preview-window(right,border-bold|bottom,border-bold)'
     )
   else
     case "$POSITION" in
