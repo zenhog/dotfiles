@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+KEY='W:r'
+
+ATTRIBUTES=(profile=discord)
+
+function runner() {
+  #flatpak run com.discordapp.Discord
+  Discord
+}

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-KEY='W:r'
-
 ATTRIBUTES=(profile=goofcord)
 
 function runner() {

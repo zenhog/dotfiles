@@ -45,7 +45,7 @@ function dolist() {
       ;;
     connections-header)
       nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-        connection show | head -1 | tr ' ' -
+        connection show | head -1 | tr ' ' '–'
       ;;
   esac
 }

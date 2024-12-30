@@ -5,5 +5,6 @@ KEY='S-W:t'
 ATTRIBUTES=(profile=steam)
 
 function runner() {
-  flatpak run com.valvesoftware.Steam
+  #flatpak run com.valvesoftware.Steam
+  steam
 }
