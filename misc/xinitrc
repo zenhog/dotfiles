@@ -82,6 +82,10 @@ if [ -x /usr/bin/xset ]; then
     xset dpms 0 0 0
 fi
 
+if [[ -r "$HOME/.xrandr" ]]; then
+  source "$HOME/.xrandr"
+fi
+
 runsvdir "${HOME}"/.xsv &
 
 register
