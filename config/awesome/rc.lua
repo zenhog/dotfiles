@@ -196,13 +196,13 @@ local function set_clienttag(c)
         kitty     = 1,
         ctfbox    = 1,
         cutter    = 1,
-        dota2     = 1,
 
         Navigator     = 2,
         chromium      = 2,
         firefox       = 2,
         qutebrowser   = 2,
 
+        dota2     = 3,
         feh       = 3,
         nsxiv     = 3,
         mupdf     = 3,
