@@ -39,12 +39,6 @@ _G.tags = sharedtags {
       layout = awful.layout.layouts[1],
       screen = 2,
     },
-    {
-      name = "5",
-      idx = 5,
-      screen = 2,
-      layout = awful.layout.layouts[1],
-    },
 }
 
 local function handle_errors()
@@ -158,7 +152,7 @@ local function set_clienttag(c)
     local homedir = os.getenv('HOME')
 
     if c.instance == 'loop' then
-        c:move_to_tag(tags[5])
+        c:move_to_tag(tags[4])
         return
     end
 
@@ -215,9 +209,9 @@ local function set_clienttag(c)
         goofcord  = 4,
         ts3client_linux_amd64 = 4,
 
-        stremio   = 5,
-        retroarch = 5,
-        steam     = 5,
+        stremio   = 4,
+        retroarch = 4,
+        steam     = 4,
     }
 
     tagmap['firefox-vpn1'] = 3
@@ -225,7 +219,7 @@ local function set_clienttag(c)
     tagmap['qutebrowser-vpn1'] = 3
     tagmap['qutebrowser-vpn2'] = 3
 
-    local tagnum = tagmap[c.profile] or 5
+    local tagnum = tagmap[c.profile] or 4
 
     c:move_to_tag(tags[tagnum])
 end
