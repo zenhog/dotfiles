@@ -198,14 +198,14 @@ awful.screen.connect_for_each_screen(function(s)
     )
 
     local taglist_callback = function(self, t, index, tags)
-        local star_outline = '󰓒'  -- empty
-        local star         = '󰓎'  -- normal
-        local starface     = '󰦥'  -- focus
-        local shuriken     = '󰫢'  -- urgent
-        -- local star         = ''  -- normal
-        -- local star_outline = ''  -- empty
-        -- local starface     = '󰐾'  -- focus
-        -- local shuriken     = '󱥸'  -- urgent
+        --local star_outline = '󰓒'  -- empty
+        --local star         = '󰓎'  -- normal
+        --local starface     = '󰦥'  -- focus
+        --local shuriken     = '󰫢'  -- urgent
+        local star         = ''  -- normal
+        local star_outline = ''  -- empty
+        local starface     = '󰐾'  -- focus
+        local shuriken     = '󱥸'  -- urgent
 
         local colors = {
           "deepskyblue",
@@ -246,8 +246,8 @@ awful.screen.connect_for_each_screen(function(s)
             ir.markup = starface
         end
 
-        ir.font = theme.iconfont_name .. ' 10'
         ir.font = theme.iconfont_name .. ' 13'
+        ir.font = theme.iconfont_name .. ' 10'
 
         ir.markup = string.format('<span color="%s">%s</span>',
             colors[tags[index].idx], ir.markup)
