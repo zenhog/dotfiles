@@ -62,7 +62,7 @@ function filter() {
 }
 
 function notify() {
-  notify-send -t 5000 -a menu "$MODULE" "$@"
+  silent notify-send -t 5000 -a menu "$MODULE" "$@"
   widget push timeout
 }
 
