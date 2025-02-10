@@ -11,9 +11,11 @@ function view() {
 
   read -r id _ <<< "$1"
 
-  khard show -u "$id"
+  khard show -u "$id" --format yaml 2>/dev/null | yq
 }
 
 function list() {
-  khard list -p -F uid,formatted_name,phone,email
+  local uids
+  readarray -t uids < <(khard list -p -F uid)
+  printf "%s\n" "${uids[@]}"
 }
