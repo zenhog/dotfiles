@@ -282,6 +282,27 @@ client.connect_signal("manage", function(c)
     not c.size_hints.program_position then
     awful.placement.no_offscreen(c)
   end
+
+  c:buttons(awful.util.table.join(
+    awful.button({ }, 1, function (c)
+      if c ~= client.focus then
+        c:emit_signal(
+          "request::activate",
+          "tasklist",
+          {raise = true}
+        )
+      end
+    end),
+    awful.button({ }, 3, function (c)
+      if c ~= client.focus then
+        c:emit_signal(
+          "request::activate",
+          "tasklist",
+          {raise = true}
+        )
+      end
+    end)
+  ))
 end)
 
 local function focus_menu()
