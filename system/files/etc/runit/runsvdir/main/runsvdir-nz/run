@@ -1,0 +1,22 @@
+#!/bin/bash
+
+exec 2>&1
+
+username=${PWD##*-}
+homedir=$(getent passwd ${username} | awk -F: '{print $6}')
+usershell=$(getent passwd ${username} | awk -F: '{print $7}')
+groups=$(groups $username | awk -F\: '{print $2}' | cut -c2- | tr ' ' ':')
+uid=$(getent passwd ${username} | awk -F: '{print $3}')
+
+export HOME="$homedir"
+export USER="$username"
+export SHELL="$usershell"
+export LOGNAME="$username"
+export LANG="en_US.UTF-8"
+export PATH="$HOME/.bin:$HOME/.local/bin:$PATH"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$HOME/.dbus-session"
+export SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh"
+
+source "$HOME/.profile"
+
+exec chpst -u "${username}:${groups}" runsvdir "${homedir}/.usv"

@@ -31,6 +31,7 @@
 /etc/pam.d/slim
 /etc/pam.d/login
 /etc/pam.d/i3lock
+/etc/pam.d/system-local-login
 
 /etc/X11/xorg.conf
 /etc/rsyslog.conf
