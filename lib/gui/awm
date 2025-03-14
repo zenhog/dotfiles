@@ -278,7 +278,8 @@ function spawn() {
   read -r attrs < <(cmdfmt attrs "${lhs[@]}")
 
   read -r pid < <(awesome-client << EOF | sed -r 's/[^0-9]//g'
-    return require('awful').spawn('${rhs[*]}', ${attrs})
+    local s = '${rhs[*]}'
+    return require('awful').spawn(s, ${attrs})
 EOF
   )
 
