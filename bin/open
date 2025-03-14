@@ -24,7 +24,7 @@ case "${mime}" in
     gui awm runonce fg -- nsxiv -a -s f -- "$(realpath -s "$1")"
     ;;
   video/*)
-    gui awm runonce fg -- vlc "$1"
+    gui awm runonce fg -- vlc "$(realpath -s "$1")"
     ;;
   application/pdf)
     gui awm runonce fg -- mupdf "$(realpath -s "$1")"
