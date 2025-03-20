@@ -12,8 +12,8 @@ SCRIPT="$PWD/config/routes.sh"
 CAFILE="$PWD/config/ca.rsa.4096.crt"
 CRLFILE="$PWD/config/crl.rsa.4096.pem"
 
-read -r VPNUSER < <(pass show www/vpn/privateinternetaccess.com/username)
-read -r VPNPASS < <(pass show www/vpn/privateinternetaccess.com/password)
+read -r VPNUSER < <(pass show www/vpn/proton.me/user)
+read -r VPNPASS < <(pass show www/vpn/proton.me/pass)
 
 ipt() {
   sudo iptables -v -w -C "$@" || sudo iptables -v -w -A "$@"
@@ -48,7 +48,7 @@ CMD=(
   --dev-type tun
   --connect-retry 5 5
   --verb 1
-  --ca "$CAFILE"
+  #--ca "$CAFILE"
 )
 
 export VPNUSER
