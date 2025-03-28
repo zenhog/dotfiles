@@ -7,66 +7,70 @@ MODULES_DIR="$HOME/.lib/widget"
 declare -A KEYS
 
 function prev() {
-    :
+	:
 }
 
 function next() {
-    :
+	:
 }
 
 function toggle() {
-    :
+	:
 }
 
 function colorize() {
-  tty -s && pastel -f paint "$1" "${@:2}" ||
-    printf '<span foreground="%s">%s</span>' "$1" "${*:2}"
+	tty -s && pastel -f paint "$1" "${@:2}" ||
+		printf '<span foreground="%s">%s</span>' "$1" "${*:2}"
+}
+
+function sanitize() {
+	sed -e 's/&/\&amp;/gp'
 }
 
 function run() {
-    gui "${BASH_ARGV[1]}" &>/dev/null && menu "${BASH_ARGV[1]}"
+	gui "${BASH_ARGV[1]}" &>/dev/null && menu "${BASH_ARGV[1]}"
 }
 
 function period() {
-  echo "${PERIOD:-60}"
+	echo "${PERIOD:-60}"
 }
 
 function timeout() {
-  gui awm timeout "${BASH_ARGV[1]}"
+	gui awm timeout "${BASH_ARGV[1]}"
 }
 
 function output() {
-  echo "$(icon):$(text)"
+	echo "$(icon):$(sanitize <<< "$(text)")"
 }
 
 function keys() {
-  for key in "${!KEYS[@]}"; do
-    echo "$key:${KEYS[$key]}"
-  done
+	for key in "${!KEYS[@]}"; do
+		echo "$key:${KEYS[$key]}"
+	done
 }
 
 function main() {
-  case $# in
-    0) # list widgets
-      readarray -t widgets < <(realpath $MODULES_DIR/*)
-      readarray -t widgets < <(basename -a "${widgets[@]}")
-      for w in "${widgets[@]}"; do
-        printf "%s:%s\n" "$w" "$(widget "$w" period)"
-      done
-      ;;
-    1) # list widget functions
-      source "$MODULES_DIR/$1" || exit 1
-      declare -F | awk '{print $3}'
-      ;;
-    *) # call widget functions
-      source "$MODULES_DIR/$1" || exit 1
-      "${@:2}"
-      # if KEYS[prev] exists, then we should timeout the widget
-      if [[ -n "${KEYS[$2]}" ]]; then
-        timeout
-      fi
-      ;;
-  esac
+	case $# in
+	0) # list widgets
+		readarray -t widgets < <(realpath $MODULES_DIR/*)
+		readarray -t widgets < <(basename -a "${widgets[@]}")
+		for w in "${widgets[@]}"; do
+			printf "%s:%s\n" "$w" "$(widget "$w" period)"
+		done
+		;;
+	1) # list widget functions
+		source "$MODULES_DIR/$1" || exit 1
+		declare -F | awk '{print $3}'
+		;;
+	*) # call widget functions
+		source "$MODULES_DIR/$1" || exit 1
+		"${@:2}"
+		# if KEYS[prev] exists, then we should timeout the widget
+		if [[ -n "${KEYS[$2]}" ]]; then
+			timeout
+		fi
+		;;
+	esac
 }
 
 main "$@"
