@@ -37,7 +37,7 @@ return {
         openrouter = function()
           return require("codecompanion.adapters").extend("openai_compatible", {
             env = {
-              api_key = os.getenv("OPENROUTER_API_KEY"),
+              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
               url = "https://openrouter.ai/api",
               chat_url = "/v1/chat/completions",
             },
@@ -53,7 +53,7 @@ return {
       window = {
         layout = "vertical", -- float|vertical|horizontal|buffer
         position = nil, -- left|right|top|bottom (nil will default depending on vim.opt.plitright|vim.opt.splitbelow)
-        width = 0.40,
+        width = 0.50,
         relative = "editor",
         opts = {
           breakindent = true,
@@ -83,7 +83,7 @@ return {
           width = 0.5,
           height = 0.5,
           prompt = "Prompt ", -- Prompt used for interactive LLM calls
-          provider = "telescope", -- default|telescope|mini_pick
+          provider = "default", -- default|telescope|mini_pick
           opts = {
             show_default_actions = true, -- Show the default actions in the action palette?
             show_default_prompt_library = true, -- Show the default prompt library in the action palette?
@@ -92,7 +92,7 @@ return {
       },
     })
 
-    -- vim.keymap.set("n", "<leader>ch", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open CodeCompanion chat" })
+    vim.keymap.set("n", "<leader>ch", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open CodeCompanion chat" })
 
     vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
     vim.g.codecompanion_in_use = true
