@@ -48,6 +48,20 @@ return {
             },
           })
         end,
+        gemini = function()
+          return require("codecompanion.adapters").extend("openai_compatible", {
+            env = {
+              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
+              url = "https://openrouter.ai/api",
+              chat_url = "/v1/chat/completions",
+            },
+            schema = {
+              model = {
+                default = "google/gemini-2.5-pro-exp-03-25:free",
+              },
+            },
+          })
+        end,
       },
       default_adapter = "openrouter",
       window = {
