@@ -49,6 +49,47 @@ _G.tags = sharedtags({
 	},
 })
 
+-- Update wibox visibility for a screen
+local function update_wibox_visibility(s)
+	-- Check if current tag has any fullscreen clients
+	local current_tag = s.selected_tag
+	local should_hide = false
+	for _, c in ipairs(client.get()) do
+		if c.screen == s and c.fullscreen and c:tags()[1] == current_tag then
+			should_hide = true
+			break
+		end
+	end
+
+	-- Set wibox visibility
+	s.leftbar.visible = not should_hide
+	s.topbar.visible = not should_hide
+end
+
+-- Update when client moves between tags
+client.connect_signal("tagged", function(c)
+	for _, s in ipairs(screen) do
+		update_wibox_visibility(s)
+	end
+end)
+
+-- Fullscreen property handler
+client.connect_signal("property::fullscreen", function(c)
+	update_wibox_visibility(c.screen)
+end)
+
+-- Tag switched handler
+tag.connect_signal("property::selected", function(t)
+	update_wibox_visibility(t.screen)
+end)
+
+-- Client unmanaged handler
+client.connect_signal("unmanage", function(c)
+	if c.fullscreen then
+		update_wibox_visibility(c.screen)
+	end
+end)
+
 local function handle_errors()
 	if awesome.startup_errors then
 		naughty.notify({
