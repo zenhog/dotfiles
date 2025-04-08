@@ -62,6 +62,20 @@ return {
             },
           })
         end,
+        llama = function()
+          return require("codecompanion.adapters").extend("openai_compatible", {
+            env = {
+              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
+              url = "https://openrouter.ai/api",
+              chat_url = "/v1/chat/completions",
+            },
+            schema = {
+              model = {
+                default = "meta-llama/llama-4-maverick:free",
+              },
+            },
+          })
+        end,
       },
       default_adapter = "openrouter",
       window = {
