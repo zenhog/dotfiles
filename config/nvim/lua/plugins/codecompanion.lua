@@ -79,7 +79,7 @@ return {
       },
       default_adapter = "openrouter",
       window = {
-        layout = "vertical", -- float|vertical|horizontal|buffer
+        layout = "float", -- float|vertical|horizontal|buffer
         position = nil, -- left|right|top|bottom (nil will default depending on vim.opt.plitright|vim.opt.splitbelow)
         width = 0.50,
         relative = "editor",
@@ -103,7 +103,7 @@ return {
           show_header_separator = false,
           separator = "─", -- The separator between the different messages in the chat buffer
           show_references = true, -- Show references (from slash commands and variables) in the chat buffer?
-          show_settings = false, -- Show LLM settings at the top of the chat buffer?
+          show_settings = true, -- Show LLM settings at the top of the chat buffer?
           show_token_count = true, -- Show the token count for each response?
           start_in_insert_mode = false, -- Open the chat buffer in insert mode?
         },
