@@ -325,7 +325,7 @@ local function set_attributes(c)
 	end
 end
 
-local roundedrect = function(cr, w, h, r)
+local roundedrect = function(cr, w, h)
 	return gears.shape.rounded_rect(cr, w, h, theme.global_radius / 2)
 end
 
