@@ -29,11 +29,13 @@ _G.tags = sharedtags({
 		name = "2",
 		idx = 2,
 		layout = awful.layout.layouts[1],
+		screen = 2,
 	},
 	{
 		name = "3",
 		idx = 3,
 		layout = awful.layout.layouts[1],
+		screen = 2,
 	},
 	{
 		name = "4",
