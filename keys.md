@@ -101,6 +101,8 @@
   - \f => fzflua files cwd
   - \F => fzflua files
   - \g => git?
+  - SPC g => neogit? vgit? diffview? gitsigns?
+  - SPC G => octo? gh.nvim? octohub? gist? pipeline.nvim?
   - \d => dap?
   - \p => prompts?
   - \c => CodeCompanion
