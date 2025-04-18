@@ -4,15 +4,21 @@ tmux
 neovim
 screen
 socat
+python3-neovim
+ruby-devel
 
 gnupg
 pass
 rsync
+rclone
 git
 curl
 wget
 w3m
 elinks
+lynx
+plantuml
+baresip
 
 less
 lesspipe

@@ -3,6 +3,7 @@ cdrtools
 collectd-utils
 dateutils
 cpufrequtils
+cpupower
 conntrack-tools
 desktop-file-utils
 libcgroup-utils

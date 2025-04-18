@@ -1,5 +1,6 @@
 - supervise
 - system-connections
 - credentials.txt
+- ngrok
 - *~
 - *.new-*
