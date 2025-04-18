@@ -100,8 +100,11 @@
   - L => next tab
   - \f => fzflua files cwd
   - \F => fzflua files
-  - \g => fzflua git?
+  - \g => git?
   - \d => dap?
+  - \p => prompts?
+  - \c => CodeCompanion
+  - \C => CodeCompanion actions
   - \h => fzflua helptags
   - \H => fzflua tags
   - \k => fzflua keymaps
