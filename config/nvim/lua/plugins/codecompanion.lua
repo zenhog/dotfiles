@@ -119,12 +119,15 @@ return {
         },
       },
     })
-
-    vim.keymap.set("n", "<leader>ch", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open CodeCompanion chat" })
-
-    vim.keymap.set({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
-    vim.g.codecompanion_in_use = true
   end,
+  -- keys = {
+  --   {
+  --     "<C-e>",
+  --     mode = { "n" },
+  --     "<Cmd>CodeCompanionChat<Cr>",
+  --     desc = "CC: Chat",
+  --   },
+  -- },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-treesitter/nvim-treesitter",
