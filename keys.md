@@ -95,7 +95,8 @@
 
 - Normal/Visual
   - Enter => textsubject visual mode
-  - s =>
+  - s => surround
+  - gs
   - H => prev tab
   - L => next tab
   - \q => fzflua quickfix
