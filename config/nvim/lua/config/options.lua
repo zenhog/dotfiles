@@ -5,3 +5,4 @@ vim.g.mapleader = "\\"
 vim.g.maplocalleader = " "
 vim.g.lazyvim_ruby_lsp = "ruby_lsp"
 vim.g.lazyvim_picker = "fzf"
+vim.opt.laststatus = 3
