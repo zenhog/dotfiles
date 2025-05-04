@@ -30,8 +30,8 @@ vim.keymap.set("i", "<C-x><C-a>", "<cmd>normal <<<cr>", { desc = "Indent left" }
 vim.keymap.set("i", "<C-x><C-e>", "<cmd>normal >><cr>", { desc = "Indent right" })
 
 -- Deletion
-vim.keymap.set("i", "<C-w>", "<C-o>db", { desc = "Delete backward word" })
-vim.keymap.set("i", "<C-x><C-w>", "<C-o>dB", { desc = "Delete backward Word" })
+vim.keymap.set("i", "<C-w>", "<cmd>normal db<cr>", { desc = "Delete backward word" })
+vim.keymap.set("i", "<C-x><C-w>", "<cmd>normal dB<cr>", { desc = "Delete backward Word" })
 vim.keymap.set("i", "<C-f>", "<C-o>dw", { desc = "Delete forward word" })
 vim.keymap.set("i", "<C-x><C-f>", "<C-o>dW", { desc = "Delete forward Word" })
 
