@@ -94,11 +94,19 @@
   - C-d C-p => prev node
 
 - Normal/Visual
-  - Enter => textsubject visual mode
+  - Enter => Flash.nvim
   - s => surround
   - gs
   - H => prev tab
   - L => next tab
+  - J =>
+  - K =>
+  - j => gj
+  - k => gk
+  - C-n =>
+  - C-p =>
+  - C-x C-n =>
+  - C-x C-p =>
   - \q => fzflua quickfix
   - \l => fzflua loclist
   - \j => fzflua jumps
@@ -108,7 +116,7 @@
   - \F => fzflua files
   - \g => git?
   - SPC g => neogit? vgit? diffview? gitsigns?
-  - SPC G => octo? gh.nvim? octohub? gist? pipeline.nvim?
+  - SPC G => octo? gh.nvim? octohub? gist? pipeline.nvim
   - \d => dap?
   - \p => prompts?
   - \r => overseer?
