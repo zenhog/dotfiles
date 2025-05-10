@@ -1,3 +1,15 @@
+[font.bold]
+family = "VictorMono Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "VictorMono Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "VictorMono Nerd Font Mono"
+style = "Italic"
+
 [font.normal]
-family = "iosevka nerd font mono"
-style = "regular"
+family = "VictorMono Nerd Font Mono"
+style = "Regular"
