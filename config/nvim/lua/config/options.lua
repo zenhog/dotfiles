@@ -6,3 +6,6 @@ vim.g.maplocalleader = " "
 vim.g.lazyvim_ruby_lsp = "ruby_lsp"
 vim.g.lazyvim_picker = "fzf"
 vim.opt.laststatus = 3
+vim.opt.timeout = false
+vim.opt.ttimeout = false
+vim.opt.ttimeoutlen = 0

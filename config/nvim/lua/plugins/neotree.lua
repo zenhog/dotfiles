@@ -52,4 +52,54 @@ return {
       },
     })
   end,
+  keys = {
+    {
+      "<C-t>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=focus source=filesystem<cr>",
+      desc = "Neotree filesystem focus",
+    },
+    {
+      "<C-x><C-t>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=close source=filesystem<cr>",
+      desc = "Neotree filesystem close",
+    },
+    {
+      "<C-y>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=focus source=buffers<cr>",
+      desc = "Neotree buffers focus",
+    },
+    {
+      "<C-x><C-y>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=show source=buffers<cr>",
+      desc = "Neotree buffers close",
+    },
+    {
+      "<C-\\>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=focus source=document_symbols position=right<cr>",
+      desc = "Neotree buffers focus",
+    },
+    {
+      "<C-x><C-\\>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=close source=document_symbols position=right<cr>",
+      desc = "Neotree buffers close",
+    },
+    {
+      "<C-g>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=focus source=git_status<cr>",
+      desc = "Neotree gitstatus focus",
+    },
+    {
+      "<C-x><C-g>",
+      mode = { "n", "v", "i", "c" },
+      "<cmd>Neotree action=close source=git_status<cr>",
+      desc = "Neotree gitstatus close",
+    },
+  },
 }
