@@ -40,7 +40,7 @@ function timeout() {
 }
 
 function output() {
-	echo "$(icon):$(sanitize <<< "$(text)")"
+	echo "$(icon):$(sanitize <<<"$(text)")"
 }
 
 function keys() {

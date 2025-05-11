@@ -2,52 +2,65 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+local map = {
+  m = { "i", "n", "c", "o", "t", "v", "x", "s" },
+  f = function(modes)
+    return function(key, map, desc)
+      vim.keymap.set(modes, key, map, { desc = desc })
+    end
+  end,
+}
+
+for _, mode in ipairs(map.m) do
+  map[mode] = map.f(mode)
+end
+
+map.ni = map.f({ "i", "n" })
+map.nix = map.f({ "i", "n", "x" })
+map.nic = map.f({ "i", "n", "c" })
+
 vim.keymap.set("i", "<C-_>", '<cmd>lua require("flash").jump()<cr>', { desc = "Flash jump" })
 vim.keymap.set("i", "<C-d><C-_>", '<cmd>lua require("flash").delete()<cr>', { desc = "Flash delete" })
 
-vim.keymap.set("i", "<C-u>", "<C-\\><C-o>u", { desc = "Cancel" })
+map.ni("<C-s>", "<Cmd>w<CR>", "Save")
+map.ni("<C-q>", "<Cmd>q<CR>", "Quit")
 
--- Half-page scrolling in insert mode
-vim.keymap.set("i", "<C-n>", "<cmd>normal! <C-d><cr>", { desc = "Scroll half page down" })
-vim.keymap.set("i", "<C-p>", "<cmd>normal! <C-u><cr>", { desc = "Scroll half page up" })
+map.i("<C-p>", "<C-\\><C-o><C-u>", "Half PgUp")
+map.i("<C-n>", "<C-\\><C-o><C-d>", "Half PgDn")
 
-vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Save Buffer" })
-vim.keymap.set("i", "<C-q>", "<cmd>q<cr>", { desc = "Kill window" })
+map.i("<C-k>", "<Up>")
+map.i("<C-j>", "<Down>")
 
-vim.keymap.set("i", "<C-k>", "<Up>", { desc = "Up line" })
-vim.keymap.set("i", "<C-j>", "<Down>", { desc = "Down line" })
-vim.keymap.set({ "i", "c" }, "<C-h>", "<BS>", { desc = "Delete 1 char left" })
-vim.keymap.set({ "i", "c" }, "<C-l>", "<Del>", { desc = "Delete 1 char right" })
+map.i("<C-h>", "<BS>")
+map.i("<C-l>", "<Del>")
 
-vim.keymap.set("i", "<C-x><C-j>", "<cmd>Gitsigns next_hunk<cr>", { desc = "Next hunk" })
-vim.keymap.set("i", "<C-x><C-k>", "<cmd>Gitsigns prev_hunk<cr>", { desc = "Prev hunk" })
+map.i("<C-x><C-h>", "<Left>")
+map.i("<C-x><C-l>", "<Right>")
 
-vim.keymap.set({ "i", "c" }, "<C-d><C-h>", "<Left>", { desc = "1 char left" })
-vim.keymap.set({ "i", "c" }, "<C-d><C-l>", "<Right>", { desc = "1 char right" })
+map.i("<C-d><C-h>", "<S-Left>")
+map.i("<C-d><C-l>", "<S-Right>")
 
-vim.keymap.set({ "i", "c" }, "<C-x><C-h>", "<S-Left>", { desc = "1 word left" })
-vim.keymap.set({ "i", "c" }, "<C-x><C-l>", "<S-Right>", { desc = "1 word right" })
+map.i("<Esc>", "<C-c>")
+map.i("<C-u>", "<C-o>u")
+map.i("<C-x><C-v>", "<C-v>")
 
-vim.keymap.set("i", "<Esc>", "<C-c>", { desc = "Quit insert-mode" })
+map.i("<C-d><C-d>", "<C-BSlash><C-o>d")
+map.i("<C-x><C-x>", "<C-BSlash><C-o><C-r>")
 
--- Indentation
-vim.keymap.set("i", "<C-x><C-a>", "<C-d>", { desc = "Indent left" })
-vim.keymap.set("i", "<C-x><C-e>", "<C-t>", { desc = "Indent right" })
+map.i("<C-a>", "<Home>")
+map.i("<C-e>", "<End>")
 
--- Deletion
-vim.keymap.set({ "i", "c" }, "<C-w>", "<C-\\><C-o>db", { desc = "Delete backward word" })
-vim.keymap.set({ "i", "c" }, "<C-f>", "<C-\\><C-o>dw", { desc = "Delete forward word" })
+map.i("<C-x><C-a>", "<C-d>", "Indent left")
+map.i("<C-x><C-e>", "<C-t>", "Indent right")
 
-vim.keymap.set({ "i", "c" }, "<C-x><C-w>", "<C-\\><C-o>dB", { desc = "Delete backward Word" })
-vim.keymap.set({ "i", "c" }, "<C-x><C-f>", "<C-\\><C-o>dW", { desc = "Delete forward Word" })
+map.i("<C-d><C-a>", "<C-BSlash><C-o>d0")
+map.i("<C-d><C-e>", "<C-BSlash><C-o>d$")
 
--- Delete operations that handle edge cases
-vim.keymap.set({ "i", "c" }, "<C-d><C-a>", "<C-\\><C-o>d0", { desc = "Delete till beginning of line" })
-vim.keymap.set({ "i", "c" }, "<C-d><C-e>", "<C-\\><C-o>d$", { desc = "Delete till end of line" })
+map.i("<C-w>", "<C-BSlash><C-o>db")
+map.i("<C-f>", "<C-BSlash><C-o>dw")
 
-vim.keymap.set("i", "<C-d><C-d>", "<C-\\><C-o>d", { desc = "Delete operator" })
+map.i("<C-d><C-w>", "<C-BSlash><C-o>dB")
+map.i("<C-d><C-f>", "<C-BSlash><C-o>dW")
 
--- Navigation
-vim.keymap.set({ "i", "c" }, "<C-a>", "<Home>", { desc = "Beginning of line" })
-vim.keymap.set({ "i", "c" }, "<C-e>", "<End>", { desc = "End of line" })
-vim.keymap.set({ "i", "c" }, "<C-x>", "<Nop>", { noremap = true, desc = "Disable <C-x>" })
+map.i("<C-x><C-w>", "<C-BSlash><C-o>B")
+map.i("<C-x><C-f>", "<C-BSlash><C-o>W")
