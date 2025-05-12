@@ -19,6 +19,8 @@ opt.timeout = false
 opt.ttimeout = false
 opt.ttimeoutlen = 0
 
+opt.confirm = false
+
 opt.completeopt = "menuone,noinsert,noselect"
 opt.sessionoptions = "curdir,buffers,folds,globals,tabpages,winpos,winsize," .. "options,localoptions,help,blank"
 
