@@ -15,9 +15,16 @@ for _, mode in ipairs(map.m) do
   map[mode] = map.f(mode)
 end
 
+map.a = map.f(map.m)
 map.ni = map.f({ "i", "n" })
 map.nix = map.f({ "i", "n", "x" })
 map.nic = map.f({ "i", "n", "c" })
+
+map.a("<M-h>", '<cmd>lua require("tmux").move_left()<cr>')
+map.a("<M-j>", '<cmd>lua require("tmux").move_bottom()<cr>')
+map.a("<M-k>", '<cmd>lua require("tmux").move_top()<cr>')
+map.a("<M-l>", '<cmd>lua require("tmux").move_right()<cr>')
+--map.a("<M-Tab>", '<cmd>lua require("tmux").next_window()<cr>')
 
 vim.keymap.set("i", "<C-_>", '<cmd>lua require("flash").jump()<cr>', { desc = "Flash jump" })
 vim.keymap.set("i", "<C-d><C-_>", '<cmd>lua require("flash").delete()<cr>', { desc = "Flash delete" })

@@ -4,8 +4,12 @@ return {
     priority = 1000, -- Ensure it loads first
     config = function()
       require("onedarkpro").setup({
-        vim.cmd("colorscheme onedark"),
+        options = {
+          cursorline = true,
+          terminal_colors = true,
+        },
       })
+      vim.cmd("colorscheme onedark_vivid")
     end,
   },
 }
