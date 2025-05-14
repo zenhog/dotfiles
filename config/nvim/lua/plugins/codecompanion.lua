@@ -126,16 +126,16 @@ return {
   },
   keys = {
     {
-      "<C-f>",
+      "<space>W",
       mode = { "n", "v" },
       "<cmd>CodeCompanionActions<cr>",
-      desc = "CodeCompanion: Actions",
+      desc = "CodeCompanion Actions",
     },
     {
-      "<C-x><C-f>",
+      "<space>w",
       mode = { "n", "v" },
       "<cmd>CodeCompanionChat Toggle<cr>",
-      desc = "CodeCompanion: Toggle",
+      desc = "CodeCompanion Toggle",
     },
   },
 }

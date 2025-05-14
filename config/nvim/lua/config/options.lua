@@ -5,6 +5,9 @@
 vim.g.mapleader = "\\"
 vim.g.maplocalleader = " "
 
+vim.g.mapleader = false
+vim.g.maplocalleader = false
+
 vim.g.lazyvim_picker = "fzf"
 vim.g.lazyvim_cmp = "blink.cmp"
 vim.g.autoformat = true

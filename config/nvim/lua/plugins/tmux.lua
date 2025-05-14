@@ -94,11 +94,6 @@ return {
         mode = { "n", "v", "i", "c" },
         "<cmd>lua require('tmux').move_bottom()<cr>",
       },
-      {
-        "<M-Tab>",
-        mode = { "n", "v", "i", "c" },
-        "<cmd>lua require('tmux').next_window()<cr>",
-      },
     },
   },
 }

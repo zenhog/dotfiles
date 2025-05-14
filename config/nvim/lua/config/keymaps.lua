@@ -29,8 +29,11 @@ map.a("<M-l>", '<cmd>lua require("tmux").move_right()<cr>')
 vim.keymap.set("i", "<C-_>", '<cmd>lua require("flash").jump()<cr>', { desc = "Flash jump" })
 vim.keymap.set("i", "<C-d><C-_>", '<cmd>lua require("flash").delete()<cr>', { desc = "Flash delete" })
 
-map.ni("<C-s>", "<Cmd>w<CR>", "Save")
-map.ni("<C-q>", "<Cmd>q<CR>", "Quit")
+map.nix("<C-s>", "<Cmd>w<CR>", "Save")
+map.nix("<C-q>", "<Cmd>q!<CR>", "Quit")
+
+map.nix("<C-s>", "<Cmd>wa<CR>", "Save")
+map.nix("<C-q>", "<Cmd>qa!<CR>", "Quit")
 
 map.i("<C-p>", "<C-\\><C-o><C-u>", "Half PgUp")
 map.i("<C-n>", "<C-\\><C-o><C-d>", "Half PgDn")

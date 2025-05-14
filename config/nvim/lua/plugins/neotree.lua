@@ -81,42 +81,44 @@ return {
       },
     })
   end,
-  keys = {
-    {
-      "<C-t>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree filesystem<cr>",
-      desc = "NeoTree: Filesystem",
-    },
-    {
-      "<C-y>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree buffers<cr>",
-      desc = "NeoTree: Buffers",
-    },
-    {
-      "<C-g>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree git_status<cr>",
-      desc = "NeoTree: Git",
-    },
-    {
-      "<C-x><C-t>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree document_symbols<cr>",
-      desc = "NeoTree: Symbols",
-    },
-    {
-      "<C-x><C-y>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree diagnostics<cr>",
-      desc = "NeoTree: Diagnostics",
-    },
-    {
-      "<C-x><C-g>",
-      mode = { "n", "v", "i", "c" },
-      "<cmd>Neotree close<cr>",
-      desc = "NeoTree: Close",
-    },
-  },
+  keys = function()
+    return {
+      {
+        "<space>f",
+        mode = { "n", "v" },
+        "<cmd>Neotree filesystem<cr>",
+        desc = "NeoTree Filesystem",
+      },
+      {
+        "<space>b",
+        mode = { "n", "v" },
+        "<cmd>Neotree buffers<cr>",
+        desc = "NeoTree Buffers",
+      },
+      {
+        "<space>g",
+        mode = { "n", "v" },
+        "<cmd>Neotree git_status<cr>",
+        desc = "NeoTree Git",
+      },
+      {
+        "<space>s",
+        mode = { "n", "v" },
+        "<cmd>Neotree document_symbols<cr>",
+        desc = "NeoTree Symbols",
+      },
+      {
+        "<space>d",
+        mode = { "n", "v" },
+        "<cmd>Neotree diagnostics<cr>",
+        desc = "NeoTree Diagnostics",
+      },
+      {
+        "<space>x",
+        mode = { "n", "v" },
+        "<cmd>Neotree close<cr>",
+        desc = "NeoTree Close",
+      },
+    }
+  end,
 }
