@@ -13,7 +13,7 @@ vim.g.lazyvim_cmp = "blink.cmp"
 vim.g.autoformat = true
 vim.g.trouble_lualine = true
 
-vim.g.snacks_animate = true
+vim.g.snacks_animate = false
 
 local opt = vim.opt
 
@@ -25,13 +25,18 @@ opt.ttimeoutlen = 0
 opt.confirm = false
 
 opt.completeopt = "menuone,noinsert,noselect"
-opt.sessionoptions = "curdir,buffers,folds,globals,tabpages,winpos,winsize," .. "options,localoptions,help,blank"
+
+opt.listchars = "tab:▶ ,trail:␣"
 
 opt.sessionoptions = {
   "buffers",
   "curdir",
   "tabpages",
   "winsize",
+  "winpos",
+  "options",
+  "blank",
+  -- "localoptions",
   "help",
   "globals",
   "skiprtp",
