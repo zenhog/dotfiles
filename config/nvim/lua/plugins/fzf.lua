@@ -1,3 +1,41 @@
+local actions = require("fzf-lua.actions")
+
+local custom_actions = {
+  references = function(selected, opts)
+    if not selected or #selected == 0 then
+      return
+    end
+    local symbol = selected[1]
+
+    print(vim.inspect(symbol))
+
+    -- Ensure we have proper LSP symbol data
+    if not symbol.selectionRange or not symbol.selectionRange.start then
+      vim.notify("Invalid symbol data", vim.log.levels.ERROR)
+      return
+    end
+
+    -- Get the current buffer and position
+    local bufnr = vim.api.nvim_get_current_buf()
+    local pos = {
+      line = symbol.selectionRange.start.line,
+      character = symbol.selectionRange.start.character,
+    }
+
+    -- Trigger LSP references
+    require("fzf-lua").lsp_references({
+      jump_to_single_result = true,
+      no_auto_resize = true,
+      winopts = {
+        height = 0.4,
+        width = 0.6,
+        row = 0.4,
+        col = 0.4,
+      },
+    }, { bufnr = bufnr, pos = pos })
+  end,
+}
+
 local keys = {
   {
     "<C-a>",
@@ -106,7 +144,27 @@ local keys = {
   },
 }
 
-local keymap = {
+local lsp_config = {
+  lsp = {
+    actions = {
+      ["ctrl-o"] = custom_actions.references,
+    },
+    symbols = {
+      symbol_hl = function(s)
+        return "TroubleIcon" .. s
+      end,
+      symbol_fmt = function(s)
+        return s:lower() .. "\t"
+      end,
+      child_prefix = false,
+    },
+    code_actions = {
+      previewer = vim.fn.executable("delta") == 1 and "codeaction_native" or nil,
+    },
+  },
+}
+
+local config = {
   keymap = {
     fzf = {
       ["ctrl-u"] = "preview-page-up",
@@ -121,6 +179,7 @@ local keymap = {
       ["<C-BSlash>"] = "toggle-preview-wrap",
     },
   },
+  lsp_config,
 }
 
 return {
@@ -132,8 +191,8 @@ return {
     -- config.defaults.keymap.fzf["ctrl-x"] = "jump"
     -- config.defaults.keymap.fzf["ctrl-u"] = "preview-page-down"
     -- config.defaults.keymap.fzf["ctrl-d"] = "preview-page-up"
-    init = function()
-      require("fzf-lua").setup(keymap)
+    config = function()
+      require("fzf-lua").setup(config)
     end,
     keys = function()
       return keys
