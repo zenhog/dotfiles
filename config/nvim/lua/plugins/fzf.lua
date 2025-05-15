@@ -1,25 +1,109 @@
 local keys = {
-  { "<C-a>", "<cmd>FzfLua lsp_document_symbols<CR>", desc = "FZF Symbols" },
-  { "<C-x><C-a>", "<cmd>FzfLua lsp_workspace_symbols<CR>", desc = "FZF Workspace Symbols" },
-
-  { "<C-e>", "<cmd>FzfLua lsp_document_diagnostics<CR>", desc = "FZF Diagnostics" },
-  { "<C-x><C-e>", "<cmd>FzfLua lsp_workspace_diagnostics<CR>", desc = "FZF Workspace Diagnostics" },
-
-  { "<bslash>f", LazyVim.pick("files", { root = false }), desc = "FZF Files" },
-  { "<bslash>F", LazyVim.pick("files"), desc = "FZF Root Files" },
-
-  { "<bslash>g", "<cmd>FzfLua git_status<CR>", desc = "FZF Status" },
-  { "<bslash>G", "<cmd>FzfLua git_commits<CR>", desc = "FZF Commits" },
-
-  { "<bslash><bslash>", LazyVim.pick("live_grep", { root = false }), desc = "Grep (cwd)" },
-  { "<bslash><slash>", LazyVim.pick("live_grep"), desc = "Grep (Root Dir)" },
-
-  { "<bslash>h", "<cmd>FzfLua help_tags<cr>", desc = "FZF Helptags" },
-  { "<bslash>H", "<cmd>FzfLua highlights<cr>", desc = "FZF Highlights" },
-
-  { "<bslash>k", "<cmd>FzfLua keymaps<cr>", desc = "FZF Keymaps" },
-  { "<bslash>j", "<cmd>FzfLua jumps<cr>", desc = "FZF Jumps" },
-  { "<bslash>c", LazyVim.pick("colorschemes"), desc = "FZF Colorschemes" },
+  {
+    "<C-a>",
+    "<cmd>FzfLua lsp_document_symbols<CR>",
+    desc = "FZF Symbols",
+  },
+  {
+    "<C-x><C-a>",
+    "<cmd>FzfLua lsp_workspace_symbols<CR>",
+    desc = "FZF Workspace Symbols",
+  },
+  {
+    "<C-e>",
+    "<cmd>FzfLua lsp_document_diagnostics<CR>",
+    desc = "FZF Diagnostics",
+  },
+  {
+    "<C-x><C-e>",
+    "<cmd>FzfLua lsp_workspace_diagnostics<CR>",
+    desc = "FZF Workspace Diagnostics",
+  },
+  {
+    "<bslash><bslash>",
+    "<cmd>FzfLua<cr>",
+    desc = "FZF",
+  },
+  {
+    "<bslash>f",
+    LazyVim.pick("files", { root = false }),
+    desc = "FZF Files - cwd",
+  },
+  {
+    "<bslash>F",
+    LazyVim.pick("files"),
+    desc = "FZF Files - root",
+  },
+  {
+    "<bslash>C",
+    "<cmd>FzfLua command_history<cr>",
+    desc = "FZF Command History",
+  },
+  {
+    "<bslash>C",
+    "<cmd>FzfLua command_history<cr>",
+    desc = "FZF Command History",
+  },
+  {
+    "<bslash>i",
+    "<cmd>FzfLua git_files<cr>",
+    desc = "FZF Git Files",
+  },
+  {
+    "<bslash>I",
+    LazyVim.pick.config_files(),
+    desc = "FZF Files - config",
+  },
+  {
+    "<bslash>b",
+    "<cmd>FzfLua buffers sort_mru=true sort_lastused=true<cr>",
+    desc = "FZF Buffers",
+  },
+  {
+    "<bslash>g",
+    "<cmd>FzfLua git_status<CR>",
+    desc = "FZF Git Status",
+  },
+  {
+    "<bslash>G",
+    "<cmd>FzfLua git_commits<CR>",
+    desc = "FZF Git Commits",
+  },
+  {
+    "<bslash>r",
+    LazyVim.pick("live_grep", { root = false }),
+    desc = "FZF Live RG - cwd",
+  },
+  {
+    "<bslash>R",
+    LazyVim.pick("live_grep"),
+    desc = "FZF Live RG - root",
+  },
+  {
+    "<bslash>h",
+    "<cmd>FzfLua help_tags<cr>",
+    desc = "FZF Helptags",
+  },
+  {
+    "<bslash>H",
+    "<cmd>FzfLua highlights<cr>",
+    desc = "FZF Highlights",
+  },
+  {
+    "<bslash>k",
+    "<cmd>FzfLua keymaps<cr>",
+    desc = "FZF Keymaps",
+  },
+  {
+    "<bslash>j",
+    "<cmd>FzfLua jumps<cr>",
+    desc = "FZF Jumps",
+  },
+  {
+    "<bslash>m",
+    LazyVim.pick("colorschemes"),
+    desc = "FZF Colorschemes",
+  },
 }
 
 local keymap = {
@@ -61,15 +145,6 @@ return {
     --   "<cmd>FzfLua buffers sort_mru=true sort_lastused=true<cr>",
     --   desc = "Switch Buffer",
     -- },
-    -- { "<bslash>/", LazyVim.pick("live_grep"), desc = "Grep (Root Dir)" },
-    -- { "<bslash>:", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
-    -- { "<bslash><space>", LazyVim.pick("files"), desc = "Find Files (Root Dir)" },
-    -- -- find
-    -- { "<bslash>fb", "<cmd>FzfLua buffers sort_mru=true sort_lastused=true<cr>", desc = "Buffers" },
-    -- { "<bslash>fc", LazyVim.pick.config_files(), desc = "Find Config File" },
-    -- { "<bslash>g", "<cmd>FzfLua git_files<cr>", desc = "Find Files (git-files)" },
-    -- { "<bslash>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent" },
-    -- { "<bslash>fR", LazyVim.pick("oldfiles", { cwd = vim.uv.cwd() }), desc = "Recent (cwd)" },
     -- -- git
     -- -- search
     -- { '<bslash>r"', "<cmd>FzfLua registers<cr>", desc = "Registers" },
