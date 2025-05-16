@@ -9,4 +9,11 @@ return {
       },
     },
   },
+  {
+    "neovim/nvim-lspconfig",
+    init = function()
+      -- Disable LSP keymaps
+      vim.g.lsp_auto_enable = false
+    end,
+  },
 }

@@ -17,7 +17,7 @@ vim.g.snacks_animate = false
 
 local opt = vim.opt
 
-opt.laststatus = 3
+-- opt.laststatus = 3
 opt.timeout = false
 opt.ttimeout = false
 opt.ttimeoutlen = 0
