@@ -20,16 +20,10 @@ map.ni = map.f({ "i", "n" })
 map.nix = map.f({ "i", "n", "x" })
 map.nic = map.f({ "i", "n", "c" })
 
--- map.a("<M-h>", require("nvim-tmux-navigation").NvimTmuxNavigateLeft)
--- map.a("<M-j>", require("nvim-tmux-navigation").NvimTmuxNavigateRight)
--- map.a("<M-k>", require("nvim-tmux-navigation").NvimTmuxNavigateUp)
--- map.a("<M-l>", require("nvim-tmux-navigation").NvimTmuxNavigateDown)
--- map.a("<M-Tab>", require("nvim-tmux-navigation").NvimTmuxNavigateNext)
-
--- map.a("<M-h>", '<cmd>lua require("tmux").move_left()<cr>')
--- map.a("<M-l>", '<cmd>lua require("tmux").move_right()<cr>')
--- map.a("<M-k>", '<cmd>lua require("tmux").move_top()<cr>')
--- map.a("<M-j>", '<cmd>lua require("tmux").move_bottom()<cr>')
+map.a("<M-h>", '<cmd>lua require("tmux").move_left()<cr>')
+map.a("<M-l>", '<cmd>lua require("tmux").move_right()<cr>')
+map.a("<M-k>", '<cmd>lua require("tmux").move_top()<cr>')
+map.a("<M-j>", '<cmd>lua require("tmux").move_bottom()<cr>')
 
 vim.keymap.set("i", "<C-_>", '<cmd>lua require("flash").jump()<cr>', { desc = "Flash jump" })
 vim.keymap.set("i", "<C-d><C-_>", '<cmd>lua require("flash").delete()<cr>', { desc = "Flash delete" })
@@ -37,8 +31,8 @@ vim.keymap.set("i", "<C-d><C-_>", '<cmd>lua require("flash").delete()<cr>', { de
 map.nix("<C-s>", "<Cmd>w<CR>", "Save")
 map.nix("<C-q>", "<Cmd>q!<CR>", "Quit")
 
-map.nix("<C-s>", "<Cmd>wa<CR>", "Save")
-map.nix("<C-q>", "<Cmd>qa!<CR>", "Quit")
+map.nix("<C-x><C-s>", "<Cmd>wa<CR>", "Save")
+map.nix("<C-x><C-q>", "<Cmd>qa!<CR>", "Quit")
 
 map.i("<C-p>", "<C-\\><C-o><C-u>", "Half PgUp")
 map.i("<C-n>", "<C-\\><C-o><C-d>", "Half PgDn")

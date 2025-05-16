@@ -6,6 +6,7 @@ return {
     "nvim-tree/nvim-web-devicons",
     "MunifTanjim/nui.nvim",
   },
+  lazy = false,
   config = function()
     require("neo-tree").setup({
       close_if_last_window = false,
@@ -73,7 +74,7 @@ return {
       },
       window = {
         position = "left",
-        width = 40,
+        width = 50,
         mappings = {
           ["<space>"] = "toggle_node",
           ["<2-LeftMouse>"] = "open",
@@ -84,41 +85,41 @@ return {
   keys = function()
     return {
       {
-        "<space>f",
+        "<C-T>",
         mode = { "n", "v" },
-        "<cmd>Neotree filesystem<cr>",
+        "<cmd>Neotree filesystem focus<cr>",
         desc = "NeoTree Filesystem",
       },
       {
-        "<space>b",
+        "<C-Y>",
         mode = { "n", "v" },
-        "<cmd>Neotree buffers<cr>",
+        "<cmd>Neotree buffers focus<cr>",
         desc = "NeoTree Buffers",
       },
       {
-        "<space>g",
+        "<C-G>",
         mode = { "n", "v" },
-        "<cmd>Neotree git_status<cr>",
+        "<cmd>Neotree git_status focus<cr>",
         desc = "NeoTree Git",
       },
-      {
-        "<space>s",
-        mode = { "n", "v" },
-        "<cmd>Neotree document_symbols<cr>",
-        desc = "NeoTree Symbols",
-      },
-      {
-        "<space>d",
-        mode = { "n", "v" },
-        "<cmd>Neotree diagnostics<cr>",
-        desc = "NeoTree Diagnostics",
-      },
-      {
-        "<space>x",
-        mode = { "n", "v" },
-        "<cmd>Neotree close<cr>",
-        desc = "NeoTree Close",
-      },
+      -- {
+      --   "<C-BSlash>",
+      --   mode = { "n", "v" },
+      --   "<cmd>Neotree document_symbols<cr>",
+      --   desc = "NeoTree Symbols",
+      -- },
+      -- {
+      --   "<C-Slash>",
+      --   mode = { "n", "v" },
+      --   "<cmd>Neotree diagnostics<cr>",
+      --   desc = "NeoTree Diagnostics",
+      -- },
+      -- {
+      --   "<C-w>",
+      --   mode = { "n", "v" },
+      --   "<cmd>Neotree close<cr>",
+      --   desc = "NeoTree Close",
+      -- },
     }
   end,
 }

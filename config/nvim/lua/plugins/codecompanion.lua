@@ -167,15 +167,34 @@ return {
     "nvim-lua/plenary.nvim",
     "nvim-treesitter/nvim-treesitter",
   },
+  -- TODO
+  -- keys for
+  --    ai-cursor prompts
+  --    /gentests
+  --    /dockerize
+  --    /
+  --    /explain
+  --    /translate
+  --    /english
+  --    /french
+  --    /spanish
+  --    /arabic
+  --    /lookup
+  --      definition
+  --      synonyms/antonyms
+  --      examples
+  --      phonetics
+  --      part of speech
+  --      translations
   keys = {
     {
-      "<space>W",
+      "<C-X><C-F>",
       mode = { "n", "v" },
       "<cmd>CodeCompanionActions<cr>",
       desc = "CodeCompanion Actions",
     },
     {
-      "<space>w",
+      "<C-F>",
       mode = { "n", "v" },
       "<cmd>CodeCompanionChat Toggle<cr>",
       desc = "CodeCompanion Toggle",
