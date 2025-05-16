@@ -31,7 +31,7 @@ return {
       view_search = "mini",
     },
     popupmenu = {
-      enabled = false,
+      enabled = true,
     },
     notify = {
       enabled = true,
