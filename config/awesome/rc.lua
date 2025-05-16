@@ -297,7 +297,7 @@ function update_terminal_visibility()
 	for _, c in ipairs(client.get()) do
 		if not is_exception(c) then
 			if c.class:match("tmux") or c.class:match("Alacritty") then
-				c.opacity = (c.screen == focused_screen and c.active) and 1 or 1 --0.75
+				c.opacity = (c.screen == focused_screen and c.active) and 1 or 0.75
 			else
 				c.opacity = 1.0 -- Non-terminals remain fully visible
 			end
