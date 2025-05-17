@@ -37,3 +37,5 @@ Refer to the [documentation](https://lazyvim.github.io/installation) to get star
 - only-window toggle
 - toggle terminal
 - start terminal in tab
+- possession
+  - use after-save/after-load hooks to set session_name and restore windows like neotree
