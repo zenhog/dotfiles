@@ -36,7 +36,23 @@ FZF_BASE_FLAGS=(
 
   "--bind=ctrl-o:toggle-preview-wrap"
   "--bind=ctrl-space:refresh-preview"
-  "--bind=ctrl-b:backward-word"
+
+  "--bind=ctrl-b:forward-word"
+  "--bind=ctrl-z:backward-word"
+
+  "--bind=ctrl-w:backward-kill-word"
+  "--bind=ctrl-f:kill-word"
+
+  "--bind=ctrl-a:beginning-of-line"
+  "--bind=ctrl-e:end-of-line"
+
+  "--bind=ctrl-p:half-page-up"
+  "--bind=ctrl-n:half-page-down"
+
+  "--bind=ctrl-l:delete-char"
+  "--bind=ctrl-h:backward-delete-char"
+
+  "--bind=ctrl-g:jump"
 )
 
 PREVIEW="bottom,border-rounded|right,border-rounded"
@@ -47,14 +63,7 @@ FZF_FLAGS=(
   #"--border=rounded"
   "--bind=right-click:toggle"
   "--bind=left-click:accept"
-  "--bind=ctrl-f:jump"
-  "--bind=ctrl-l:clear-query"
-  "--bind=ctrl-p:prev-history"
-  "--bind=ctrl-n:next-history"
-  "--bind=ctrl-z:deselect-all"
-  "--bind=ctrl-w:backward-kill-word"
-  "--bind=ctrl-g:preview-bottom"
-  #"'--bind=ctrl-x:change-preview-window($PREVIEW)'"
+  "'--bind=ctrl-x:change-preview-window($PREVIEW)'"
 )
 
 FZF_TAB_FLAGS=()
