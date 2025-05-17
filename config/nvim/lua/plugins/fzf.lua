@@ -166,10 +166,7 @@ local lsp_config = {
 
 local config = {
   keymap = {
-    fzf = {
-      ["ctrl-u"] = "preview-page-up",
-      ["ctrl-d"] = "preview-page-down",
-    },
+    fzf = {},
     builtin = {
       ["<C-u>"] = "preview-page-up",
       ["<C-d>"] = "preview-page-down",

@@ -45,7 +45,7 @@ return {
         },
         {
           "<space>s",
-          "<cmd>PossessionSaveCwd<cr>",
+          "<cmd>PossessionSaveCwd!<cr>",
           desc = "SESSION Save Cwd",
         },
         {
@@ -75,7 +75,7 @@ return {
           on_load = true,
           on_quit = true,
         },
-        autoload = false, -- or 'last' or 'auto_cwd' or 'last_cwd' or fun(): string
+        autoload = "auto_cwd", -- or 'last' or 'auto_cwd' or 'last_cwd' or fun(): string
         commands = {
           save = "PossessionSave",
           load = "PossessionLoad",
@@ -111,13 +111,13 @@ return {
               custom = false, -- or fun(win): boolean
             },
           },
-          delete_hidden_buffers = {
-            hooks = {
-              "before_load",
-              vim.o.sessionoptions:match("buffer") and "before_save",
-            },
-            force = false, -- or fun(buf): boolean
-          },
+          -- delete_hidden_buffers = {
+          --   hooks = {
+          --     "before_load",
+          --     vim.o.sessionoptions:match("buffer") and "before_save",
+          --   },
+          --   force = false, -- or fun(buf): boolean
+          -- },
           nvim_tree = true,
           neo_tree = true,
           symbols_outline = true,
@@ -132,7 +132,7 @@ return {
         },
         telescope = {
           previewer = {
-            enabled = true,
+            enabled = false,
             previewer = "pretty", -- or 'raw' or fun(opts): Previewer
             wrap_lines = true,
             include_empty_plugin_data = false,

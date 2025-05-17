@@ -1,3 +1,30 @@
+local function session_name()
+  return require("possession.session").get_session_name() or ""
+end
+
+local function tabs()
+  local sep = " ∙ "
+  local tabnr = vim.fn.tabpagenr()
+  local tablist = vim.fn.gettabinfo()
+  local output = ""
+
+  if #tablist == 1 then
+    return ""
+  end
+
+  for _, v in ipairs(tablist) do
+    if v.tabnr == tabnr then
+      output = output .. "%#lualine_custom_active#" .. v.tabnr
+    else
+      output = output .. "%#lualine_custom_inactive#" .. v.tabnr
+    end
+    if v.tabnr ~= #tablist then
+      output = output .. "%#lualine_custom_inactive#" .. sep
+    end
+  end
+  return output
+end
+
 return {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",
@@ -51,7 +78,11 @@ return {
           -- stylua: ignore
           {
             function() return require("noice").api.status.command.get() end,
-            cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+            cond = function()
+              return package.loaded["noice"] and require(
+                "noice"
+              ).api.status.command.has()
+            end,
             color = function() return { fg = Snacks.util.color("Statement") } end,
           },
           -- stylua: ignore
@@ -95,7 +126,10 @@ return {
           { "progress", separator = " ", padding = { left = 1, right = 0 } },
           { "location", padding = { left = 0, right = 1 } },
         },
-        lualine_z = {},
+        lualine_z = {
+          tabs,
+          session_name,
+        },
         -- lualine_z = {
         --   function()
         --     return " " .. os.date("%R")
