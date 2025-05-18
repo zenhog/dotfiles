@@ -14,6 +14,8 @@ znap source romkatv/powerlevel10k
 
 znap source Aloxaf/fzf-tab
 
+znap source junegunn/fzf-git.sh
+
 # replace with my own widgets
 znap source hchbaw/zce.zsh
 znap source joshskidmore/zsh-fzf-history-search

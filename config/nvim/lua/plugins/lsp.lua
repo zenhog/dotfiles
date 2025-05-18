@@ -36,5 +36,10 @@ return {
       -- { "<a-p>", function() Snacks.words.jump(-vim.v.count1, true) end, has = "documentHighlight",
       --   desc = "Prev Reference", cond = function() return Snacks.words.is_enabled() end },
     end,
+    config = function()
+      vim.diagnostic.config({
+        virtual_text = false, -- Disables all virtual text diagnostics
+      })
+    end,
   },
 }
