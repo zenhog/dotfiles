@@ -38,15 +38,15 @@ return {
         debug = false,
         logfile = false,
         prompt_no_cr = false,
+        autoload = "auto_cwd",
         autosave = {
-          current = false, -- or fun(name): boolean
+          current = true, -- or fun(name): boolean
           cwd = false, -- or fun(): boolean
           tmp = false, -- or fun(): boolean
           tmp_name = "tmp", -- or fun(): string
           on_load = true,
           on_quit = true,
         },
-        autoload = "auto_cwd", -- or 'last' or 'auto_cwd' or 'last_cwd' or fun(): string
         commands = {
           save = "PossessionSave",
           load = "PossessionLoad",
@@ -104,24 +104,6 @@ return {
         telescope = {
           previewer = {
             enabled = false,
-            previewer = "pretty", -- or 'raw' or fun(opts): Previewer
-            wrap_lines = true,
-            include_empty_plugin_data = false,
-            cwd_colors = {
-              cwd = "Comment",
-              tab_cwd = { "#cc241d", "#b16286", "#d79921", "#689d6a", "#d65d0e", "#458588" },
-            },
-          },
-          list = {
-            default_action = "load",
-            mappings = {
-              save = { n = "<c-x>", i = "<c-x>" },
-              load = { n = "<c-v>", i = "<c-v>" },
-              delete = { n = "<c-t>", i = "<c-t>" },
-              rename = { n = "<c-r>", i = "<c-r>" },
-              grep = { n = "<c-g>", i = "<c-g>" },
-              find = { n = "<c-f>", i = "<c-f>" },
-            },
           },
         },
       })

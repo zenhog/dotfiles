@@ -42,8 +42,8 @@ map.i("<C-l>", "<Del>")
 map.i("<C-x><C-h>", "<Left>")
 map.i("<C-x><C-l>", "<Right>")
 
-map.i("<C-d><C-h>", "<S-Left>")
-map.i("<C-d><C-l>", "<S-Right>")
+map.i("<C-z>", "<S-Left>")
+map.i("<C-b>", "<S-Right>")
 
 map.i("<Esc>", "<C-c>")
 
