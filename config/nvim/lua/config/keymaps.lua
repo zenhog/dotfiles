@@ -24,6 +24,7 @@ map.ni = map.f({ "n", "i" })
 map.niv = map.f({ "n", "i", "v" })
 map.nix = map.f({ "n", "i", "x" })
 map.nic = map.f({ "n", "i", "c" })
+
 map.nix("<C-s>", "<Cmd>w<CR>", "Save")
 map.nix("<C-q>", "<Cmd>q!<CR>", "Quit")
 
@@ -36,14 +37,17 @@ map.i("<C-n>", "<C-\\><C-o><C-d>", "Half PgDn")
 map.i("<C-k>", "<Up>")
 map.i("<C-j>", "<Down>")
 
-map.i("<C-h>", "<BS>")
-map.i("<C-l>", "<Del>")
+map.i("<C-h>", "<Left>")
+map.i("<C-l>", "<Right>")
 
-map.i("<C-x><C-h>", "<Left>")
-map.i("<C-x><C-l>", "<Right>")
+map.i("<C-x><C-h>", "<bs>")
+map.i("<C-x><C-l>", "<del>")
 
 map.i("<C-z>", "<S-Left>")
 map.i("<C-b>", "<S-Right>")
+
+map.i("<C-x><C-z>", "<C-BSlash><C-o>B")
+map.i("<C-x><C-b>", "<C-BSlash><C-o>W")
 
 map.i("<Esc>", "<C-c>")
 
@@ -67,9 +71,6 @@ map.i("<C-f>", "<C-BSlash><C-o>dw")
 
 map.i("<C-d><C-w>", "<C-BSlash><C-o>dB")
 map.i("<C-d><C-f>", "<C-BSlash><C-o>dW")
-
-map.i("<C-x><C-w>", "<C-BSlash><C-o>B")
-map.i("<C-x><C-f>", "<C-BSlash><C-o>W")
 
 map.nx("k", "v:count == 0 ? 'gk' : 'k'", "Up", { expr = true })
 map.nx("j", "v:count == 0 ? 'gj' : 'j'", "Down", { expr = true })
@@ -157,7 +158,8 @@ map.n("]b", "<cmd>bnext<cr>", "Next Buffer")
 
 map.n("<space>l", "<cmd>Lazy<cr>", "Lazy")
 map.n("<space>x", "<cmd>LazyExtras<cr>", "Lazy")
-map.n("<space><cr>", "<cmd>enew<cr>", "NewFile")
+
+map.n("<space><cr>", "<cmd>tabnew<cr>", "NewFile")
 
 map.n("[q", vim.cmd.cprev, "Prev Quickfix")
 map.n("]q", vim.cmd.cnext, "Next Quickfix")
@@ -173,11 +175,15 @@ local diagnostic_goto = function(next, severity)
     go({ severity = severity })
   end
 end
+
 -- map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
+
 map.n("]d", diagnostic_goto(true), "Next Diagnostic")
 map.n("[d", diagnostic_goto(false), "Prev Diagnostic")
+
 map.n("]e", diagnostic_goto(true, "ERROR"), "Next Error")
 map.n("[e", diagnostic_goto(false, "ERROR"), "Prev Error")
+
 map.n("]w", diagnostic_goto(true, "WARN"), "Next Warning")
 map.n("[w", diagnostic_goto(false, "WARN"), "Prev Warning")
 --

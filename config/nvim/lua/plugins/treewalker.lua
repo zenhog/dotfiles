@@ -1,18 +1,10 @@
 return {
   "aaronik/treewalker.nvim",
+  lazy = false,
 
-  -- The following options are the defaults.
-  -- Treewalker aims for sane defaults, so these are each individually optional,
-  -- and setup() does not need to be called, so the whole opts block is optional as well.
   opts = {
-    -- Whether to briefly highlight the node after jumping to it
     highlight = true,
-
-    -- How long should above highlight last (in ms)
     highlight_duration = 250,
-
-    -- The color of the above highlight. Must be a valid vim highlight group.
-    -- (see :h highlight-group for options)
     highlight_group = "CursorLine",
   },
   keys = {
@@ -39,6 +31,30 @@ return {
       mode = { "n", "v" },
       "<cmd>Treewalker Right<cr>",
       desc = "Treewalker Right",
+    },
+    {
+      "<C-x><C-k>",
+      mode = { "n", "v" },
+      "<cmd>Treewalker SwapUp<cr>",
+      desc = "Treewalker Swap Up",
+    },
+    {
+      "<C-x><C-j>",
+      mode = { "n", "v" },
+      "<cmd>Treewalker SwapDown<cr>",
+      desc = "Treewalker Swap Down",
+    },
+    {
+      "<C-x><C-h>",
+      mode = { "n", "v" },
+      "<cmd>Treewalker SwapLeft<cr>",
+      desc = "Treewalker Swap Left",
+    },
+    {
+      "<C-x><C-l>",
+      mode = { "n", "v" },
+      "<cmd>Treewalker SwapRight<cr>",
+      desc = "Treewalker Swap Right",
     },
   },
 }
