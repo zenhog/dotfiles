@@ -8,133 +8,134 @@ ICON=
 
 NOWRAP=1
 
-init() {
-  rm -f "$DB"
-  sqlite3 "$DB" << EOF
-    CREATE TABLE packages(
-        id integer primary key,
-        name text unique,
-        kind text
-    );
-EOF
-}
+# init() {
+#   rm -f "$DB"
+#   sqlite3 "$DB" << EOF
+#     CREATE TABLE packages(
+#         id integer primary key,
+#         name text unique,
+#         kind text
+#     );
+# EOF
+# }
 
 function label() {
-  local id kind pkg
-  read -r state name _ <<< "$1"
-  # decode [X]
-  echo "$name"
+	local id kind pkg
+	read -r state name _ <<<"$1"
+	# decode [X]
+	echo "$name"
 }
 
 function view() {
-  local id kind pkg
-  read -r state name _ <<< "$1"
+	local id kind pkg
+	read -r state name _ <<<"$1"
 
-  xbps-query -R "$name"
+	xbps-query -R "$name"
 
-  sepline files
-  xbps-query -Rf "$name"
+	sepline files
+	xbps-query -Rf "$name"
 
-  sepline deps
-  xbps-query -x "$name"
+	sepline deps
+	xbps-query -x "$name"
 
-  sepline fulldeps
-  xbps-query --fulldeptree -x "$name"
+	sepline fulldeps
+	xbps-query --fulldeptree -x "$name"
 
-  sepline revdeps
-  xbps-query -X "$name"
+	sepline revdeps
+	xbps-query -X "$name"
 
-  sepline fullrevdeps
-  xbps-query --fulldeptree -X "$name"
+	sepline fullrevdeps
+	xbps-query --fulldeptree -X "$name"
 }
 
 function list() {
-  local pkgs_explicit
-  local pkgs_installed
-  local pkgs_all
-  local pkgs_registered
-  local pkgs_implied
-  local pkgs_available
+	local pkgs_explicit
+	local pkgs_installed
+	local pkgs_all
+	local pkgs_registered
+	local pkgs_implied
+	local pkgs_available
 
-  function pkgprint() {
-    [[ -n "$flag" ]] && flag="${flag} "
-    printf "${flag}%s\n" "$@"
-  }
+	function pkgprint() {
+		[[ -n "$flag" ]] && flag="${flag} "
+		printf "${flag}%s\n" "$@"
+	}
 
-  readarray -t pkgs_explicit < <(xpkg -m)
-  readarray -t pkgs_installed < <(xpkg)
-  readarray -t pkgs_all < <(xpkg -a | sort)
-  readarray -t pkgs_orphaned < <(xpkg -O)
-  readarray -t pkgs_removed < <(xpkg -D)
+	readarray -t pkgs_explicit < <(xpkg -m)
+	readarray -t pkgs_installed < <(xpkg)
+	readarray -t pkgs_all < <(xpkg -a | sort)
+	readarray -t pkgs_orphaned < <(xpkg -O)
+	readarray -t pkgs_removed < <(xpkg -D)
 
-  readarray -t pkgs_all < \
-    <(comm -3 \
-      <(pkgprint "${pkgs_all[@]}") \
-      <(pkgprint "${pkgs_removed[@]}") \
-    | sort)
+	readarray -t pkgs_all < \
+		<(comm -3 \
+			<(pkgprint "${pkgs_all[@]}") \
+			<(pkgprint "${pkgs_removed[@]}") |
+			sort)
 
-  readarray -t pkgs_registered < <(find "$HOME"/.packages/* \
-      -type f -exec cat {} \; | sort -u | grep -v -e '^$' -e '^#')
+	readarray -t pkgs_registered < <(find "$HOME"/.packages/* \
+		-type f -exec cat {} \; | sort -u | grep -v -e '^$' -e '^#')
 
-  readarray -t pkgs_unregistered < \
-    <(comm -3 \
-      <(pkgprint "${pkgs_explicit[@]}") \
-      <(pkgprint "${pkgs_registered[@]}") \
-    )
+	readarray -t pkgs_unregistered < \
+		<(
+			comm -3 \
+				<(pkgprint "${pkgs_explicit[@]}") \
+				<(pkgprint "${pkgs_registered[@]}")
+		)
 
-  readarray -t pkgs_implicit < \
-    <(comm -3 \
-      <(pkgprint "${pkgs_installed[@]}") \
-      <(pkgprint "${pkgs_unregistered[@]}") \
-    )
+	readarray -t pkgs_implicit < \
+		<(
+			comm -3 \
+				<(pkgprint "${pkgs_installed[@]}") \
+				<(pkgprint "${pkgs_unregistered[@]}")
+		)
 
-  readarray -t pkgs_available < \
-    <(comm -3 \
-      <(pkgprint "${pkgs_all[@]}") \
-      <(pkgprint "${pkgs_installed[@]}") \
-    )
+	readarray -t pkgs_available < \
+		<(
+			comm -3 \
+				<(pkgprint "${pkgs_all[@]}") \
+				<(pkgprint "${pkgs_installed[@]}")
+		)
 
-  flag='[@]' pkgprint "${pkgs_registered[@]}"
-  flag='[+]' pkgprint "${pkgs_unregistered[@]}"
-  flag='[*]' pkgprint "${pkgs_implicit[@]}"
-  flag='[-]' pkgprint "${pkgs_available[@]}"
+	flag='[@]' pkgprint "${pkgs_registered[@]}"
+	flag='[+]' pkgprint "${pkgs_unregistered[@]}"
+	flag='[*]' pkgprint "${pkgs_implicit[@]}"
+	flag='[-]' pkgprint "${pkgs_available[@]}"
 
-  unset pkgprint
+	unset pkgprint
 }
 
 function upload() {
-  # upload to mega
-  # /iso/{voidlive-amd64-custom-latest.iso,voidrootfs-amd4-custom-latest.tar.xz}
-  return
+	# upload to mega
+	# /iso/{voidlive-amd64-custom-latest.iso,voidrootfs-amd4-custom-latest.tar.xz}
+	return
 }
 
 add() {
-  local kind="${1?}"
-  local name="${2?}"
+	local kind="${1?}"
+	local name="${2?}"
 
-  xbps-install --dry-run "$name" && sqlite3 "$DB" \
-    "INSERT INTO packages (kind, name) VALUES ('${kind}', '${name}')"
+	xbps-install --dry-run "$name" && sqlite3 "$DB" \
+		"INSERT INTO packages (kind, name) VALUES ('${kind}', '${name}')"
 }
 
 rm() {
-  return
+	return
 }
 
 sync() {
-  return
+	return
 }
 
 make() {
-  local kind="${1?}"
+	local kind="${1?}"
 
-  case "$kind" in
-    live)
-      ;;
-    rootfs)
-      ;;
-  esac
+	case "$kind" in
+	live) ;;
+	rootfs) ;;
+	esac
 }
 
 check() {
-  return
+	return
 }
