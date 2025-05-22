@@ -279,7 +279,9 @@ function tarextract() {
 	# exec {COPROC[0]}>&-
 	# exec {COPROC[1]}>&-
 
-	tar "${opts[@]}" -C "${src[1]:-$PWD}" 2>&3
+	tar "${opts[@]}" -C "${src[1]:-$PWD}"
+
+	[[ $? -eq 2 || $? -eq 0 ]]
 
 	# exec 3>&-
 
