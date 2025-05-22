@@ -37,6 +37,16 @@ map.i("<C-n>", "<C-\\><C-o><C-d>", "Half PgDn")
 map.i("<C-k>", "<Up>")
 map.i("<C-j>", "<Down>")
 
+map.nv("<C-k>", "<cmd>Treewalker Up<cr>", "Treewalk Up", { silent = true })
+map.nv("<C-j>", "<cmd>Treewalker Down<cr>", "Treewalk Down", { silent = true })
+map.nv("<C-h>", "<cmd>Treewalker Left<cr>", "Treewalk Left", { silent = true })
+map.nv("<C-l>", "<cmd>Treewalker Right<cr>", "Treewalk Right", { silent = true })
+
+map.nv("<C-x><C-k>", "<cmd>Treewalker SwapUp<cr>", "Treewalk Swap Up", { silent = true })
+map.nv("<C-x><C-j>", "<cmd>Treewalker SwapDown<cr>", "Treewalk Swap Down", { silent = true })
+map.nv("<C-x><C-h>", "<cmd>Treewalker SwapLeft<cr>", "Treewalk Swap Left", { silent = true })
+map.nv("<C-x><C-l>", "<cmd>Treewalker SwapRight<cr>", "Treewalk Swap Right", { silent = true })
+
 map.i("<C-h>", "<Left>")
 map.i("<C-l>", "<Right>")
 
