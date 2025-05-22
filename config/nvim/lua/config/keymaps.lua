@@ -2,6 +2,15 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+vim.keymap.set({ "n", "o" }, "U", function()
+  local ts_utils = require("nvim-treesitter.ts_utils")
+  local node = ts_utils.get_node_at_cursor()
+  if node then
+    vim.api.nvim_feedkeys("v", "n", false) -- Enter visual mode
+    ts_utils.update_selection(0, node)
+  end
+end, { desc = "Select current Tree-sitter node" })
+
 local map = {
   m = { "i", "n", "c", "o", "t", "v", "x", "s" },
   f = function(modes)
