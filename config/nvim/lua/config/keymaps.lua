@@ -47,6 +47,11 @@ map.nv("<C-x><C-j>", "<cmd>Treewalker SwapDown<cr>", "Treewalk Swap Down", { sil
 map.nv("<C-x><C-h>", "<cmd>Treewalker SwapLeft<cr>", "Treewalk Swap Left", { silent = true })
 map.nv("<C-x><C-l>", "<cmd>Treewalker SwapRight<cr>", "Treewalk Swap Right", { silent = true })
 
+vim.api.nvim_set_keymap("x", "iu", ':lua require"treesitter-unit".select()<CR>', { noremap = true })
+vim.api.nvim_set_keymap("x", "au", ':lua require"treesitter-unit".select(true)<CR>', { noremap = true })
+vim.api.nvim_set_keymap("o", "iu", ':<c-u>lua require"treesitter-unit".select()<CR>', { noremap = true })
+vim.api.nvim_set_keymap("o", "au", ':<c-u>lua require"treesitter-unit".select(true)<CR>', { noremap = true })
+
 map.i("<C-h>", "<Left>")
 map.i("<C-l>", "<Right>")
 
