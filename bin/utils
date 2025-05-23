@@ -281,7 +281,7 @@ function tarextract() {
 
 	tar "${opts[@]}" -C "${src[1]:-$PWD}"
 
-	[[ $? -eq 2 || $? -eq 0 ]]
+	[[ $? -eq 1 || $? -eq 0 ]]
 
 	# exec 3>&-
 
