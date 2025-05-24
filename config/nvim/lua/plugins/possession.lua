@@ -1,5 +1,6 @@
 local sfmt = "%s/storage/main/data/nvim/sessions"
 local sdir = string.format(sfmt, os.getenv("HOME"))
+
 return {
   {
     "jedrzejboczar/possession.nvim",
@@ -14,7 +15,7 @@ return {
           desc = "SESSION Restore",
         },
         {
-          "<space><bs>",
+          "<space><esc>",
           "<cmd>PossessionClose<cr>",
           desc = "SESSION Close",
         },
@@ -32,7 +33,7 @@ return {
           desc = "SESSION Save",
         },
         {
-          "<bslash><cr>",
+          "<bslash><space>",
           "<cmd>PossessionPick<cr>",
           desc = "FZF Session",
         },
