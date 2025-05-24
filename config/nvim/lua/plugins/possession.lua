@@ -23,7 +23,10 @@ return {
         },
         {
           "<space>S",
-          "<cmd>PossessionSave<cr>",
+          function()
+            local input = vim.fn.input("Session name: ")
+            vim.cmd("PossessionSave! " .. input)
+          end,
           desc = "SESSION Save",
         },
         {
@@ -35,15 +38,16 @@ return {
     end,
     config = function()
       require("possession").setup({
-        silent = false,
+        silent = true,
         load_silent = true,
         debug = false,
         logfile = false,
         prompt_no_cr = false,
+        session_dir = string.format("%s/storage/main/data/nvim/sessions", os.getenv("HOME")),
         use_git_branch = true,
-        on_autoload_no_session = function()
-          vim.notify("No existing session to load.")
-        end,
+        -- on_autoload_no_session = function()
+        --   vim.notify("No existing session to load.")
+        -- end,
         allowed_dirs = {
           "~/.dotfiles",
           "~/workspace",
