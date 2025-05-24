@@ -1,3 +1,5 @@
+local sfmt = "%s/storage/main/data/nvim/sessions"
+local sdir = string.format(sfmt, os.getenv("HOME"))
 return {
   {
     "jedrzejboczar/possession.nvim",
@@ -43,15 +45,15 @@ return {
         debug = false,
         logfile = false,
         prompt_no_cr = false,
-        session_dir = string.format("%s/storage/main/data/nvim/sessions", os.getenv("HOME")),
-        use_git_branch = true,
+        session_dir = sdir,
+        -- use_git_branch = true,
         -- on_autoload_no_session = function()
         --   vim.notify("No existing session to load.")
         -- end,
-        allowed_dirs = {
-          "~/.dotfiles",
-          "~/workspace",
-        },
+        -- allowed_dirs = {
+        --   "~/.dotfiles",
+        --   "~/workspace",
+        -- },
         autoload = "auto_cwd",
         autosave = {
           current = true, -- or fun(name): boolean

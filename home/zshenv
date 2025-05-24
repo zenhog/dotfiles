@@ -28,6 +28,9 @@ FZF_BASE_FLAGS=(
   "--ansi"
   "--info=inline-right"
 
+  "--bind=left-click:accept"
+  "--bind=right-click:toggle"
+
   "--bind=ctrl-k:up"
   "--bind=ctrl-j:down"
 
@@ -39,6 +42,12 @@ FZF_BASE_FLAGS=(
 
   "--bind=ctrl-b:forward-word"
   "--bind=ctrl-z:backward-word"
+
+  "--bind=ctrl-t:clear-query"
+  "'--bind=ctrl-y:transform-query(echo -n {q}; tmux showb)'"
+
+  '"--bind=ctrl-\\:toggle-wrap"'
+  '"--bind=ctrl-/:toggle-wrap"'
 
   "--bind=ctrl-w:backward-kill-word"
   "--bind=ctrl-f:kill-word"
@@ -58,11 +67,8 @@ FZF_BASE_FLAGS=(
 PREVIEW="bottom,border-rounded|right,border-rounded"
 FZF_FLAGS=(
   "${FZF_BASE_FLAGS[@]}"
-  #"--history=$HOME/.fzf-history"
   #"--preview-window=right,border-rounded"
   #"--border=rounded"
-  "--bind=right-click:toggle"
-  "--bind=left-click:accept"
   "'--bind=ctrl-x:change-preview-window($PREVIEW)'"
 )
 
