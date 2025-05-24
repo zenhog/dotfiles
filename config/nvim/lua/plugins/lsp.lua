@@ -10,6 +10,16 @@ return {
       keys[#keys + 1] = { "K", false }
       keys[#keys + 1] = { "gK", false }
       keys[#keys + 1] = { "<C-k>", false, mode = "i" }
+      keys[#keys + 1] = { "<A-n>", false }
+      keys[#keys + 1] = { "<A-p>", false }
+      -- { "]]", function() Snacks.words.jump(vim.v.count1) end, has = "documentHighlight",
+      --   desc = "Next Reference", cond = function() return Snacks.words.is_enabled() end },
+      -- { "[[", function() Snacks.words.jump(-vim.v.count1) end, has = "documentHighlight",
+      --   desc = "Prev Reference", cond = function() return Snacks.words.is_enabled() end },
+      -- { "<a-n>", function() Snacks.words.jump(vim.v.count1, true) end, has = "documentHighlight",
+      --   desc = "Next Reference", cond = function() return Snacks.words.is_enabled() end },
+      -- { "<a-p>", function() Snacks.words.jump(-vim.v.count1, true) end, has = "documentHighlight",
+      --   desc = "Prev Reference", cond = function() return Snacks.words.is_enabled() end },
       -- add a keymap
       -- keys[#keys + 1] = { "H", "<cmd>echo 'hello'<cr>" }
       -- { "<leader>cl", function() Snacks.picker.lsp_config() end, desc = "Lsp Info" },
@@ -27,14 +37,6 @@ return {
       -- { "<leader>cR", function() Snacks.rename.rename_file() end, desc = "Rename File", mode ={"n"}, has = { "workspace/didRenameFiles", "workspace/willRenameFiles" } },
       -- { "<leader>cr", vim.lsp.buf.rename, desc = "Rename", has = "rename" },
       -- { "<leader>cA", LazyVim.lsp.action.source, desc = "Source Action", has = "codeAction" },
-      -- { "]]", function() Snacks.words.jump(vim.v.count1) end, has = "documentHighlight",
-      --   desc = "Next Reference", cond = function() return Snacks.words.is_enabled() end },
-      -- { "[[", function() Snacks.words.jump(-vim.v.count1) end, has = "documentHighlight",
-      --   desc = "Prev Reference", cond = function() return Snacks.words.is_enabled() end },
-      -- { "<a-n>", function() Snacks.words.jump(vim.v.count1, true) end, has = "documentHighlight",
-      --   desc = "Next Reference", cond = function() return Snacks.words.is_enabled() end },
-      -- { "<a-p>", function() Snacks.words.jump(-vim.v.count1, true) end, has = "documentHighlight",
-      --   desc = "Prev Reference", cond = function() return Snacks.words.is_enabled() end },
     end,
   },
 }
