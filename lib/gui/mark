@@ -10,7 +10,7 @@ RATIO=20%
 
 export DB="$HOME/.db/bookmarks.db"
 
-function initdb() {
+initdb() {
   sqlite3 "$DB" << EOF
     CREATE TABLE IF NOT EXISTS bookmarks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +21,7 @@ function initdb() {
 EOF
 }
 
-function insert() {
+insert() {
   local url="$1"
   local title="$2"
 
@@ -31,7 +31,7 @@ function insert() {
   "
 }
 
-function view() {
+view() {
   local id
 
   read -r id _ <<< "$1"
@@ -45,7 +45,7 @@ function view() {
   } | column -t -s "$iSEP"
 }
 
-function label() {
+label() {
   local id
 
   read -r id _ <<< "$1"
@@ -53,7 +53,7 @@ function label() {
   sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
 }
 
-function list() {
+list() {
   sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
     column -t -s "$iSEP"
 }
@@ -61,7 +61,7 @@ function list() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open bookmark'
-function open() {
+open() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
@@ -71,7 +71,7 @@ function open() {
 BINDS[_open]=alt-enter
 HOOKS[_open]=clear
 DESCS[_open]='Open bookmark with vpnfox'
-function _open() {
+_open() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
@@ -81,13 +81,13 @@ function _open() {
 BINDS[bgopen]=tab
 HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open bookmark in the background with vpnfox'
-function bgopen() {
+bgopen() {
   open "$@"
 }
 
 BINDS[copy]=alt-c
 DESCS[copy]='Clipboard bookmark URL'
-function copy() {
+copy() {
   local id url
 
   read -r id _ <<< "$1"
@@ -96,7 +96,7 @@ function copy() {
   tmux load-buffer - <<< "$url"
 }
 
-function check() {
+check() {
   local id
 
   read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
@@ -105,7 +105,7 @@ function check() {
 BINDS[rm]=alt-d
 HOOKS[rm]=noclear
 DESCS[rm]='Delete bookmark'
-function rm() {
+rm() {
   local id
 
   read -r id _ <<< "$1"
@@ -116,7 +116,7 @@ function rm() {
 BINDS[mod]=alt-e
 HOOKS[mod]=sclear
 DESCS[mod]='Rename bookmark'
-function mod() {
+mod() {
   local id title
 
   read -r id title <<< "$1"
@@ -133,7 +133,7 @@ function mod() {
   fi
 }
 
-function add() {
+add() {
   local url="$1" title="$2" mytitle
 
   if check "$url"; then
@@ -159,7 +159,7 @@ function add() {
   fi
 }
 
-function del() {
+del() {
   local url="$1"
   if check "$url"; then
     sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"

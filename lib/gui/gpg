@@ -6,7 +6,7 @@ ICON=
 
 HORIZONTAL=1
 
-function view() {
+view() {
   local uid
   read -r uid _ <<< "$1"
   gpg --list-key --with-fingerprint --with-keygrip "$uid"
@@ -14,19 +14,19 @@ function view() {
   gpg-connect-agent "keyinfo --list --with-ssh --ssh-fpr" '/bye' | head -n -1
 }
 
-function label() {
+label() {
   local grp val
   read -r _ _ _ _ grp _ <<< "$1"
   echo "$grp"
 }
 
-function date() {
+date() {
   local infinity=󰛤
   [[ "$1" -eq 0 ]] && echo -n "$infinity" || command date -d "@${1}" '+%F'
 }
 
 
-function list() {
+list() {
   local -a uids
   readarray -t uids < \
     <(gpg --list-secret-keys --fixed-list-mode --with-keygrip --with-colons |
@@ -38,7 +38,7 @@ function list() {
       <(gpg --list-secret-key --fixed-list-mode --with-colons "$uid" |
         grep -v '^uid')
 
-    function fmtgpgline() {
+    fmtgpgline() {
       printf "%s " \
         "${keys[uid]}" \
         "${keys[type]}" \
@@ -84,7 +84,7 @@ function list() {
 BINDS[grip]=enter
 HOOKS[grip]=accept
 DESCS[grip]='Copy keygrip'
-function grip() {
+grip() {
   local grp
   read -r _ _ _ _ grp _ <<< "$1"
   tmux load-buffer - <<< "$grp"
@@ -92,7 +92,7 @@ function grip() {
 
 BINDS[clear]=alt-r
 DESCS[clear]='Clear passphrase cache'
-function clear() {
+clear() {
   local grp
   read -r _ _ _ _ grp _ <<< "$1"
   gpg-connect-agent "clear_passphrase --mode=normal ${grp}" '/bye'

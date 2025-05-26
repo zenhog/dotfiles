@@ -6,19 +6,19 @@ ICON=
 
 HORIZONTAL=1
 
-function view() {
+view() {
   local bufnum
   read -r bufnum _ <<< "$1"
   tmux show-buffer -b "$bufnum"
 }
 
-function list() {
+list() {
   tmux list-buffers -F '#{buffer_name} #{buffer_sample}'
 }
 
 BINDS[del]=alt-d
 DESCS[del]='Delete buffer'
-function del() {
+del() {
   local buf
   read -r buf _ <<< "$1"
   tmux delete-buffer -b "$buf"
@@ -26,7 +26,7 @@ function del() {
 
 BINDS[delall]=alt-a
 DESCS[dellall]='Delete buffer'
-function delall() {
+delall() {
   local buffers
   readarray -t buffers < <(tmux list-buffers -F '#{buffer_name}')
 
@@ -35,12 +35,12 @@ function delall() {
   done
 }
 
-function clip() {
+clip() {
   tmux load-buffer - <<< "${1:1}"
   notify "Clipped '${1:1}'"
 }
 
-function fork() {
+fork() {
   local origin="$1"
   local pathname="$2"
 

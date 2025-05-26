@@ -19,14 +19,14 @@ NOWRAP=1
 # EOF
 # }
 
-function label() {
+label() {
 	local id kind pkg
 	read -r state name _ <<<"$1"
 	# decode [X]
 	echo "$name"
 }
 
-function view() {
+view() {
 	local id kind pkg
 	read -r state name _ <<<"$1"
 
@@ -48,7 +48,7 @@ function view() {
 	xbps-query --fulldeptree -X "$name"
 }
 
-function list() {
+list() {
 	local pkgs_explicit
 	local pkgs_installed
 	local pkgs_all
@@ -56,7 +56,7 @@ function list() {
 	local pkgs_implied
 	local pkgs_available
 
-	function pkgprint() {
+	pkgprint() {
 		[[ -n "$flag" ]] && flag="${flag} "
 		printf "${flag}%s\n" "$@"
 	}
@@ -105,7 +105,7 @@ function list() {
 	unset pkgprint
 }
 
-function upload() {
+upload() {
 	# upload to mega
 	# /iso/{voidlive-amd64-custom-latest.iso,voidrootfs-amd4-custom-latest.tar.xz}
 	return

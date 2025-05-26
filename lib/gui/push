@@ -6,12 +6,12 @@ ICON=󰛸
 
 export SOCKET="/tmp/rofi_notification_daemon"
 
-function view() {
+view() {
   :
 }
 
-function list() {
-  function extract() {
+list() {
+  extract() {
     readarray -t "$1" < <(jq -r ".[].$1" <<< "$TEXT")
   }
 

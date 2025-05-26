@@ -9,15 +9,15 @@ RATIO=75
 
 export STORE="$HOME/.password-store"
 
-function label() {
+label() {
   quiet tmux show-buffer -b label
 }
 
-function extract() {
+extract() {
   view "$1" | command extract GR_PASSVAL 2>/dev/tty
 }
 
-function view() {
+view() {
   local dir entries
 
   dir="$1"
@@ -54,23 +54,23 @@ function view() {
   #qrencode -m1 -tANSI256 <<< "$val"
 }
 
-function list() {
+list() {
   (cd "$STORE" && find * .* \( -type d -or -type l \) -exec sh -c \
     'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
 }
 
-function rename() {
+rename() {
   local rand
   read -r rand < <(tr -dc '[:alnum:]' < /dev/urandom | quiet dd bs=1 count=5)
   mv -v -- "${STORE}/$1.gpg" "${STORE}/$1.old.$rand.gpg"
 }
 
-function get() {
+get() {
   local dir="$1" key="$2"
   quiet pass show "$dir/$key" || quiet cat "$STORE/.defaults/$key"
 }
 
-function insert() {
+insert() {
   local dir="$1" key="$2" val="$3" force="$4" curval
 
   [[ -z "${key?}" ]] && return 1
@@ -82,7 +82,7 @@ function insert() {
   pass insert -f "$dir/$key" < <(tee /dev/stdout <<< "$val")
 }
 
-function check() {
+check() {
   local password="${1}" charspec="${2}" length count specs regex
 
   [[ -n "${password}" && -n "${charspec}" ]] || return 1
@@ -111,7 +111,7 @@ function check() {
 BINDS[regen]=alt-r
 HOOKS[regen]=noclear
 DESCS[regen]='Regenerate password conform to spec'
-function regen() {
+regen() {
   local dir="$1" password charspec length specs regex
 
   read -r charspec < <(get "${dir}" charspec)
@@ -136,7 +136,7 @@ function regen() {
 BINDS[reloc]=alt-u
 HOOKS[reloc]=noclear
 DESCS[reloc]='Overwrite location'
-function reloc() {
+reloc() {
   local dir="$1"
   #eval "$(tmux show-environment -t menu LOCATION 2>/dev/null)"
   #tmux set-environment -t menu -u LOCATION
@@ -152,7 +152,7 @@ function reloc() {
 BINDS[cleanup]=alt-c
 HOOKS[cleanup]=noclear
 DESCS[cleanup]='Clean old password entries'
-function cleanup() {
+cleanup() {
   local dir="$1"
   [[ -d "${STORE}/${dir}" ]] && rm -f "${STORE}/${dir}"/*.old.*.gpg
 }
@@ -160,7 +160,7 @@ function cleanup() {
 BINDS[mod]=alt-w
 HOOKS[mod]=sclear
 DESCS[mod]='Modify entries'
-function mod() {
+mod() {
   local dir="$1" entries
 
   view "$dir" | tmux load-buffer -b preview -
@@ -184,7 +184,7 @@ function mod() {
 BINDS[edit]=alt-e
 HOOKS[edit]=sclear
 DESCS[edit]='Rename directory entry'
-function edit() {
+edit() {
   local dir="$1" newdir
 
   view "$dir" | tmux load-buffer -b preview -
@@ -200,7 +200,7 @@ function edit() {
 BINDS[getuser]=alt-t
 HOOKS[getuser]=accept
 DESCS[getuser]='Clip username field'
-function getuser() {
+getuser() {
   local dir="$1"
   quiet get "$dir" username | tmux load-buffer -
 }
@@ -208,7 +208,7 @@ function getuser() {
 BINDS[getpass]=alt-y
 HOOKS[getpass]=accept
 DESCS[getpass]='Clip password field'
-function getpass() {
+getpass() {
   local dir="$1"
   quiet get "$dir" password | tmux load-buffer -
 }
@@ -216,7 +216,7 @@ function getpass() {
 BINDS[add]=alt-a
 HOOKS[add]=sclear
 DESCS[add]='Add directory entry'
-function add() {
+add() {
   local dir
   read -r dir < <(input query="www/")
   mkdir -p "${STORE}/${dir}"
@@ -225,14 +225,14 @@ function add() {
 BINDS[del]=alt-d
 HOOKS[del]=noclear
 DESCS[del]='Remove directory entry'
-function del() {
+del() {
   local dir="${1}"
 
   rm -rf "${STORE}/${dir}"
   (cd "$STORE" && find * -type d -empty -delete)
 }
 
-function dom() {
+dom() {
   local IFS='.' i=0 found
   local zones=($@)
 
@@ -246,7 +246,7 @@ function dom() {
   [[ -n "$found" ]] && printf "%s\n" "${found}"
 }
 
-function baseurl() {
+baseurl() {
   local IFS='.'
 
   local zones=($@)
@@ -265,7 +265,7 @@ function baseurl() {
   printf "www/%s\n" "${zones[*]}"
 }
 
-function grab() {
+grab() {
   local domain="$1" key="$2" dir
 
   read -r dir < <(dom "$domain") || return 1
@@ -278,7 +278,7 @@ function grab() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open location entry'
-function open() {
+open() {
   local location dir="$1"
  
   read -r location < <(get "$dir" location)
@@ -289,14 +289,14 @@ function open() {
 BINDS[bgopen]=tab
 HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open location entry in the background'
-function bgopen() {
+bgopen() {
   open "$@"
 }
 
 BINDS[fopen]=alt-enter
 HOOKS[fopen]=clear
 DESCS[fopen]='Open location entry'
-function fopen() {
+fopen() {
   local location dir="$1"
  
   read -r location < <(get "$dir" location)
@@ -304,7 +304,7 @@ function fopen() {
   urlopen "$location"
 }
 
-function new() {
+new() {
   local domain="${1}" location="${2}" force="${3}" dir dom
 
   echo -n "$location" | tmux load-buffer -b label -

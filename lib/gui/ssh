@@ -10,11 +10,11 @@ export HOSTDIR="$HOME/.ssh/hosts"
 
 export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot
 
-function view() {
+view() {
   ssh -G "$1"
 }
 
-function list() {
+list() {
   local hosts
 
   readarray -t hosts < <(find "$HOSTDIR" -type f -exec grep '^Host ' {} \;)
@@ -30,13 +30,13 @@ function list() {
   done | sort
 }
 
-function connected() {
+connected() {
   local host="$1"
 
   mute ssh -S "$SOCKDIR/$host.S" -O check "$host"
 }
 
-function connect() {
+connect() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -49,7 +49,7 @@ function connect() {
   timeout 5 ssh -fMNS "$sock" "$host"
 }
 
-function disconnect() {
+disconnect() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -61,7 +61,7 @@ function disconnect() {
 
 BINDS[toggle]=tab
 DESCS[toggle]='Toggle ssh master connection'
-function toggle() {
+toggle() {
   local host="$1"
 
   if connected "$host"; then
@@ -71,7 +71,7 @@ function toggle() {
   fi
 }
 
-function revport() {
+revport() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -80,7 +80,7 @@ function revport() {
   fi
 }
 
-function cancel() {
+cancel() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -92,7 +92,7 @@ function cancel() {
 BINDS[mux]=enter
 HOOKS[mux]=acceptsync
 DESCS[mux]='Attach a tmux session'
-function mux() {
+mux() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
   local name="${host%%.*}"
@@ -100,7 +100,7 @@ function mux() {
   attach fg "$name" "$host"
 }
 
-function attach() {
+attach() {
   local mode="$1"
   local name="$2"
   local host="$3"
@@ -114,7 +114,7 @@ function attach() {
 BINDS[shell]='alt-enter'
 HOOKS[shell]=acceptsync
 DESCS[shell]='Open a new shell window in tmux'
-function shell() {
+shell() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
   local name="${host%%.*}"
@@ -125,7 +125,7 @@ function shell() {
   fi
 }
 
-function mount() {
+mount() {
   local host="$(get host "$1")"
 
   mkdir -p "$HOME/.sshfs/$host"
@@ -133,15 +133,15 @@ function mount() {
   sshfs "$host":'$HOME' "$HOME/.sshfs/$host"
 }
 
-#function goto() {
+#goto() {
 #  mount && cd
 #}
 
-#function authorize() {
+#authorize() {
 #  ssh-copy-id ???
 #}
 
-function ttyexec() {
+ttyexec() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -153,7 +153,7 @@ function ttyexec() {
   fi
 }
 
-function rexec() {
+rexec() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 
@@ -167,7 +167,7 @@ function rexec() {
   fi
 }
 
-function sync() {
+sync() {
   local host="$1"
   local sock="$SOCKDIR/$host.S"
 

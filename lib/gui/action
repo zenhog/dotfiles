@@ -4,11 +4,11 @@ KEY=x
 MOD='S-M'
 ICON=
 
-function view() {
+view() {
   declare -f "action:$1"
 }
 
-function list() {
+list() {
   while read -r _ _ f _; do
     [[ "$f" =~ action:.* ]] && printf "%s\n" "${f#action:}"
   done < <(declare -F)
@@ -17,30 +17,30 @@ function list() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Execute entry'
-function open() {
+open() {
   action:$1
 }
 
-function action:poweroff() {
+action:poweroff() {
   sudo poweroff
 }
 
-function action:reboot() {
+action:reboot() {
   sudo reboot
 }
 
-function action:suspend() {
+action:suspend() {
   action:screenlock
   sudo zzz
 }
 
-function action:screenlock() {
+action:screenlock() {
   local image="$HOME/.wallpapers/whysosleepy.png"
 
   gui awm spawn -- i3lock -nuei "$image"
 }
 
-function action:screenshot() {
+action:screenshot() {
   local name dir="$HOME/.screenshots"
   mkdir -p "$dir"
   name="$dir/screenshot-$(date "+%F_%T")"-'$wx$h.png'
@@ -48,7 +48,7 @@ function action:screenshot() {
   scrot -zio -F "$name" && notify "Screen shot!"
 }
 
-function action:windowshot() {
+action:windowshot() {
   local name dir="$HOME/.screenshots"
   mkdir -p "$dir"
   name="$dir/windowshot-$(date "+%F_%T")"-'$wx$h.png'
@@ -56,7 +56,7 @@ function action:windowshot() {
   scrot -ziow "$(xdotool getwindowfocus)" -F "$name" && notify "Window shot!"
 }
 
-function action:selectshot() {
+action:selectshot() {
   local name dir="$HOME/.screenshots"
   mkdir -p "$dir"
   name="$dir/selectshot-$(date "+%F_%T")"-'$wx$h.png'
@@ -64,7 +64,7 @@ function action:selectshot() {
   scrot -zios -F "$name" && notify "Selection shot!"
 }
 
-function action:toggletheme() {
+action:toggletheme() {
   local current theme
   read -r current < "$HOME/.colorscheme"
 
@@ -76,7 +76,7 @@ function action:toggletheme() {
   applytheme "$theme"
 }
 
-function inittheme() {
+inittheme() {
   local current theme
   read -r current < "$HOME/.colorscheme"
 
@@ -89,7 +89,7 @@ function inittheme() {
 }
 
 
-function settheme() {
+settheme() {
   local theme="$1"
 
   # alacritty
@@ -132,7 +132,7 @@ function settheme() {
   echo "$theme" > "$HOME/.colorscheme"
 }
 
-function applytheme() {
+applytheme() {
   local theme="$1"
 
   settheme "$1"
@@ -166,6 +166,6 @@ function applytheme() {
   gui tmux colors
 }
 
-function action:mailsync() {
+action:mailsync() {
   mailsync
 }

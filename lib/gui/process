@@ -8,7 +8,7 @@ ICON=
 #RATIO=40%
 HORIZONTAL=1
 
-function view() {
+view() {
   local pid
   read -r pid _ <<< "$1"
 
@@ -34,7 +34,7 @@ function view() {
   done | column -t -s "$iSEP"
 }
 
-function list() {
+list() {
   LIBPROC_HIDE_KERNEL=1 ps axo pid,ppid,pidns,userns,user,pmem,cmd --sort pmem |
     tail -n +2 | tac
 }
@@ -42,7 +42,7 @@ function list() {
 BINDS[del]=alt-d
 HOOKS[del]=noclear
 DESCS[del]='Kill process'
-function del() {
+del() {
   local pid
   read -r pid _ <<< "$1"
   notify "$pid"

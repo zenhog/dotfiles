@@ -12,7 +12,7 @@ label() {
   echo "$thread"
 }
 
-function view() {
+view() {
   local thread
   read -r thread _ <<< "$1"
   readarray -t files < <(notmuch search --output=files "$thread")
@@ -26,7 +26,7 @@ function view() {
   done
 }
 
-function list() {
+list() {
   # @menu-mail-list inbox|sent|draft|archive
   notmuch search --sort=newest-first --output=summary tag:inbox
 }
@@ -34,7 +34,7 @@ function list() {
 BINDS[tag]=alt-q
 HOOKS[tag]=tag
 CALLS[tag]='execute-silent(%s {1} {q})+reload-sync(list)'
-function tag() {
+tag() {
   local term="$1"
   notmuch tag -unread "$term"
 }

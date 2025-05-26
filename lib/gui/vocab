@@ -9,7 +9,7 @@ HORIZONTAL=1
 export DB="$HOME/.db/vocabulary.db"
 export API="https://api.dictionaryapi.dev/api/v2/entries/en"
 
-function noinit() {
+noinit() {
   rm -f "$DB"
   sqlite3 "$DB" << EOF
   CREATE TABLE words(
@@ -24,7 +24,7 @@ function noinit() {
 EOF
 }
 
-function view() {
+view() {
   local id word
   read -r id word _ <<< "$1"
 
@@ -34,7 +34,7 @@ function view() {
         yq -y | bat -p --force-colorization --language yaml
 }
 
-function list() {
+list() {
   # @menu-word-language fr|en
   # @menu-word-hidden 1|0
   sqlite3 -separator "$iSEP" "$DB" \
@@ -42,13 +42,13 @@ function list() {
       sort -t "$iSEP" -k2 | column -t -s "$iSEP"
 }
 
-function dump() {
+dump() {
   sqlite3 "$DB" "SELECT word_en FROM words"
 }
 
 BINDS[pronounce]=alt-p
 DESCS[pronounce]='Pronounce word'
-function pronounce() {
+pronounce() {
   local id word links
   read -r id word _ <<< "$1"
   readarray -t links < <(curl -sL "${API}/${word}" |
@@ -62,7 +62,7 @@ function pronounce() {
 
 BINDS[add]=enter
 DESCS[add]='Add word to vocabulary database'
-function add() {
+add() {
   #local word language domain
   local -a words
   read -r -a words <<< "$2"
@@ -79,7 +79,7 @@ EOF
 
 BINDS[del]=alt-d
 DESCS[del]='Delete word'
-function del() {
+del() {
   local id
   read -r id _ <<< "$1"
   sqlite3 "$DB" "DELETE FROM words WHERE id == ${id}"

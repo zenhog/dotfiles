@@ -15,17 +15,17 @@ export TMUX_DIR="$HOME/.config/tmux"
 export TMUX_CONFIG="$TMUX_DIR/tmux.conf"
 export MUXSOCKET="$HOME/.vmux.S"
 
-function label() {
+label() {
   local mode="$(get_opt mode)"
 
   echo " mode: $mode "
 }
 
-function init() {
+init() {
   set_opt mode sessions
 }
 
-function list() {
+list() {
   local mode="${1:-$(get_opt mode)}"
 
   set_opt mode "$mode"
@@ -33,7 +33,7 @@ function list() {
   "list-$mode"
 }
 
-function format() {
+format() {
   local mode="$1"
   local name="$2"
 
@@ -62,7 +62,7 @@ function format() {
   esac
 }
 
-function get() {
+get() {
   local key="$1"
   local session="$2"
 
@@ -81,7 +81,7 @@ function get() {
   esac
 }
 
-function list-sessions() {
+list-sessions() {
   local sessions
   readarray -t sessions < <(tmux ls -F '#S')
 
@@ -90,7 +90,7 @@ function list-sessions() {
   done | column -t
 }
 
-function list-windows() {
+list-windows() {
   local sessions
 
   readarray -t sessions < <(list-sessions | grep "${1:-.}")
@@ -110,7 +110,7 @@ function list-windows() {
   done | column -t
 }
 
-function list-panes() {
+list-panes() {
   local windows
 
   readarray -t windows < <(list-windows | grep "${1:-.}")
@@ -128,7 +128,7 @@ function list-panes() {
   done | column -t
 }
 
-function view() {
+view() {
   local mode id
 
   mode="$(get_opt mode)"
@@ -148,7 +148,7 @@ function view() {
   esac
 }
 
-function view-session() {
+view-session() {
   local session="$1" windows
 
   readarray -t windows < <(list-windows "$session")
@@ -160,7 +160,7 @@ function view-session() {
   done
 }
 
-function view-window() {
+view-window() {
   local window="$1" panes
 
   readarray -t panes < <(list-panes "$window")
@@ -172,7 +172,7 @@ function view-window() {
   done
 }
 
-function view-pane() {
+view-pane() {
   local session host pane="$1"
 
   IFS=: read -r session _ <<< "$pane"
@@ -193,7 +193,7 @@ function view-pane() {
 BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
-function rotate_mode() {
+rotate_mode() {
   local mode="$(get_opt mode)"
 
   case "$mode" in
@@ -203,7 +203,7 @@ function rotate_mode() {
   esac
 }
 
-function status() {
+status() {
   local type="${1?}"
 
   case "$type" in
@@ -214,7 +214,7 @@ function status() {
   esac
 }
 
-function mksession() {
+mksession() {
   local kind="${1?}"
   local name="${2?}"
 
@@ -290,7 +290,7 @@ function mksession() {
   esac
 }
 
-function window() {
+window() {
   local kind="$1" session="$2" window="$3"
 
   shift 3
@@ -311,7 +311,7 @@ function window() {
   esac
 }
 
-function cursor() {
+cursor() {
   local word="$(tmux display -p '#{copy_cursor_word}')"
   local x="$(tmux display -p '#{copy_cursor_x}')"
   local y="$(tmux display -p '#{copy_cursor_y}')"
@@ -321,7 +321,7 @@ function cursor() {
   tmux display "Word under cursor: '$word' at ($x, $y), match: '$word'"
 }
 
-function line() {
+line() {
   local line="$(tmux display -p '#{copy_cursor_line}')"
   local x="$(tmux display -p '#{copy_cursor_x}')"
   local y="$(tmux display -p '#{copy_cursor_y}')"
@@ -331,13 +331,13 @@ function line() {
   tmux display "Line under cursor: '$word' at ($x, $y), line: '$line'"
 }
 
-function lastcmd() {
+lastcmd() {
   dmux copy-mode
   dmux send-keys -X search-backward "$CMDPAT"
   dmux set -p @direction prev
 }
 
-function pagecmd() {
+pagecmd() {
   tmux copy-mode
   tmux send-keys -X search-backward "$CMDPAT"
   tmux send-keys -X begin-selection
@@ -346,7 +346,7 @@ function pagecmd() {
   tmux show-buffer | less
 }
 
-function nextcmd() {
+nextcmd() {
   local direction="$(dmux show -pv @direction)"
 
   [[ "$direction" == prev ]] && dmux send-keys -X search-forward "$CMDPAT"
@@ -354,7 +354,7 @@ function nextcmd() {
   dmux set -p @direction next
 }
 
-function prevcmd() {
+prevcmd() {
   local direction="$(dmux show -pv @direction)"
 
   [[ "$direction" == next ]] && dmux send-keys -X search-backward "$CMDPAT"
@@ -362,34 +362,34 @@ function prevcmd() {
   dmux set -p @direction prev
 }
 
-function reload() {
+reload() {
   tmux source "$TMUX_CONFIG"
 }
 
-function colors() {
+colors() {
   source "$TMUX_DIR/30-options.conf"
 }
 
-function copytk() {
+copytk() {
   dmux run "copytk easycopy --search-nkeys 1"
 }
 
-function extract-pane() {
+extract-pane() {
   local pane="$(dmux display -p '#S:#I.#P')"
   dmux run \
     "bash -c \"tmux new-window -n grep bash -c '
       tmux capture-pane -pNq -t $pane | PANE="$pane" extract'\""
 }
 
-function extract-pane-history() {
+extract-pane-history() {
   local pane="$(dmux display -p '#S:#I.#P')"
   dmux run \
     "bash -c \"tmux new-window -n grep bash -c '
       tmux capture-pane -pNq -S- -E- -t $pane | extract'\""
 }
 
-function gethint() {
-  function printscreen() {
+gethint() {
+  printscreen() {
     tmux send-keys -X cancel
     tput clear
     if [[ -z "$screen" ]]; then
@@ -400,7 +400,7 @@ function gethint() {
     tmux send-keys -X page-up
   }
 
-  function hintup() {
+  hintup() {
     local key matches hintkeys=qwertyuiopasdfghjklzxcvbnm
 
     readarray -t hintkeys < <(grep -o . <<< "$hintkeys")
@@ -484,13 +484,13 @@ function gethint() {
   unset printscreen
 }
 
-function hintcopy() {
+hintcopy() {
   local pane="$(tmux display -p '#S:#I.#P')"
 
   tmux new-window -S -n hint -t "$(hostname):" gui tmux gethint "$pane"
 }
 
-function forward_style() {
+forward_style() {
   local sessions
 
   readarray -t sessions < <(tmux list-sessions -F '#S')
@@ -512,7 +512,7 @@ function forward_style() {
   done
 }
 
-function sync_clipboard() {
+sync_clipboard() {
   if [[ -n "$DISPLAY" ]]; then
     local tmuxdata=$(tmux show-buffer | base64)
     local xseldata=$(xsel -ob | base64)
@@ -523,7 +523,7 @@ function sync_clipboard() {
   fi
 }
 
-function forward_buffer() {
+forward_buffer() {
   local name="$(tmux display -p '#S')"
   local kind="$(quiet tmux show -vt "$name" @kind)"
   local port="$(quiet tmux show -vt "$name" @port)"
@@ -541,15 +541,15 @@ function forward_buffer() {
   sync_clipboard
 }
 
-function setup_session() {
+setup_session() {
   :
 }
 
-function cleanup_session() {
+cleanup_session() {
   :
 }
 
-function is_remote() {
+is_remote() {
   local sid="$1"
 
   [[ -z "$sid" ]] && read -r sid < <(tmux display -p '#S')
@@ -557,7 +557,7 @@ function is_remote() {
   [[ -n "$sid" ]] && quiet tmux show -vt "$sid" @host
 }
 
-function rmux() {
+rmux() {
   local host="${1?}"
 
   shift
@@ -565,7 +565,7 @@ function rmux() {
   gui ssh rexec "$host" tmux "$@"
 }
 
-function dkey() {
+dkey() {
   local session="$(tmux display -p '#S')"
 
   [[ -n "$session" ]] || return
@@ -579,7 +579,7 @@ function dkey() {
   return 1
 }
 
-function dmux() {
+dmux() {
   local session="$(tmux display -p '#S')"
 
   if [[ "$1" == session:* ]]; then
@@ -599,7 +599,7 @@ function dmux() {
   fi
 }
 
-function mod() {
+mod() {
   local mode="$1"
 
   shift
@@ -613,7 +613,7 @@ function mod() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open a session/window/pane'
-function open() {
+open() {
   local id mode="$(get_opt mode)"
 
   read -r _ id _ <<< "$1"
@@ -621,7 +621,7 @@ function open() {
   "open-${mode:0:-1}" "$id"
 }
 
-function open-session() {
+open-session() {
   local sid="$1"
   local host="$(is_remote "$sid")"
 
@@ -632,7 +632,7 @@ function open-session() {
   fi
 }
 
-function open-window() {
+open-window() {
   local sid host id="$1"
 
   IFS=: read -r sid _ <<< "$id"
@@ -648,7 +648,7 @@ function open-window() {
   fi
 }
 
-function open-pane() {
+open-pane() {
   local sid host id="$1"
 
   IFS=.: read -r sid wid _ <<< "$id"
@@ -666,7 +666,7 @@ function open-pane() {
 
 BINDS[del]=alt-d
 DESCS[del]='Delete a session/window/pane'
-function del() {
+del() {
   local id mode="$(get_opt mode)"
 
   read -r _ id _ <<< "$1"
@@ -674,7 +674,7 @@ function del() {
   "del-${mode:0:-1}" "$id"
 }
 
-function del-session() {
+del-session() {
   local sid="$1"
   local host="$(is_remote "$sid")"
 
@@ -685,7 +685,7 @@ function del-session() {
   fi
 }
 
-function del-window() {
+del-window() {
   local sid host id="$1"
 
   IFS=: read -r sid _ <<< "$id"
@@ -699,7 +699,7 @@ function del-window() {
   fi
 }
 
-function del-pane() {
+del-pane() {
   local sid host id="$1"
 
   IFS=.: read -r sid wid _ <<< "$id"
@@ -713,11 +713,11 @@ function del-pane() {
   fi
 }
 
-function rename() {
+rename() {
   :
 }
 
-function attach() {
+attach() {
   local kind="${1?}"
   local name="${2?}"
   local host="$3"

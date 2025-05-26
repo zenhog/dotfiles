@@ -6,10 +6,10 @@ ICON=󰝚
 
 HORIZONTAL=1
 
-function view() {
+view() {
   :
 }
 
-function list() {
+list() {
   mpc playlist
 }

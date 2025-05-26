@@ -7,27 +7,27 @@ ICON=󰴽
 HORIZONTAL=1
 PREVIEW_LABEL_OFFSET=2
 
-function view() {
+view() {
   local y
 }
 
-function label() {
+label() {
   local mode="$(get_opt mode)"
 
   echo " mode: $mode "
 }
 
-function previewlabel() {
+previewlabel() {
   local mode="$(get_opt mode)"
 
   echo " $(dolist "$mode-header") "
 }
 
-function init() {
+init() {
   set_opt mode connections
 }
 
-function dolist() {
+dolist() {
   local kind="$1"
 
   case "$kind" in
@@ -52,11 +52,11 @@ function dolist() {
 
 BINDS[rescan]=alt-r
 DESCS[rescan]='Rescan'
-function reload() {
+reload() {
   sudo nmcli device wifi rescan
 }
 
-function view() {
+view() {
   local mode="$(get_opt mode)"
 
   local active id
@@ -76,7 +76,7 @@ function view() {
 BINDS[open]=enter
 HOOKS[open]=clear
 DESCS[open]='Toggle connection or wifi'
-function open() {
+open() {
   local mode="$(get_opt mode)"
 
   local active id
@@ -99,7 +99,7 @@ function open() {
   esac
 }
 
-function list() {
+list() {
   local mode="${1:-$(get_opt mode)}"
 
   set_opt mode "$mode"
@@ -110,7 +110,7 @@ function list() {
 BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
-function rotate_mode() {
+rotate_mode() {
   local mode="$(get_opt mode)"
 
   case "$mode" in

@@ -8,7 +8,7 @@ HORIZONTAL=1
 
 export DB="$HOME/.local/share/newsboat/cache.db"
 
-function view() {
+view() {
   local id url
   read -r id _ <<< "$1"
   read -r url < <(sqlite3 "$DB" "SELECT url FROM rss_item WHERE id == ${id}")
@@ -20,14 +20,14 @@ function view() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open news in the browser'
-function open() {
+open() {
   local id url
   read -r id _ <<< "$1"
   read -r url _ < <(sqlite3 "$DB" "SELECT url FROM rss_item WHERE id == ${id}")
   command open "$url"
 }
 
-function list() {
+list() {
   local request entries
 
   read -r -d '' request << EOF

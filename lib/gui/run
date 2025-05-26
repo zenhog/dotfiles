@@ -6,22 +6,22 @@ ICON=
 
 export APP_DIR="$HOME/.lib/app"
 
-function view() {
+view() {
   command preview "$APP_DIR/$1"
 }
 
-function list() {
+list() {
   local apps
   readarray -t apps < <(ls -1 $HOME/.lib/app)
   printf "%s\n" "${apps[@]}"
 }
 
-function key() {
+key() {
   source "$HOME/.lib/app/$1"
   echo "$1:$KEY"
 }
 
-function keys() {
+keys() {
   for app in $(basename -a "${APP_DIR}"/*); do
     gui run key "$app"
   done
@@ -30,11 +30,11 @@ function keys() {
 BINDS[edit]=alt-e
 HOOKS[edit]=accept
 DESCS[edit]='Edit in $EDITOR'
-function edit() {
+edit() {
   open "$APP_DIR/$1"
 }
 
-function run() {
+run() {
   local file="$1" mode="$2"
 
   shift 2
@@ -49,21 +49,21 @@ function run() {
 BINDS[fg]=enter
 HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
-function fg() {
+fg() {
   source "$HOME/.lib/app/$1"
   gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
-function bg() {
+bg() {
   source "$HOME/.lib/app/$1"
   gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[close]=alt-d
 DESCS[close]='Terminate window'
-function close() {
+close() {
   source "$HOME/.lib/app/$1"
   gui awm winkill "${ATTRIBUTES[@]}"
 }

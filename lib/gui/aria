@@ -6,7 +6,7 @@ ICON=
 
 HORIZONTAL=1
 
-function query() {
+query() {
   local query params URL=http://localhost:6800/jsonrpc
 
   local -A methods=(
@@ -34,11 +34,11 @@ EOF
     jq -r '.result'
 }
 
-function view() {
+view() {
   :
 }
 
-function label() {
+label() {
   declare -A -x -g STATS
 
   local -a values
@@ -65,7 +65,7 @@ function label() {
   export "$(declare -p STATS)"
 }
 
-function list() {
+list() {
   local flatkey
   local -a values
   local -a keys=(
@@ -84,7 +84,7 @@ function list() {
   read -r flatkey < <(IFS=,; printf '%s' "${keys[*]/#/.}")
   # .bittorrent.info.name
 
-  function f() {
+  f() {
     query "$@" | jq -r ".[]|${flatkey}"
   }
 
@@ -96,7 +96,7 @@ function list() {
 
 BINDS[remove]=alt-r
 DESCS[remove]='Remove download entry'
-function remove() {
+remove() {
   local id
   read -r id _ <<< "$1"
   aria2p rm "$id"

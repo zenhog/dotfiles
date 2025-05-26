@@ -4,17 +4,17 @@ KEY=c
 MOD='S-M'
 ICON=
 
-function view() {
+view() {
   curl -sL cht.sh/$1
 }
 
-function list() {
+list() {
   curl -sL cht.sh/:list
 }
 
 BINDS[open]=enter
 DESCS[open]='Choose line (needs rework)'
-function open() {
+open() {
   local f="$(mktemp --dry-run)"
 
   view "$1" | fzf --ansi -f '' > "$f"

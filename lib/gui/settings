@@ -7,7 +7,7 @@ ICON=
 export ALACRITTY_DIR="$HOME/.config/alacritty"
 export PREVIEW_FILE="$HOME/.UTF-8-demo.txt"
 
-function atfinish() {
+atfinish() {
   (
     cd "$ALACRITTY_DIR"
     read -r orig < <(basename "$(realpath font-name.link.toml)")
@@ -15,14 +15,14 @@ function atfinish() {
   )
 }
 
-function label() {
+label() {
   local font size
   read -r size < <(size get)
   read -r font < <(basename $(realpath "${ALACRITTY_DIR}/font-name.link.toml"))
   echo "${font} (${size})"
 }
 
-function view() {
+view() {
   local font size
   read -r size < <(size get)
   read -r font <<< "$1"
@@ -36,7 +36,7 @@ function view() {
   command preview "$PREVIEW_FILE"
 }
 
-function list() {
+list() {
   fd --base-directory "$ALACRITTY_DIR/fonts" -e toml
   # themes
   # wallpapers
@@ -44,7 +44,7 @@ function list() {
 
 BINDS[link]=enter
 DESCS[link]='Link font entry'
-function link() {
+link() {
   local font
   read -r font <<< "$1"
   (
@@ -54,7 +54,7 @@ function link() {
   )
 }
 
-function size() {
+size() {
   local file="${ALACRITTY_DIR}/font-size.toml"
   case "$1" in
     get) sed -rn '/size/s/[^[:digit:]]//gp' "${file}";;
@@ -68,7 +68,7 @@ EOF
 
 BINDS[inc]=alt-n
 DESCS[inc]='Increase size'
-function inc() {
+inc() {
   local size
   read -r size < <(size get)
   size set $((size+1))
@@ -76,7 +76,7 @@ function inc() {
 
 BINDS[dec]=alt-p
 DESCS[dec]='Decrease size'
-function dec() {
+dec() {
   local size
   read -r size < <(size get)
   size set $((size-1))

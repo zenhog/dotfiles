@@ -7,13 +7,13 @@ ICON=
 POSITION=RIGHT
 NOWRAP=1
 
-function view() {
+view() {
   local menu
   read -r menu _ <<< "$1"
   gui "$menu" list
 }
 
-function list() {
+list() {
   gui | column -t -s: | sort -k4
 }
 
@@ -21,7 +21,7 @@ BINDS[open]=enter
 CALLS[open]='become(menu shell {2})'
 HOOKS[open]=open
 DESCS[open]='Open menu entry'
-function open() {
+open() {
   local icon menu
   read -r -d '' icon menu _ <<< "$1"
 }

@@ -8,11 +8,11 @@ HORIZONTAL=1
 
 export DB="$HOME/.local/share/qutebrowser/sessions/ctabs.yml"
 
-function view() {
+view() {
   :
 }
 
-function list() {
+list() {
   #qutebrowser ":session-save ctabs" 2>/dev/null
   readarray -t tabs < \
     <(yq -r '.windows[].tabs.[] | .history.[] | select(.active) | .title' < "$DB")
@@ -23,7 +23,7 @@ function list() {
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Raise tab'
-function open() {
+open() {
   local id title
   read -r id _ <<< "$1"
   #echo tab-focus $id > "$QUTE_FIFO"

@@ -8,7 +8,7 @@ NOWRAP=1
 
 export UEBERZUG_PREVIEW=1
 
-function init() {
+init() {
 	#set_opt pwd "$HOME/.marks"
 	[[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
 	set_opt hide 0
@@ -16,15 +16,15 @@ function init() {
 	set_opt mode-mod 3
 }
 
-function folder_save() {
+folder_save() {
 	set_opt pwd "$(pwd)"
 }
 
-function folder_restore() {
+folder_restore() {
 	FOLDER="$(get_opt pwd)"
 }
 
-function path() {
+path() {
 	local path="$(filter all "$1")"
 
 	folder_restore
@@ -36,18 +36,18 @@ function path() {
 	fi
 }
 
-function folder_cd() {
+folder_cd() {
 	cd "$(path "$1")" && folder_save
 }
 
-function label() {
+label() {
 	local path="$(path "$FOLDER")"
 	local mode="$(get_opt mode)"
 	local hide="$(get_opt hide)"
 	printf "%s - hide = %s - mode = %s" "$path" "$hide" "$mode"
 }
 
-function mimetype() {
+mimetype() {
 	# assuming valid absolute path
 	local path="$(path "$1")"
 
@@ -55,7 +55,7 @@ function mimetype() {
 		"$(du -hs "$path" | awk '{print $1}')"
 }
 
-function view() {
+view() {
 	local path="$(path "$1")"
 
 	mimetype "$path"
@@ -63,7 +63,7 @@ function view() {
 	command preview "$path"
 }
 
-function state_update() {
+state_update() {
 	folder_restore
 	restore_opt hide
 
@@ -96,7 +96,7 @@ function state_update() {
 
 BINDS[list]=alt-w
 DESCS[list]='Reload current directory listing'
-function list() {
+list() {
 	local dir="$1"
 
 	state_update
@@ -112,7 +112,7 @@ BINDS[search]=alt-s
 HOOKS[search]=search
 CALLS[search]='reload-sync(%s {} {q})+clear-query'
 DESCS[search]='Search arbitrary pattern with fd'
-function search() {
+search() {
 	state_update
 	cd "$FOLDER" && "${SEARCH_CMD[@]}" "$2"
 }
@@ -120,21 +120,21 @@ function search() {
 BINDS[rotate_mode]=alt-y
 HOOKS[rotate_mode]=search
 DESCS[rotate_mode]='Rotate mode'
-function rotate_mode() {
+rotate_mode() {
 	rotate_opt mode
 	search "$1" "$2"
 }
 
 BINDS[toggle_hide]=alt-t
 DESCS[toggle_hide]='Toggle hidden'
-function toggle_hide() {
+toggle_hide() {
 	toggle_opt hide
 }
 
 BINDS[rename]=alt-r
 HOOKS[rename]=sclear
 DESCS[rename]='Prompt rename entry'
-function rename() {
+rename() {
 	folder_restore
 	local entry="$1"
 
@@ -146,7 +146,7 @@ function rename() {
 
 BINDS[mark]=alt-m
 DESCS[mark]='Mark entry'
-function mark() {
+mark() {
 	local path="$(path "$1")"
 
 	local marksdir="$HOME/.marks"
@@ -160,7 +160,7 @@ function mark() {
 
 BINDS[attach]=alt-f
 DESCS[attach]='Select entry'
-function attach() {
+attach() {
 	local path="$(path "$1")"
 	mkdir -p "$HOME/.selections"
 	ln -svf "$path" "$HOME/.selections"
@@ -168,7 +168,7 @@ function attach() {
 
 BINDS[marks]=alt-space
 DESCS[marks]='Go to marks directory'
-function marks() {
+marks() {
 	save_opt hide
 	set_opt hide 0
 	folder_cd "$HOME/.marks"
@@ -176,13 +176,13 @@ function marks() {
 
 BINDS[home]=alt-q
 DESCS[home]='Home directory'
-function home() {
+home() {
 	folder_cd "$HOME"
 }
 
 BINDS[add]=alt-a
 DESCS[add]='Create directory'
-function add() {
+add() {
 	local query="$2"
 	folder_restore
 	mkdir -p "$FOLDER/$query"
@@ -190,44 +190,44 @@ function add() {
 
 BINDS[del]=alt-d
 DESCS[del]='Delete entry definitively'
-function del() {
+del() {
 	rm -rf "$(path "$1")"
 }
 
 BINDS[open]=tab
 HOOKS[open]=noclear
 DESCS[open]='Open entry'
-function open() {
+open() {
 	command open "$(path "$1")"
 }
 
 BINDS[_open]=alt-enter
 HOOKS[_open]=accept
 DESCS[_open]='Open entry and quit'
-function _open() {
+_open() {
 	open "$1"
 }
 
 BINDS[vimsession]=alt-u
 HOOKS[vimsession]=accept
 DESCS[vimsession]='Open vim project and quit'
-function vimsession() {
+vimsession() {
 	command open "$(path "$1")" nvim
 }
 
 BINDS[enter]=enter
 DESCS[enter]='Change Directory'
-function enter() {
+enter() {
 	folder_cd "$1"
 }
 
 BINDS[back]=esc
 DESCS[back]='Parent Directory'
-function back() {
+back() {
 	folder_cd ..
 }
 
-function atfinish() {
+atfinish() {
 	#unset_opt pwd
 	unset_opt hide
 	unset_opt mode

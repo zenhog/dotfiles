@@ -4,11 +4,11 @@ KEY=b
 MOD='S-M'
 ICON=󰂯
 
-function view() {
+view() {
   read -r _ addr _ <<< "$1"
   bluetoothctl info "$addr"
 }
 
-function list() {
+list() {
   bluetoothctl devices
 }
