@@ -37,17 +37,15 @@ FZF_BASE_FLAGS=(
   "--bind=ctrl-u:preview-half-page-up"
   "--bind=ctrl-d:preview-half-page-down"
 
-  #"--bind=ctrl-o:toggle-preview-wrap"
-  "--bind=ctrl-space:refresh-preview"
-
   "--bind=ctrl-b:forward-word"
   "--bind=ctrl-z:backward-word"
 
-  "--bind=ctrl-t:clear-query"
+  "--bind=ctrl-g:clear-query"
   "'--bind=ctrl-y:transform-query(echo -n {q}; tmux showb)'"
 
-  '"--bind=ctrl-\\:toggle-wrap+toggle-preview-wrap"'
-  #'"--bind=ctrl-/:toggle-wrap"'
+  '"--bind=ctrl-\\:refresh-preview"'
+  "--bind=ctrl-o:refresh-preview"
+  "--bind=ctrl-space:toggle-wrap+toggle-preview-wrap"
 
   "--bind=ctrl-w:backward-kill-word"
   "--bind=ctrl-f:kill-word"
@@ -58,10 +56,10 @@ FZF_BASE_FLAGS=(
   "--bind=ctrl-p:half-page-up"
   "--bind=ctrl-n:half-page-down"
 
-  "--bind=ctrl-l:delete-char"
-  "--bind=ctrl-h:backward-delete-char"
+  "--bind=ctrl-l:forward-char"
+  "--bind=ctrl-h:backward-char"
 
-  "--bind=ctrl-g:jump"
+  "--bind=ctrl-/:jump"
 )
 
 PREVIEW="bottom,border-rounded|right,border-rounded"

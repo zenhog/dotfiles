@@ -1,41 +1,3 @@
-local actions = require("fzf-lua.actions")
-
-local custom_actions = {
-  references = function(selected, opts)
-    if not selected or #selected == 0 then
-      return
-    end
-    local symbol = selected[1]
-
-    print(vim.inspect(symbol))
-
-    -- Ensure we have proper LSP symbol data
-    if not symbol.selectionRange or not symbol.selectionRange.start then
-      vim.notify("Invalid symbol data", vim.log.levels.ERROR)
-      return
-    end
-
-    -- Get the current buffer and position
-    local bufnr = vim.api.nvim_get_current_buf()
-    local pos = {
-      line = symbol.selectionRange.start.line,
-      character = symbol.selectionRange.start.character,
-    }
-
-    -- Trigger LSP references
-    require("fzf-lua").lsp_references({
-      jump_to_single_result = true,
-      no_auto_resize = true,
-      winopts = {
-        height = 0.4,
-        width = 0.6,
-        row = 0.4,
-        col = 0.4,
-      },
-    }, { bufnr = bufnr, pos = pos })
-  end,
-}
-
 local keys = {
   {
     "<C-a>",
@@ -144,39 +106,53 @@ local keys = {
   },
 }
 
-local lsp_config = {
-  lsp = {
-    actions = {
-      ["ctrl-o"] = custom_actions.references,
-    },
-    symbols = {
-      symbol_hl = function(s)
-        return "TroubleIcon" .. s
-      end,
-      symbol_fmt = function(s)
-        return s:lower() .. "\t"
-      end,
-      child_prefix = false,
-    },
-    code_actions = {
-      previewer = vim.fn.executable("delta") == 1 and "codeaction_native" or nil,
-    },
-  },
-}
-
 local config = {
   keymap = {
     fzf = {},
     builtin = {
-      ["<C-u>"] = "preview-page-up",
-      ["<C-d>"] = "preview-page-down",
-      ["<C-n>"] = "toggle-preview-cw",
-      ["<C-p>"] = "toggle-preview-ccw",
-      ["<C-Slash>"] = "toggle-fullscreen",
-      ["<C-BSlash>"] = "toggle-preview-wrap",
+      -- ["<C-u>"] = "preview-page-up",
+      -- ["<C-d>"] = "preview-page-down",
+      --["<C-n>"] = "toggle-preview-cw",
+      --["<C-p>"] = "toggle-preview-ccw",
+      --["<C-Slash>"] = "toggle-fullscreen",
+      --["<C-BSlash>"] = "toggle-preview-wrap",
     },
   },
-  lsp_config,
+  preview = {
+    default = "bat", -- override the default previewer?
+    -- default uses the 'builtin' previewer
+    border = "rounded", -- preview border: accepts both `nvim_open_win`
+    -- and fzf values (e.g. "border-top", "none")
+    -- native fzf previewers (bat/cat/git/etc)
+    -- can also be set to `fun(winopts, metadata)`
+    wrap = false, -- preview line wrap (fzf's 'wrap|nowrap')
+    hidden = false, -- start preview hidden
+    vertical = "down:45%", -- up|down:size
+    horizontal = "right:60%", -- right|left:size
+    layout = "flex", -- horizontal|vertical|flex
+    flip_columns = 100, -- #cols to switch to horizontal on flex
+    -- Only used with the builtin previewer:
+    title = true, -- preview border title (file/buf)?
+    title_pos = "center", -- left|center|right, title alignment
+    scrollbar = "float", -- `false` or string:'float|border'
+    -- float:  in-window floating border
+    -- border: in-border "block" marker
+    scrolloff = -1, -- float scrollbar offset from right
+    -- applies only when scrollbar = 'float'
+    delay = 20, -- delay(ms) displaying the preview
+    -- prevents lag on fast scrolling
+    -- winopts = { -- builtin previewer window options
+    --   number = true,
+    --   relativenumber = false,
+    --   cursorline = true,
+    --   cursorlineopt = "both",
+    --   cursorcolumn = false,
+    --   signcolumn = "no",
+    --   list = false,
+    --   foldenable = false,
+    --   foldmethod = "manual",
+    -- },
+  },
 }
 
 return {
