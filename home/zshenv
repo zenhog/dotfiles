@@ -43,8 +43,8 @@ FZF_BASE_FLAGS=(
   "--bind=ctrl-g:clear-query"
   "'--bind=ctrl-y:transform-query(echo -n {q}; tmux showb)'"
 
-  '"--bind=ctrl-\\:refresh-preview"'
-  "--bind=ctrl-o:refresh-preview"
+  # "'--bind=ctrl-\\:refresh-preview'"
+  # "--bind=ctrl-o:refresh-preview"
   "--bind=ctrl-space:toggle-wrap+toggle-preview-wrap"
 
   "--bind=ctrl-w:backward-kill-word"
