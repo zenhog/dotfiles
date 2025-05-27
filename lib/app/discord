@@ -4,7 +4,7 @@ KEY='W:r'
 
 ATTRIBUTES=(profile=discord)
 
-function runner() {
+runner() {
   #flatpak run com.discordapp.Discord
   Discord
 }

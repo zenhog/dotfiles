@@ -1,3 +1,3 @@
-function ls() {
+ls() {
   mute lsd "$@" && lsd "$@" || command ls "$@"
 }

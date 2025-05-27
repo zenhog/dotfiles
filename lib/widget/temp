@@ -2,13 +2,13 @@
 
 PERIOD=5
 
-function text() {
+text() {
   read -r text < <(sensors |
     sed -rn '/^Package id 0:/s/^Package id 0:[^[:digit:]]+([[:digit:]]+).*$/\1/p')
   printf "%s" "$text"
 }
 
-function icon() {
+icon() {
   local icon=󰔏
   printf "%s" "$icon"
 }

@@ -1,4 +1,4 @@
-function gpg() {
+gpg() {
   case "$1" in
     --seclist)
       gpg --list-secret-keys --with-subkey-fingerprint --with-fingerprint \

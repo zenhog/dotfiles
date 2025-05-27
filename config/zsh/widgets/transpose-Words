@@ -1,4 +1,4 @@
-function transpose-Words() {
+transpose-Words() {
   wordchars="$WORDCHARS"
   WORDCHARS=$'!@#$%^&*()_-+={}:;<>,./?\\[]~`'
   zle transpose-words

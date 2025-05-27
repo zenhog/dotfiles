@@ -2,6 +2,6 @@
 
 KEY='W:a'
 
-function runner() {
+runner() {
   gui action open toggletheme
 }

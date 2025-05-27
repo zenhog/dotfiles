@@ -1,4 +1,4 @@
-function fillalbum() {
+fillalbum() {
   local dirname="$1"
   local basename="$(basename "$dirname")"
 

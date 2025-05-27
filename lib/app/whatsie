@@ -4,6 +4,6 @@ KEY='W:t'
 
 ATTRIBUTES=(profile=whatsie)
 
-function runner() {
+runner() {
   flatpak run com.ktechpit.whatsie
 }

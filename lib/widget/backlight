@@ -3,17 +3,17 @@
 PERIOD=30
 
 KEYS[prev]='C-M:d'
-function prev() {
+prev() {
   xbacklight -dec 5
 }
 
 KEYS[next]='C-M:u'
-function next() {
+next() {
   xbacklight -inc 5
 }
 
 KEYS[toggle]='C-M:f'
-function toggle() {
+toggle() {
     read -r backlight < <(xbacklight | xargs printf "%02.f")
     if (( backlight <= 30 )); then
         xbacklight -set 100
@@ -22,13 +22,13 @@ function toggle() {
     fi
 }
 
-function text() {
+text() {
     read -r backlight < <(xbacklight | xargs printf "%02.f")
 
     printf "%s" "$backlight"
 }
 
-function icon() {
+icon() {
     local icon=
     local icon=󰃠
     local icon=󰃞

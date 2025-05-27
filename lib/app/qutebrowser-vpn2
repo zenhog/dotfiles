@@ -4,6 +4,6 @@ KEY='C-W:w'
 
 ATTRIBUTES=(profile=qutebrowser-vpn2)
 
-function runner() {
+runner() {
   browser qutebrowser vpn2
 }

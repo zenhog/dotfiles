@@ -2,6 +2,6 @@
 
 KEY='C-M:r'
 
-function runner() {
+runner() {
   gui tmux window local "$(hostname)" news newsboat
 }

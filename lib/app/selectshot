@@ -2,7 +2,7 @@
 
 KEY='E:Delete'
 
-function runner() {
+runner() {
   local name dir="$HOME/.screenshots"
   mkdir -p "$dir"
   name="$dir/selectshot-$(date "+%F_%T")"-'$wx$h.png'

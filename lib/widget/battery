@@ -5,7 +5,7 @@ PERIOD=1
 POWER_PATH=/sys/class/power_supply
 readarray -t BATTERIES < <(echo $POWER_PATH/BAT*)
 
-function text() {
+text() {
   local cur max
 
   CUR=0
@@ -23,7 +23,7 @@ function text() {
   printf "%.f" "$PERCENTAGE"
 }
 
-function icon() {
+icon() {
   local ok=󱐋
   local ko=󰂎
   local status

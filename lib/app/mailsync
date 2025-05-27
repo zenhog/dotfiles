@@ -2,6 +2,6 @@
 
 KEY='W:o'
 
-function runner() {
+runner() {
   mailsync && notify 'Mail synced successfully!'
 }

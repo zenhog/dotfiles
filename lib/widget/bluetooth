@@ -2,13 +2,13 @@
 
 PERIOD=10
 
-function text() {
+text() {
     readarray -t devices < <(bluetoothctl devices Connected |
         grep -v 'No default controller available' | awk '{print $2}')
     printf "%s" "${devices[0]}"
 }
 
-function icon() {
+icon() {
     local icon=󰂯
     printf "%s" "$icon"
 }

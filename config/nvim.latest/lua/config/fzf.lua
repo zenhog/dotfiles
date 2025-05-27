@@ -31,7 +31,7 @@ local function copy_to_clipboard(selected, opts)
   return true
 end
 
-function M.setup()
+M.setup()
   require('fzf-lua').setup({
     lsp = {
       actions = {

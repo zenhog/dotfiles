@@ -1,4 +1,4 @@
-function search() {
+search() {
   menu popup search list "$(pwd)"
 
   local dir="$(tmux show -sv @menu-search-cdir 2>/dev/null)"

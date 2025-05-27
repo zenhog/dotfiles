@@ -1,4 +1,4 @@
-function marks() {
+marks() {
   local answer
 
   answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |

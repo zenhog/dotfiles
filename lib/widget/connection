@@ -5,7 +5,7 @@ PERIOD=10
 read -r PROFILE < <(nmcli -t connection show --active)
 read -r TYPE < <(awk -F: '{print $3}' <<< "$PROFILE")
 
-function text() {
+text() {
     local connection
     read -r connection < <(awk -F: '{print $1}' <<< "$PROFILE")
 
@@ -15,7 +15,7 @@ function text() {
     #printf "%s_%s" "C4:12:F5:CE:71:E1" "D-Link"
 }
 
-function icon() {
+icon() {
     local icon
     local unknown=󱕆
     local wireless=󰖩

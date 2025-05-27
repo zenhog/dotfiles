@@ -1,4 +1,4 @@
-function mkalbum() {
+mkalbum() {
   for folder in "$@"; do
     mkdir -p "$folder" && echo image/ > "$folder/.dirtype"
   done

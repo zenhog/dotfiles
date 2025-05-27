@@ -4,6 +4,6 @@ KEY='W:w'
 
 ATTRIBUTES=(profile=qutebrowser)
 
-function runner() {
+runner() {
   browser qutebrowser
 }

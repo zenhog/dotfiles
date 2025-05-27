@@ -1,4 +1,4 @@
-function envupdate-and-complete() {
+envupdate-and-complete() {
   source "$HOME/.zshenv"
   zle fzf-tab-complete
 }

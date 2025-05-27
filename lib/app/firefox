@@ -4,6 +4,6 @@ KEY='W:e'
 
 ATTRIBUTES=(profile=firefox)
 
-function runner() {
+runner() {
   browser firefox
 }

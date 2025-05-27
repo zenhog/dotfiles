@@ -2,7 +2,7 @@
 
 PERIOD=10
 
-function text() {
+text() {
     local vpn
     local url='http://ip-api.com/json/?lang=us&fields=countryCode'
 
@@ -15,7 +15,7 @@ function text() {
     printf "%s" "$vpn"
 }
 
-function icon() {
+icon() {
   local icon=󰉀
   printf "%s" "$icon"
 }

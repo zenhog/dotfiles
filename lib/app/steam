@@ -4,7 +4,7 @@ KEY='S-W:t'
 
 ATTRIBUTES=(profile=steam)
 
-function runner() {
+runner() {
   #flatpak run com.valvesoftware.Steam
   steam
 }

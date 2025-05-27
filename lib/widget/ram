@@ -2,7 +2,7 @@
 
 PERIOD=5
 
-function toggle() {
+toggle() {
     function setgov() {
         local nbcpus
         read -r nbcpus < <(cpufreq-info | grep -c 'CPU [[:digit:]]:')
@@ -18,11 +18,11 @@ function toggle() {
     esac
 }
 
-function run() {
+run() {
     menu process
 }
 
-function text() {
+text() {
     local text availram totalram
 
     read -r availram < <(free | awk '/^Mem:/ {print $7}')
@@ -31,7 +31,7 @@ function text() {
     printf "%s" "$text"
 }
 
-function icon() {
+icon() {
     local cpupath=/sys/devices/system/cpu
     local -a governors
     readarray -t governors < <(cat $cpupath/cpu*/cpufreq/scaling_governor | uniq)

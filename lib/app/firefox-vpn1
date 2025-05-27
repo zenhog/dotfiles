@@ -4,6 +4,6 @@ KEY='S-W:e'
 
 ATTRIBUTES=(profile=firefox-vpn1)
 
-function runner() {
+runner() {
   browser firefox vpn1
 }

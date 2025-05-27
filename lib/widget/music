@@ -3,27 +3,27 @@
 PERIOD=30
 
 KEYS[prev]='C-M:p'
-function prev() {
+prev() {
     mpc prev
 }
 
 KEYS[next]='C-M:n'
-function next() {
+next() {
     mpc next
 }
 
 KEYS[toggle]='C-M:space'
-function toggle() {
+toggle() {
     mpc toggle
 }
 
-function text() {
+text() {
     read -r song < <(mpc current 2>/dev/null)
 
     printf "%s" "$song"
 }
 
-function icon() {
+icon() {
 
     local playing=󰝚
     local paused=󰽺

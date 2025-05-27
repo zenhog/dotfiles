@@ -6,7 +6,7 @@ SOCKET="/tmp/rofi_notification_daemon"
 
 NEWSDB="$HOME/.local/share/newsboat/cache.db"
 
-function mail() {
+mail() {
 	local icon=󰊫
 	readarray -t mails < <(notmuch search --format=json tag:unread |
 		jq -r '.[].subject')
@@ -16,7 +16,7 @@ function mail() {
 	printf "$icon %s " "${mails[@]}"
 }
 
-function news() {
+news() {
 	local icon=󰑫
 	local iconcolor=aqua
 	local textcolor=bisque
@@ -37,7 +37,7 @@ function news() {
 	printf "$(colorize "$iconcolor" "$icon") %s " "${news[@]}"
 }
 
-function notification() {
+notification() {
 
 	function extract() {
 		readarray -t "$1" < <(jq -r ".[].$1" <<<"$TEXT")
@@ -59,11 +59,11 @@ function notification() {
 	printf "%s %s " "$(colorize "$iconcolor" "$icon")" "${bell[@]}"
 }
 
-function text() {
+text() {
 	notification || mail || news
 }
 
-function icon() {
+icon() {
 	local icon=󰛸
 	local color=seagreen
 

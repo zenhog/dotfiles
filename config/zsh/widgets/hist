@@ -1,4 +1,4 @@
-function hist() {
+hist() {
   for line in "${(@f)$(<"$HOME/.zhistory")}"; do
     IFS=$';' read -r timestamp cmd <<< "$line"
     echo "$timestamp $cmd"

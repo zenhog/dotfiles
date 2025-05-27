@@ -2,7 +2,7 @@
 
 PERIOD=10
 
-function unread() {
+unread() {
     local db="$HOME/.local/share/newsboat/cache.db"
     local day=$((3600*24))
     local age=1
@@ -12,7 +12,7 @@ function unread() {
         "SELECT count(*) FROM rss_item WHERE unread == 1 and pubDate > $epoch"
 }
 
-function text() {
+text() {
     local count
     local color=skyblue
 
@@ -21,7 +21,7 @@ function text() {
     colorize "$color" "$count"
 }
 
-function icon() {
+icon() {
     local icon=󰑫
     local color=yellow
 

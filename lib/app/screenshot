@@ -2,7 +2,7 @@
 
 KEY='E:Print'
 
-function runner() {
+runner() {
   local name dir="$HOME/.screenshots"
 
   mkdir -p "$dir"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function text() {
+text() {
     local time=$(date '+%R')
     local time=$(date '+%I:%M %p')
     local time=$(date '+%H:%M %a %b %d')
@@ -8,12 +8,12 @@ function text() {
     printf "%s" "$time"
 }
 
-function icon() {
+icon() {
   local icon=󱑍
   printf "%s" "$icon"
 }
 
-function output() {
+output() {
     printf ":"
     text
 }

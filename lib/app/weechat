@@ -2,6 +2,6 @@
 
 KEY='C-M:e'
 
-function runner() {
+runner() {
   gui tmux window local "$(hostname)" chat weechat
 }

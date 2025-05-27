@@ -2,6 +2,6 @@
 
 ATTRIBUTES=(profile=goofcord)
 
-function runner() {
+runner() {
   flatpak run io.github.milkshiift.GoofCord
 }

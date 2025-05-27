@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function text() {
+text() {
   read -d '' text < <(btrfs filesystem usage --raw / 2>/dev/null)
 
   read -r used < <(awk '/^ *Used:/ {print $2}' <<< "$text")
@@ -11,7 +11,7 @@ function text() {
   printf "%s" "$text"
 }
 
-function icon() {
+icon() {
   local icon=󰆼
   printf "%s" "$icon"
 }

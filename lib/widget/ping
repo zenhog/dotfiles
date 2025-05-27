@@ -2,12 +2,12 @@
 
 PERIOD=1
 
-function ping() {
+ping() {
     command timeout 0.5 ping -n -4 -c 1 "$1" |
             awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
 }
 
-function text() {
+text() {
     local ping
 
     ip1="185.199.109.153" # voidlinux.org
@@ -21,7 +21,7 @@ function text() {
     printf "%s" "$ping"
 }
 
-function icon() {
+icon() {
     local icon=󰀚
     printf "%s" "$icon"
 }
