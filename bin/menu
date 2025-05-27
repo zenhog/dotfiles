@@ -4,13 +4,13 @@ source "$HOME/.bin/gui"
 
 export UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
 
-function atexit() {
+atexit() {
 	silent declare -F atfinish && atfinish
 }
 
-BINDS[help]=alt-h
-HOOKS[help]=preview
-function help() {
+# BINDS[help]=alt-h
+# HOOKS[help]=help
+help() {
 	eval "$SDESCS"
 	eval "$SBINDS"
 	eval "$SGDESCS"
@@ -28,7 +28,7 @@ function help() {
 	done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
 }
 
-function urlopen() {
+urlopen() {
 	local choice alternatives
 
 	readarray -t alternatives < <(browser list)
@@ -44,14 +44,14 @@ function urlopen() {
 
 BINDS[copyentry]='alt-\'
 GDESCS[copyentry]='Clip entry'
-function copyentry() {
+copyentry() {
 	echo -n "$1" | fzf --ansi -f '' | tmux load-buffer -
 }
 
 BINDS[extract]='alt-/'
 HOOKS[extract]=sclear
 GDESCS[extract]='Fzfgrep preview'
-function extract() {
+extract() {
 	preview "$1" | command extract 2>/dev/tty
 }
 
@@ -74,11 +74,11 @@ HOOKS[qalc]=qalc
 GDESCS[qalc]='Evaluate qalc expressions'
 CALLS[qalc]='change-preview(eval qalc {q})'
 
-function inputpreview() {
+inputpreview() {
 	tmux show-buffer -b preview 2>/dev/null && tmux delete-buffer -b preview
 }
 
-function choice() {
+choice() {
 
 	local cmd
 
@@ -96,7 +96,7 @@ function choice() {
 	printf "%s\n" "$@" | "${cmd[@]}" 2>/dev/tty
 }
 
-function input() {
+input() {
 
 	local fifo query
 
@@ -125,7 +125,7 @@ function input() {
 	fi
 }
 
-function main() {
+main() {
 	trap atexit EXIT
 
 	if [[ "$1" == input ]]; then
@@ -265,7 +265,7 @@ function main() {
 	list "${LIST_ARGS[@]}" | "${COMMAND[@]}"
 }
 
-function dispatch() {
+dispatch() {
 	local mode="$1"
 
 	shift

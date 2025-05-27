@@ -6,50 +6,50 @@ MODULES_DIR="$HOME/.lib/widget"
 
 declare -A KEYS
 
-function prev() {
+prev() {
 	:
 }
 
-function next() {
+next() {
 	:
 }
 
-function toggle() {
+toggle() {
 	:
 }
 
-function colorize() {
+colorize() {
 	tty -s && pastel -f paint "$1" "${@:2}" ||
 		printf '<span foreground="%s">%s</span>' "$1" "${*:2}"
 }
 
-function sanitize() {
+sanitize() {
 	sed -e 's/&/\&amp;/gp'
 }
 
-function run() {
+run() {
 	gui "${BASH_ARGV[1]}" &>/dev/null && menu "${BASH_ARGV[1]}"
 }
 
-function period() {
+period() {
 	echo "${PERIOD:-60}"
 }
 
-function timeout() {
+timeout() {
 	gui awm timeout "${BASH_ARGV[1]}"
 }
 
-function output() {
+output() {
 	echo "$(icon):$(sanitize <<<"$(text)")"
 }
 
-function keys() {
+keys() {
 	for key in "${!KEYS[@]}"; do
 		echo "$key:${KEYS[$key]}"
 	done
 }
 
-function main() {
+main() {
 	case $# in
 	0) # list widgets
 		readarray -t widgets < <(realpath $MODULES_DIR/*)

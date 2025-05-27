@@ -6,14 +6,14 @@ exec 2>&1
 
 UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
 
-function cleanup() {
+cleanup() {
   exec 3>&-
   rm "$SOCKET" &>/dev/null
   rm "$UEBERZUG_FIFO" &>/dev/null
   kill $(jobs -p) &>/dev/null
 }
 
-function start_ueberzug() {
+start_ueberzug() {
   mkfifo "${UEBERZUG_FIFO}"
 
   ueberzug layer --parser bash --silent < "$UEBERZUG_FIFO" &

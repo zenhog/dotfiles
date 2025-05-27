@@ -119,7 +119,7 @@ PATTERNS[LINE]='^.*$'
 PATTERN_GROUPS+=(GR_ALL)
 GR_ALL=("${!PATTERNS[@]}")
 
-function match() {
+match() {
   local pattern="$1"
   local submatch_id="${SUBMATCHES[$pattern]:-0}"
 

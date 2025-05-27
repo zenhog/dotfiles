@@ -13,6 +13,8 @@ esac
 
 #tty -s && echo -ne "\e[5 q"
 
+FZF_HELPCMD=(fzf --preview help --preview-window noborder,top,99% --border=rounded)
+
 FZF_BASE_FLAGS=(
   "--color=$THEME"
 
@@ -43,8 +45,7 @@ FZF_BASE_FLAGS=(
   "--bind=ctrl-g:clear-query"
   "'--bind=ctrl-y:transform-query(echo -n {q}; tmux showb)'"
 
-  # "'--bind=ctrl-\\:refresh-preview'"
-  # "--bind=ctrl-o:refresh-preview"
+  "'--bind=ctrl-\\:execute(${FZF_HELPCMD[@]} </dev/null)+clear-screen'"
   "--bind=ctrl-space:toggle-wrap+toggle-preview-wrap"
 
   "--bind=ctrl-w:backward-kill-word"

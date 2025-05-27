@@ -3,7 +3,7 @@
 FS_UTILS="$HOME/.bin/utils"
 GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/utils
 
-function SOURCE() {
+SOURCE() {
   if [[ -r "$FS_UTILS" ]]; then
     source "$FS_UTILS" && return
   fi
@@ -16,7 +16,7 @@ BASEDIR="$HOME/.dotfiles"
 
 BRANCHES=(master public private)
 
-function init() {
+init() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
@@ -24,7 +24,7 @@ function init() {
   pull "$branch"
 }
 
-function clone() {
+clone() {
 
   local dir="${1?}" url="${2?}" branch="${3?}"
 
@@ -46,7 +46,7 @@ function clone() {
   fi
 }
 
-function pull() {
+pull() {
   local branch="${1?}"
 
   if isremote "$branch"; then
@@ -66,7 +66,7 @@ function pull() {
   link "$branch"
 }
 
-function push() {
+push() {
   local branch="${1?}"
 
   verbose pull "$branch"
@@ -88,7 +88,7 @@ function push() {
   verbose cdgit "$branch" status
 }
 
-function commit() {
+commit() {
   local branch="${1?}"
 
   #fs2rcs "$branch"
@@ -97,7 +97,7 @@ function commit() {
   cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
 }
 
-function linktarget() {
+linktarget() {
   local target="$1"
   local link="$2"
 
@@ -110,7 +110,7 @@ function linktarget() {
   verbose ln -T -svf -- "$target" "$link"
 }
 
-function link() {
+link() {
   local branch="${1?}"
 
   if isremote "$branch"; then
@@ -153,13 +153,13 @@ function link() {
   done
 }
 
-function isremote() {
+isremote() {
   local branch="${1?}"
 
   [[ -f "$BASEDIR/$branch/.gitremote" ]]
 }
 
-function encrypt() {
+encrypt() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
@@ -183,7 +183,7 @@ function encrypt() {
   done
 }
 
-function decrypt() {
+decrypt() {
   local branch="${1?}"
   local dir="$BASEDIR/$branch"
 
@@ -200,7 +200,7 @@ function decrypt() {
   done
 }
 
-function fs2rcs() {
+fs2rcs() {
   local branch="${1?}"
 
   local files
@@ -236,7 +236,7 @@ function fs2rcs() {
   done
 }
 
-function rcs2fs() {
+rcs2fs() {
   local branch="${1?}"
 
   local files
@@ -264,7 +264,7 @@ function rcs2fs() {
   done
 }
 
-function all() {
+all() {
   local mod="${1?}"
 
   for branch in "${BRANCHES[@]}"; do
@@ -272,13 +272,13 @@ function all() {
   done
 }
 
-function cdgit() (
+cdgit() (
   local branch="${1?}"
 
   cd "$BASEDIR/$branch" && git "${@:2}"
 )
 
-function status() {
+status() {
   local branch="${1?}"
 
   if isremote "$branch"; then
@@ -288,19 +288,19 @@ function status() {
   cdgit "$branch" status
 }
 
-function lastdiff() {
+lastdiff() {
   local branch="${1?}"
 
   cdgit "$branch" diff "$branch"~ "$branch"
 }
 
-function gitdiff() {
+gitdiff() {
   local branch="${1?}"
 
   cdgit "$branch" diff "$branch"
 }
 
-function rebranch() (
+rebranch() (
   local repo="${1?}"
   local branch
 
@@ -317,7 +317,7 @@ function rebranch() (
   verbose cdgit "$repo" push --set-upstream origin "$branch" --force
 )
 
-function cleanup() {
+cleanup() {
   local branch="${1?}"
 
   rm -rvf "$BASEDIR/$branch/.git/refs/original"
@@ -327,7 +327,7 @@ function cleanup() {
   cdgit "$branch" gc --aggressive --prune=now
 }
 
-function mklive() {
+mklive() {
   local dir="$HOME/.voidlive"
   local url=https://github.com/void-linux/void-mklive
 
@@ -376,7 +376,7 @@ function mklive() {
   verbose sudo rm -rf "$tmpdir"
 }
 
-function checkbin() {
+checkbin() {
   for bin in "$@"; do
     which "$bin" >/dev/null || return
   done

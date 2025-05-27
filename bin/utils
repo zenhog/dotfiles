@@ -21,29 +21,29 @@ zsh)
 	;;
 esac
 
-function quiet() {
+quiet() {
 	"$@" 2>/dev/null
 }
 
-function silent() {
+silent() {
 	"$@" >/dev/null
 }
 
-function mute() {
+mute() {
 	"$@" &>/dev/null
 }
 
-function exitwith() {
+exitwith() {
 	echo "$@" >&2
 	exit 1
 }
 
-function failwith() {
+failwith() {
 	echo "$@" >&2
 	exit 1
 }
 
-function verbose() {
+verbose() {
 	sepline >&2
 	echo "$*" >&2
 
@@ -56,7 +56,7 @@ function verbose() {
 	"$@"
 }
 
-function on_xsession() {
+on_xsession() {
 	local rtty ctty
 
 	read -r ctty < <(cat /sys/class/tty/tty0/active)
@@ -65,13 +65,13 @@ function on_xsession() {
 	[[ "$ctty" == "$rtty" ]]
 }
 
-function checkbin() {
+checkbin() {
 	for bin in "$@"; do
 		silent which "$bin" || return
 	done
 }
 
-function chainsource() {
+chainsource() {
 	local sources
 
 	for f in "$@"; do
@@ -79,7 +79,7 @@ function chainsource() {
 	done
 }
 
-function backup() {
+backup() {
 	for f in "$@"; do
 		local rand
 		read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=8)
@@ -87,13 +87,13 @@ function backup() {
 	done
 }
 
-function printvars() {
+printvars() {
 	for var in "$@"; do
 		echo "$var: $(eval echo \$"$var")"
 	done
 }
 
-function path() {
+path() {
 	local fullpath dir base
 
 	[[ -z "$1" ]] && return
@@ -107,7 +107,7 @@ function path() {
 	echo "$fullpath" "$dir" "$base"
 }
 
-function prompt() {
+prompt() {
 	if eval "[[ -z \$$1 ]]"; then
 		echo -n "$1: " >&2
 		eval "IFS=$'\n' read -r $1"
@@ -118,7 +118,7 @@ function prompt() {
 	printf '%s=%s\n' "$1" "$(eval "echo \$$1")" >&2
 }
 
-function sepline() {
+sepline() {
 	local columns="${FZF_PREVIEW_COLUMNS}"
 
 	[[ -z "$columns" ]] && columns="$COLUMNS"
@@ -146,7 +146,7 @@ function sepline() {
 	[[ -n "$NONEWLINE" ]] || echo
 }
 
-function parse() {
+parse() {
 	local lhs rhs side=lhs type="$1"
 
 	shift
@@ -167,11 +167,11 @@ function parse() {
 	esac
 }
 
-function zug() {
+zug() {
 	mute which ueberzug || return
 }
 
-function colorize() {
+colorize() {
 	local -A colors=(
 		[reset]=$'\e[39m'
 		[black]=$'\e[30m'
@@ -191,17 +191,17 @@ function colorize() {
 	printf "%s%s%s\n" "${colors[$color]}" "$*" "${colors[reset]}"
 }
 
-function enc() {
+enc() {
 	gpg -q --yes --pinentry-mode=loopback --symmetric \
 		--passphrase-file=<(passphrase) "$@"
 }
 
-function dec() {
+dec() {
 	gpg -q --yes --pinentry-mode=loopback --decrypt \
 		--passphrase-file=<(passphrase) "$@"
 }
 
-function passphrase() {
+passphrase() {
 	declare -g PASSPHRASE
 
 	local token="$HOME/.password-store/tokens/main.gpg"
@@ -218,7 +218,7 @@ function passphrase() {
 	[[ -n "$PASSPHRASE" ]] && echo "$PASSPHRASE"
 }
 
-function emutils() {
+emutils() {
 	utils "$@"
 }
 
@@ -226,13 +226,13 @@ if [[ "$RUNSHELL" == zsh ]]; then
 	return 0 2>/dev/null
 fi
 
-function tarformat() {
+tarformat() {
 	COLUMNS=80 sepline "> $TAR_FILENAME <" '-'
 	cat -v -
 	echo
 }
 
-function tarcreate() {
+tarcreate() {
 	local src dst
 
 	read -r -a src < <(path "$1")
@@ -249,7 +249,7 @@ function tarcreate() {
 	tar "${opts[@]}" -C "${src[1]}" "${src[2]}"
 }
 
-function tarextract() {
+tarextract() {
 	local src opts
 
 	read -r -a src < <(path "$1")
@@ -298,7 +298,7 @@ function tarextract() {
 	# return 0
 }
 
-function tarlist() {
+tarlist() {
 	local src
 
 	read -r -a src < <(path "$1")
@@ -322,7 +322,7 @@ function tarlist() {
 	done | column -t
 }
 
-function tardump() {
+tardump() {
 	local extra_opts=(--to-command="${BASH_SOURCE[0]} tarformat")
 
 	#coproc tarextract "$@"
@@ -349,11 +349,11 @@ function tardump() {
 	#exec 4>&-
 }
 
-function tarpreview() {
+tarpreview() {
 	tarcreate "${1?}" | tardump
 }
 
-function tardiff() {
+tardiff() {
 	local diff=diff
 	tty -s && diff=diff
 
@@ -364,17 +364,17 @@ function tardiff() {
 	fi
 }
 
-function decsecret() {
+decsecret() {
 	local src="$(realpath -sm "${1?}")"
 	(cd "$(dirname "$src")" && dec --output - "$src" | tarextract)
 }
 
-function dumpsecret() {
+dumpsecret() {
 	local src="$(realpath -sm "${1?}")"
 	dec --output - "$src" | tardump
 }
 
-function diffsecret() {
+diffsecret() {
 	local dirsrc tarsrc diff=diff
 
 	dirsrc="$(realpath -sm "${1?}")"
@@ -387,7 +387,7 @@ function diffsecret() {
 		<(quiet tarpreview "$dirsrc")
 }
 
-function encsecret() {
+encsecret() {
 	local src="$(realpath -sm "${1?}")"
 	local dst="$src.tar.gz.gpg"
 

@@ -26,7 +26,7 @@ declare -A -x CALLS=(
 	[preview]='change-preview(do_call %s {} {q})'
 )
 
-function do_call() {
+do_call() {
 	local func="$1"
 	local entry="$(filter all "$2")"
 	local query="$(filter all "$3")"
@@ -34,11 +34,11 @@ function do_call() {
 	"$func" "$entry" "$query"
 }
 
-function preview() {
+preview() {
 	mute declare -F view && do_call view "$1" "$2"
 }
 
-function filter() {
+filter() {
 	local kind="$1" input="$2"
 
 	case "$kind" in
@@ -61,28 +61,28 @@ function filter() {
 	esac
 }
 
-function notify() {
+notify() {
 	silent notify-send -t 5000 -a menu "$MODULE" "$@"
 	widget push timeout
 }
 
-function get_opt() {
+get_opt() {
 	quiet tmux show -sv "@menu-${MODULE}-$1"
 }
 
-function set_opt() {
+set_opt() {
 	quiet tmux set -s "@menu-${MODULE}-$1" "$2"
 }
 
-function unset_opt() {
+unset_opt() {
 	quiet tmux set -su "@menu-${MODULE}-$1"
 }
 
-function list_opt() {
+list_opt() {
 	quiet tmux show -s | grep "^@menu-${MODULE}"
 }
 
-function save_opt() {
+save_opt() {
 	local val
 
 	read -r val < <(get_opt "$1")
@@ -92,7 +92,7 @@ function save_opt() {
 	fi
 }
 
-function restore_opt() {
+restore_opt() {
 	local val
 
 	read -r val < <(get_opt "$1-saved")
@@ -103,7 +103,7 @@ function restore_opt() {
 	fi
 }
 
-function toggle_opt() {
+toggle_opt() {
 	local opt="$1"
 	local val="$(get_opt "$opt")"
 
@@ -115,7 +115,7 @@ function toggle_opt() {
 	esac
 }
 
-function rotate_opt() {
+rotate_opt() {
 	local val="$(get_opt "$1")"
 	local mod="$(get_opt "$1-mod")"
 

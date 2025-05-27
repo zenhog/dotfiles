@@ -25,7 +25,7 @@ zsh_update() {
       zsh -is < <(printf "%s\n" "${initcmd[@]}")
 }
 
-function incus_update() {
+incus_update() {
   TIMEZONE="$(readlink /etc/localtime)"
   TIMEZONE="${TIMEZONE#/usr/share/zoneinfo/}"
 
