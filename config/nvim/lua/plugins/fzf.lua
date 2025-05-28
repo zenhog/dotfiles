@@ -104,6 +104,11 @@ local keys = {
     LazyVim.pick("colorschemes"),
     desc = "FZF Colorschemes",
   },
+  {
+    "gr",
+    "<cmd>FzfLua lsp_references<cr>",
+    desc = "FZF LSP References",
+  },
 }
 
 local config = {
