@@ -107,8 +107,25 @@ local keys = {
 }
 
 local config = {
+  defaults = {
+    keymap = {
+      fzf = {
+        ["ctrl-u"] = "preview-page-up",
+        ["ctrl-d"] = "preview-page-down",
+      },
+    },
+  },
   keymap = {
-    fzf = {},
+    fzf = {
+      ["ctrl-u"] = "preview-page-up",
+      ["ctrl-d"] = "preview-page-down",
+      -- config.defaults.keymap.fzf["ctrl-q"] = "select-all+accept"
+      -- config.defaults.keymap.fzf["ctrl-p"] = "half-page-up"
+      -- config.defaults.keymap.fzf["ctrl-n"] = "half-page-down"
+      -- config.defaults.keymap.fzf["ctrl-x"] = "jump"
+      -- config.defaults.keymap.fzf["ctrl-u"] = "preview-page-down"
+      -- config.defaults.keymap.fzf["ctrl-d"] = "preview-page-up"
+    },
     builtin = {
       -- ["<C-u>"] = "preview-page-up",
       -- ["<C-d>"] = "preview-page-down",
@@ -119,7 +136,7 @@ local config = {
     },
   },
   preview = {
-    default = "bat", -- override the default previewer?
+    default = "builtin", -- override the default previewer?
     -- default uses the 'builtin' previewer
     border = "rounded", -- preview border: accepts both `nvim_open_win`
     -- and fzf values (e.g. "border-top", "none")
@@ -158,12 +175,6 @@ local config = {
 return {
   {
     "ibhagwan/fzf-lua",
-    -- config.defaults.keymap.fzf["ctrl-q"] = "select-all+accept"
-    -- config.defaults.keymap.fzf["ctrl-p"] = "half-page-up"
-    -- config.defaults.keymap.fzf["ctrl-n"] = "half-page-down"
-    -- config.defaults.keymap.fzf["ctrl-x"] = "jump"
-    -- config.defaults.keymap.fzf["ctrl-u"] = "preview-page-down"
-    -- config.defaults.keymap.fzf["ctrl-d"] = "preview-page-up"
     config = function()
       require("fzf-lua").setup(config)
     end,
