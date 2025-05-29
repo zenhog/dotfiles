@@ -49,13 +49,13 @@ opt.sessionoptions = {
   "tabpages",
   -- "winsize",
   "winpos",
-  "options",
+  -- "options",
   -- "blank",
   -- "localoptions",
-  "help",
-  "globals",
+  -- "help",
+  -- "globals",
   "skiprtp",
-  "folds",
+  -- "folds",
 }
 
 opt.formatoptions:remove({ "c", "r", "o" })
