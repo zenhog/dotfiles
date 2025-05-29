@@ -26,6 +26,11 @@ for _, mode in ipairs(map.m) do
   map[mode] = map.f(mode)
 end
 
+vim.keymap.del({ "n", "x" }, "gra")
+vim.keymap.del({ "n" }, "gri")
+vim.keymap.del({ "n" }, "grn")
+vim.keymap.del({ "n" }, "grr")
+
 map.a = map.f(map.m)
 map.nv = map.f({ "n", "v" })
 map.nx = map.f({ "n", "x" })

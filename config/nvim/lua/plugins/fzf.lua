@@ -109,6 +109,26 @@ local keys = {
     "<cmd>FzfLua lsp_references<cr>",
     desc = "FZF LSP References",
   },
+  {
+    "gd",
+    "<cmd>FzfLua lsp_declarations<cr>",
+    desc = "FZF LSP Declarations",
+  },
+  {
+    "gD",
+    "<cmd>FzfLua lsp_definitions<cr>",
+    desc = "FZF LSP Definitions",
+  },
+  {
+    "gI",
+    "<cmd>FzfLua lsp_incoming_calls<cr>",
+    desc = "FZF LSP Incoming Calls",
+  },
+  {
+    "gO",
+    "<cmd>FzfLua lsp_outgoing_calls<cr>",
+    desc = "FZF LSP Outgoing Calls",
+  },
 }
 
 local config = {

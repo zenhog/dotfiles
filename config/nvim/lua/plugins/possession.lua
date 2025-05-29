@@ -55,7 +55,7 @@ return {
         --   "~/.dotfiles",
         --   "~/workspace",
         -- },
-        autoload = "auto_cwd",
+        autoload = false,
         autosave = {
           current = true, -- or fun(name): boolean
           cwd = false, -- or fun(): boolean
