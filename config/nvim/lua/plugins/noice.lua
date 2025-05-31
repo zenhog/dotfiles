@@ -48,6 +48,13 @@ return {
       command_palette = true,
       long_message_to_split = true,
     },
+    -- status = {
+    --   ruler = true,
+    --   message = true,
+    --   command = false,
+    --   mode = true,
+    --   search = true,
+    -- },
   },
     -- stylua: ignore
   keys = function()

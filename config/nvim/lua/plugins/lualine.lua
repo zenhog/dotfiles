@@ -2,6 +2,35 @@ local function session_name()
   return require("possession.session").get_session_name() or ""
 end
 
+local function lspname()
+  local icon = ""
+  local icon = "LSP:"
+  local msg = icon
+  local buf_ft = vim.api.nvim_buf_get_option(0, "filetype")
+  local clients = vim.lsp.get_active_clients()
+  if next(clients) == nil then
+    return msg
+  end
+  for _, client in ipairs(clients) do
+    local filetypes = client.config.filetypes
+    if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+      return icon .. " " .. client.name
+    end
+  end
+  return msg
+end
+
+local function location()
+  local curcol = vim.fn.col(".")
+  local curline = vim.fn.line(".")
+  local lastline = vim.fn.line("$")
+  local percentage = curline * 100 / lastline
+  percentage = tonumber(string.format("%.f", percentage))
+  local format = "%d/%d:%d-%d%%"
+  format = string.format(format, curline, lastline, curcol, percentage)
+  return curline .. "/" .. lastline .. ":" .. curcol .. "[" .. percentage .. "%%]"
+end
+
 local function tabs()
   local sep = " ∙ "
   local tabnr = vim.fn.tabpagenr()
@@ -57,8 +86,28 @@ return {
         section_separators = { left = " ", right = " " },
         disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
       },
+      tabline = {
+        lualine_a = {
+          "mode",
+          lspname,
+        },
+        lualine_b = {
+          {
+            require("lazy.status").updates,
+            cond = require("lazy.status").has_updates,
+            color = function()
+              return { fg = Snacks.util.color("Special") }
+            end,
+          },
+        },
+        lualine_z = {
+          -- tabs,
+          "tabs",
+          session_name,
+        },
+      },
       sections = {
-        lualine_a = { "mode" },
+        -- lualine_a = { "mode" },
         lualine_b = { "branch" },
 
         lualine_c = {
@@ -101,11 +150,6 @@ return {
           },
           -- stylua: ignore
           {
-            require("lazy.status").updates,
-            cond = require("lazy.status").has_updates,
-            color = function() return { fg = Snacks.util.color("Special") } end,
-          },
-          {
             "diff",
             symbols = {
               added = icons.git.added,
@@ -125,13 +169,15 @@ return {
           },
         },
         lualine_y = {
-          { "progress", separator = " ", padding = { left = 1, right = 0 } },
-          { "location", padding = { left = 0, right = 1 } },
+          -- { "progress", separator = " ", padding = { left = 1, right = 0 } },
+          --{ "location", padding = { left = 0, right = 1 } },
+          location,
         },
-        lualine_z = {
-          tabs,
-          session_name,
-        },
+        lualine_z = {},
+        -- lualine_z = {
+        --   tabs,
+        --   session_name,
+        -- },
         -- lualine_z = {
         --   function()
         --     return " " .. os.date("%R")

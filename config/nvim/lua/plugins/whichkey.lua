@@ -5,7 +5,7 @@ return {
     -- opts_extend = { "spec" },
     config = function()
       require("which-key").setup({
-        preset = "classic",
+        preset = "helix",
         -- defaults = {},
         spec = {
           {

@@ -58,6 +58,20 @@ return {
             },
           })
         end,
+        deepqwen = function()
+          return require("codecompanion.adapters").extend("openai_compatible", {
+            env = {
+              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
+              url = "https://openrouter.ai/api",
+              chat_url = "/v1/chat/completions",
+            },
+            schema = {
+              model = {
+                default = "deepseek/deepseek-r1-0528-qwen3-8b:free",
+              },
+            },
+          })
+        end,
         gemini = function()
           return require("codecompanion.adapters").extend("openai_compatible", {
             env = {
