@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SDIR="/home/stuck/.remotes"
+SOCK="$SDIR/$(hostname).S"
+
+ssh -t hashbang "ss -lx | grep -q $SOCK" && exit 0
+
+sleep 1
+
+SVDIR="$HOME/.usv" sv restart hashbang
