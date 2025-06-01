@@ -11,4 +11,11 @@ return {
   config = function()
     require("mcphub").setup()
   end,
+  keys = {
+    {
+      "<space>h",
+      "<cmd>MCPHub<cr>",
+      desc = "MCPHub",
+    },
+  },
 }
