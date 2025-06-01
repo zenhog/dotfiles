@@ -5,6 +5,8 @@ exec 2>&1
 SDIR="/home/stuck/.remotes"
 SOCK="$SDIR/$(hostname).S"
 
+echo
+echo "**************************************"
 echo "********* Log from $(date) ***********"
 
 ssh -T hashbang "mkdir -p $SDIR ; rm $SOCK"
