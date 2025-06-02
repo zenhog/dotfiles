@@ -428,6 +428,7 @@ awful.screen.connect_for_each_screen(function(s)
 			id = "topbar",
 			{
 				widget = wibox.container.place,
+				widget = wibox.layout.fixed.horizontal,
 				-- fill_horizontal = true,
 				id = "underbar",
 				{
@@ -436,10 +437,10 @@ awful.screen.connect_for_each_screen(function(s)
 					block(M.group(s.menus.run), theme.iconsize),
 					block(M.group(s.menus.awm), theme.iconsize),
 					block(M.group(s.menus.ssh), theme.iconsize),
-					scroll(widgets.music, 250),
 					block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
 					block(M.group(widgets.ping, widgets.vpn)),
 					block(M.group(widgets.ram, widgets.disk, widgets.temp)),
+					scroll(widgets.music),
 				},
 			},
 			{
@@ -456,7 +457,7 @@ awful.screen.connect_for_each_screen(function(s)
 					spacing = 1,
 					{
 						widget = wibox.container.constraint,
-						width = 400,
+						width = 540,
 						{
 							widget = wibox.container.place,
 							fill_horizontal = true,
@@ -489,7 +490,7 @@ awful.screen.connect_for_each_screen(function(s)
 		left = 1,
 		right = 1,
 		top = 1,
-		bottom = 0,
+		bottom = 1,
 		widget = wibox.container.margin,
 	})
 
