@@ -20,7 +20,7 @@ return {
       },
       strategies = {
         chat = {
-          adapter = "openrouter",
+          adapter = "deepqwen",
           slash_commands = {
             ["file"] = {
               -- Location to the slash command in CodeCompanion
@@ -44,7 +44,7 @@ return {
         },
       },
       adapters = {
-        openrouter = function()
+        deepseek = function()
           return require("codecompanion.adapters").extend("openai_compatible", {
             env = {
               api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
@@ -72,36 +72,8 @@ return {
             },
           })
         end,
-        gemini = function()
-          return require("codecompanion.adapters").extend("openai_compatible", {
-            env = {
-              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
-              url = "https://openrouter.ai/api",
-              chat_url = "/v1/chat/completions",
-            },
-            schema = {
-              model = {
-                default = "google/gemini-2.5-pro-exp-03-25:free",
-              },
-            },
-          })
-        end,
-        llama = function()
-          return require("codecompanion.adapters").extend("openai_compatible", {
-            env = {
-              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
-              url = "https://openrouter.ai/api",
-              chat_url = "/v1/chat/completions",
-            },
-            schema = {
-              model = {
-                default = "meta-llama/llama-4-maverick:free",
-              },
-            },
-          })
-        end,
       },
-      default_adapter = "openrouter",
+      default_adapter = "deepseek",
       window = {
         layout = "float", -- float|vertical|horizontal|buffer
         position = nil, -- left|right|top|bottom (nil will default depending on vim.opt.plitright|vim.opt.splitbelow)
