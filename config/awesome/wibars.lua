@@ -417,7 +417,7 @@ awful.screen.connect_for_each_screen(function(s)
 		width = theme.wibar_height,
 		width = 38,
 		type = "dock",
-		bg = "#00000000",
+		bg = "#000000a0",
 	})
 
 	s.topbar:setup({
