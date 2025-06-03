@@ -417,20 +417,15 @@ awful.screen.connect_for_each_screen(function(s)
 		width = theme.wibar_height,
 		width = 38,
 		type = "dock",
-		bg = "#000000a0",
+		bg = "#00000000",
 	})
 
 	s.topbar:setup({
 		{
-			--inner_fill_strategy = 'justify',
 			layout = wibox.layout.align.horizontal,
 			expand = "outside",
-			id = "topbar",
 			{
-				widget = wibox.container.place,
 				widget = wibox.layout.fixed.horizontal,
-				-- fill_horizontal = true,
-				id = "underbar",
 				{
 					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
@@ -450,40 +445,18 @@ awful.screen.connect_for_each_screen(function(s)
 				right = 1,
 			},
 			{
-				widget = wibox.container.place,
-				halign = "right",
+				layout = wibox.layout.align.horizontal,
+				spacing = 1,
+				scroll(widgets.push, 500),
+				nil,
 				{
-					layout = wibox.layout.align.horizontal,
+					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
-					{
-						widget = wibox.container.constraint,
-						width = 540,
-						{
-							widget = wibox.container.place,
-							fill_horizontal = true,
-							halign = "right",
-							{
-								layout = wibox.layout.flex.horizontal,
-								spacing = 1,
-								-- scroll(widgets.connection),
-								-- scroll(widgets.bluetooth),
-								scroll(widgets.push),
-							},
-						},
-					},
-					{
-						widget = wibox.container.margin,
-						right = 1,
-					},
-					{
-						layout = wibox.layout.fixed.horizontal,
-						spacing = 1,
-						block(M.group(widgets.mail, widgets.news, widgets.download)),
-						block(M.group(widgets.battery)),
-						block(M.group(widgets.timedate)),
-						block(M.group(s.menus.service), theme.iconsize),
-						block(M.group(s.menus.menu), theme.iconsize),
-					},
+					block(M.group(widgets.mail, widgets.news, widgets.download)),
+					block(M.group(widgets.battery)),
+					block(M.group(widgets.timedate)),
+					block(M.group(s.menus.service), theme.iconsize),
+					block(M.group(s.menus.menu), theme.iconsize),
 				},
 			},
 		},
@@ -493,8 +466,6 @@ awful.screen.connect_for_each_screen(function(s)
 		bottom = 1,
 		widget = wibox.container.margin,
 	})
-
-	-- s.topbar:get_children_by_id("topbar")[1]:ajust_ratio(2, 0.6, 0, 0.4)
 
 	s.leftbar:setup({
 		{
@@ -507,16 +478,17 @@ awful.screen.connect_for_each_screen(function(s)
 				block(M.group(s.menus.search)),
 				s.tasklist,
 			},
-			{
-				widget = wibox.container.margin,
-				top = 1,
-				bottom = 1,
-				{
-					layout = wibox.layout.fixed.vertical,
-					spacing = 1,
-					-- block(s.taglist),
-				},
-			},
+			nil,
+			-- {
+			-- 	widget = wibox.container.margin,
+			-- 	top = 1,
+			-- 	bottom = 1,
+			-- 	{
+			-- 		layout = wibox.layout.fixed.vertical,
+			-- 		spacing = 1,
+			-- 		-- block(s.taglist),
+			-- 	},
+			-- },
 			{
 				layout = wibox.layout.fixed.vertical,
 				spacing = 1,
@@ -534,6 +506,7 @@ awful.screen.connect_for_each_screen(function(s)
 		left = 1,
 		top = 0,
 		bottom = 1,
+		right = 1,
 		widget = wibox.container.margin,
 	})
 end)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-snooze -v -s 1d -t $PWD/timefile
+snooze -v -s 1d -t "$PWD/timefile"
 
 vim --headless \
 	-c "TSUpdateSync" \
@@ -10,4 +10,4 @@ vim --headless \
 #-c "echo ''" \
 #-c "MasonToolsUpdate"
 
-touch $PWD/timefile
+touch "$PWD/timefile"
