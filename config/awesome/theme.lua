@@ -4,19 +4,19 @@ theme.homedir = os.getenv("HOME")
 
 theme.wallpaper = theme.homedir .. "/.wallpapers/main"
 
-theme.textfont_name = "SpaceMono Nerd Font Mono Bold"
 theme.textfont_name = "VictorMono Nerd Font Mono Bold"
+theme.textfont_name = "SpaceMono Nerd Font Mono Bold"
 theme.textfont_size = 10
 theme.textfont = theme.textfont_name .. " " .. theme.textfont_size
 
-theme.iconfont_name = "SpaceMono Nerd Font Propo Bold"
 theme.iconfont_name = "VictorMono Nerd Font Propo Bold"
+theme.iconfont_name = "SpaceMono Nerd Font Propo Bold"
 theme.iconfont_size = 10
 theme.iconfont = theme.iconfont_name .. " " .. theme.iconfont_size
 
-theme.useless_gap = 0.5
+theme.useless_gap = 1
 theme.spacing = 4
-theme.global_radius = 2
+theme.global_radius = 1
 
 theme.wibar_height = 40
 theme.wibar_margins = 10

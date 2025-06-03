@@ -401,6 +401,24 @@ awful.screen.connect_for_each_screen(function(s)
 	end
 	pipe:close()
 
+	s.rightbar = awful.wibar({
+		screen = s,
+		position = "right",
+		opacity = 0.65,
+		width = 1,
+		type = "dock",
+		bg = "#00000000",
+	})
+
+	s.botbar = awful.wibar({
+		screen = s,
+		position = "bottom",
+		opacity = 0.65,
+		height = 1,
+		type = "dock",
+		bg = "#00000000",
+	})
+
 	s.topbar = awful.wibar({
 		screen = s,
 		position = "top",
@@ -447,7 +465,7 @@ awful.screen.connect_for_each_screen(function(s)
 			{
 				layout = wibox.layout.align.horizontal,
 				spacing = 1,
-				scroll(widgets.push, 500),
+				scroll(widgets.push, 470),
 				nil,
 				{
 					layout = wibox.layout.fixed.horizontal,
@@ -505,7 +523,7 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 		left = 1,
 		top = 0,
-		bottom = 1,
+		bottom = 0,
 		right = 1,
 		widget = wibox.container.margin,
 	})
