@@ -75,6 +75,11 @@ return {
     local icons = LazyVim.config.icons
 
     vim.o.laststatus = vim.g.lualine_laststatus
+    vim.api.nvim_set_hl(0, "lualine_custom_active", {
+      fg = "cyan",
+      bold = true,
+    })
+    vim.api.nvim_set_hl(0, "lualine_custom_inactive", {})
 
     local opts = {
       options = {
@@ -104,8 +109,8 @@ return {
           },
         },
         lualine_z = {
-          -- tabs,
-          "tabs",
+          tabs,
+          -- "tabs",
           session_name,
         },
       },

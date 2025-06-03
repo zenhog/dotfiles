@@ -1,6 +1,9 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    keys = function()
+      return {}
+    end,
     opts = function()
       local keys = require("lazyvim.plugins.lsp.keymaps").get()
       keys[#keys + 1] = { "K", false }
