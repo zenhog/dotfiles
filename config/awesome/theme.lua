@@ -14,7 +14,7 @@ theme.iconfont_name = "SpaceMono Nerd Font Propo Bold"
 theme.iconfont_size = 10
 theme.iconfont = theme.iconfont_name .. " " .. theme.iconfont_size
 
-theme.useless_gap = 1
+theme.useless_gap = 0.5
 theme.spacing = 4
 theme.global_radius = 1
 
