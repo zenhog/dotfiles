@@ -4,8 +4,9 @@ snooze -v -s 1d -t "$PWD/timefile"
 
 vim --headless \
 	-c "TSUpdateSync" \
-	-c "Lazy! sync"
-#-c "echo 'LazySync done'" \
+	-c "Lazy! sync" \
+	-c "echo 'LazySync done'" \
+	-c "q!"
 #-c "autocmd User MasonToolsUpdateCompleted quitall!" \
 #-c "echo ''" \
 #-c "MasonToolsUpdate"

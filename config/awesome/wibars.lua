@@ -451,7 +451,7 @@ awful.screen.connect_for_each_screen(function(s)
 					block(M.group(s.menus.awm), theme.iconsize),
 					block(M.group(s.menus.ssh), theme.iconsize),
 					block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
-					block(M.group(widgets.ping, widgets.vpn)),
+					block(M.group(widgets.ping_wan, widgets.ping_vpn1, widgets.ping_vpn2)),
 					block(M.group(widgets.ram, widgets.disk, widgets.temp)),
 					scroll(widgets.music),
 				},
@@ -465,11 +465,12 @@ awful.screen.connect_for_each_screen(function(s)
 			{
 				layout = wibox.layout.align.horizontal,
 				spacing = 1,
-				scroll(widgets.push, 470),
+				scroll(widgets.push, 320),
 				nil,
 				{
 					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
+					scroll(widgets.connection, 80),
 					block(M.group(widgets.mail, widgets.news, widgets.download)),
 					block(M.group(widgets.battery)),
 					block(M.group(widgets.timedate)),
@@ -497,16 +498,6 @@ awful.screen.connect_for_each_screen(function(s)
 				s.tasklist,
 			},
 			nil,
-			-- {
-			-- 	widget = wibox.container.margin,
-			-- 	top = 1,
-			-- 	bottom = 1,
-			-- 	{
-			-- 		layout = wibox.layout.fixed.vertical,
-			-- 		spacing = 1,
-			-- 		-- block(s.taglist),
-			-- 	},
-			-- },
 			{
 				layout = wibox.layout.fixed.vertical,
 				spacing = 1,
