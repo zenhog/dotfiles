@@ -22,7 +22,7 @@ theme.wibar_height = 40
 theme.wibar_margins = 10
 
 theme.iconsize = theme.iconfont_size * 2
-theme.iconsize = theme.wibar_height - theme.spacing
+theme.iconsize = theme.wibar_height - theme.spacing + 1
 
 theme.bg_normal = "#2A393E65"
 theme.bg_normal = "#3A494E75"
