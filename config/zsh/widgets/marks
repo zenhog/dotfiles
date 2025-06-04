@@ -4,7 +4,9 @@ marks() {
   answer=$(find "$HOME/.marks/" -type l -printf '%f\n' |
     fzf --bind 'enter:execute-silent(echo {})+accept')
 
-  [[ -n "$answer" ]] && cd "$(realpath "$HOME/.marks/$answer/")"
+  [[ -n "$answer" ]] && cd "$(realpath "$HOME/.marks/$answer/")" && {
+      [[ -n "$TMUX" ]] && tmux rename-window "$answer"
+    }
 
   zle accept-line
 }
