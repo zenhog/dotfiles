@@ -332,7 +332,7 @@ local roundedrect = function(cr, w, h)
 end
 
 client.connect_signal("manage", function(c)
-	c.shape = roundedrect
+	-- c.shape = roundedrect
 
 	set_clienttag(c)
 	--set_titlebars(c)
@@ -404,7 +404,7 @@ awful.rules.rules = {
 			maximized_horizontal = false,
 			maximized_vertical = false,
 			maximized = false,
-			titlebars_enabled = true,
+			titlebars_enabled = false,
 			fullscreen = false,
 			floating = false,
 			requests_no_titlebar = false,

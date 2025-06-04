@@ -447,7 +447,7 @@ awful.screen.connect_for_each_screen(function(s)
 				{
 					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
-					block(M.group(s.menus.run), theme.iconsize),
+					block(M.group(s.menus.run), theme.iconsize + 1),
 					block(M.group(s.menus.awm), theme.iconsize),
 					block(M.group(s.menus.ssh), theme.iconsize),
 					block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
