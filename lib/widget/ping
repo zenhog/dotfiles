@@ -37,7 +37,7 @@ cc() {
 	printf "%s" "$cc"
 }
 
-ping() {
+pp() {
 	if [[ "$CTX" == wan ]]; then
 		command timeout 0.5 ping -n -4 -c 1 "$1" |
 			awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
@@ -54,15 +54,18 @@ text() {
 	ip2="89.16.167.134"   # gentoo.org
 	ip3="142.250.178.174" # google.com
 
-	[[ -z "$ping" ]] && read -r ping < <(ping "$ip1")
-	[[ -z "$ping" ]] && read -r ping < <(ping "$ip2")
-	[[ -z "$ping" ]] && read -r ping < <(ping "$ip3")
+	[[ -z "$ping" ]] && read -r ping < <(pp "$ip1")
+	[[ -z "$ping" ]] && read -r ping < <(pp "$ip2")
+	[[ -z "$ping" ]] && read -r ping < <(pp "$ip3")
 
 	printf "%s/%s" "$(fmt "$ping")" "$(cc)"
 }
 
 icon() {
 	local icon=󰀚
+	if [[ "$CTX" == vpn* ]]; then
+		icon=󰉀
+	fi
 	local color=green
 	# printf "%s" "$icon"
 	colorize "$color" "$icon"
