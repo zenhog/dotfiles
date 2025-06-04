@@ -3,52 +3,51 @@
 PERIOD=5
 
 toggle() {
-    function setgov() {
-        local nbcpus
-        read -r nbcpus < <(cpufreq-info | grep -c 'CPU [[:digit:]]:')
-        for i in $(seq 0 $((nbcpus - 1))); do
-            sudo cpufreq-set -c "$i" -g "$1"
-        done
-    }
-    local governor
-    read -r governor < <(cpufreq-info | sed -rn '/may decide/s/.*"(.*)".*/\1/p' | head -1)
-    case "$governor" in
-        powersave) setgov performance ;;
-        performance) setgov powersave ;;
-    esac
+	function setgov() {
+		local nbcpus
+		read -r nbcpus < <(cpufreq-info | grep -c 'CPU [[:digit:]]:')
+		for i in $(seq 0 $((nbcpus - 1))); do
+			sudo cpufreq-set -c "$i" -g "$1"
+		done
+	}
+	local governor
+	read -r governor < <(cpufreq-info | sed -rn '/may decide/s/.*"(.*)".*/\1/p' | head -1)
+	case "$governor" in
+	powersave) setgov performance ;;
+	performance) setgov powersave ;;
+	esac
 }
 
 run() {
-    menu process
+	menu process
 }
 
 text() {
-    local text availram totalram
+	local text availram totalram
 
-    read -r availram < <(free | awk '/^Mem:/ {print $7}')
-    read -r totalram < <(free | awk '/^Mem:/ {print $2}')
-    read -r text < <(bc <<< "$availram * 100 / $totalram")
-    printf "%s" "$text"
+	read -r availram < <(free | awk '/^Mem:/ {print $7}')
+	read -r totalram < <(free | awk '/^Mem:/ {print $2}')
+	read -r text < <(bc <<<"$availram * 100 / $totalram")
+	printf "%s" "$(fmt "$text")"
 }
 
 icon() {
-    local cpupath=/sys/devices/system/cpu
-    local -a governors
-    readarray -t governors < <(cat $cpupath/cpu*/cpufreq/scaling_governor | uniq)
+	local cpupath=/sys/devices/system/cpu
+	local -a governors
+	readarray -t governors < <(cat $cpupath/cpu*/cpufreq/scaling_governor | uniq)
 
-    local powersave=󰌲
-    local performance=󰍛
-    local ambiguous=󰌨
-    local icon="$ambiguous"
+	local powersave=󰌲
+	local performance=󰍛
+	local ambiguous=󰌨
+	local icon="$ambiguous"
 
-    (( ${#governors[@]} <= 0 || ${#governors[@]} >= 2)) && ICON=
+	((${#governors[@]} <= 0 || ${#governors[@]} >= 2)) && ICON=
 
-    (( ${#governors[@]} <= 0 || ${#governors[@]} >= 2)) ||
-        case "${governors[0]}" in
-            powersave) icon="$powersave";;
-            performance) icon="$performance";;
-        esac
+	((${#governors[@]} <= 0 || ${#governors[@]} >= 2)) ||
+		case "${governors[0]}" in
+		powersave) icon="$powersave" ;;
+		performance) icon="$performance" ;;
+		esac
 
-
-    printf "%s" "$icon"
+	printf "%s" "$icon"
 }

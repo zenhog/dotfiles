@@ -4,34 +4,34 @@ PERIOD=30
 
 KEYS[prev]='C-M:d'
 prev() {
-  xbacklight -dec 5
+	xbacklight -dec 5
 }
 
 KEYS[next]='C-M:u'
 next() {
-  xbacklight -inc 5
+	xbacklight -inc 5
 }
 
 KEYS[toggle]='C-M:f'
 toggle() {
-    read -r backlight < <(xbacklight | xargs printf "%02.f")
-    if (( backlight <= 30 )); then
-        xbacklight -set 100
-    else
-        xbacklight -set 30
-    fi
+	read -r backlight < <(xbacklight | xargs printf "%02.f")
+	if ((backlight <= 30)); then
+		xbacklight -set 100
+	else
+		xbacklight -set 30
+	fi
 }
 
 text() {
-    read -r backlight < <(xbacklight | xargs printf "%02.f")
+	read -r backlight < <(xbacklight | xargs printf "%02.f")
 
-    printf "%s" "$backlight"
+	printf "%s" "$(fmt "$backlight")"
 }
 
 icon() {
-    local icon=
-    local icon=󰃠
-    local icon=󰃞
+	local icon=
+	local icon=󰃠
+	local icon=󰃞
 
-    printf "%s" "$icon"
+	printf "%s" "$icon"
 }

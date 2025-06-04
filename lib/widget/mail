@@ -3,19 +3,18 @@
 PERIOD=10
 
 toggle() {
-  mailsync
+	mailsync
 }
 
 text() {
-    local count
+	local count
 
-    read -r count < <(notmuch count tag:unread)
-    printf "%s" "$count"
+	read -r count < <(notmuch count tag:unread)
+	printf "%s" "$(fmt "$count")"
 }
 
 icon() {
-  local icon=
-  local icon=󰴃
-  printf "%s" "$icon"
+	local icon=
+	local icon=󰴃
+	printf "%s" "$icon"
 }
-

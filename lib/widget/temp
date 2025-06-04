@@ -3,12 +3,12 @@
 PERIOD=5
 
 text() {
-  read -r text < <(sensors |
-    sed -rn '/^Package id 0:/s/^Package id 0:[^[:digit:]]+([[:digit:]]+).*$/\1/p')
-  printf "%s" "$text"
+	read -r text < <(sensors |
+		sed -rn '/^Package id 0:/s/^Package id 0:[^[:digit:]]+([[:digit:]]+).*$/\1/p')
+	printf "%s" "$(fmt "$text")"
 }
 
 icon() {
-  local icon=󰔏
-  printf "%s" "$icon"
+	local icon=󰔏
+	printf "%s" "$icon"
 }

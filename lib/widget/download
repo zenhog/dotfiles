@@ -4,19 +4,19 @@ PERIOD=10
 
 KEYS[toggle]='C-M:a'
 toggle() {
-  # aria2p toggle-all
-  :
+	# aria2p toggle-all
+	:
 }
 
 text() {
-  local count
-  read -r count < <(aria2p show 2>/dev/null |
-    sed -rn '2,$ { /active/p }' | wc -l)
-  printf "%s" "$count"
+	local count
+	read -r count < <(aria2p show 2>/dev/null |
+		sed -rn '2,$ { /active/p }' | wc -l)
+	printf "%s" "$(fmt "$count")"
 }
 
 icon() {
-  local icon=󰄠
+	local icon=󰄠
 
-  printf "%s" "$icon"
+	printf "%s" "$icon"
 }

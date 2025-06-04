@@ -2,26 +2,68 @@
 
 PERIOD=1
 
+CTX="$(basename "$(realpath -s "${BASH_SOURCE[0]}")")"
+CTX="${CTX#ping_}"
+
+cc() {
+
+	local period=10
+	local url='http://ip-api.com/json/?lang=us&fields=countryCode'
+
+	local ccopt="@widget-ping-${CTX}-cc"
+	local countopt="@widget-ping-${CTX}-count"
+
+	local count="$(tmux show -sv "$countopt" 2>/dev/null)"
+	local cc="$(tmux show -sv "$ccopt" 2>/dev/null)"
+
+	[[ -z "$count" ]] && count=0
+
+	if ((count == 0)); then
+		if [[ "$CTX" == wan ]]; then
+			read -r cc < <(command timeout 1.5 curl -sL "$url" | jq -r '.countryCode')
+		else
+			read -r cc < \
+				<(command timeout 1.5 cgexec -g "net_cls:$CTX" curl -sL "$url" |
+					jq -r '.countryCode')
+		fi
+	fi
+
+	[[ -z "$cc" ]] && cc='**'
+	((count = ++count % period))
+
+	tmux set -s "$ccopt" "$cc"
+	tmux set -s "$countopt" "$count"
+
+	printf "%s" "$cc"
+}
+
 ping() {
-    command timeout 0.5 ping -n -4 -c 1 "$1" |
-            awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
+	if [[ "$CTX" == wan ]]; then
+		command timeout 0.5 ping -n -4 -c 1 "$1" |
+			awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
+	else
+		command timeout 0.5 cgexec -g "net_cls:$CTX" ping -n -4 -c 1 "$1" |
+			awk '/64 bytes/ {print $7}' | cut -d= -f2 | cut -d. -f1
+	fi
 }
 
 text() {
-    local ping
+	local ping
 
-    ip1="185.199.109.153" # voidlinux.org
-    ip2="89.16.167.134"   # gentoo.org
-    ip3="142.250.178.174" # google.com
+	ip1="185.199.109.153" # voidlinux.org
+	ip2="89.16.167.134"   # gentoo.org
+	ip3="142.250.178.174" # google.com
 
-    [[ -z "$ping" ]] && read -r ping < <(ping "$ip1")
-    [[ -z "$ping" ]] && read -r ping < <(ping "$ip2")
-    [[ -z "$ping" ]] && read -r ping < <(ping "$ip3")
+	[[ -z "$ping" ]] && read -r ping < <(ping "$ip1")
+	[[ -z "$ping" ]] && read -r ping < <(ping "$ip2")
+	[[ -z "$ping" ]] && read -r ping < <(ping "$ip3")
 
-    printf "%s" "$ping"
+	printf "%s/%s" "$(fmt "$ping")" "$(cc)"
 }
 
 icon() {
-    local icon=󰀚
-    printf "%s" "$icon"
+	local icon=󰀚
+	local color=green
+	# printf "%s" "$icon"
+	colorize "$color" "$icon"
 }

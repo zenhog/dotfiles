@@ -38,7 +38,7 @@ text() {
 	local volume
 	read -r volume < <(pulsemixer --get-volume | awk '{print $1}')
 	#read -r _ volume _ < <(wpctl get-volume @DEFAULT_SINK@)
-	echo -n ${volume#*.}
+	printf "%s" "$(fmt "${volume#*.}")"
 }
 
 icon() {

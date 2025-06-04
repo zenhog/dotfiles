@@ -3,27 +3,27 @@
 PERIOD=10
 
 unread() {
-    local db="$HOME/.local/share/newsboat/cache.db"
-    local day=$((3600*24))
-    local age=1
-    local epoch=$(($(date +%s)-($age * $day)))
+	local db="$HOME/.local/share/newsboat/cache.db"
+	local day=$((3600 * 24))
+	local age=1
+	local epoch=$(($(date +%s) - ($age * $day)))
 
-    sqlite3 "$db" \
-        "SELECT count(*) FROM rss_item WHERE unread == 1 and pubDate > $epoch"
+	sqlite3 "$db" \
+		"SELECT count(*) FROM rss_item WHERE unread == 1 and pubDate > $epoch"
 }
 
 text() {
-    local count
-    local color=skyblue
+	local count
+	local color=skyblue
 
-    read -r count < <(unread)
+	read -r count < <(unread)
 
-    colorize "$color" "$count"
+	colorize "$color" "$(fmt "$count")"
 }
 
 icon() {
-    local icon=󰑫
-    local color=yellow
+	local icon=󰑫
+	local color=yellow
 
-    colorize "$color" "$icon"
+	colorize "$color" "$icon"
 }

@@ -27,6 +27,29 @@ sanitize() {
 	sed -e 's/&/\&amp;/gp'
 }
 
+fmt() {
+	local num="$1"
+
+	if ! [[ "$num" =~ ^[0-9]+$ ]]; then
+		printf "**"
+		return
+	fi
+
+	local decpart="$((num % 10))"
+	local hexpart="$((num / 10))"
+	local hex="$(printf "%X" "$hexpart")"
+
+	if ((hexpart == 0)); then
+		printf "%02d" "$decpart"
+		return
+	elif ((${#hex} > 1)); then
+		printf "**"
+		return
+	else
+		printf "%s%d" "$hex" "$decpart"
+	fi
+}
+
 run() {
 	gui "${BASH_ARGV[1]}" &>/dev/null && menu "${BASH_ARGV[1]}"
 }
@@ -52,7 +75,7 @@ keys() {
 main() {
 	case $# in
 	0) # list widgets
-		readarray -t widgets < <(realpath $MODULES_DIR/*)
+		readarray -t widgets < <(realpath -s $MODULES_DIR/*)
 		readarray -t widgets < <(basename -a "${widgets[@]}")
 		for w in "${widgets[@]}"; do
 			printf "%s:%s\n" "$w" "$(widget "$w" period)"
