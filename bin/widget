@@ -28,6 +28,10 @@ sanitize() {
 }
 
 format() {
+  local num="$1"
+  local a0="$((${1}%10))"
+  local a1="$((${1}/10))"
+  if (( a1 >=))
 	printf "%01d" "$@"
 }
 
