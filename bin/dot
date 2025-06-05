@@ -4,10 +4,10 @@ FS_UTILS="$HOME/.bin/utils"
 GH_UTILS=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/utils
 
 SOURCE() {
-  if [[ -r "$FS_UTILS" ]]; then
-    source "$FS_UTILS" && return
-  fi
-  source <(curl -sSL "$GH_UTILS")
+	if [[ -r "$FS_UTILS" ]]; then
+		source "$FS_UTILS" && return
+	fi
+	source <(curl -sSL "$GH_UTILS")
 }
 
 GITURL=https://github.com/zenhog/dotfiles
@@ -17,369 +17,388 @@ BASEDIR="$HOME/.dotfiles"
 BRANCHES=(master public private)
 
 init() {
-  local branch="${1?}"
-  local dir="$BASEDIR/$branch"
+	local branch="${1?}"
+	local dir="$BASEDIR/$branch"
 
-  clone "$dir" "$GITURL" "$branch"
-  pull "$branch"
+	clone "$dir" "$GITURL" "$branch"
+	pull "$branch"
 }
 
 clone() {
 
-  local dir="${1?}" url="${2?}" branch="${3?}"
+	local dir="${1?}" url="${2?}" branch="${3?}"
 
-  local cmd=(git clone --single-branch --branch="$branch" "$url" "$dir")
+	local cmd=(git clone --single-branch --branch="$branch" "$url" "$dir")
 
-  (quiet cd "$dir" || verbose "${cmd[@]}")
+	(quiet cd "$dir" || verbose "${cmd[@]}")
 
-  (
-    cd "$dir" &&
-      if [[ "$(git remote get-url origin)" != "$url" ||
-        "$(git branch --show-current)" != "$branch" ]]
-      then
-        backup "$dir" && verbose "${cmd[@]}"
-      fi
-  )
+	(
+		cd "$dir" &&
+			if [[ "$(git remote get-url origin)" != "$url" ||
+			"$(git branch --show-current)" != "$branch" ]]; then
+				backup "$dir" && verbose "${cmd[@]}"
+			fi
+	)
 
-  if [[ -d "$dir/.githooks" ]]; then
-    (cd "$dir" && git config --local core.hooksPath .githooks)
-  fi
+	if [[ -d "$dir/.githooks" ]]; then
+		(cd "$dir" && git config --local core.hooksPath .githooks)
+	fi
 }
 
 pull() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  if isremote "$branch"; then
-    verbose cdgit "$branch" pull --rebase --autostash --force origin "$branch"
-  else
-    verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
-  fi
+	if isremote "$branch"; then
+		verbose cdgit "$branch" pull --rebase --autostash --force origin "$branch"
+	else
+		verbose cdgit "$branch" pull --rebase --autostash origin "$branch"
+	fi
 
-  mute decrypt "$branch"
+	mute decrypt "$branch"
 
-  if isremote "$branch"; then
-    clone "$BASEDIR/$branch/$branch" "$BASEDIR/$branch/remote" master
-    verbose cdgit "$branch/$branch" pull --rebase --autostash origin master
-  fi
+	if isremote "$branch"; then
+		clone "$BASEDIR/$branch/$branch" "$BASEDIR/$branch/remote" master
+		verbose cdgit "$branch/$branch" pull --rebase --autostash origin master
+	fi
 
-  #rcs2fs "$branch"
-  link "$branch"
+	#rcs2fs "$branch"
+	link "$branch"
 }
 
 push() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  verbose pull "$branch"
+	verbose pull "$branch"
 
-  if isremote "$branch"; then
-    commit "$branch/$branch" && cdgit "$branch/$branch" push origin master
-  fi
+	if isremote "$branch"; then
+		commit "$branch/$branch" && cdgit "$branch/$branch" push origin master
+	fi
 
-  nodiff=1 commit "$branch"
+	nodiff=1 commit "$branch"
 
-  if isremote "$branch"; then
-    #if [[ -n "$(git status --porcelain=v1)" ]]; then
-      verbose rebranch "$branch"
-    #fi
-  else
-    verbose cdgit "$branch" push
-  fi
+	if isremote "$branch"; then
+		#if [[ -n "$(git status --porcelain=v1)" ]]; then
+		verbose rebranch "$branch"
+		#fi
+	else
+		verbose cdgit "$branch" push
+	fi
 
-  verbose cdgit "$branch" status
+	verbose cdgit "$branch" status
 }
 
 commit() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  #fs2rcs "$branch"
-  encrypt "$branch"
-  cdgit "$branch" add --all .
-  cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
+	#fs2rcs "$branch"
+	encrypt "$branch"
+	cdgit "$branch" add --all .
+	cdgit "$branch" commit -m "$(date "+%F") at $(date "+%T") on $(hostname)"
 }
 
 linktarget() {
-  local target="$1"
-  local link="$2"
+	local target="$1"
+	local link="$2"
 
-  mkdir -p "$(dirname "$link")"
+	mkdir -p "$(dirname "$link")"
 
-  mute readlink "$link" || backup "$link"
+	mute readlink "$link" || backup "$link"
 
-  [[ "$(quiet readlink "$link")" == "$target" ]] && return
+	[[ "$(quiet readlink "$link")" == "$target" ]] && return
 
-  verbose ln -T -svf -- "$target" "$link"
+	verbose ln -T -svf -- "$target" "$link"
 }
 
 link() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  if isremote "$branch"; then
-    link "$branch/$branch"
-    return
-  fi
+	if isremote "$branch"; then
+		link "$branch/$branch"
+		return
+	fi
 
-  local hints
+	local hints
 
-  readarray -t hints < <(cd "$BASEDIR/$branch" &&
-    find * -name '.linkdir' -or -name '.linkfiles')
+	readarray -t hints < <(cd "$BASEDIR/$branch" &&
+		find * -name '.linkdir' -or -name '.linkfiles')
 
-  for hint in "${hints[@]}"; do
-    local prefix reladir link target dir type
+	for hint in "${hints[@]}"; do
+		local prefix reladir link target dir type
 
-    read -r reladir < <(dirname "$hint")
-    read -r _ dir type < <(path "$BASEDIR/$branch/$hint")
+		read -r reladir < <(dirname "$hint")
+		read -r _ dir type < <(path "$BASEDIR/$branch/$hint")
 
-    read -r prefix < "$BASEDIR/$branch/$hint"
+		read -r prefix <"$BASEDIR/$branch/$hint"
 
-    case "$type" in
-      .linkdir)
-        eval prefix="${prefix:-${HOME}/.}"
-        link="${prefix}${reladir}"
-        linktarget "$dir" "$link"
-        ;;
-      .linkfiles)
-        eval prefix="${prefix:-${HOME}/.${reladir}/}"
+		case "$type" in
+		.linkdir)
+			eval prefix="${prefix:-${HOME}/.}"
+			link="${prefix}${reladir}"
+			linktarget "$dir" "$link"
+			;;
+		.linkfiles)
+			eval prefix="${prefix:-${HOME}/.${reladir}/}"
 
-        local files
-        readarray -t files < <(cd "$BASEDIR/$branch/$reladir" &&
-          find * -maxdepth 0)
+			local files
+			readarray -t files < <(cd "$BASEDIR/$branch/$reladir" &&
+				find * -maxdepth 0)
 
-        for file in "${files[@]}"; do
-          linktarget "$dir/$file" "${prefix}${file}"
-        done
-        ;;
-    esac
+			for file in "${files[@]}"; do
+				linktarget "$dir/$file" "${prefix}${file}"
+			done
+			;;
+		esac
 
-  done
+	done
 }
 
 isremote() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  [[ -f "$BASEDIR/$branch/.gitremote" ]]
+	[[ -f "$BASEDIR/$branch/.gitremote" ]]
 }
 
 encrypt() {
-  local branch="${1?}"
-  local dir="$BASEDIR/$branch"
+	local branch="${1?}"
+	local dir="$BASEDIR/$branch"
 
-  local secrets archives
+	local secrets archives
 
-  readarray -t secrets < <(find "$dir" -name '.gitsecret')
+	readarray -t secrets < <(find "$dir" -name '.gitsecret')
 
-  [[ ${#secrets[@]} -eq 0 ]] && return
+	[[ ${#secrets[@]} -eq 0 ]] && return
 
-  silent passphrase
+	silent passphrase
 
-  for secret in "${secrets[@]}"; do
-    encsecret "$(dirname "$secret")"
-  done
+	for secret in "${secrets[@]}"; do
+		encsecret "$(dirname "$secret")"
+	done
 
-  # remove archives whose associated secret folder was deleted
-  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+	# remove archives whose associated secret folder was deleted
+	readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
 
-  for archive in "${archives[@]}"; do
-    [[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || verbose rm -vf "$archive"
-  done
+	for archive in "${archives[@]}"; do
+		[[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || verbose rm -vf "$archive"
+	done
 }
 
 decrypt() {
-  local branch="${1?}"
-  local dir="$BASEDIR/$branch"
+	local branch="${1?}"
+	local dir="$BASEDIR/$branch"
 
-  local archives
+	local archives
 
-  readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
+	readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
 
-  [[ ${#archives[@]} -eq 0 ]] && return
+	[[ ${#archives[@]} -eq 0 ]] && return
 
-  silent passphrase
+	silent passphrase
 
-  for archive in "${archives[@]}"; do
-    (cd "$(dirname "$archive")" && decsecret "$archive")
-  done
+	for archive in "${archives[@]}"; do
+		(cd "$(dirname "$archive")" && decsecret "$archive")
+	done
+}
+
+rcpush() {
+	local files
+
+	readarray -t files < <(find "$BASEDIR/public" -type f -name .cloudstorage)
+
+	for f in "${files[@]}"; do
+		local dir remote
+
+		read -r dir < <(dirname "$f")
+		read -r remote < <(basename "$dir")
+
+		rclone "${opts[@]}" "$dir" "$remote":
+	done
+
+}
+
+rcpull() {
+	:
 }
 
 fs2rcs() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  local files
+	local files
 
-  readarray -t files < <(find "$BASEDIR/$branch" -type f -name manifest)
+	readarray -t files < <(find "$BASEDIR/$branch" -type f -name manifest)
 
-  for f in "${files[@]}"; do
-    local dir opts
+	for f in "${files[@]}"; do
+		local dir opts
 
-    read -r dir < <(dirname "$f")
+		read -r dir < <(dirname "$f")
 
-    find "${dir:?}" -exec rm -rf {}/files \;
+		find "${dir:?}" -exec rm -rf {}/files \;
 
-    opts=(
-      #--verbose
-      --times
-      --recursive
-      --relative
-      --links
-      --perms
-      --no-group
-      --no-owner
-      --files-from="$f"
-      --delete
-    )
+		opts=(
+			#--verbose
+			--times
+			--recursive
+			--relative
+			--links
+			--perms
+			--no-group
+			--no-owner
+			--files-from="$f"
+			--delete
+		)
 
-    if [[ -r "$dir/ignore" ]]; then
-      opts+=(--exclude-from="$dir/ignore")
-    fi
+		if [[ -r "$dir/ignore" ]]; then
+			opts+=(--exclude-from="$dir/ignore")
+		fi
 
-    verbose sudo rsync "${opts[@]}" / "$dir/files"
-    verbose sudo chown -R "$USER:$USER" "$dir/files"
-  done
+		verbose sudo rsync "${opts[@]}" / "$dir/files"
+		verbose sudo chown -R "$USER:$USER" "$dir/files"
+	done
 }
 
 rcs2fs() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  local files
+	local files
 
-  readarray -t files < <(find "$BASEDIR/$branch" -type f -name manifest)
+	readarray -t files < <(find "$BASEDIR/$branch" -type f -name manifest)
 
-  for f in "${files[@]}"; do
-    local dir opts
+	for f in "${files[@]}"; do
+		local dir opts
 
-    read -r dir < <(dirname "$f")
+		read -r dir < <(dirname "$f")
 
-    opts=(
-      #--verbose
-      --times
-      --recursive
-      --relative
-      --links
-      --perms
-      --no-group
-      --no-owner
-      --backup-dir=/.backup
-    )
+		opts=(
+			#--verbose
+			--times
+			--recursive
+			--relative
+			--links
+			--perms
+			--no-group
+			--no-owner
+			--backup-dir=/.backup
+		)
 
-    (cd "$dir" && verbose sudo rsync "${opts[@]}" files/./ /)
-  done
+		(cd "$dir" && verbose sudo rsync "${opts[@]}" files/./ /)
+	done
 }
 
 all() {
-  local mod="${1?}"
+	local mod="${1?}"
 
-  for branch in "${BRANCHES[@]}"; do
-    verbose "$mod" "$branch" "${@:2}"
-  done
+	for branch in "${BRANCHES[@]}"; do
+		verbose "$mod" "$branch" "${@:2}"
+	done
 }
 
 cdgit() (
-  local branch="${1?}"
+	local branch="${1?}"
 
-  cd "$BASEDIR/$branch" && git "${@:2}"
+	cd "$BASEDIR/$branch" && git "${@:2}"
 )
 
 status() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  if isremote "$branch"; then
-    cdgit "$branch/$branch" status
-  fi
+	if isremote "$branch"; then
+		cdgit "$branch/$branch" status
+	fi
 
-  cdgit "$branch" status
+	cdgit "$branch" status
 }
 
 lastdiff() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  cdgit "$branch" diff "$branch"~ "$branch"
+	cdgit "$branch" diff "$branch"~ "$branch"
 }
 
 gitdiff() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  cdgit "$branch" diff "$branch"
+	cdgit "$branch" diff "$branch"
 }
 
 rebranch() (
-  local repo="${1?}"
-  local branch
+	local repo="${1?}"
+	local branch
 
-  read -r branch < <(cdgit "$repo" branch --show-current)
+	read -r branch < <(cdgit "$repo" branch --show-current)
 
-  [[ "$branch" == "$repo" ]]
+	[[ "$branch" == "$repo" ]]
 
-  verbose cdgit "$repo" checkout --orphan tmp
-  commit "$repo"
+	verbose cdgit "$repo" checkout --orphan tmp
+	commit "$repo"
 
-  verbose cdgit "$repo" branch -D "$branch"
-  verbose cdgit "$repo" branch --move tmp "$branch"
+	verbose cdgit "$repo" branch -D "$branch"
+	verbose cdgit "$repo" branch --move tmp "$branch"
 
-  verbose cdgit "$repo" push --set-upstream origin "$branch" --force
+	verbose cdgit "$repo" push --set-upstream origin "$branch" --force
 )
 
 cleanup() {
-  local branch="${1?}"
+	local branch="${1?}"
 
-  rm -rvf "$BASEDIR/$branch/.git/refs/original"
+	rm -rvf "$BASEDIR/$branch/.git/refs/original"
 
-  cdgit "$branch" reflog expire --expire=now --all
-  cdgit "$branch" gc --prune=now
-  cdgit "$branch" gc --aggressive --prune=now
+	cdgit "$branch" reflog expire --expire=now --all
+	cdgit "$branch" gc --prune=now
+	cdgit "$branch" gc --aggressive --prune=now
 }
 
 mklive() {
-  local dir="$HOME/.voidlive"
-  local url=https://github.com/void-linux/void-mklive
+	local dir="$HOME/.voidlive"
+	local url=https://github.com/void-linux/void-mklive
 
-  [[ -d "$dir" ]] || git clone "$url" "$dir"
+	[[ -d "$dir" ]] || git clone "$url" "$dir"
 
-  local packages args=(
-    console=tty0
-    console=ttyS0,115200n8
-    net.ifnames=0
-    live.user="$USER"
-    live.shell=/bin/zsh
-    live
-  )
+	local packages args=(
+		console=tty0
+		console=ttyS0,115200n8
+		net.ifnames=0
+		live.user="$USER"
+		live.shell=/bin/zsh
+		live
+	)
 
-  readarray -t packages < <(find /etc/packages/live -type f -exec cat {} \; |
-    grep -v -h '^$' | sort -u)
+	readarray -t packages < <(find /etc/packages/live -type f -exec cat {} \; |
+		grep -v -h '^$' | sort -u)
 
-  verbose xbps-install -S --yes --dry-run "${packages[@]}"
+	verbose xbps-install -S --yes --dry-run "${packages[@]}"
 
-  local opts=(
-    #--verbose
-    --recursive
-    --relative
-    --links
-    --perms
-  )
+	local opts=(
+		#--verbose
+		--recursive
+		--relative
+		--links
+		--perms
+	)
 
-  local tmpdir="$(mktemp -d)"
+	local tmpdir="$(mktemp -d)"
 
-  verbose sudo rsync "${opts[@]}" \
-    --exclude=supervise --files-from=/etc/live.manifest \
-    / "$tmpdir"
+	verbose sudo rsync "${opts[@]}" \
+		--exclude=supervise --files-from=/etc/live.manifest \
+		/ "$tmpdir"
 
-  verbose rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
+	verbose rsync "${opts[@]}" "$HOME/.dotfiles/master" "$tmpdir"
 
-  (
-    cd "$dir" && verbose sudo ./mklive.sh -K \
-      -C "${args[*]}" \
-      -p "${packages[*]}" \
-      -T "Custom VoidLinux Live Image" \
-      -i gzip -s gzip \
-      -I "$tmpdir" \
-      -o $HOME/custom-voidlinux-liveimg.iso
-  )
+	(
+		cd "$dir" && verbose sudo ./mklive.sh -K \
+			-C "${args[*]}" \
+			-p "${packages[*]}" \
+			-T "Custom VoidLinux Live Image" \
+			-i gzip -s gzip \
+			-I "$tmpdir" \
+			-o $HOME/custom-voidlinux-liveimg.iso
+	)
 
-  verbose sudo rm -rf "$tmpdir"
+	verbose sudo rm -rf "$tmpdir"
 }
 
 checkbin() {
-  for bin in "$@"; do
-    which "$bin" >/dev/null || return
-  done
+	for bin in "$@"; do
+		which "$bin" >/dev/null || return
+	done
 }
 
 checkbin git gpg curl rsync && mkdir -p "$BASEDIR" && SOURCE && "$@"
