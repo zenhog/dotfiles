@@ -39,7 +39,62 @@ view() {
 
 	set_opt mode "$mode"
 
-	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -y ".[] | select(.index)"
+	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -yC
+}
+
+BINDS[inc]=alt-k
+DESCS[inc]='Volume Up'
+inc() {
+	volctl + "$@"
+}
+
+BINDS[dec]=alt-j
+DESCS[dec]='Volume Down'
+dec() {
+	volctl - "$@"
+}
+
+volctl() {
+	local index ctl="$1"
+
+	shift
+
+	read -r index _ <<<"$1"
+
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	pactl set-"${mode%s}"-volume "$index" "${ctl}5%"
+
+	widget playback timeout
+	widget capture timeout
+}
+
+BINDS[togglemute]=alt-r
+DESCS[togglemute]='Toggle Mute'
+togglemute() {
+	local index
+
+	read -r index _ <<<"$1"
+
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	case "$mode" in
+	sinks)
+		mode=sink
+		;;
+	sources)
+		mode=source
+		;;
+	esac
+
+	pactl set-"$mode"-mute "$index" toggle
+
+	widget playback timeout
+	widget capture timeout
 }
 
 # input
@@ -99,6 +154,9 @@ entries() {
 			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
 		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
 
+		mutes=("${mutes[@]/true/M}")
+		mutes=("${mutes[@]/false/-}")
+
 		unset default
 
 		case "$kind" in
@@ -111,8 +169,9 @@ entries() {
 		esac
 
 		for i in "${!indices[@]}"; do
-			read -r line < <(printf "%s%s[%s]%s%s" \
-				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}")
+			read -r line < <(printf "%s%s[%s:%s]%s%s" \
+				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "${mutes[$i]}" \
+				"$iSEP" "${descs[$i]}")
 			if [[ "${names[$i]}" == "$default" ]]; then
 				printf "%s\n" "$(colorize green "$line")"
 			else
@@ -130,9 +189,12 @@ entries() {
 			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
 		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
 
+		mutes=("${mutes[@]/true/M}")
+		mutes=("${mutes[@]/false/-}")
+
 		for i in "${!indices[@]}"; do
-			printf "%s%s[%s]%s%s (%s)\n" \
-				"${indices[$i]}" "$iSEP" "${lvols[$i]}" \
+			printf "%s%s[%s:%s]%s%s (%s)\n" \
+				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "${mutes[$i]}" \
 				"$iSEP" "${names[$i]}" "${descs[$i]}"
 		done | column -t -s "$iSEP"
 		;;
