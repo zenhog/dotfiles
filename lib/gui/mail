@@ -7,34 +7,50 @@ ICON=
 HORIZONTAL=1
 
 label() {
-  local thread
-  read -r thread _ <<< "$1"
-  echo "$thread"
+	local thread
+	read -r thread _ <<<"$1"
+	echo "$thread"
 }
 
 view() {
-  local thread
-  read -r thread _ <<< "$1"
-  readarray -t files < <(notmuch search --output=files "$thread")
+	local thread
 
-  local i=0
-  for file in "${files[@]}"; do
-    [[ $i -ne 0 ]] && sepline
-    echo "$file"; sepline
-    mu view "$file"
-    ((i++))
-  done
+	read -r thread _ < <(mails | sed -rn "${FZF_POS}p")
+
+	readarray -t files < <(notmuch search --output=files "$thread")
+
+	local i=0
+	for file in "${files[@]}"; do
+		[[ $i -ne 0 ]] && sepline
+		echo "$file"
+		sepline
+		mu view "$file" | bat -p --force-colorization --language=Email
+		((i++))
+	done
+}
+
+mails() {
+	notmuch search --sort=newest-first --output=summary --format=json tag:inbox
 }
 
 list() {
-  # @menu-mail-list inbox|sent|draft|archive
-  notmuch search --sort=newest-first --output=summary tag:inbox
+	# @menu-mail-list inbox|sent|draft|archive
+	local authors subjects mails
+
+	IFS= read -r -d '' mails < <(mails)
+
+	readarray -t authors < <(jq -r ".[].authors" <<<"$mails")
+	readarray -t subjects < <(jq -r ".[].subject" <<<"$mails")
+
+	for i in "${!authors[@]}"; do
+		printf "%s%s%s\n" "${subjects[$i]}" "$iSEP" "${authors[$i]}"
+	done | column -t -s "$iSEP"
 }
 
 BINDS[tag]=alt-q
 HOOKS[tag]=tag
 CALLS[tag]='execute-silent(%s {1} {q})+reload-sync(list)'
 tag() {
-  local term="$1"
-  notmuch tag -unread "$term"
+	local term="$1"
+	notmuch tag -unread "$term"
 }
