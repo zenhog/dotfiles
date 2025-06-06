@@ -443,19 +443,16 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.align.horizontal,
 			expand = "outside",
 			{
-				widget = wibox.layout.fixed.horizontal,
-				{
-					layout = wibox.layout.fixed.horizontal,
-					spacing = 1,
-					block(M.group(s.menus.run), theme.iconsize),
-					block(M.group(s.menus.awm), theme.iconsize),
-					block(M.group(s.menus.ssh), theme.iconsize),
-					block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
-					block(M.group(widgets.ping_wan, widgets.ping_vpn1)),
-					block(M.group(widgets.ram, widgets.disk, widgets.temp)),
-					scroll(widgets.connection, 80),
-					scroll(widgets.music),
-				},
+				layout = wibox.layout.fixed.horizontal,
+				spacing = 1,
+				block(M.group(s.menus.run), theme.iconsize),
+				block(M.group(s.menus.awm), theme.iconsize),
+				block(M.group(s.menus.ssh), theme.iconsize),
+				block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
+				block(M.group(widgets.ping_wan, widgets.ping_vpn1)),
+				block(M.group(widgets.ram, widgets.disk, widgets.temp)),
+				scroll(widgets.connection, 80),
+				scroll(widgets.music),
 			},
 			{
 				widget = wibox.container.margin,
@@ -465,7 +462,6 @@ awful.screen.connect_for_each_screen(function(s)
 			},
 			{
 				layout = wibox.layout.align.horizontal,
-				spacing = 1,
 				scroll(widgets.push, 318),
 				nil,
 				{
