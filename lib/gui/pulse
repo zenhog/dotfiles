@@ -31,7 +31,15 @@ rotate_mode() {
 }
 
 view() {
-	:
+	local index
+
+	read -r index _ <<<"$1"
+
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -y ".[] | select(.index)"
 }
 
 # input

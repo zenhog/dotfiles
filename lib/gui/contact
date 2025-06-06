@@ -7,15 +7,15 @@ ICON=󰀆
 POSITION=BOTTOM
 
 view() {
-  local id
+	local id
 
-  read -r id _ <<< "$1"
+	read -r id _ <<<"$1"
 
-  khard show -u "$id" --format yaml 2>/dev/null | yq
+	khard show -u "$id" --format yaml 2>/dev/null | yq -y
 }
 
 list() {
-  local uids
-  readarray -t uids < <(khard list -p -F uid)
-  printf "%s\n" "${uids[@]}"
+	local uids
+	readarray -t uids < <(khard list -p -F uid)
+	printf "%s\n" "${uids[@]}"
 }
