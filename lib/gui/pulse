@@ -74,11 +74,16 @@ entries() {
 	local kind="$1"
 	local json="$(pactl -f json list "$kind")"
 
-	local indices descs lvols rvols mutes
+	local indices descs lvols rvols mutes dsource dsink default
+
+	read -r dsink < <(pactl get-default-sink)
+	read -r dsource < <(pactl get-default-source)
+
 	readarray -t indices < <(jq -r '.[] | (.index|tostring)' <<<"$json")
 
 	case "$kind" in
 	sinks | sources)
+		readarray -t names < <(jq -r '.[] | .name' <<<"$json")
 		readarray -t descs < <(jq -r '.[] | .description' <<<"$json")
 		readarray -t lvols < \
 			<(jq -r '.[] | .volume."front-left".value_percent' <<<"$json")
@@ -86,9 +91,25 @@ entries() {
 			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
 		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
 
+		unset default
+
+		case "$kind" in
+		sinks)
+			default="$dsink"
+			;;
+		sources)
+			default="$dsource"
+			;;
+		esac
+
 		for i in "${!indices[@]}"; do
-			printf "%s%s[%s]%s%s\n" \
-				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}"
+			read -r line < <(printf "%s%s[%s]%s%s" \
+				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "$iSEP" "${descs[$i]}")
+			if [[ "${names[$i]}" == "$default" ]]; then
+				printf "%s\n" "$(colorize green "$line")"
+			else
+				printf "%s\n" "$line"
+			fi
 		done | column -t -s "$iSEP"
 		;;
 	sink-inputs | source-outputs)

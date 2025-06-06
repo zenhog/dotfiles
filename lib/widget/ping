@@ -58,7 +58,7 @@ text() {
 	[[ -z "$ping" ]] && read -r ping < <(pp "$ip2")
 	[[ -z "$ping" ]] && read -r ping < <(pp "$ip3")
 
-	[[ -z "$ping" ]] && ping='--'
+	[[ -z "$ping" ]] && ping='xx'
 
 	printf "%s/%s" "$(fmt "$ping")" "$(cc)"
 }

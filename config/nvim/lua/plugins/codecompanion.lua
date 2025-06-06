@@ -73,7 +73,7 @@ return {
           })
         end,
       },
-      default_adapter = "deepseek",
+      default_adapter = "deepqwen",
       window = {
         layout = "float", -- float|vertical|horizontal|buffer
         position = nil, -- left|right|top|bottom (nil will default depending on vim.opt.plitright|vim.opt.splitbelow)
@@ -115,6 +115,45 @@ return {
         },
       },
       prompt_library = {
+        ["Translate"] = {
+          strategy = "chat",
+          description = "Write documentation for me",
+          opts = {
+            index = 11,
+            is_slash_cmd = true,
+            auto_submit = false,
+            short_name = "trans",
+          },
+          prompts = {
+            {
+              role = "system",
+              content = [[
+                You are a multi-language translator.
+                The input is of the form 'FR:EN Ceci est un texte en Français!'
+                The first word represents the source and the destination
+                language codes separated by a colon. If absent, you are to
+                guess the source language and translate it into English, unless
+                the source language is English, in which case, you translate to
+                French.
+                It is essential that your response only contains the
+                translation of the input and nothing else (with the exception
+                of the country codes specification which is to be ignored in
+                the translation).
+                Here are a few examples of a translation interaction:
+
+                Input: FR:EN Ceci est un texte en Français!
+                Output: This is a text written in French!
+
+                Input: Default behaviour is ignorance
+                Output: Le comportement par défaut est l'ignorance
+              ]],
+            },
+            {
+              role = "user",
+              content = "Here is a simple text to translate to get you going",
+            },
+          },
+        },
         ["Docusaurus"] = {
           strategy = "chat",
           description = "Write documentation for me",
