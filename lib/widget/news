@@ -18,12 +18,13 @@ text() {
 
 	read -r count < <(unread)
 
-	colorize "$color" "$(fmt "$count")"
+	# colorize "$color" "$(fmt "$count")"
+	fmt "$count"
 }
 
 icon() {
 	local icon=󰑫
-	local color=yellow
+	local color=red
 
 	colorize "$color" "$icon"
 }

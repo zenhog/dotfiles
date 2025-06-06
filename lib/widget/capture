@@ -2,46 +2,53 @@
 
 PERIOD=10
 
-REGEX='/Default/s/.*ID: (.*), Name.*/\1/p'
-
-read -r ID < <(pulsemixer --list-sources | sed -rn "$REGEX")
-
 KEYS[prev]='C-M:h'
 prev() {
-	pulsemixer --id "$ID" --change-volume -5 --max-volume 100
-	#wpctl set-volume @DEFAULT_SOURCE@ 5%-
+	gui pulse ctl source dec
 }
 
 KEYS[next]='C-M:l'
 next() {
-	pulsemixer --id "$ID" --change-volume +5 --max-volume 100
-	#wpctl set-volume @DEFAULT_SOURCE@ 5%+
+	gui pulse ctl source inc
 }
 
 KEYS[toggle]='C-M:i'
 toggle() {
-	pulsemixer --id "$ID" --toggle-mute
-	#wpctl set-volume @DEFAULT_SOURCE@ toggle
+	gui pulse ctl source mute
 }
 
 run() {
-	menu pulse
+	tmux set -s "@menu-pulse-mode" sources
+	menu auto pulse
 }
 
 text() {
-	local volume
-	read -r volume < <(pulsemixer --id "$ID" --get-volume | awk '{print $1}')
-	#read -r _ volume _ < <(wpctl get-volume @DEFAULT_SOURCE@)
-	echo -n "$(fmt "${volume#*.}")"
+	local vol
+
+	read -r vol < <(gui pulse ctl source getvol)
+
+	vol="${vol%\%}"
+
+	printf "%s" "$(fmt "${vol#*.}")"
 }
 
 icon() {
 	local ok=󰍬
 	local ko=󰍭
 
-	read -r mute < <(wpctl get-volume @DEFAULT_SOURCE@)
+	local icon
+	local color=gold
+
+	read -r mute < <(gui pulse ctl source getmute)
+
 	case "$mute" in
-	*MUTE*) echo -n "$ko" ;;
-	*) echo -n "$ok" ;;
+	true)
+		icon="$ko"
+		;;
+	false)
+		icon="$ok"
+		;;
 	esac
+
+	printf "%s" "$(colorize "$color" "$icon")"
 }

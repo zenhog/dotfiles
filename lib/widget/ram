@@ -40,6 +40,7 @@ icon() {
 	local performance=󰍛
 	local ambiguous=󰌨
 	local icon="$ambiguous"
+	local color=lime
 
 	((${#governors[@]} <= 0 || ${#governors[@]} >= 2)) && ICON=
 
@@ -49,5 +50,5 @@ icon() {
 		performance) icon="$performance" ;;
 		esac
 
-	printf "%s" "$icon"
+	printf "%s" "$(colorize "$color" "$icon")"
 }

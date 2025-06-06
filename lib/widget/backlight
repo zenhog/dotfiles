@@ -22,6 +22,17 @@ toggle() {
 	fi
 }
 
+ctl() {
+	local cmd
+
+	if xbacklight &>/dev/null; then
+		cmd=xbacklight
+	elif xrandr &>/dev/null; then
+		local monitors
+		readarray -t monitors < <(xrandr --listactivemonitors)
+	fi
+}
+
 text() {
 	read -r backlight < <(xbacklight | xargs printf "%02.f")
 
@@ -33,5 +44,7 @@ icon() {
 	local icon=󰃠
 	local icon=󰃞
 
-	printf "%s" "$icon"
+	local color=blueviolet
+
+	printf "%s" "$(colorize "$color" "$icon")"
 }

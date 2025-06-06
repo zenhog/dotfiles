@@ -43,7 +43,7 @@ fmt() {
 		printf "%02d" "$decpart"
 		return
 	elif ((${#hex} > 1)); then
-		printf "**"
+		printf "++"
 		return
 	else
 		printf "%s%d" "$hex" "$decpart"

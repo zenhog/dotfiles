@@ -7,13 +7,16 @@ ICON=󰐰
 HORIZONTAL=1
 
 init() {
-	set_opt mode sinks
+	local mode="$(get_opt mode)"
+	[[ -z "$mode" ]] && set_opt mode sinks
 }
 
 label() {
 	local mode="$(get_opt mode)"
 
 	echo " mode: $mode "
+	widget playback timeout
+	widget capture timeout
 }
 
 BINDS[rotate_mode]=alt-t
@@ -39,39 +42,138 @@ view() {
 
 	set_opt mode "$mode"
 
-	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -yC
+	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -yC |
+		bat -p --force-colorization --language=yaml
 }
 
 BINDS[inc]=alt-k
 DESCS[inc]='Volume Up'
 inc() {
-	volctl + "$@"
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	ctl "${mode%s}" inc "$@"
 }
 
 BINDS[dec]=alt-j
 DESCS[dec]='Volume Down'
 dec() {
-	volctl - "$@"
-}
-
-volctl() {
-	local index ctl="$1"
-
-	shift
-
-	read -r index _ <<<"$1"
-
 	local mode="$(get_opt mode)"
 
 	set_opt mode "$mode"
 
-	pactl set-"${mode%s}"-volume "$index" "${ctl}5%"
-
-	widget playback timeout
-	widget capture timeout
+	ctl "${mode%s}" dec "$@"
 }
 
-BINDS[togglemute]=alt-r
+BINDS[def]=Enter
+DESCS[def]='Set Default'
+def() {
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	ctl "${mode%s}" default "$@"
+}
+
+BINDS[move]=alt-r
+HOOKS[move]=clear
+DESCS[move]='Move Sink/Source'
+move() {
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	local choice choices index
+
+	read -r index _ <<<"$1"
+
+	readarray -t choices < <(ctl "${mode%-inputs}" move)
+
+	read -r choice _ < <(choice "${choices[@]}")
+
+	case "$mode" in
+	sinks)
+		mode=sink-input
+		;;
+	sources)
+		mode=source-output
+		;;
+	esac
+
+	pactl move-"$mode" "$index" "$choice"
+}
+
+ctl() {
+	local index
+	local mode="$1"
+	local ctl="$2"
+
+	shift 2
+
+	read -r index _ <<<"$1"
+
+	if [[ -z "$index" ]]; then
+		case "$mode" in
+		sink)
+			read -r dsink < <(pactl get-default-sink)
+
+			read -r index < <(pactl -f json list sinks | jq -r \
+				".[] | select (.name == \"$dsink\") | .index")
+
+			;;
+		source)
+			read -r dsource < <(pactl get-default-source)
+
+			read -r index < <(pactl -f json list sources | jq -r \
+				".[] | select (.name == \"$dsource\") | .index")
+			;;
+		esac
+	fi
+
+	case "$ctl" in
+	inc) ctl='+' ;;
+	dec) ctl='-' ;;
+	esac
+
+	case "$ctl" in
+	mute)
+		pactl set-"$mode"-mute "$index" toggle
+		;;
+	getmute)
+		pactl -f json list "${mode}s" | jq -r \
+			".[] | select (.index == $index) | .mute"
+		;;
+	getvol)
+		pactl -f json list "${mode}s" | jq -r \
+			".[] | select (.index == $index) | .volume.\"front-left\".value_percent"
+		;;
+	default)
+		pactl set-default-"$mode" "$index"
+		;;
+	move)
+		local indices descriptions
+
+		readarray -t indices < <(pactl -f json list "${mode}s" |
+			jq -r ".[] | .index")
+
+		readarray -t descriptions < <(pactl -f json list "${mode}s" |
+			jq -r ".[] | .description")
+
+		for i in "${!indices[@]}"; do
+			printf "%s %s\n" "${indices[$i]}" "${descriptions[$i]}"
+		done
+		;;
+	ports) ;;
+	cards) ;;
+	*)
+		pactl set-"$mode"-volume "$index" "${ctl}5%"
+		;;
+	esac
+
+}
+
+BINDS[togglemute]=alt-m
 DESCS[togglemute]='Toggle Mute'
 togglemute() {
 	local index
@@ -81,34 +183,8 @@ togglemute() {
 	local mode="$(get_opt mode)"
 
 	set_opt mode "$mode"
-
-	case "$mode" in
-	sinks)
-		mode=sink
-		;;
-	sources)
-		mode=source
-		;;
-	esac
-
-	pactl set-"$mode"-mute "$index" toggle
-
-	widget playback timeout
-	widget capture timeout
+	ctl "${mode%s}" mute "$@"
 }
-
-# input
-# output
-# source
-# sink
-
-# set-default
-# set-sink-source
-
-# vol %5+
-# vol %5-
-# vol toggle
-# vol mute/unmute
 
 # edit conn
 # show conn
@@ -148,6 +224,7 @@ entries() {
 	sinks | sources)
 		readarray -t names < <(jq -r '.[] | .name' <<<"$json")
 		readarray -t descs < <(jq -r '.[] | .description' <<<"$json")
+		readarray -t states < <(jq -r '.[] | .state' <<<"$json")
 		readarray -t lvols < \
 			<(jq -r '.[] | .volume."front-left".value_percent' <<<"$json")
 		readarray -t rvols < \

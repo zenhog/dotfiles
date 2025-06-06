@@ -17,6 +17,7 @@ text() {
 
 icon() {
 	local icon=󰄠
+	local color=aqua
 
-	printf "%s" "$icon"
+	colorize "$color" "$icon"
 }

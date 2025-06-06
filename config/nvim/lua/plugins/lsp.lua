@@ -25,6 +25,12 @@ return {
       keys[#keys + 1] = { "<leader>cl", false }
       keys[#keys + 1] = { "]]", false }
       keys[#keys + 1] = { "[[", false }
+      keys[#keys + 1] = {
+        "gR",
+        vim.lsp.buf.rename,
+        desc = "Rename",
+        has = "rename",
+      }
     end,
   },
 }

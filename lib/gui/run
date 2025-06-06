@@ -7,63 +7,63 @@ ICON=
 export APP_DIR="$HOME/.lib/app"
 
 view() {
-  command preview "$APP_DIR/$1"
+	command preview "$APP_DIR/$1"
 }
 
 list() {
-  local apps
-  readarray -t apps < <(ls -1 $HOME/.lib/app)
-  printf "%s\n" "${apps[@]}"
+	local apps
+	readarray -t apps < <(ls -1 $HOME/.lib/app)
+	printf "%s\n" "${apps[@]}"
 }
 
 key() {
-  source "$HOME/.lib/app/$1"
-  echo "$1:$KEY"
+	source "$HOME/.lib/app/$1"
+	echo "$1:$KEY"
 }
 
 keys() {
-  for app in $(basename -a "${APP_DIR}"/*); do
-    gui run key "$app"
-  done
+	for app in $(basename -a "${APP_DIR}"/*); do
+		gui run key "$app"
+	done
 }
 
 BINDS[edit]=alt-e
 HOOKS[edit]=accept
 DESCS[edit]='Edit in $EDITOR'
 edit() {
-  open "$APP_DIR/$1"
+	open "$APP_DIR/$1"
 }
 
 run() {
-  local file="$1" mode="$2"
+	local file="$1" mode="$2"
 
-  shift 2
+	shift 2
 
-  source "$HOME/.lib/app/$file"
+	source "$HOME/.lib/app/$file"
 
-  if silent declare -F runner; then
-    runner "${@:3}"
-  fi
+	if silent declare -F runner; then
+		runner "${@:3}"
+	fi
 }
 
 BINDS[fg]=enter
 HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 fg() {
-  source "$HOME/.lib/app/$1"
-  gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+	source "$HOME/.lib/app/$1"
+	gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 bg() {
-  source "$HOME/.lib/app/$1"
-  gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+	source "$HOME/.lib/app/$1"
+	gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[close]=alt-d
 DESCS[close]='Terminate window'
 close() {
-  source "$HOME/.lib/app/$1"
-  gui awm winkill "${ATTRIBUTES[@]}"
+	source "$HOME/.lib/app/$1"
+	gui awm winkill "${ATTRIBUTES[@]}"
 }

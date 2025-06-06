@@ -11,7 +11,8 @@ view() {
 
 	read -r id _ <<<"$1"
 
-	khard show -u "$id" --format yaml 2>/dev/null | yq -y
+	khard show -u "$id" --format yaml 2>/dev/null | yq -y | bat -p \
+		--force-colorization --language=yaml
 }
 
 list() {

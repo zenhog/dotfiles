@@ -58,17 +58,19 @@ text() {
 	[[ -z "$ping" ]] && read -r ping < <(pp "$ip2")
 	[[ -z "$ping" ]] && read -r ping < <(pp "$ip3")
 
-	[[ -z "$ping" ]] && ping='xx'
+	[[ -z "$ping" ]] && ping='**'
 
 	printf "%s/%s" "$(fmt "$ping")" "$(cc)"
 }
 
 icon() {
 	local icon=󰀚
+	local color=deepskyblue
+
 	if [[ "$CTX" == vpn* ]]; then
 		icon=󰉀
+		color=deeppink
 	fi
-	local color=green
-	# printf "%s" "$icon"
+
 	colorize "$color" "$icon"
 }

@@ -29,7 +29,10 @@ icon() {
 	local ok=󱐋
 	local ko=󰂎
 	local status
+	local color=fuschia
+
 	STATUS="$ok"
+
 	for bat in "${BATTERIES[@]}"; do
 		read -r status <"$bat/status"
 		if [[ "$status" == Discharging ]]; then
@@ -37,5 +40,6 @@ icon() {
 			break
 		fi
 	done
+
 	printf "%s" "$STATUS"
 }
