@@ -3,8 +3,8 @@ local function session_name()
 end
 
 local function lspname()
-  local icon = ""
   local icon = "LSP:"
+  local icon = " "
   local msg = icon
   local buf_ft = vim.api.nvim_buf_get_option(0, "filetype")
   local clients = vim.lsp.get_active_clients()
@@ -88,7 +88,7 @@ return {
         component_separators = { left = "", right = "" },
         component_separators = { left = " ", right = " " },
         section_separators = { left = "", right = "" },
-        section_separators = { left = " ", right = " " },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
       },
       tabline = {
