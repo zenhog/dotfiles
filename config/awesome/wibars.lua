@@ -462,7 +462,7 @@ awful.screen.connect_for_each_screen(function(s)
 			},
 			{
 				layout = wibox.layout.align.horizontal,
-				scroll(widgets.push, 318),
+				scroll(widgets.push, 317),
 				nil,
 				{
 					layout = wibox.layout.fixed.horizontal,
