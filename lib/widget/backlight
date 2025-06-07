@@ -29,7 +29,11 @@ ctl() {
 		cmd=xbacklight
 	elif xrandr &>/dev/null; then
 		local monitors
-		readarray -t monitors < <(xrandr --listactivemonitors)
+		readarray -t monitors < <(xrandr --listactivemonitors | sed -nr '2,$p' |
+			awk '{print $4}')
+		for mon in "${monitors[@]}"; do
+			xrandr --output "$mon" --brightness
+		done
 	fi
 }
 

@@ -67,41 +67,29 @@ dec() {
 }
 
 BINDS[def]=Enter
+HOOKS[def]=clear
 DESCS[def]='Set Default'
 def() {
 	local mode="$(get_opt mode)"
 
 	set_opt mode "$mode"
 
-	ctl "${mode%s}" default "$@"
-}
-
-BINDS[move]=alt-r
-HOOKS[move]=clear
-DESCS[move]='Move Sink/Source'
-move() {
-	local mode="$(get_opt mode)"
-
-	set_opt mode "$mode"
-
-	local choice choices index
-
-	read -r index _ <<<"$1"
-
-	readarray -t choices < <(ctl "${mode%-inputs}" move)
-
-	read -r choice _ < <(choice "${choices[@]}")
-
 	case "$mode" in
-	sinks)
-		mode=sink-input
+	sinks | sources)
+		ctl "${mode%s}" default "$@"
 		;;
-	sources)
-		mode=source-output
+	sink-inputs | source-outputs)
+		local choice choices index
+
+		read -r index _ <<<"$1"
+
+		readarray -t choices < <(ctl "${mode%-inputs}" move)
+
+		read -r choice _ < <(choice "${choices[@]}")
+
+		pactl move-"${mode%s}" "$index" "$choice"
 		;;
 	esac
-
-	pactl move-"$mode" "$index" "$choice"
 }
 
 ctl() {
@@ -246,9 +234,13 @@ entries() {
 		esac
 
 		for i in "${!indices[@]}"; do
-			read -r line < <(printf "%s%s[%s:%s]%s%s" \
-				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "${mutes[$i]}" \
-				"$iSEP" "${descs[$i]}")
+			read -r line < <(
+				printf "%s%s[%s:%s]%s%s%s%s" \
+					"${indices[$i]}" "$iSEP" \
+					"${lvols[$i]}" "${mutes[$i]}" "$iSEP" \
+					"${descs[$i]}" "$iSEP" \
+					"${states[$i]}"
+			)
 			if [[ "${names[$i]}" == "$default" ]]; then
 				printf "%s\n" "$(colorize green "$line")"
 			else
@@ -258,21 +250,37 @@ entries() {
 		;;
 	sink-inputs | source-outputs)
 		readarray -t descs < <(jq -r '.[] | .properties."media.name"' <<<"$json")
+
 		readarray -t names < \
 			<(jq -r '.[] | .properties."application.name"' <<<"$json")
+
 		readarray -t lvols < \
 			<(jq -r '.[] | .volume."front-left".value_percent' <<<"$json")
+
 		readarray -t rvols < \
 			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
 		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
+
+		readarray -t puts < <(jq -r ".[] | .${kind%-*}" <<<"$json")
+
+		local jsoff
+
+		IFS= read -r -d '' jsoff < <(pactl -f json list "${kind%-*}s")
+
+		for i in "${!puts[@]}"; do
+			puts[$i]="$(jq -r ".[] | select(.index == ${puts[$i]}) | .description" \
+				<<<"$jsoff")"
+		done
 
 		mutes=("${mutes[@]/true/M}")
 		mutes=("${mutes[@]/false/-}")
 
 		for i in "${!indices[@]}"; do
-			printf "%s%s[%s:%s]%s%s (%s)\n" \
-				"${indices[$i]}" "$iSEP" "${lvols[$i]}" "${mutes[$i]}" \
-				"$iSEP" "${names[$i]}" "${descs[$i]}"
+			printf "%s%s[%s:%s]%s%s%s(%s)\n" \
+				"${indices[$i]}" "$iSEP" \
+				"${lvols[$i]}" "${mutes[$i]}" "$iSEP" \
+				"${names[$i]}" "$iSEP" \
+				"${puts[$i]}"
 		done | column -t -s "$iSEP"
 		;;
 	esac
