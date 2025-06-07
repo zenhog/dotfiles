@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-text() {
-    local time=$(date '+%R')
-    local time=$(date '+%I:%M %p')
-    local time=$(date '+%H:%M %a %b %d')
+PERIOD=1
 
-    printf "%s" "$time"
+text() {
+	local time=$(date '+%R')
+	local time=$(date '+%I:%M %p')
+	local time=$(date '+%H:%M %a %b %d')
+
+	printf "%s" "$time"
 }
 
 icon() {
-  local icon=󱑍
-  printf "%s" "$icon"
+	local icon=󱑍
+	printf "%s" "$icon"
 }
 
 output() {
-    printf ":"
-    text
+	printf ":"
+	text
 }
