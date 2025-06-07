@@ -93,7 +93,7 @@ def() {
 }
 
 ctl() {
-	local index
+	local index vol
 	local mode="$1"
 	local ctl="$2"
 
@@ -101,7 +101,9 @@ ctl() {
 
 	read -r index _ <<<"$1"
 
-	if [[ -z "$index" ]]; then
+	shift
+
+	if [[ -z "$index" || "$index" == default ]]; then
 		case "$mode" in
 		sink)
 			read -r dsink < <(pactl get-default-sink)
@@ -127,6 +129,10 @@ ctl() {
 	case "$ctl" in
 	mute)
 		pactl set-"$mode"-mute "$index" toggle
+		;;
+	setvol)
+		vol="$1"
+		pactl set-"$mode"-volume "$index" "$vol"%
 		;;
 	getmute)
 		pactl -f json list "${mode}s" | jq -r \
