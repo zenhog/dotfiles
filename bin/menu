@@ -91,7 +91,7 @@ choice() {
 	cmd+=('--no-separator')
 	cmd+=('--preview' 'inputpreview')
 	cmd+=('--preview-window' 'bottom,30%,border-top')
-	cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
+	# cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
 
 	printf "%s\n" "$@" | "${cmd[@]}" 2>/dev/tty
 }
@@ -116,7 +116,7 @@ input() {
 	cmd+=('--no-separator')
 	cmd+=('--preview' 'inputpreview')
 	cmd+=('--preview-window' 'bottom,90%,border-top')
-	cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
+	# cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
 
 	if [[ -n "$fifo" ]]; then
 		echo -n | "${cmd[@]}" 2>/dev/tty >"$fifo"
@@ -258,6 +258,7 @@ main() {
 		COMMAND+=("$cmd")
 	done
 
+	echo "${EXTRA[@]}" >/tmp/extra
 	[[ -n "$EXTRA" ]] && COMMAND+=("${EXTRA[@]}")
 
 	mute declare -F init && init

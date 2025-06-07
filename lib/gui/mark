@@ -11,7 +11,7 @@ RATIO=20%
 export DB="$HOME/.db/bookmarks.db"
 
 initdb() {
-  sqlite3 "$DB" << EOF
+	sqlite3 "$DB" <<EOF
     CREATE TABLE IF NOT EXISTS bookmarks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       url TEXT NOT NULL UNIQUE,
@@ -22,153 +22,154 @@ EOF
 }
 
 insert() {
-  local url="$1"
-  local title="$2"
+	local url="$1"
+	local title="$2"
 
-  sqlite3 "$DB" "
+	sqlite3 "$DB" "
     INSERT INTO bookmarks (url, title)
     VALUES ('$url', '$title')
   "
 }
 
 view() {
-  local id
+	local id
 
-  read -r id _ <<< "$1"
+	read -r id _ <<<"$1"
 
-  {
-    printf "URL: %s %s\n" "$iSEP" \
-      "$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
+	{
+		printf "URL: %s %s\n" "$iSEP" \
+			"$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
 
-    printf "Title: %s %s\n" "$iSEP" \
-      "$(sqlite3 "$DB" "SELECT title FROM bookmarks WHERE id = $id")"
-  } | column -t -s "$iSEP"
+		printf "Title: %s %s\n" "$iSEP" \
+			"$(sqlite3 "$DB" "SELECT title FROM bookmarks WHERE id = $id")"
+	} | column -t -s "$iSEP"
 }
 
 label() {
-  local id
+	local id
 
-  read -r id _ <<< "$1"
+	read -r id _ <<<"$1"
 
-  sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
+	sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
 }
 
+# export EXTRA+=(--with-nth 2..)
 list() {
-  sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
-    column -t -s "$iSEP"
+	sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
+		column -t -s "$iSEP"
 }
 
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open bookmark'
 open() {
-  local id url
-  read -r id _ <<< "$1"
-  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-  command open "$url"
+	local id url
+	read -r id _ <<<"$1"
+	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	command open "$url"
 }
 
 BINDS[_open]=alt-enter
 HOOKS[_open]=clear
 DESCS[_open]='Open bookmark with vpnfox'
 _open() {
-  local id url
-  read -r id _ <<< "$1"
-  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-  urlopen "$url"
+	local id url
+	read -r id _ <<<"$1"
+	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	urlopen "$url"
 }
 
 BINDS[bgopen]=tab
 HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open bookmark in the background with vpnfox'
 bgopen() {
-  open "$@"
+	open "$@"
 }
 
 BINDS[copy]=alt-c
 DESCS[copy]='Clipboard bookmark URL'
 copy() {
-  local id url
+	local id url
 
-  read -r id _ <<< "$1"
-  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	read -r id _ <<<"$1"
+	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
 
-  tmux load-buffer - <<< "$url"
+	tmux load-buffer - <<<"$url"
 }
 
 check() {
-  local id
+	local id
 
-  read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
+	read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
 }
 
 BINDS[rm]=alt-d
 HOOKS[rm]=noclear
 DESCS[rm]='Delete bookmark'
 rm() {
-  local id
+	local id
 
-  read -r id _ <<< "$1"
+	read -r id _ <<<"$1"
 
-  sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
+	sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
 }
 
 BINDS[mod]=alt-e
 HOOKS[mod]=sclear
 DESCS[mod]='Rename bookmark'
 mod() {
-  local id title
+	local id title
 
-  read -r id title <<< "$1"
+	read -r id title <<<"$1"
 
-  echo -n "$title" | tmux load-buffer -b preview -
+	echo -n "$title" | tmux load-buffer -b preview -
 
-  read -r title < <(input)
+	read -r title < <(input)
 
-  mute tmux delete-buffer -b preview
+	mute tmux delete-buffer -b preview
 
-  if [[ -n "$title" ]]; then
-    sqlite3 "$DB" \
-      "UPDATE bookmarks SET title = '${title}' WHERE id == ${id}"
-  fi
+	if [[ -n "$title" ]]; then
+		sqlite3 "$DB" \
+			"UPDATE bookmarks SET title = '${title}' WHERE id == ${id}"
+	fi
 }
 
 add() {
-  local url="$1" title="$2" mytitle
+	local url="$1" title="$2" mytitle
 
-  if check "$url"; then
-    notify "'$url' already exists"
-    return 1
-  fi
+	if check "$url"; then
+		notify "'$url' already exists"
+		return 1
+	fi
 
-  (
-    echo "TITLE: $title"
-    echo "URL: $url"
-  ) | tmux load-buffer -b preview -
+	(
+		echo "TITLE: $title"
+		echo "URL: $url"
+	) | tmux load-buffer -b preview -
 
-  read -r mytitle < <(menu input)
+	read -r mytitle < <(menu input)
 
-  [[ -z "$mytitle" ]] && return
+	[[ -z "$mytitle" ]] && return
 
-  insert "$url" "$mytitle"
+	insert "$url" "$mytitle"
 
-  if check "$url"; then
-    notify "Added '$url'"
-  else
-    notify "Failed to add '$url'"
-  fi
+	if check "$url"; then
+		notify "Added '$url'"
+	else
+		notify "Failed to add '$url'"
+	fi
 }
 
 del() {
-  local url="$1"
-  if check "$url"; then
-    sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"
-    if check "$url"; then
-      notify "Failed to delete '$url'"
-    else
-      notify "Deleted '$url'"
-    fi
-  else
-    notify "'$url' does not exist"
-  fi
+	local url="$1"
+	if check "$url"; then
+		sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"
+		if check "$url"; then
+			notify "Failed to delete '$url'"
+		else
+			notify "Deleted '$url'"
+		fi
+	else
+		notify "'$url' does not exist"
+	fi
 }
