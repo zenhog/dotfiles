@@ -15,7 +15,7 @@ label() {
 view() {
 	local thread
 
-	read -r thread _ < <(mails | sed -rn "${FZF_POS}p")
+	read -r thread _ <<<"$1"
 
 	readarray -t files < <(notmuch search --output=files "$thread")
 
@@ -33,17 +33,23 @@ mails() {
 	notmuch search --sort=newest-first --output=summary --format=json tag:inbox
 }
 
+OPTS+=(--with-nth 2..)
 list() {
 	# @menu-mail-list inbox|sent|draft|archive
 	local authors subjects mails
+	local author_color=red
+	local subject_color=yellow
 
 	IFS= read -r -d '' mails < <(mails)
 
+	readarray -t threads < <(jq -r ".[].thread" <<<"$mails")
 	readarray -t authors < <(jq -r ".[].authors" <<<"$mails")
 	readarray -t subjects < <(jq -r ".[].subject" <<<"$mails")
 
 	for i in "${!authors[@]}"; do
-		printf "%s%s%s\n" "${subjects[$i]}" "$iSEP" "${authors[$i]}"
+		printf "%s%s%s%s%s\n" "${threads[$i]}" "$iSEP" \
+			"$(colorize "$author_color" "${authors[$i]:0:30}")" "$iSEP" \
+			"$(colorize "$subject_color" "${subjects[$i]}")"
 	done | column -t -s "$iSEP"
 }
 

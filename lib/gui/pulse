@@ -194,6 +194,7 @@ togglemute() {
 # create combine-sink-all
 # create monitored-sink?
 
+OPTS+=(--with-nth 2..)
 list() {
 	# format: INDEX, SINK/SOURCE/INPUT/OUTPUT/PORT, NAME, MUTE, VOL, DEFAULT
 

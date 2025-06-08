@@ -7,49 +7,50 @@ ICON=
 HORIZONTAL=1
 
 view() {
-  local bufnum
-  read -r bufnum _ <<< "$1"
-  tmux show-buffer -b "$bufnum"
+	local bufnum
+	read -r bufnum _ <<<"$1"
+	tmux show-buffer -b "$bufnum"
 }
 
+OPTS+=(--with-nth 2..)
 list() {
-  tmux list-buffers -F '#{buffer_name} #{buffer_sample}'
+	tmux list-buffers -F '#{buffer_name} #{buffer_sample}'
 }
 
 BINDS[del]=alt-d
 DESCS[del]='Delete buffer'
 del() {
-  local buf
-  read -r buf _ <<< "$1"
-  tmux delete-buffer -b "$buf"
+	local buf
+	read -r buf _ <<<"$1"
+	tmux delete-buffer -b "$buf"
 }
 
 BINDS[delall]=alt-a
 DESCS[dellall]='Delete buffer'
 delall() {
-  local buffers
-  readarray -t buffers < <(tmux list-buffers -F '#{buffer_name}')
+	local buffers
+	readarray -t buffers < <(tmux list-buffers -F '#{buffer_name}')
 
-  for buf in "${buffers[@]}"; do
-    tmux delete-buffer -b "$buf"
-  done
+	for buf in "${buffers[@]}"; do
+		tmux delete-buffer -b "$buf"
+	done
 }
 
 clip() {
-  tmux load-buffer - <<< "${1:1}"
-  notify "Clipped '${1:1}'"
+	tmux load-buffer - <<<"${1:1}"
+	notify "Clipped '${1:1}'"
 }
 
 fork() {
-  local origin="$1"
-  local pathname="$2"
+	local origin="$1"
+	local pathname="$2"
 
-  IFS=/ read -r _ user repo _ <<< "$pathname"
+	IFS=/ read -r _ user repo _ <<<"$pathname"
 
-  cd "$HOME/workspace/repos" && {
-    [[ -d "$repo" ]] && notify "Repo '$repo' already exists" || {
-      git clone "$origin/$user/$repo" "$repo" && notify "Cloned '$repo'" ||
-        notify "Failed to clone '$repo'"
-      }
-  }
+	cd "$HOME/workspace/repos" && {
+		[[ -d "$repo" ]] && notify "Repo '$repo' already exists" || {
+			git clone "$origin/$user/$repo" "$repo" && notify "Cloned '$repo'" ||
+				notify "Failed to clone '$repo'"
+		}
+	}
 }

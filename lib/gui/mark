@@ -53,7 +53,7 @@ label() {
 	sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
 }
 
-# export EXTRA+=(--with-nth 2..)
+OPTS=(--with-nth 2..)
 list() {
 	sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
 		column -t -s "$iSEP"

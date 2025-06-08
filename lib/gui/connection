@@ -7,114 +7,111 @@ ICON=󰴽
 HORIZONTAL=1
 PREVIEW_LABEL_OFFSET=2
 
-view() {
-  local y
-}
-
 label() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  echo " mode: $mode "
+	echo " mode: $mode "
 }
 
 previewlabel() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  echo " $(dolist "$mode-header") "
+	echo " $(dolist "$mode-header") "
 }
 
 init() {
-  set_opt mode connections
+	set_opt mode connections
 }
 
 dolist() {
-  local kind="$1"
+	local kind="$1"
 
-  case "$kind" in
-    ssids)
-      nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-        device wifi list --rescan yes | tail +2
-      ;;
-    ssids-header)
-      nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-        device wifi list --rescan yes | head -1 | tr ' ' '–'
-      ;;
-    connections)
-      nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-        connection show | tail +2
-      ;;
-    connections-header)
-      nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-        connection show | head -1 | tr ' ' '–'
-      ;;
-  esac
+	case "$kind" in
+	ssids)
+		nmcli -c yes -s -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+			device wifi list --rescan yes | tail +2
+		;;
+	ssids-header)
+		nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+			device wifi list --rescan yes | head -1 | tr ' ' '–'
+		;;
+	connections)
+		sudo nmcli -c yes -s -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+			connection show | tail +2
+		;;
+	connections-header)
+		nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+			connection show | head -1 | tr ' ' '–'
+		;;
+	esac
 }
 
 BINDS[rescan]=alt-r
 DESCS[rescan]='Rescan'
 reload() {
-  sudo nmcli device wifi rescan
+	sudo nmcli device wifi rescan
 }
 
 view() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  local active id
+	local active id
 
-  read -r active id _ <<< "$1"
+	read -r active id _ <<<"$1"
 
-  case "$mode" in
-    connections)
-      nmcli --show-secrets con show "$id"
-      ;;
-    ssids)
-      nmcli con show "$id"
-      ;;
-  esac
+	case "$mode" in
+	connections)
+		sudo nmcli --show-secrets con show "$id"
+		;;
+	ssids)
+		nmcli con show "$id"
+		;;
+	esac
 }
 
 BINDS[open]=enter
 HOOKS[open]=clear
 DESCS[open]='Toggle connection or wifi'
 open() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  local active id
+	local active id
 
-  read -r active id _ <<< "$1"
+	read -r active id _ <<<"$1"
 
-  case "$mode" in
-    connections)
-      case "$active" in
-        yes) sudo nmcli con down "$id" ;;
-        no) sudo nmcli con up "$id" ;;
-      esac
-      ;;
-    ssids)
-      case "$active" in
-        yes) sudo nmcli con down "$id" ;;
-        no) sudo nmcli con up "$id" ;;
-      esac
-      ;;
-  esac
+	case "$mode" in
+	connections)
+		case "$active" in
+		yes) sudo nmcli con down "$id" ;;
+		no) sudo nmcli con up "$id" ;;
+		esac
+		;;
+	ssids)
+		case "$active" in
+		yes) sudo nmcli con down "$id" ;;
+		no) sudo nmcli con up "$id" ;;
+		esac
+		;;
+	esac
 }
 
+OPTS+=(--with-nth 3..)
 list() {
-  local mode="${1:-$(get_opt mode)}"
+	local mode="${1:-$(get_opt mode)}"
 
-  set_opt mode "$mode"
+	set_opt mode "$mode"
 
-  dolist "$mode"
+	dolist "$mode"
 }
 
 BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 rotate_mode() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  case "$mode" in
-    connections) set_opt mode ssids ;;
-    ssids) set_opt mode connections ;;
-  esac
+	case "$mode" in
+	connections) set_opt mode ssids ;;
+	ssids) set_opt mode connections ;;
+	esac
 }

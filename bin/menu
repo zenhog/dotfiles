@@ -258,8 +258,8 @@ main() {
 		COMMAND+=("$cmd")
 	done
 
-	echo "${EXTRA[@]}" >/tmp/extra
 	[[ -n "$EXTRA" ]] && COMMAND+=("${EXTRA[@]}")
+	[[ -n "$OPTS" ]] && COMMAND+=("${OPTS[@]}")
 
 	mute declare -F init && init
 
