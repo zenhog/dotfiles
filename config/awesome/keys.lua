@@ -96,7 +96,7 @@ for i = 1, 9 do
 end
 
 for _, line in ipairs(pipexec("gui")) do
-	local _, command, mod, key = line:match("^(%S+):(%S+):(%S+):(%S+)$")
+	local _, command, mod, key, _ = line:match("^(%S+):(%S+):(%S+):(%S+):(%S+)$")
 
 	globalkeys = gears.table.join(
 		globalkeys,
