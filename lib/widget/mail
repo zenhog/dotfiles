@@ -6,6 +6,10 @@ toggle() {
 	mailsync
 }
 
+run() {
+	menu auto mail
+}
+
 text() {
 	local count
 

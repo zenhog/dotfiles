@@ -2,6 +2,10 @@
 
 PERIOD=10
 
+run() {
+	menu auto news
+}
+
 unread() {
 	local db="$HOME/.local/share/newsboat/cache.db"
 	local day=$((3600 * 24))

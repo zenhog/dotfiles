@@ -2,6 +2,10 @@
 
 PERIOD=10
 
+run() {
+	menu auto aria
+}
+
 KEYS[toggle]='C-M:a'
 toggle() {
 	# aria2p toggle-all
