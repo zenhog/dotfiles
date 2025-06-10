@@ -462,10 +462,11 @@ awful.screen.connect_for_each_screen(function(s)
 			},
 			{
 				layout = wibox.layout.align.horizontal,
-				scroll(widgets.push, 318),
+				expand = "outside",
 				nil,
 				{
 					layout = wibox.layout.fixed.horizontal,
+					scroll(widgets.push, 318),
 					spacing = 1,
 					scroll(widgets.bluetooth, 80),
 					block(M.group(widgets.mail, widgets.news, widgets.download)),
@@ -474,6 +475,7 @@ awful.screen.connect_for_each_screen(function(s)
 					block(M.group(s.menus.service), theme.iconsize),
 					block(M.group(s.menus.menu), theme.iconsize),
 				},
+				nil,
 			},
 		},
 		left = 1,
