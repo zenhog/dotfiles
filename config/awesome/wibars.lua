@@ -391,11 +391,11 @@ awful.screen.connect_for_each_screen(function(s)
 	local pipe = io.popen("gui")
 
 	for line in pipe:lines() do
-		local icon, command, _, _ = line:match("^(%S+):(%S+):(%S+):(%S+)$")
+		local icon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S*)$")
 		local buttons = {}
 
 		if command then
-			s.menus[command] = iconwidget(icon, command, command)
+			s.menus[command] = iconwidget(icon, command, command, color or nil)
 			s.menus[command]:buttons(addbutton(buttons, 1, "menu loop " .. command))
 		end
 	end
