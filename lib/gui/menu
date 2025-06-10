@@ -3,18 +3,19 @@
 KEY=space
 MOD='S-M'
 ICON=
+COLOR=yellow
 
 POSITION=RIGHT
 NOWRAP=1
 
 view() {
-  local menu
-  read -r menu _ <<< "$1"
-  gui "$menu" list
+	local menu
+	read -r menu _ <<<"$1"
+	gui "$menu" list
 }
 
 list() {
-  gui | column -t -s: | sort -k4
+	gui | column -t -s: | sort -k4
 }
 
 BINDS[open]=enter
@@ -22,6 +23,6 @@ CALLS[open]='become(menu shell {2})'
 HOOKS[open]=open
 DESCS[open]='Open menu entry'
 open() {
-  local icon menu
-  read -r -d '' icon menu _ <<< "$1"
+	local icon menu
+	read -r -d '' icon menu _ <<<"$1"
 }

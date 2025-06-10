@@ -3,6 +3,7 @@
 KEY=e
 MOD='S-M'
 ICON=
+COLOR=darkred
 
 export MUXSOCK="$HOME/.vmux.S"
 export SOCKDIR="$HOME/.sockets"
@@ -11,126 +12,126 @@ export HOSTDIR="$HOME/.ssh/hosts"
 export URL=https://raw.githubusercontent.com/zenhog/dotfiles/master/bin/dot
 
 view() {
-  ssh -G "$1"
+	ssh -G "$1"
 }
 
 list() {
-  local hosts
+	local hosts
 
-  readarray -t hosts < <(find "$HOSTDIR" -type f -exec grep '^Host ' {} \;)
+	readarray -t hosts < <(find "$HOSTDIR" -type f -exec grep '^Host ' {} \;)
 
-  for host in "${hosts[@]}"; do
-    read -r _ host <<< "$host"
+	for host in "${hosts[@]}"; do
+		read -r _ host <<<"$host"
 
-    if connected "$host"; then
-      host="$(colorize green "$host")"
-    fi
+		if connected "$host"; then
+			host="$(colorize green "$host")"
+		fi
 
-    printf "%s\n" "$host"
-  done | sort
+		printf "%s\n" "$host"
+	done | sort
 }
 
 connected() {
-  local host="$1"
+	local host="$1"
 
-  mute ssh -S "$SOCKDIR/$host.S" -O check "$host"
+	mute ssh -S "$SOCKDIR/$host.S" -O check "$host"
 }
 
 connect() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  if connected "$host"; then
-    return
-  fi
+	if connected "$host"; then
+		return
+	fi
 
-  rm -f "$sock"
+	rm -f "$sock"
 
-  timeout 5 ssh -fMNS "$sock" "$host"
+	timeout 5 ssh -fMNS "$sock" "$host"
 }
 
 disconnect() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  if connected "$host"; then
-    ssh -S "$sock" -O cancel "$host"
-    ssh -S "$sock" -O exit   "$host"
-  fi
+	if connected "$host"; then
+		ssh -S "$sock" -O cancel "$host"
+		ssh -S "$sock" -O exit "$host"
+	fi
 }
 
 BINDS[toggle]=tab
 DESCS[toggle]='Toggle ssh master connection'
 toggle() {
-  local host="$1"
+	local host="$1"
 
-  if connected "$host"; then
-    disconnect "$1"
-  else
-    connect "$1"
-  fi
+	if connected "$host"; then
+		disconnect "$1"
+	else
+		connect "$1"
+	fi
 }
 
 revport() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  if connected "$host"; then
-    ssh -S "$sock" -O forward -R "localhost:0:$MUXSOCK" "$host"
-  fi
+	if connected "$host"; then
+		ssh -S "$sock" -O forward -R "localhost:0:$MUXSOCK" "$host"
+	fi
 }
 
 cancel() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  if connected "$host"; then
-    ssh -S "$sock" -O cancel "$host"
-  fi
+	if connected "$host"; then
+		ssh -S "$sock" -O cancel "$host"
+	fi
 }
 
 BINDS[mux]=enter
 HOOKS[mux]=acceptsync
 DESCS[mux]='Attach a tmux session'
 mux() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
-  local name="${host%%.*}"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
+	local name="${host%%.*}"
 
-  attach fg "$name" "$host"
+	attach fg "$name" "$host"
 }
 
 attach() {
-  local mode="$1"
-  local name="$2"
-  local host="$3"
+	local mode="$1"
+	local name="$2"
+	local host="$3"
 
-  if ! connected "$host"; then
-    connect "$host"
-  fi
-  gui tmux mod "$mode" attach remote "$name" "$host"
+	if ! connected "$host"; then
+		connect "$host"
+	fi
+	gui tmux mod "$mode" attach remote "$name" "$host"
 }
 
 BINDS[shell]='alt-enter'
 HOOKS[shell]=acceptsync
 DESCS[shell]='Open a new shell window in tmux'
 shell() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
-  local name="${host%%.*}"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
+	local name="${host%%.*}"
 
-  if connect "$host"; then
-    gui tmux window local "$(hostname)" "$name" \
-      ssh -S "$sock" -t "$host" zsh -il
-  fi
+	if connect "$host"; then
+		gui tmux window local "$(hostname)" "$name" \
+			ssh -S "$sock" -t "$host" zsh -il
+	fi
 }
 
 mount() {
-  local host="$(get host "$1")"
+	local host="$(get host "$1")"
 
-  mkdir -p "$HOME/.sshfs/$host"
+	mkdir -p "$HOME/.sshfs/$host"
 
-  sshfs "$host":'$HOME' "$HOME/.sshfs/$host"
+	sshfs "$host":'$HOME' "$HOME/.sshfs/$host"
 }
 
 #goto() {
@@ -142,50 +143,50 @@ mount() {
 #}
 
 ttyexec() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  shift
+	shift
 
-  #connect "$host" && ssh -S "$sock" -t "$host" bash -lc "'$*'"
-  if connected "$host"; then
-    exec ssh -S "$sock" -t "$host" bash -lc "$(printf " %q" "$*")"
-  fi
+	#connect "$host" && ssh -S "$sock" -t "$host" bash -lc "'$*'"
+	if connected "$host"; then
+		exec ssh -S "$sock" -t "$host" bash -lc "$(printf " %q" "$*")"
+	fi
 }
 
 rexec() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  shift
+	shift
 
-  #connect "$host" && ssh -S "$sock" "$host" bash -lc "'$*'"
-  #connect "$host" && ssh -S "$sock" "$host" bash -ls < <(printf " %q" "$@")
+	#connect "$host" && ssh -S "$sock" "$host" bash -lc "'$*'"
+	#connect "$host" && ssh -S "$sock" "$host" bash -ls < <(printf " %q" "$@")
 
-  if connected "$host"; then
-    ssh -S "$sock" "$host" bash -ls <<< "${@@Q}"
-  fi
+	if connected "$host"; then
+		ssh -S "$sock" "$host" bash -ls <<<"${@@Q}"
+	fi
 }
 
 sync() {
-  local host="$1"
-  local sock="$SOCKDIR/$host.S"
+	local host="$1"
+	local sock="$SOCKDIR/$host.S"
 
-  local cmd
+	local cmd
 
-  read -r cmd < <(printf '<(curl -sL %s)' "$URL")
+	read -r cmd < <(printf '<(curl -sL %s)' "$URL")
 
-  cmd=(bash "$cmd" install master)
+	cmd=(bash "$cmd" install master)
 
-  local temp="$(mktemp --dry-run)"
+	local temp="$(mktemp --dry-run)"
 
-  if connected "$host"; then
-    ssh -S "$sock" "$host" bash -ls << EOF
+	if connected "$host"; then
+		ssh -S "$sock" "$host" bash -ls <<EOF
     curl -sSL "$URL" -o "$temp"
     if bash "$temp" install master; then
       bash "$temp" pull master
     fi
     rm -f "$temp"
 EOF
-  fi
+	fi
 }

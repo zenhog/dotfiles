@@ -3,6 +3,7 @@
 KEY=u
 MOD='S-M'
 ICON=
+COLOR=firebrick
 
 HORIZONTAL=1
 NOWRAP=1

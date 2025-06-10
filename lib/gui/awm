@@ -3,13 +3,14 @@
 KEY=t
 MOD='S-M'
 ICON=
+COLOR=bisque
 
 HORIZONTAL=1
 
 NOWRAP=1
 
 list() {
-  awesome-client << EOF | sed -r '1d;$d' | column -t -s "$iSEP"
+	awesome-client <<EOF | sed -r '1d;$d' | column -t -s "$iSEP"
     require('awful')
     local r = '\n'
     for _, c in ipairs(client.get()) do
@@ -22,39 +23,40 @@ EOF
 }
 
 view() {
-  local window
-  read -r window _ <<< "$1"
-  properties @window="$window"
+	local window
+	read -r window _ <<<"$1"
+	properties @window="$window"
 }
 
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Raise window entry'
 open() {
-  local window
+	local window
 
-  read -r window _ <<< "$1"
-  raise @window="$window"
+	read -r window _ <<<"$1"
+	raise @window="$window"
 }
 
 BINDS[close]=alt-d
 DESCS[close]='Close window entry'
 close() {
-  local window
+	local window
 
-  read -r window _ <<< "$1"
-  winkill @window="$window"
+	read -r window _ <<<"$1"
+	winkill @window="$window"
 }
 
 raise() {
-  local lhs conds success
-  read -r -a lhs < <(parse lhs "$@")
+	local lhs conds success
+	read -r -a lhs < <(parse lhs "$@")
 
-  IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
+	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 
-  [[ -z "$mode" ]] && local mode=fg
+	[[ -z "$mode" ]] && local mode=fg
 
-  read -r success < <(awesome-client << EOF
+	read -r success < <(
+		awesome-client <<EOF
     require('awful')
     for _, c in ipairs(client.get()) do
       if ${conds} then
@@ -70,18 +72,19 @@ raise() {
     end
     return false
 EOF
-  )
+	)
 
-  [[ "boolean true" == "$success" ]]
+	[[ "boolean true" == "$success" ]]
 }
 
 winkill() {
-  local lhs conds success
-  read -r -a lhs < <(parse lhs "$@")
+	local lhs conds success
+	read -r -a lhs < <(parse lhs "$@")
 
-  IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
+	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 
-  read -r success < <(awesome-client << EOF
+	read -r success < <(
+		awesome-client <<EOF
     require('awful')
     for _, c in ipairs(client.get()) do
       if ${conds} then
@@ -91,114 +94,121 @@ winkill() {
     end
     return false
 EOF
-  )
+	)
 
-  [[ "boolean true" == "$success" ]]
+	[[ "boolean true" == "$success" ]]
 }
 
 timeout() {
-  for widget in "$@"; do
-    awesome-client << EOF
+	for widget in "$@"; do
+		awesome-client <<EOF
       require('widgets').timers.${widget}:emit_signal('timeout')
 EOF
-  done
+	done
 }
 
 properties() {
-  getattributes "$@" -- \
-    window name type pid role icon_name class instance minimized maximized \
-    ontop above below sticky urgent hidden fullscreen opacity startup_id \
-    maximized_horizontal maximized_vertical
+	getattributes "$@" -- \
+		window name type pid role icon_name class instance minimized maximized \
+		ontop above below sticky urgent hidden fullscreen opacity startup_id \
+		maximized_horizontal maximized_vertical
 }
 
 runonce() {
-  local mode="$1" lhs rhs conds
+	local mode="$1" lhs rhs conds
 
-  shift
+	shift
 
-  read -r -a lhs < <(parse lhs "$@")
-  read -r -a rhs < <(parse rhs "$@")
+	read -r -a lhs < <(parse lhs "$@")
+	read -r -a rhs < <(parse rhs "$@")
 
-  case "$mode" in
-    fg)
-      raise "${lhs[@]}" || spawn fg "${lhs[@]}" -- "${rhs[@]}"
-      ;;
-    bg)
-      exists "${lhs[@]}" || spawn bg "${lhs[@]}" -- "${rhs[@]}"
-      ;;
-  esac
+	case "$mode" in
+	fg)
+		raise "${lhs[@]}" || spawn fg "${lhs[@]}" -- "${rhs[@]}"
+		;;
+	bg)
+		exists "${lhs[@]}" || spawn bg "${lhs[@]}" -- "${rhs[@]}"
+		;;
+	esac
 }
 
 strfmt() {
-  local attr="$1"
+	local attr="$1"
 
-  [[ "$attr" == *=* ]] || return
+	[[ "$attr" == *=* ]] || return
 
-  local lhs="${attr%%=*}"
-  local rhs="${attr#*=}"
+	local lhs="${attr%%=*}"
+	local rhs="${attr#*=}"
 
-  if [[ '@' == "${lhs:0:1}" ]]; then
-    lhs="${lhs:1}"
-  else
-    rhs="'${rhs}'"
-  fi
+	if [[ '@' == "${lhs:0:1}" ]]; then
+		lhs="${lhs:1}"
+	else
+		rhs="'${rhs}'"
+	fi
 
-  echo "$lhs" "$rhs"
+	echo "$lhs" "$rhs"
 }
 
 cmdfmt() {
-  local fmt str type="${1?}"
+	local fmt str type="${1?}"
 
-  case "$type" in
-    conds)
-      fmt="c.%s == %s"
-      ;;
-    attrs)
-      fmt=" %s = %s "
-      ;;
-    props)
-      fmt=" '%s' "
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+	case "$type" in
+	conds)
+		fmt="c.%s == %s"
+		;;
+	attrs)
+		fmt=" %s = %s "
+		;;
+	props)
+		fmt=" '%s' "
+		;;
+	*)
+		return 1
+		;;
+	esac
 
-  shift
+	shift
 
-  for attr in "$@"; do
-    local lhs rhs
+	for attr in "$@"; do
+		local lhs rhs
 
-    read -r lhs rhs < <(strfmt "$attr")
+		read -r lhs rhs < <(strfmt "$attr")
 
-    if [[ -z "$lhs" ]]; then
-      str+=("$(printf "$fmt" "$attr")")
-      continue
-    fi
+		if [[ -z "$lhs" ]]; then
+			str+=("$(printf "$fmt" "$attr")")
+			continue
+		fi
 
-    str+=("$(printf "$fmt" "$lhs" "$rhs")")
-  done
+		str+=("$(printf "$fmt" "$lhs" "$rhs")")
+	done
 
-  case "$type" in
-    conds)
-      (IFS=,; printf "%s" "${str[*]}") | sed -r 's/,/ and /g'
-      ;;
-    props|attrs)
-      (IFS=,; printf "{%s}" "${str[*]}")
-      ;;
-  esac
+	case "$type" in
+	conds)
+		(
+			IFS=,
+			printf "%s" "${str[*]}"
+		) | sed -r 's/,/ and /g'
+		;;
+	props | attrs)
+		(
+			IFS=,
+			printf "{%s}" "${str[*]}"
+		)
+		;;
+	esac
 }
 
 getattributes() {
-  local lhs rhs conds props output
+	local lhs rhs conds props output
 
-  read -r -a lhs < <(parse lhs "$@")
-  read -r -a rhs < <(parse rhs "$@")
+	read -r -a lhs < <(parse lhs "$@")
+	read -r -a rhs < <(parse rhs "$@")
 
-  IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
-  read -r props < <(cmdfmt props "${rhs[@]}")
+	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
+	read -r props < <(cmdfmt props "${rhs[@]}")
 
-  IFS= read -r -d '' output < <(awesome-client << EOF | sed -r '1d;$d'
+	IFS= read -r -d '' output < <(
+		awesome-client <<EOF | sed -r '1d;$d'
     require('awful')
     local r = '\n'
     for _, c in ipairs(client.get()) do
@@ -216,78 +226,79 @@ getattributes() {
     end
     return r
 EOF
-  )
+	)
 
-  echo -n "$output" | column -t
-  [[ -n "$output" ]]
+	echo -n "$output" | column -t
+	[[ -n "$output" ]]
 }
 
 exists() {
-  mute getattributes "$@" -- window
+	mute getattributes "$@" -- window
 }
 
 waitfor() {
-  local totaltime=0
-  until exists "$@" || (( totaltime > 30 )); do
-    sleep 0.1
-    (( totaltime += 1 ))
-  done
+	local totaltime=0
+	until exists "$@" || ((totaltime > 30)); do
+		sleep 0.1
+		((totaltime += 1))
+	done
 }
 
 setattributes() {
-  local lhs rhs conds props
+	local lhs rhs conds props
 
-  read -r -a lhs < <(parse lhs "$@")
-  read -r -a rhs < <(parse rhs "$@")
+	read -r -a lhs < <(parse lhs "$@")
+	read -r -a rhs < <(parse rhs "$@")
 
-  IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
-  read -r props < <(cmdfmt props "${rhs[@]}")
+	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
+	read -r props < <(cmdfmt props "${rhs[@]}")
 
-  awesome-client << EOF
+	awesome-client <<EOF
     require('awful')
     for _, c in ipairs(client.get()) do
       if ${conds} then
         $(
-          for attr in "${rhs[@]}"; do
-            local lhs rhs
+		for attr in "${rhs[@]}"; do
+			local lhs rhs
 
-            read -r lhs rhs < <(strfmt "$attr")
+			read -r lhs rhs < <(strfmt "$attr")
 
-            [[ -n "$lhs" ]] && printf "c.%s = %s\n" "$lhs" "$rhs"
-          done
-        )
+			[[ -n "$lhs" ]] && printf "c.%s = %s\n" "$lhs" "$rhs"
+		done
+	)
       end
     end
 EOF
 
-  rhs=("${rhs[@]%%=*}")
+	rhs=("${rhs[@]%%=*}")
 
-  getattributes "${lhs[@]}" -- "${rhs[@]#@}"
+	getattributes "${lhs[@]}" -- "${rhs[@]#@}"
 }
 
 spawn() {
-  local mode="$1"
+	local mode="$1"
 
-  shift
+	shift
 
-  local lhs rhs attrs pid
+	local lhs rhs attrs pid
 
-  read -r -a lhs < <(parse lhs "$@")
-  read -r -a rhs < <(parse rhs "$@")
+	read -r -a lhs < <(parse lhs "$@")
+	read -r -a rhs < <(parse rhs "$@")
 
-  read -r attrs < <(cmdfmt attrs "${lhs[@]}")
+	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
 
-  read -r pid < <(awesome-client << EOF | sed -r 's/[^0-9]//g'
+	read -r pid < <(
+		awesome-client <<EOF | sed -r 's/[^0-9]//g'
     local s = '${rhs[*]}'
     return require('awful').spawn(s, ${attrs})
 EOF
-  )
+	)
 
-  [[ "$pid" =~ [0-9]+ ]] || return
-  [[ "$rhs" == i3lock ]] && return
+	[[ "$pid" =~ [0-9]+ ]] || return
+	[[ "$rhs" == i3lock ]] && return
 
-  if [[ -n "$lhs" ]]; then
-    gui awm waitfor "${lhs[@]}"
-    [[ "$mode" == fg ]] && raise "${lhs[@]}"
-  fi
+	if [[ -n "$lhs" ]]; then
+		gui awm waitfor "${lhs[@]}"
+		[[ "$mode" == fg ]] && raise "${lhs[@]}"
+	fi
 }

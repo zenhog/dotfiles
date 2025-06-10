@@ -3,6 +3,7 @@
 KEY=v
 MOD='S-M'
 ICON=󰝨
+COLOR=cadetblue
 
 FOLLOW=1
 NOWRAP=1
@@ -13,66 +14,73 @@ export ULOG_DIR="$HOME/.local/share/log/runit"
 export SLOG_DIR=/var/log/runit
 
 view() {
-  local service logd="$(get_opt logd)"
-  read -r service _ <<< "$1"
-  grc --colour=on tail -n +1 -f "$logd/$service/current"
+	local service logd="$(get_opt logd)"
+	read -r service _ <<<"$1"
+	grc --colour=on tail -n +1 -f "$logd/$service/current"
 }
 
 label() {
-  local mode="$(get_opt mode)"
-  local logd="$(get_opt logd)"
+	local mode="$(get_opt mode)"
+	local logd="$(get_opt logd)"
 
-  echo " mode: $mode, logd: $logd "
+	echo " mode: $mode, logd: $logd "
 }
 
 init() {
-  set_opt mode user
-  set_opt logd "$ULOG_DIR"
+	set_opt mode user
+	set_opt logd "$ULOG_DIR"
 }
 
 BINDS[rotate_mode]=alt-t
 HOOKS[rotate_mode]=clear
 DESCS[rotate_mode]='Rotate mode'
 rotate_mode() {
-  local mode="$(get_opt mode)"
+	local mode="$(get_opt mode)"
 
-  case "$mode" in
-    system) set_opt mode user; set_opt logd "$SLOG_DIR" ;;
-    user)   set_opt mode xorg; set_opt logd "$ULOG_DIR" ;;
-    xorg)   set_opt mode system; set_opt logd "$ULOG_DIR" ;;
-  esac
+	case "$mode" in
+	system)
+		set_opt mode user
+		set_opt logd "$SLOG_DIR"
+		;;
+	user)
+		set_opt mode xorg
+		set_opt logd "$ULOG_DIR"
+		;;
+	xorg)
+		set_opt mode system
+		set_opt logd "$ULOG_DIR"
+		;;
+	esac
 }
 
 list() {
-  local mode="${1:-$(get_opt mode)}"
+	local mode="${1:-$(get_opt mode)}"
 
-  set_opt mode "$mode"
+	set_opt mode "$mode"
 
-  "list-$mode"
+	"list-$mode"
 }
 
 list-user() {
-  local logd="$(get_opt logd)"
-  vsv -d "$HOME/.usv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+	local logd="$(get_opt logd)"
+	vsv -d "$HOME/.usv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
 }
 
 list-xorg() {
-  vsv -d "$HOME/.xsv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+	vsv -d "$HOME/.xsv" | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
 }
 
 list-system() {
-  sudo vsv | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
+	sudo vsv | sed -rn '3,$p' | awk '{print $2,$3}' | column -t
 }
-
 
 BINDS[restart]=alt-r
 DESCS[restart]='Restart service'
 restart() {
-  local svc
-  read -r svc _ <<< "$1"
-  sudo vsv restart "$svc"
+	local svc
+	read -r svc _ <<<"$1"
+	sudo vsv restart "$svc"
 }
-
 
 # start
 # stop

@@ -3,6 +3,7 @@
 KEY=w
 MOD='S-M'
 ICON=󰈭
+COLOR=gold
 
 HORIZONTAL=1
 
@@ -10,8 +11,8 @@ export DB="$HOME/.db/vocabulary.db"
 export API="https://api.dictionaryapi.dev/api/v2/entries/en"
 
 noinit() {
-  rm -f "$DB"
-  sqlite3 "$DB" << EOF
+	rm -f "$DB"
+	sqlite3 "$DB" <<EOF
   CREATE TABLE words(
     id integer primary key,
     word_en text unique,
@@ -25,62 +26,62 @@ EOF
 }
 
 view() {
-  local id word
-  read -r id word _ <<< "$1"
+	local id word
+	read -r id word _ <<<"$1"
 
-  curl -sL "${API}/${word}" |
-    jq 'def f: recurse | select(IN([], {}));
+	curl -sL "${API}/${word}" |
+		jq 'def f: recurse | select(IN([], {}));
       until(isempty(f); del(f)) | map(del(.phonetics,.license,.sourceUrls))' |
-        yq -y | bat -p --force-colorization --language yaml
+		yq -y | bat -p --force-colorization --language yaml
 }
 
 list() {
-  # @menu-word-language fr|en
-  # @menu-word-hidden 1|0
-  sqlite3 -separator "$iSEP" "$DB" \
-    'SELECT id, word_en, word_fr, word_es, word_ar, word_ru FROM words WHERE learnt == false' |
-      sort -t "$iSEP" -k2 | column -t -s "$iSEP"
+	# @menu-word-language fr|en
+	# @menu-word-hidden 1|0
+	sqlite3 -separator "$iSEP" "$DB" \
+		'SELECT id, word_en, word_fr, word_es, word_ar, word_ru FROM words WHERE learnt == false' |
+		sort -t "$iSEP" -k2 | column -t -s "$iSEP"
 }
 
 dump() {
-  sqlite3 "$DB" "SELECT word_en FROM words"
+	sqlite3 "$DB" "SELECT word_en FROM words"
 }
 
 BINDS[pronounce]=alt-p
 DESCS[pronounce]='Pronounce word'
 pronounce() {
-  local id word links
-  read -r id word _ <<< "$1"
-  readarray -t links < <(curl -sL "${API}/${word}" |
-    jq -r '.[].phonetics.[].audio')
+	local id word links
+	read -r id word _ <<<"$1"
+	readarray -t links < <(curl -sL "${API}/${word}" |
+		jq -r '.[].phonetics.[].audio')
 
-  for link in "${links[@]}"; do
-    [[ "$link" =~ ^http ]] || link="https:${link}"
-    mpv "$link"
-  done
+	for link in "${links[@]}"; do
+		[[ "$link" =~ ^http ]] || link="https:${link}"
+		mpv "$link"
+	done
 }
 
 BINDS[add]=enter
 DESCS[add]='Add word to vocabulary database'
 add() {
-  #local word language domain
-  local -a words
-  read -r -a words <<< "$2"
-  for word in "${words[@]}"; do
-    local word_fr
-    read -r word_fr < <(dt -src en -tg fr -txt "$word" |
-      sed -rn '/^Translation result:/ s/^Translation result: (.*)$/\1/p')
-    sqlite3 "$DB" << EOF
+	#local word language domain
+	local -a words
+	read -r -a words <<<"$2"
+	for word in "${words[@]}"; do
+		local word_fr
+		read -r word_fr < <(dt -src en -tg fr -txt "$word" |
+			sed -rn '/^Translation result:/ s/^Translation result: (.*)$/\1/p')
+		sqlite3 "$DB" <<EOF
       INSERT INTO words (word_en, word_fr, learnt)
       values ('${word}', '${word_fr}', false)
 EOF
-  done
+	done
 }
 
 BINDS[del]=alt-d
 DESCS[del]='Delete word'
 del() {
-  local id
-  read -r id _ <<< "$1"
-  sqlite3 "$DB" "DELETE FROM words WHERE id == ${id}"
+	local id
+	read -r id _ <<<"$1"
+	sqlite3 "$DB" "DELETE FROM words WHERE id == ${id}"
 }

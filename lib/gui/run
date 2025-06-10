@@ -3,6 +3,7 @@
 KEY=r
 MOD='S-M'
 ICON=
+COLOR=aqua
 
 export APP_DIR="$HOME/.lib/app"
 
