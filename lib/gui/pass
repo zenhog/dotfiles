@@ -25,7 +25,7 @@ view() {
 
 	[[ -z "$dir" ]] && return
 
-	readarray -t entries < <(cd "$STORE/$dir" && find * -type f)
+	readarray -t entries < <(cd "$STORE/$dir" && find -- * -type f)
 
 	local val
 	for entry in "${entries[@]}"; do
@@ -56,7 +56,7 @@ view() {
 }
 
 list() {
-	(cd "$STORE" && find * .* \( -type d -or -type l \) -exec sh -c \
+	(cd "$STORE" && find -- * .* \( -type d -or -type l \) -exec sh -c \
 		'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
 }
 
@@ -230,7 +230,7 @@ del() {
 	local dir="${1}"
 
 	rm -rf "${STORE}/${dir}"
-	(cd "$STORE" && find * -type d -empty -delete)
+	(cd "$STORE" && find -- * -type d -empty -delete)
 }
 
 dom() {
@@ -239,7 +239,7 @@ dom() {
 
 	while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
 		#read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
-		read -r found < <(cd "$STORE" && find * \( -type d -or -type l \) \
+		read -r found < <(cd "$STORE" && find -- * \( -type d -or -type l \) \
 			-name "*${zones[*]:$i}" | tac)
 		[[ -n "$found" ]] && break
 		((++i))
