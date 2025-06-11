@@ -1,0 +1,27 @@
+* default card: builtin
+* default profile: stereo? upmixed?
+* default sink: Combine LR
+* default source: AEC
+* default ports:
+* default volumes per sink
+* sinks
+  * Front LR (300) (Upmixed)
+  * Rear LR (200) (virtual surround sound)
+  * Combine LR (100)
+  * Upmixed Combine LR
+  * Current Mic => current Sink (for recording conversations) (1050)
+* sources
+  * Front Mic (400)
+  * AEC+(effects: keyboard,fan suppression) Front Mic**
+  * AEC+(effects: keyboard,fan suppression) Front Mic <= current sink
+
+  * Rear Mic (500)
+  * AEC+(effects: keyboard,fan suppression) Rear Mic <= current sink
+  * AEC+(effects: keyboard,fan suppression) Rear Mic <= current sink
+
+  * Phone Mic (300)
+  * Bluetooth Mic (100)
+  * USB Mic (200)
+* video
+  * Phone Cam
+  * USB Cam
