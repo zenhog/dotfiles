@@ -198,8 +198,39 @@ local function set_clientimg(c)
 		cr:paint()
 
 		c.icon = img._native
+		c.alticon = c.icon
 	end
 end
+
+-- gears.timer.delayed_call(function()
+-- 	os.execute("echo ab >> /tmp/ab")
+-- 	require("awful")
+-- 	for _, c in ipairs(client.get()) do
+-- 		os.execute(string.format("echo %s >> /tmp/ab", c.profile or "no"))
+-- 		if c.profile then
+-- 			if c.profile:match("firefox.*") then
+-- 				set_clientimg(c)
+-- 			end
+-- 		end
+-- 	end
+-- end)
+
+-- gears.timer.delayed_call(function()
+-- 	for c in client.get() do
+-- 		os.execute(string.format("echo %s >> /tmp/ab", c.profile or "no"))
+-- 		if c.profile:match("firefox.*") then
+-- 			set_clientimg(c)
+-- 		end
+-- 	end
+-- end)
+
+-- client.connect_signal("property::icon", function(c)
+-- 	set_clientimg(c)
+-- end)
+
+-- client.connect_signal("property::icon_sizes", function(c)
+-- 	-- set_clientimg(c)
+-- end)
 
 local function set_clienttag(c)
 	local tags = c.screen.tags
