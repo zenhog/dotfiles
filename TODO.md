@@ -1,0 +1,35 @@
+- mail
+  - open
+  - read
+  - unread
+  - delete
+  - spam
+- news
+  - read
+  - unread
+  - keep
+  - open
+- pulse
+  - inc/dec/mute
+- search
+- aria2
+  - del
+  - toggle
+  -
+- ping/vpn
+  - list
+    ping/flag/cgroup
+  - view
+- nmcli
+  - SSID
+  - password
+  - Signal Strength
+  - IP Addr
+  - Device
+  - KeyMgmt (WPA1,2,3 WEP)
+- mpd
+- notifications
+- clipboard
+- pass
+- vocab
+- cheatsheet
