@@ -102,12 +102,12 @@ return {
         "<cmd>Neotree git_status focus<cr>",
         desc = "NeoTree Git",
       },
-      -- {
-      --   "<C-BSlash>",
-      --   mode = { "n", "v" },
-      --   "<cmd>Neotree document_symbols<cr>",
-      --   desc = "NeoTree Symbols",
-      -- },
+      {
+        "<C-Slash>",
+        mode = { "n", "v" },
+        "<cmd>Neotree document_symbols<cr>",
+        desc = "NeoTree Symbols",
+      },
       -- {
       --   "<C-Slash>",
       --   mode = { "n", "v" },

@@ -152,6 +152,8 @@ add() {
 
 	[[ -z "$mytitle" ]] && return
 
+	[[ "$mytitle" == TITLE ]] && mytitle="$title"
+
 	insert "$url" "$mytitle"
 
 	if check "$url"; then
