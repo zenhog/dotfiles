@@ -4,12 +4,15 @@ mkdir -p "$HOME/.mail/proton"
 mkdir -p "$HOME/.mail/mailbox"
 mkdir -p "$HOME/.mail/gmail"
 mkdir -p "$HOME/.mail/disroot"
+mkdir -p "$HOME/.mail/disroot-1"
+mkdir -p "$HOME/.mail/disroot-2"
+mkdir -p "$HOME/.mail/disroot-3"
 
 # ignore All Mail and mv tagged mail to folders
 
 # important/starred
 readarray -t files < <(notmuch search --output=files \
-  --format=text0 tag:important tag:moved)
+	--format=text0 tag:important tag:moved)
 
 # spam/junk
 # archive
