@@ -247,7 +247,7 @@ local function set_clienttag(c)
 		cutter = 1,
 		dota2 = 1,
 
-		Navigator = 2,
+		navigator = 2,
 		chromium = 2,
 		firefox = 2,
 		qutebrowser = 2,

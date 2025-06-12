@@ -18,20 +18,60 @@ Expunge Both
 SyncState *
 Sync All
 
-IMAPStore disroot-remote
+IMAPStore disroot-remote-1
 Host disroot.org
 UserCmd "pass show www/mail/disroot.org/email"
 PassCmd "pass show www/mail/disroot.org/password"
 TLSType IMAPS
 
-MaildirStore disroot-local
-Path  ~/.mail/disroot/
-Inbox ~/.mail/disroot/INBOX
+MaildirStore disroot-local-1
+Path  ~/.mail/disroot-1/
+Inbox ~/.mail/disroot-1/INBOX
 SubFolders Verbatim
 
-Channel disroot
-Far :disroot-remote:
-Near :disroot-local:
+Channel disroot-1
+Far :disroot-remote-1:
+Near :disroot-local-1:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
+
+IMAPStore disroot-remote-2
+Host disroot.org
+UserCmd "echo stuck@disroot.org"
+PassCmd "pass show www/mail/disroot.org/password"
+TLSType IMAPS
+
+MaildirStore disroot-local-2
+Path  ~/.mail/disroot-2/
+Inbox ~/.mail/disroot-2/INBOX
+SubFolders Verbatim
+
+Channel disroot-2
+Far :disroot-remote-2:
+Near :disroot-local-2:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
+
+IMAPStore disroot-remote-3
+Host disroot.org
+UserCmd "echo izemmouri@disroot.org"
+PassCmd "pass show www/mail/disroot.org/password"
+TLSType IMAPS
+
+MaildirStore disroot-local-3
+Path  ~/.mail/disroot-3/
+Inbox ~/.mail/disroot-3/INBOX
+SubFolders Verbatim
+
+Channel disroot-3
+Far :disroot-remote-3:
+Near :disroot-local-3:
 Patterns *
 Create Both
 Expunge Both
