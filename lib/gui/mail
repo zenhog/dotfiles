@@ -33,6 +33,12 @@ mails() {
 	notmuch search --sort=newest-first --output=summary --format=json tag:inbox
 }
 
+# del
+# tag read
+# tag unread
+# open in neomutt
+# Vkk
+
 OPTS+=(--with-nth 2..)
 list() {
 	# @menu-mail-list inbox|sent|draft|archive
