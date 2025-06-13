@@ -12,6 +12,9 @@
 - pulse
   - inc/dec/mute
 - search
+  - live search dirs?
+  - live search files?
+  -
 - aria2
   - del
   - toggle
