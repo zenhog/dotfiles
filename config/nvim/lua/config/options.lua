@@ -25,7 +25,7 @@ vim.g.maplocalleader = false
 
 vim.g.lazyvim_picker = "fzf"
 vim.g.lazyvim_cmp = "blink.cmp"
-vim.g.autoformat = true
+vim.g.autoformat = false
 vim.g.trouble_lualine = true
 
 vim.g.snacks_animate = false

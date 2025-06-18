@@ -42,8 +42,8 @@ view() {
 
 	set_opt mode "$mode"
 
-	pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" | yq -yC |
-		bat -p --force-colorization --language=yaml
+	quiet pactl -f json list "$mode" | jq ".[] | select(.index == ${index})" |
+    yq -yC | bat -p --force-colorization --language=yaml
 }
 
 BINDS[inc]=alt-k
@@ -93,13 +93,13 @@ def() {
 }
 
 ctl() {
-	local index vol
+	local index vol port
 	local mode="$1"
 	local ctl="$2"
 
 	shift 2
 
-	read -r index _ <<<"$1"
+	read -r index port _ <<<"$1"
 
 	shift
 
@@ -144,6 +144,7 @@ ctl() {
 		;;
 	default)
 		pactl set-default-"$mode" "$index"
+		pactl set-"$mode"-port "$index" "$port"
 		;;
 	move)
 		local indices descriptions
@@ -167,6 +168,16 @@ ctl() {
 
 }
 
+printline() {
+	local s="" i=0
+	while ((i < $#)); do
+		s+="%s"
+		((++i))
+	done
+	printf "$s" "$@"
+	printf "\n"
+}
+
 BINDS[togglemute]=alt-m
 DESCS[togglemute]='Toggle Mute'
 togglemute() {
@@ -180,24 +191,8 @@ togglemute() {
 	ctl "${mode%s}" mute "$@"
 }
 
-# edit conn
-# show conn
-# add wifi
-# mod sublist
-#   pass
-#   name
-#   forget?
-
-# create aec-sink-source
-# create drc-sink-source
-# create surround-sink
-# create combine-sink-all
-# create monitored-sink?
-
-OPTS+=(--with-nth 2..)
+OPTS+=(--with-nth 3..)
 list() {
-	# format: INDEX, SINK/SOURCE/INPUT/OUTPUT/PORT, NAME, MUTE, VOL, DEFAULT
-
 	local mode="${1:-$(get_opt mode)}"
 
 	set_opt mode "$mode"
@@ -205,10 +200,18 @@ list() {
 }
 
 entries() {
+  local -A icons=(
+    [sinks]=SINK
+    [sources]=SOURCE
+    [sink-inputs]=INPUT
+    [source-outputs]=OUTPUT
+  )
+
 	local kind="$1"
 	local json="$(pactl -f json list "$kind")"
 
 	local indices descs lvols rvols mutes dsource dsink default
+	local ports curports portnames
 
 	read -r dsink < <(pactl get-default-sink)
 	read -r dsource < <(pactl get-default-source)
@@ -225,6 +228,7 @@ entries() {
 		readarray -t rvols < \
 			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
 		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
+		readarray -t curports < <(jq -r ".[] | .active_port" <<<"$json")
 
 		mutes=("${mutes[@]/true/M}")
 		mutes=("${mutes[@]/false/-}")
@@ -241,18 +245,32 @@ entries() {
 		esac
 
 		for i in "${!indices[@]}"; do
-			read -r line < <(
-				printf "%s%s[%s:%s]%s%s%s%s" \
-					"${indices[$i]}" "$iSEP" \
-					"${lvols[$i]}" "${mutes[$i]}" "$iSEP" \
-					"${descs[$i]}" "$iSEP" \
-					"${states[$i]}"
-			)
-			if [[ "${names[$i]}" == "$default" ]]; then
-				printf "%s\n" "$(colorize green "$line")"
-			else
-				printf "%s\n" "$line"
-			fi
+			unset ports portnames
+
+			readarray -t ports < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+        .ports | .[].description" <<<"$json")
+			readarray -t portnames < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+        .ports | .[].name" <<<"$json")
+
+			for p in "${!ports[@]}"; do
+				read -r line < <(
+					printline \
+						"${indices[$i]}" "$iSEP" \
+						"${portnames[$p]:--}" "$iSEP" \
+						"${icons[$kind]}" "$iSEP" \
+						"${descs[$i]}" "$iSEP" \
+						"${ports[$p]}" "$iSEP" \
+						"${lvols[$i]}" "$iSEP" \
+						"${mutes[$i]}" "$iSEP" \
+						"${states[$i]}"
+				)
+				if [[ "${names[$i]}" == "$default" ]] &&
+					[[ "${curports[$i]}" == "${portnames[$p]}" ]]; then
+					printf "%s\n" "$(colorize green "$line")"
+				else
+					printf "%s\n" "$line"
+				fi
+			done
 		done | column -t -s "$iSEP"
 		;;
 	sink-inputs | source-outputs)
@@ -283,11 +301,15 @@ entries() {
 		mutes=("${mutes[@]/false/-}")
 
 		for i in "${!indices[@]}"; do
-			printf "%s%s[%s:%s]%s%s%s(%s)\n" \
+			printline \
 				"${indices[$i]}" "$iSEP" \
-				"${lvols[$i]}" "${mutes[$i]}" "$iSEP" \
+				"${indices[$i]}" "$iSEP" \
+        "${icons[$kind]}" "$iSEP" \
 				"${names[$i]}" "$iSEP" \
-				"${puts[$i]}"
+				"${lvols[$i]}" "$iSEP" \
+				"${mutes[$i]}" "$iSEP" \
+				"${descs[$i]}" "$iSEP" \
+				"(${puts[$i]})"
 		done | column -t -s "$iSEP"
 		;;
 	esac

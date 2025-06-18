@@ -7,91 +7,91 @@ kind="$1"
 type="$2"
 
 if [[ "$CTTY" == "$RTTY" ]]; then
-  case "$kind" in
-    list)
-      echo qutebrowser
-      echo qutebrowser-vpn1
-      echo qutebrowser-vpn2
-      echo firefox
-      echo firefox-vpn1
-      echo firefox-vpn2
-      ;;
-    qutebrowser)
-      shift
+	case "$kind" in
+	list)
+		echo qutebrowser
+		echo qutebrowser-vpn1
+		echo qutebrowser-vpn2
+		echo firefox
+		echo firefox-vpn1
+		echo firefox-vpn2
+		;;
+	qutebrowser)
+		shift
 
-      if [[ "$type" == vpn* ]]; then
-        shift
-      else
-        type=wan
-      fi
+		if [[ "$type" == vpn* ]]; then
+			shift
+		else
+			type=wan
+		fi
 
-      tmpdir="/tmp/qutebrowser/instances/$type"
+		tmpdir="/tmp/qutebrowser/instances/$type"
 
-      mkdir -p "$tmpdir/config"
+		mkdir -p "$tmpdir/config"
 
-      for f in $HOME/.config/qutebrowser/*; do
-        ln -s "$f" "$tmpdir/config/" 2>/dev/null
-      done
+		for f in $HOME/.config/qutebrowser/*; do
+			ln -s "$f" "$tmpdir/config/" 2>/dev/null
+		done
 
-      mkdir -p "$tmpdir/data/sessions"
+		mkdir -p "$tmpdir/data/sessions"
 
-      QUTEDATA="$HOME/.local/share/qutebrowser"
+		QUTEDATA="$HOME/.local/share/qutebrowser"
 
-      for f in "$QUTEDATA"/sessions/*; do
-        ln -s "$f" "$tmpdir/data/sessions/" 2>/dev/null
-      done
+		for f in "$QUTEDATA"/sessions/*; do
+			ln -s "$f" "$tmpdir/data/sessions/" 2>/dev/null
+		done
 
-      for f in "$QUTEDATA"/{blocked-hosts,adblock-cache.dat}; do
-        ln -s "$f" "$tmpdir/data/" 2>/dev/null
-      done
+		for f in "$QUTEDATA"/{blocked-hosts,adblock-cache.dat}; do
+			ln -s "$f" "$tmpdir/data/" 2>/dev/null
+		done
 
-      profile="$kind-$type"
+		profile="$kind-$type"
 
-      [[ "$type" == wan ]] && profile=qutebrowser
+		[[ "$type" == wan ]] && profile=qutebrowser
 
-      cmd+=(gui awm runonce bg "profile=$profile" --)
+		cmd+=(gui awm runonce bg "profile=$profile" --)
 
-      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
+		[[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-      cmd+=(qutebrowser --qt-arg name "$profile" -B "$tmpdir")
+		cmd+=(qutebrowser --qt-arg name "$profile" -B "$tmpdir")
 
-      if gui awm exists "profile=$profile"; then
-        "${cmd[@]}"
-        [[ -n "$*" ]] && qutebrowser -B "$tmpdir" --target tab "$@"
-      else
-        "${cmd[@]}" --target tab "$@"
-      fi
-      ;;
-    firefox)
-      shift
+		if gui awm exists "profile=$profile"; then
+			"${cmd[@]}"
+			[[ -n "$*" ]] && qutebrowser -B "$tmpdir" --target tab "$@"
+		else
+			"${cmd[@]}" --target tab "$@"
+		fi
+		;;
+	firefox)
+		shift
 
-      if [[ "$type" == vpn* ]]; then
-        shift
-      else
-        type=wan
-      fi
+		if [[ "$type" == vpn* ]]; then
+			shift
+		else
+			type=wan
+		fi
 
-      profile="firefox-$type"
+		profile="firefox-$type"
 
-      [[ "$type" == wan ]] && profile=firefox
+		[[ "$type" == wan ]] && profile=firefox
 
-      cmd+=(gui awm runonce bg "profile=$profile" --)
+		cmd+=(gui awm runonce bg "profile=$profile" --)
 
-      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
+		[[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-      cmd+=(firefox -p private --new-instance --class "$profile")
+		cmd+=(firefox -p "$type" --new-instance --class "$profile")
 
-      if gui awm exists "profile=$profile"; then
-        "${cmd[@]}"
-        [[ -n "$*" ]] && firefox -p private "$@"
-      else
-        "${cmd[@]}" "$@"
-      fi
-      ;;
-    *)
-      browser firefox "$@"
-      ;;
-  esac
+		if gui awm exists "profile=$profile"; then
+			"${cmd[@]}"
+			[[ -n "$*" ]] && firefox -p "$type" "$@"
+		else
+			"${cmd[@]}" "$@"
+		fi
+		;;
+	*)
+		browser firefox "$@"
+		;;
+	esac
 else
-  w3m "$@"
+	w3m "$@"
 fi
