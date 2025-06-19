@@ -37,6 +37,8 @@ opt.timeout = false
 opt.ttimeout = false
 opt.ttimeoutlen = 0
 
+opt.wrap = true
+
 opt.confirm = false
 
 opt.completeopt = "menuone,noinsert,noselect"

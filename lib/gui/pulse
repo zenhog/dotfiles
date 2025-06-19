@@ -99,7 +99,7 @@ ctl() {
 
 	shift 2
 
-	read -r index port _ <<<"$1"
+	read -r index _ <<<"$1"
 
 	shift
 
@@ -144,7 +144,7 @@ ctl() {
 		;;
 	default)
 		pactl set-default-"$mode" "$index"
-		pactl set-"$mode"-port "$index" "$port"
+		# pactl set-"$mode"-port "$index" "$port"
 		;;
 	move)
 		local indices descriptions
@@ -191,7 +191,7 @@ togglemute() {
 	ctl "${mode%s}" mute "$@"
 }
 
-OPTS+=(--with-nth 3..)
+OPTS+=(--with-nth 2..)
 list() {
 	local mode="${1:-$(get_opt mode)}"
 
@@ -205,7 +205,17 @@ entries() {
     [sources]=SOURCE
     [sink-inputs]=INPUT
     [source-outputs]=OUTPUT
+    [modules]=MODULE
+    [ports]=PORT
+    [cards]=CARD
+    [profiles]=PROFILE
   )
+
+  # inputs < sinks
+  # outputs < sources
+  # profiles < cards
+  # ports < sinks/sources
+  # modules?
 
 	local kind="$1"
 	local json="$(pactl -f json list "$kind")"
@@ -245,32 +255,31 @@ entries() {
 		esac
 
 		for i in "${!indices[@]}"; do
-			unset ports portnames
+			# unset ports portnames
 
-			readarray -t ports < <(jq -r ".[] | select(.index == ${indices[$i]}) |
-        .ports | .[].description" <<<"$json")
-			readarray -t portnames < <(jq -r ".[] | select(.index == ${indices[$i]}) |
-        .ports | .[].name" <<<"$json")
+			# readarray -t ports < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+			#      .ports | .[].description" <<<"$json")
+			# readarray -t portnames < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+			#      .ports | .[].name" <<<"$json")
 
-			for p in "${!ports[@]}"; do
+			# for p in "${!ports[@]}"; do
 				read -r line < <(
 					printline \
 						"${indices[$i]}" "$iSEP" \
-						"${portnames[$p]:--}" "$iSEP" \
 						"${icons[$kind]}" "$iSEP" \
-						"${descs[$i]}" "$iSEP" \
-						"${ports[$p]}" "$iSEP" \
+						"${names[$i]}" "$iSEP" \
+            "${descs[$i]}" "$iSEP" \
 						"${lvols[$i]}" "$iSEP" \
 						"${mutes[$i]}" "$iSEP" \
 						"${states[$i]}"
 				)
-				if [[ "${names[$i]}" == "$default" ]] &&
-					[[ "${curports[$i]}" == "${portnames[$p]}" ]]; then
+				if [[ "${names[$i]}" == "$default" ]]; then
+					# [[ "${curports[$i]}" == "${portnames[$p]}" ]]; then
 					printf "%s\n" "$(colorize green "$line")"
 				else
 					printf "%s\n" "$line"
 				fi
-			done
+			# done
 		done | column -t -s "$iSEP"
 		;;
 	sink-inputs | source-outputs)
@@ -302,7 +311,6 @@ entries() {
 
 		for i in "${!indices[@]}"; do
 			printline \
-				"${indices[$i]}" "$iSEP" \
 				"${indices[$i]}" "$iSEP" \
         "${icons[$kind]}" "$iSEP" \
 				"${names[$i]}" "$iSEP" \

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Create a new sink called Simultaneous Output
+pw-cli create-node adapter '{ factory.name=support.null-audio-sink node.name="mainwrap" node.description="Simultaneous Output" media.class=Audio/Sink object.linger=true audio.position=[FL FR] }'
+
+# Connect the normal permanent sound card output to the new sink
+pw-link "mainwrap:monitor_FL" "System:playback_FL"
+pw-link "mainwrap:monitor_FR" "System:playback_FR"
