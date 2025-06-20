@@ -271,7 +271,8 @@ entries() {
             "${descs[$i]}" "$iSEP" \
 						"${lvols[$i]}" "$iSEP" \
 						"${mutes[$i]}" "$iSEP" \
-						"${states[$i]}"
+						"${states[$i]}" "$iSEP" \
+            "${curports[$i]}"
 				)
 				if [[ "${names[$i]}" == "$default" ]]; then
 					# [[ "${curports[$i]}" == "${portnames[$p]}" ]]; then
