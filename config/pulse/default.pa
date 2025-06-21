@@ -21,8 +21,8 @@
 .fail
 
 ### Automatically restore the volume of streams and devices
-load-module module-device-restore
-load-module module-stream-restore
+# load-module module-device-restore
+# load-module module-stream-restore
 load-module module-card-restore
 
 ### Automatically augment property information from .desktop files
@@ -98,7 +98,7 @@ load-module module-native-protocol-unix
 ### during runtime
 ### NOTE: This should be loaded as early as possible so that subsequent modules
 ### that look up the default sink/source get the right value
-load-module module-default-device-restore
+# load-module module-default-device-restore
 
 ### Automatically move streams to the default sink if the sink they are
 ### connected to dies, similar for sources
@@ -136,5 +136,5 @@ load-module module-filter-heuristics
 load-module module-filter-apply
 
 ### Make some devices default
-#set-default-sink output
-#set-default-source input
+set-default-sink Default
+set-default-source Default
