@@ -21,6 +21,9 @@ zstyle ':fzf-tab:*' fzf-flags "${FZF_TAB_FLAGS[@]}"
 zstyle ':fzf-tab:*' switch-group 'ctrl-p' 'ctrl-n'
 zstyle ':fzf-tab:*' prefix ''
 
+zstyle ':fzf-tab:*' fzf-min-height 5
+zstyle ':fzf-tab:*' popup-min-size 50 1
+
 #zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath}'
 #zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
 #        fzf-preview 'echo ${(P)word}'
