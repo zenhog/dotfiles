@@ -6,15 +6,43 @@ ICON=
 
 HORIZONTAL=1
 
+ctl() {
+  # remove forceRemove
+  # add
+  # pause forcePause
+  # pause-all forcePauseAll
+  #
+  local -A methods=(
+    [add]=addUri
+    [del]=remove
+    [Del]=forceRemove
+    [dela]=
+    )
+
+  case "$kind" in
+    add)
+      ;;
+    del)
+      ;;
+    toggle)
+      ;;
+    toggleAll)
+      ;;
+    stats)
+      ;;
+
+  esac
+}
+
 query() {
   local query params URL=http://localhost:6800/jsonrpc
 
   local -A methods=(
-    stats aria2.getGlobalStat
-    active aria2.tellActive
-    waiting aria2.tellWaiting
-    stopped aria2.tellStopped
-    files aria2.getFiles
+    [stats]=aria2.getGlobalStat
+    [active]=aria2.tellActive
+    [waiting]=aria2.tellWaiting
+    [stopped]=aria2.tellStopped
+    [files]=aria2.getFiles
   )
 
   if [[ $# -ge 2 ]]; then
@@ -66,6 +94,8 @@ label() {
 }
 
 list() {
+  # [GID] STATUS completedLength/totalLength uploadedLength dSpeed/dMaxSpeed uSpeed/uMaxSpeed
+  # #numpieces 
   local flatkey
   local -a values
   local -a keys=(

@@ -108,6 +108,9 @@ return {
             end,
           },
         },
+        lualine_c = {
+          { LazyVim.lualine.pretty_path() },
+        },
         lualine_z = {
           tabs,
           -- "tabs",
