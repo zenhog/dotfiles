@@ -1,4 +1,4 @@
 histdrop() {
-  unset HISTFILE
+  [[ -n "$HISTFILE" ]] && unset HISTFILE || HISTFILE="$HOME/.zhistory"
   zle accept-line
 }
