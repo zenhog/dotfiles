@@ -34,6 +34,7 @@
     context                 # context?
     netgrp                  # network cgroup (user-defined)
     dotpush
+    histmark
     dir                     # current directory
     vcs                     # git status
     status                  # exit code of the last command

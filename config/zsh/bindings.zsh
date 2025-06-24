@@ -16,6 +16,7 @@ bindkey "^Y" zce-kill
 bindkey "^Q" search
 
 bindkey "^X^S" git-status
+bindkey "^X^R" histdrop
 
 # bindkey "^Q" add-space
 bindkey "^U" kill-whole-line

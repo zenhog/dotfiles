@@ -15,6 +15,10 @@ prompt_netgrp () {
 	[[ -n "$cgroup" ]] && p10k segment -f 208 -i '󰛸' -t "$cgroup"
 }
 
+prompt_histmark () {
+  [[ -z "$HISTFILE" ]] && p10k segment -f 190 -i '?'
+}
+
 prompt_dotpush () {
   local dotfiles="$HOME/.dotfiles"
 

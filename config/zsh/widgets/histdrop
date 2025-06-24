@@ -1,0 +1,4 @@
+histdrop() {
+  unset HISTFILE
+  zle accept-line
+}
