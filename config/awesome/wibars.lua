@@ -451,8 +451,7 @@ awful.screen.connect_for_each_screen(function(s)
 				block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
 				block(M.group(widgets.ping_wan, widgets.ping_vpn1)),
 				block(M.group(widgets.ram, widgets.disk, widgets.temp)),
-				scroll(widgets.connection, 80),
-				scroll(widgets.music),
+        scroll(widgets.push),
 			},
 			{
 				widget = wibox.container.margin,
@@ -466,9 +465,9 @@ awful.screen.connect_for_each_screen(function(s)
 				nil,
 				{
 					layout = wibox.layout.fixed.horizontal,
-					scroll(widgets.push, 318),
 					spacing = 1,
-					scroll(widgets.bluetooth, 80),
+          scroll(widgets.music, 304),
+          scroll(widgets.connection, 95),
 					block(M.group(widgets.mail, widgets.news, widgets.download)),
 					block(M.group(widgets.battery)),
 					block(M.group(widgets.timedate)),
