@@ -466,8 +466,8 @@ awful.screen.connect_for_each_screen(function(s)
 				{
 					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
-          scroll(widgets.music, 304),
-          scroll(widgets.connection, 95),
+          scroll(widgets.music, 300),
+          scroll(widgets.connection, 103),
 					block(M.group(widgets.mail, widgets.news, widgets.download)),
 					block(M.group(widgets.battery)),
 					block(M.group(widgets.timedate)),
