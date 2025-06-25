@@ -35,15 +35,8 @@ ctl() {
 }
 
 query() {
-  local query params URL=http://localhost:6800/jsonrpc
-
-  local -A methods=(
-    [stats]=aria2.getGlobalStat
-    [active]=aria2.tellActive
-    [waiting]=aria2.tellWaiting
-    [stopped]=aria2.tellStopped
-    [files]=aria2.getFiles
-  )
+  local query params method="$1"
+  local URL=http://localhost:6800/jsonrpc
 
   if [[ $# -ge 2 ]]; then
     read -r params < <(IFS=,; printf '"params": [%s]' "${*:2}")
@@ -53,7 +46,7 @@ query() {
   {
     "jsonrpc": "2.0",
     "id": "menu",
-    "method": "${methods[$1]}",
+    "method": "$method",
     ${params}
   }
 EOF
@@ -61,6 +54,54 @@ EOF
   curl -sL -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
     jq -r '.result'
 }
+
+request() {
+  local method="$1"
+  shift
+  local params=("$@")
+
+  case "$method" in
+    stats)
+      query aria2.getGlobalStat
+      ;;
+    status)
+      ;;
+    list)
+      local numWaiting numStoppedTotal
+
+      IFS=$'\n' read -r -d '' numWaiting numStoppedTotal < <(
+        query aria2.getGlobalStat | jq -r '(.numWaiting, .numStoppedTotal)'
+      )
+
+      jq -n 'reduce inputs as $in
+        (null; . + if $in|type == "array" then $in else [$in] end)' < <(
+        query aria2.tellActive
+        query aria2.tellWaiting 0 "$numWaiting"
+        query aria2.tellStopped 0 "$numStoppedTotal"
+      )
+      ;;
+    toggle)
+      query aria2.pause "$@"
+      ;;
+    toggleAll)
+      ;;
+    add)
+      query aria2.addUri "${params[@]}"
+      ;;
+    del)
+      ;;
+    getgopt)
+      query aria2.getGlobalOption
+      ;;
+    setgopt)
+      ;;
+    getopt)
+      ;;
+    setopt)
+      ;;
+  esac
+}
+
 
 view() {
   :
@@ -80,7 +121,7 @@ label() {
   )
 
   readarray -t values < \
-    <(query stats | jq -r "$(IFS=,; printf '%s' "${keys[*]/#/.}")")
+    <(request stats | jq -r "$(IFS=,; printf '%s' "${keys[*]/#/.}")")
 
   for i in $(seq 0 $((${#values[@]} -1))); do
     if [[ "${keys[$i]}" == *Speed ]]; then
@@ -94,7 +135,7 @@ label() {
 }
 
 list() {
-  # [GID] STATUS completedLength/totalLength uploadedLength dSpeed/dMaxSpeed uSpeed/uMaxSpeed
+  # [GID] TYPE? STATUS completedLength/totalLength uploadedLength dSpeed/dMaxSpeed uSpeed/uMaxSpeed
   # #numpieces 
   local flatkey
   local -a values

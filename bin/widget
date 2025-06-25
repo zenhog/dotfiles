@@ -31,7 +31,7 @@ fmt() {
 	local num="$1"
 
 	if ! [[ "$num" =~ ^[0-9]+$ ]]; then
-		printf "--"
+		printf -- '**'
 		return
 	fi
 
