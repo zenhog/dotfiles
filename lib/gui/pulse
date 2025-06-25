@@ -199,6 +199,11 @@ list() {
 	entries "$mode"
 }
 
+dump() {
+  pw-dump | jq -r '.[] | select(.type == "PipeWire:Interface:Node") |
+    (.info.props."node.name", .info.props."media.class")'
+}
+
 entries() {
   local -A icons=(
     [sinks]=SINK
