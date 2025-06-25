@@ -136,5 +136,5 @@ load-module module-filter-heuristics
 load-module module-filter-apply
 
 ### Make some devices default
-set-default-sink Default
-set-default-source Default
+set-default-sink base_sink
+set-default-source base_source
