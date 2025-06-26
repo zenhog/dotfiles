@@ -188,7 +188,11 @@ colorize() {
 
 	shift
 
-	printf "%s%s%s\n" "${colors[$color]}" "$*" "${colors[reset]}"
+  if [[ -z "${colors[$color]}" ]]; then
+    pastel -f paint "$color" "$@"
+  else
+    printf "%s%s%s\n" "${colors[$color]}" "$*" "${colors[reset]}"
+  fi
 }
 
 enc() {

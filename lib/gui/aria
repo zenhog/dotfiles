@@ -9,34 +9,6 @@ HORIZONTAL=1
 export ICON_DL=
 export ICON_UL=
 
-ctl() {
-  # remove forceRemove
-  # add
-  # pause forcePause
-  # pause-all forcePauseAll
-  #
-  local -A methods=(
-    [add]=addUri
-    [del]=remove
-    [Del]=forceRemove
-    [dela]=
-    )
-
-  case "$kind" in
-    add)
-      ;;
-    del)
-      ;;
-    toggle)
-      ;;
-    toggleAll)
-      ;;
-    stats)
-      ;;
-
-  esac
-}
-
 query() {
   local query params method="$1"
   local URL=http://localhost:6800/jsonrpc
@@ -89,7 +61,14 @@ request() {
       )
       ;;
     count)
-      query aria2.getGlobalStat | jq -r '.numActive'
+      local numActive numWaiting numStoppedTotal
+
+      IFS=$'\n' read -r -d '' numActive numWaiting numStoppedTotal < <(
+        query aria2.getGlobalStat |
+          jq -r '(.numActive, .numWaiting, .numStoppedTotal)'
+      )
+
+      printf "%d\n" $((numActive + numWaiting + numStoppedTotal))
       ;;
     files)
       query aria2.getFiles "\"$gid\""
@@ -133,14 +112,6 @@ request() {
   esac
 }
 
-
-view() {
-  local gid
-  read -r gid _ <<< "$1"
-
-  request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
-}
-
 label() {
 
   local ul dl maxuspeed maxdspeed
@@ -159,6 +130,13 @@ label() {
   ul="$(numfmt --to=iec --suffix=Bps "$ul")"
 
   printf " $ICON_DL %s $ICON_UL %s " "$dl/$maxdspeed" "$ul/$maxuspeed"
+}
+
+view() {
+  local gid
+  read -r gid _ <<< "$1"
+
+  request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
 }
 
 OPTS+=(--with-nth 2..)
@@ -206,12 +184,12 @@ list() {
     printline \
       "${gid[$i]}" "$iSEP" \
       "${status[$i]}" "$iSEP" \
-      "${progress[$i]}%" "$iSEP" \
-      "$ICON_DL $dlh/$th" "$iSEP" \
-      "$dsh/$maxdspeed" "$iSEP" \
-      "$ICON_UL $ulh" "$iSEP" \
-      "$ush/$maxuspeed" "$iSEP" \
-      "$(basename "${names[$i]}")"
+      "$(colorize blueviolet "${progress[$i]}%")" "$iSEP" \
+      "$(colorize royalblue "$ICON_DL $dlh/$th")" "$iSEP" \
+      "$(colorize royalblue "$dsh/$maxdspeed")" "$iSEP" \
+      "$(colorize yellow "$ICON_UL $ulh")" "$iSEP" \
+      "$(colorize yellow "$ush/$maxuspeed")" "$iSEP" \
+      "$(colorize red "$(basename "${names[$i]}")")"
   done | column -t -s "$iSEP"
 }
 
@@ -229,6 +207,44 @@ del() {
   for f in "${files[@]}"; do
     [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
   done
+}
+
+BINDS[dinc]=alt-l
+DESCS[dinc]='Increase Download Speed'
+dinc() {
+  local gid dlimit
+
+  read -r gid _ <<< "$1"
+
+  read -r dlimit < <(request getopt "$gid" | jq -r '."max-download-limit"')
+
+  if (( dlimit < 1024 * 1024 )); then
+    dlimit=$((dlimit + 1024 * 10))
+  else
+    dlimit=$((dlimit + 1024 * 1024))
+  fi
+
+  request setopt "$gid" \
+    "$(printf '{ "max-download-limit":"%d" }' "$dlimit")"
+}
+
+BINDS[ddec]=alt-h
+DESCS[ddec]='Decrease Download Speed'
+ddec() {
+  local gid dlimit
+
+  read -r gid _ <<< "$1"
+
+  read -r dlimit < <(request getopt "$gid" | jq -r '."max-download-limit"')
+
+  if (( dlimit < 1024 * 1024 )); then
+    dlimit=$((dlimit - 1024 * 10))
+  else
+    dlimit=$((dlimit - 1024 * 1024))
+  fi
+
+  request setopt "$gid" \
+    "$(printf '{ "max-download-limit":"%d" }' "$dlimit")"
 }
 
 BINDS[toggle]=enter
@@ -253,18 +269,6 @@ refresh() {
   :
 }
 
-inc_uspeed() {
-  local gid
-}
-
-dec_uspeed() {
-  local gid
-}
-
-inc_dspeed() {
-  local gid
-}
-
-dec_dspeed() {
-  local gid
+restart() {
+  :
 }
