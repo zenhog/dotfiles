@@ -6,16 +6,19 @@ notify() {
 
 case "${0##*-}" in
   complete)
+    notify Completed "$(basename "$3")"
     ;;
   error)
+    notify Failed "$(basename "$3")"
     ;;
   pause)
     ;;
   start)
+    notify Added "$(basename "$3")"
     ;;
   stop)
+    notify Stopped "$(basename "$3")"
     ;;
 esac
 
-notify "${0##*-}" "$(basename "$3")"
 widget download timeout
