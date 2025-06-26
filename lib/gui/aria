@@ -6,6 +6,9 @@ ICON=
 
 HORIZONTAL=1
 
+export ICON_DL=
+export ICON_UL=
+
 ctl() {
   # remove forceRemove
   # add
@@ -54,8 +57,6 @@ query() {
   }
 EOF
 
-echo "$query"
-
   curl -sL -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
     jq -r '.result'
 }
@@ -91,29 +92,29 @@ request() {
       query aria2.getGlobalStat | jq -r '.numActive'
       ;;
     files)
-      query aria2.getFiles "$gid"
+      query aria2.getFiles "\"$gid\""
       ;;
     pause)
-      query aria2.pause "$gid"
+      query aria2.pause "\"$gid\""
       ;;
     pauseAll)
       query aria2.pauseAll
       ;;
     unpause)
-      query aria2.unpause "$gid"
+      query aria2.unpause "\"$gid\""
       ;;
     unpauseAll)
       query aria2.unpauseAll
       ;;
     add)
       local uri="$gid"
-      query aria2.addUri "$uri"
+      query aria2.addUri "\"$gid\""
       ;;
     del)
-      query aria2.remove "$gid"
+      query aria2.remove "\"$gid\""
       ;;
     rm)
-      query aria2.forceRemove "$gid"
+      query aria2.forceRemove "\"$gid\""
       ;;
     getgopt)
       query aria2.getGlobalOption
@@ -123,87 +124,133 @@ request() {
       query aria2.changeGlobalOption "${opts[@]}"
       ;;
     getopt)
-      query aria2.getOption "$gid"
+      query aria2.getOption "\"$gid\""
       ;;
     setopt)
       local opts=("$@")
-      query aria2.changeOption "$gid" "${opts[@]}"
+      query aria2.changeOption "\"$gid\"" "${opts[@]}"
       ;;
   esac
 }
 
 
 view() {
-  :
+  local gid
+  read -r gid _ <<< "$1"
+
+  request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
 }
 
 label() {
-  declare -A -x -g STATS
 
-  local -a values
-  local -a keys=(
-    downloadSpeed
-    uploadSpeed
-    numActive
-    numStopped
-    numStoppedTotal
-    numWaiting
+  local ul dl maxuspeed maxdspeed
+
+  IFS=$'\n' read -r -d '' dl ul < <(
+    request stats | jq -r '(.downloadSpeed, .uploadSpeed)'
   )
 
-  readarray -t values < \
-    <(request stats | jq -r "$(IFS=,; printf '%s' "${keys[*]/#/.}")")
+  read -r maxdspeed < <(request getgopt | jq -r '."max-download-limit"')
+  read -r maxuspeed < <(request getgopt | jq -r '."max-upload-limit"')
 
-  for i in $(seq 0 $((${#values[@]} -1))); do
-    if [[ "${keys[$i]}" == *Speed ]]; then
-      values[$i]="$(numfmt --to=iec --suffix=B <<< "${values[$i]}")"
-    fi
-    STATS[${keys[$i]}]="${values[$i]}"
-  done
+  maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
+  maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
+ 
+  dl="$(numfmt --to=iec --suffix=Bps "$dl")"
+  ul="$(numfmt --to=iec --suffix=Bps "$ul")"
 
-  printf "  %s/s  %s/s 󰧩 %s 󰒲 %s 󰙧 %s 󱕱 %s " "${values[@]}"
-  export "$(declare -p STATS)"
+  printf " $ICON_DL %s $ICON_UL %s " "$dl/$maxdspeed" "$ul/$maxuspeed"
 }
 
+OPTS+=(--with-nth 2..)
 list() {
-  # [GID] TYPE? STATUS completedLength/totalLength uploadedLength dSpeed/dMaxSpeed uSpeed/uMaxSpeed
-  # #numpieces 
-  local flatkey
-  local values
-  local keys=(
-    .gid
-    .status
-    .completedLength
-    .totalLength
-    .uploadLength
-    .connections
-    .downloadSpeed
-    .uploadSpeed
-    '.files.[0].path'
-  )
+  local list
 
-  read -r flatkey < <(IFS=,; printf '%s' "${keys[*]}")
+  IFS= read -r -d '' list < <(request list)
 
-  request list | jq -r ".[] | (${flatkey})"
+  local gid status dled uled total conns dspeed uspeed names
+  local progress maxuspeed maxdspeed dlh ulh th dsh ush
 
-  # printf "%s %s %s %s\n" "${values[@]}"
+  readarray -t gid < <(jq -r '.[] | .gid' <<< "$list")
+  readarray -t status < <(jq -r '.[] | .status' <<< "$list")
+  readarray -t dled < <(jq -r '.[] | .completedLength' <<< "$list")
+  readarray -t uled < <(jq -r '.[] | .uploadLength' <<< "$list")
+  readarray -t total < <(jq -r '.[] | .totalLength' <<< "$list")
+  readarray -t conns < <(jq -r '.[] | .connections' <<< "$list")
+  readarray -t dspeed < <(jq -r '.[] | .downloadSpeed' <<< "$list")
+  readarray -t uspeed < <(jq -r '.[] | .uploadSpeed' <<< "$list")
+  readarray -t names < <(jq -r '.[] | .files.[0].uris.[0].uri' <<< "$list" |
+    xargs basename -a)
+
+  for i in "${!gid[@]}"; do
+    unset dsh ush dlh ulh th maxuspeed maxdspeed
+
+    dsh="$(numfmt --to=iec --suffix=Bps "${dspeed[$i]}")"
+    ush="$(numfmt --to=iec --suffix=Bps "${uspeed[$i]}")"
+
+    dlh="$(numfmt --to=iec --suffix=B "${dled[$i]}")"
+    ulh="$(numfmt --to=iec --suffix=B "${uled[$i]}")"
+
+    th="$(numfmt --to=iec --suffix=B "${total[$i]}")"
+
+    read -r maxdspeed < <(request getopt "${gid[$i]}" |
+      jq -r '."max-download-limit"')
+    read -r maxuspeed < <(request getopt "${gid[$i]}" |
+      jq -r '."max-upload-limit"')
+
+    maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
+    maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
+
+    progress[$i]="$(printf "%0.0f" \
+      "$(echo "${dled[$i]} * 100. / ${total[$i]}" | bc)")"
+
+    printline \
+      "${gid[$i]}" "$iSEP" \
+      "${status[$i]}" "$iSEP" \
+      "${progress[$i]}%" "$iSEP" \
+      "$ICON_DL $dlh/$th" "$iSEP" \
+      "$dsh/$maxdspeed" "$iSEP" \
+      "$ICON_UL $ulh" "$iSEP" \
+      "$ush/$maxuspeed" "$iSEP" \
+      "$(basename "${names[$i]}")"
+  done | column -t -s "$iSEP"
 }
 
 BINDS[del]=alt-d
 DESCS[del]='Delete entry'
 del() {
-  local gid
+  local gid files
   read -r gid _ <<< "$1"
+
+  readarray -t files < <(request files "$gid" |
+    jq -r '.[].path')
+
   request del "$gid"
+
+  for f in "${files[@]}"; do
+    [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
+  done
 }
 
-BINDS[toggle]=alt-t
+BINDS[toggle]=enter
 DESCS[toggle]='Toggle pause'
 toggle() {
-  local gid
+  local gid status
+  read -r gid status _ <<< "$1"
+
+  case "$status" in
+    paused)
+      request unpause "$gid"
+      ;;
+    active)
+      request pause "$gid"
+      ;;
+  esac
 }
 
+BINDS[refresh]=alt-r
+DESCS[refresh]='Refresh status'
 refresh() {
-  local gid
+  :
 }
 
 inc_uspeed() {

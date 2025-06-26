@@ -124,6 +124,16 @@ rotate_opt() {
 	set_opt "$1" $((++val % mod))
 }
 
+printline() {
+	local s="" i=0
+	while ((i < $#)); do
+		s+="%s"
+		((++i))
+	done
+	printf "$s" "$@"
+	printf "\n"
+}
+
 return 0 2>/dev/null
 
 case $# in

@@ -43,8 +43,7 @@ case "${mime}" in
         gui tmux window local "$(hostname)" mail neomutt "${1#mailto:}"
         ;;
       magnet:*)
-        aria2p add "$1"
-        #gui aria add "$1"
+        gui aria request add "$1"
         ;;
       ftp://*)
         browser "$1"

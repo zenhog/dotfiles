@@ -168,16 +168,6 @@ ctl() {
 
 }
 
-printline() {
-	local s="" i=0
-	while ((i < $#)); do
-		s+="%s"
-		((++i))
-	done
-	printf "$s" "$@"
-	printf "\n"
-}
-
 BINDS[togglemute]=alt-m
 DESCS[togglemute]='Toggle Mute'
 togglemute() {
