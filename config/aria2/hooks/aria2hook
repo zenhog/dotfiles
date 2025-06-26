@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+notify() {
+  notify-send -t 5000 -a "${0##*-}" "$1" "${*:2}"
+}
+
+case "${0##*-}" in
+  complete)
+    ;;
+  error)
+    ;;
+  pause)
+    ;;
+  start)
+    ;;
+  stop)
+    ;;
+esac
+
+notify "${0##*-}" "$(basename "$3")"
+widget download timeout

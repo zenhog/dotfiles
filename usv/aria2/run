@@ -4,9 +4,15 @@ exec 2>&1
 
 touch "$HOME/.aria2.session"
 
+HOOKS="$HOME/.config/aria2/hooks"
+
 #exec aria2c --dir="$HOME/downloads" \
 exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads" \
-    --on-download-complete="${HOME}/.bin/aria2clean" \
+    --on-download-complete="$HOOKS"/aria2hook-complete \
+    --on-download-pause="$HOOKS"/aria2hook-pause \
+    --on-download-start="$HOOKS"/aria2hook-start \
+    --on-download-error="$HOOKS"/aria2hook-error \
+    --on-download-stop="$HOOKS"/aria2hook-stop \
     --enable-dht=true \
     --enable-dht6=false \
     --disable-ipv6=true \
