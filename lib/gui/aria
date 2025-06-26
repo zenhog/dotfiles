@@ -38,8 +38,11 @@ query() {
   local query params method="$1"
   local URL=http://localhost:6800/jsonrpc
 
-  if [[ $# -ge 2 ]]; then
-    read -r params < <(IFS=,; printf '"params": [%s]' "${*:2}")
+  shift
+
+  if [[ -n "$*" ]]; then
+    read -r params < <(IFS=,; printf "%s" "$*")
+    params="\"params\": [ $params ]"
   fi
 
   read -r -d '' query << EOF
@@ -47,9 +50,11 @@ query() {
     "jsonrpc": "2.0",
     "id": "menu",
     "method": "$method",
-    ${params}
+    $params
   }
 EOF
+
+echo "$query"
 
   curl -sL -X POST -H 'Content-Type: application/json' -d "$query" "$URL" |
     jq -r '.result'
@@ -57,14 +62,16 @@ EOF
 
 request() {
   local method="$1"
-  shift
-  local params=("$@")
+  local gid="$2"
+
+  shift 2
 
   case "$method" in
     stats)
       query aria2.getGlobalStat
       ;;
     status)
+      query aria2.tellStatus "$gid"
       ;;
     list)
       local numWaiting numStoppedTotal
@@ -80,24 +87,47 @@ request() {
         query aria2.tellStopped 0 "$numStoppedTotal"
       )
       ;;
-    toggle)
-      query aria2.pause "$@"
+    count)
+      query aria2.getGlobalStat | jq -r '.numActive'
       ;;
-    toggleAll)
+    files)
+      query aria2.getFiles "$gid"
+      ;;
+    pause)
+      query aria2.pause "$gid"
+      ;;
+    pauseAll)
+      query aria2.pauseAll
+      ;;
+    unpause)
+      query aria2.unpause "$gid"
+      ;;
+    unpauseAll)
+      query aria2.unpauseAll
       ;;
     add)
-      query aria2.addUri "${params[@]}"
+      local uri="$gid"
+      query aria2.addUri "$uri"
       ;;
     del)
+      query aria2.remove "$gid"
+      ;;
+    rm)
+      query aria2.forceRemove "$gid"
       ;;
     getgopt)
       query aria2.getGlobalOption
       ;;
     setgopt)
+      local opts=("$@")
+      query aria2.changeGlobalOption "${opts[@]}"
       ;;
     getopt)
+      query aria2.getOption "$gid"
       ;;
     setopt)
+      local opts=("$@")
+      query aria2.changeOption "$gid" "${opts[@]}"
       ;;
   esac
 }
@@ -138,38 +168,56 @@ list() {
   # [GID] TYPE? STATUS completedLength/totalLength uploadedLength dSpeed/dMaxSpeed uSpeed/uMaxSpeed
   # #numpieces 
   local flatkey
-  local -a values
-  local -a keys=(
-    gid
-    status
-    completedLength
-    totalLength
-    #connections
-    #dir
-    #downloadSpeed
-    #uploadSpeed
-    #uploadLength
-    #numPieces
+  local values
+  local keys=(
+    .gid
+    .status
+    .completedLength
+    .totalLength
+    .uploadLength
+    .connections
+    .downloadSpeed
+    .uploadSpeed
+    '.files.[0].path'
   )
-  silent label
-  read -r flatkey < <(IFS=,; printf '%s' "${keys[*]/#/.}")
-  # .bittorrent.info.name
 
-  f() {
-    query "$@" | jq -r ".[]|${flatkey}"
-  }
+  read -r flatkey < <(IFS=,; printf '%s' "${keys[*]}")
 
-  readarray -t values < <(f stopped 0 "${STATS[numStopped]}")
-  readarray -t values < <(f paused)
-  readarray -t values < <(f active)
-  printf "%s %s %s %s\n" "${values[@]}"
+  request list | jq -r ".[] | (${flatkey})"
+
+  # printf "%s %s %s %s\n" "${values[@]}"
 }
 
-BINDS[remove]=alt-r
-DESCS[remove]='Remove download entry'
-remove() {
-  local id
-  read -r id _ <<< "$1"
-  aria2p rm "$id"
-  aria2p purge
+BINDS[del]=alt-d
+DESCS[del]='Delete entry'
+del() {
+  local gid
+  read -r gid _ <<< "$1"
+  request del "$gid"
+}
+
+BINDS[toggle]=alt-t
+DESCS[toggle]='Toggle pause'
+toggle() {
+  local gid
+}
+
+refresh() {
+  local gid
+}
+
+inc_uspeed() {
+  local gid
+}
+
+dec_uspeed() {
+  local gid
+}
+
+inc_dspeed() {
+  local gid
+}
+
+dec_dspeed() {
+  local gid
 }

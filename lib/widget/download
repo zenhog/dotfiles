@@ -8,14 +8,12 @@ run() {
 
 KEYS[toggle]='C-M:a'
 toggle() {
-	# aria2p toggle-all
-	:
+  gui aria toggleAll
 }
 
 text() {
 	local count
-	read -r count < <(aria2p show 2>/dev/null |
-		sed -rn '2,$ { /active/p }' | wc -l)
+  read -r count < <(gui aria request count)
 	printf "%s" "$(fmt "$count")"
 }
 
