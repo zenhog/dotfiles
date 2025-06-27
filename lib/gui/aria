@@ -10,14 +10,14 @@ export ICON_DL=
 export ICON_UL=
 
 query() {
-  local query params method="$1"
+  local query args params method="$1"
   local URL=http://localhost:6800/jsonrpc
 
   shift
 
   if [[ -n "$*" ]]; then
-    read -r params < <(IFS=,; printf "%s" "$*")
-    params="\"params\": [ $params ]"
+    read -r args < <(IFS=,; printf "%s" "$*")
+    params="\"params\": [ $args ]"
   fi
 
   read -r -d '' query << EOF
@@ -95,12 +95,17 @@ request() {
     rm)
       query aria2.forceRemove "\"$gid\""
       ;;
+    purge)
+      query aria2.removeDownloadResult "\"$gid\""
+      ;;
+    purgeAll)
+      query aria2.purgeDownloadResult
+      ;;
     getgopt)
       query aria2.getGlobalOption
       ;;
     setgopt)
-      local opts=("$@")
-      query aria2.changeGlobalOption "${opts[@]}"
+      query aria2.changeGlobalOption "$gid"
       ;;
     getopt)
       query aria2.getOption "\"$gid\""
@@ -120,8 +125,9 @@ label() {
     request stats | jq -r '(.downloadSpeed, .uploadSpeed)'
   )
 
-  read -r maxdspeed < <(request getgopt | jq -r '."max-download-limit"')
-  read -r maxuspeed < <(request getgopt | jq -r '."max-upload-limit"')
+  read -r maxdspeed < <(
+    request getgopt | jq -r '."max-overall-download-limit"')
+  read -r maxuspeed < <(request getgopt | jq -r '."max-overall-upload-limit"')
 
   maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
   maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
@@ -146,7 +152,7 @@ list() {
   IFS= read -r -d '' list < <(request list)
 
   local gid status dled uled total conns dspeed uspeed names
-  local progress maxuspeed maxdspeed dlh ulh th dsh ush
+  local progress maxuspeed maxdspeed dlh ulh th dsh ush name
 
   readarray -t gid < <(jq -r '.[] | .gid' <<< "$list")
   readarray -t status < <(jq -r '.[] | .status' <<< "$list")
@@ -156,11 +162,10 @@ list() {
   readarray -t conns < <(jq -r '.[] | .connections' <<< "$list")
   readarray -t dspeed < <(jq -r '.[] | .downloadSpeed' <<< "$list")
   readarray -t uspeed < <(jq -r '.[] | .uploadSpeed' <<< "$list")
-  readarray -t names < <(jq -r '.[] | .files.[0].uris.[0].uri' <<< "$list" |
-    xargs basename -a)
+  readarray -t names < <(jq -r '.[] | .files.[0].path' <<< "$list")
 
   for i in "${!gid[@]}"; do
-    unset dsh ush dlh ulh th maxuspeed maxdspeed
+    unset dsh ush dlh ulh th maxuspeed maxdspeed name
 
     dsh="$(numfmt --to=iec --suffix=Bps "${dspeed[$i]}")"
     ush="$(numfmt --to=iec --suffix=Bps "${uspeed[$i]}")"
@@ -181,6 +186,14 @@ list() {
     progress[$i]="$(printf "%0.0f" \
       "$(echo "${dled[$i]} * 100. / ${total[$i]}" | bc)")"
 
+    name="${names[$i]}"
+    if [[ -z "$name" ]]; then
+      read -r name < <(jq -r ".[] | select (.gid == ${gid[$i]}) |
+        .[] | .files.[0].uris.[0].uri")
+    fi
+
+    name="$(basename "$name")"
+
     printline \
       "${gid[$i]}" "$iSEP" \
       "${status[$i]}" "$iSEP" \
@@ -189,24 +202,31 @@ list() {
       "$(colorize royalblue "$dsh/$maxdspeed")" "$iSEP" \
       "$(colorize yellow "$ICON_UL $ulh")" "$iSEP" \
       "$(colorize yellow "$ush/$maxuspeed")" "$iSEP" \
-      "$(colorize red "$(basename "${names[$i]}")")"
+      "$(colorize red "$(basename "$name")")"
   done | column -t -s "$iSEP"
 }
 
 BINDS[del]=alt-d
 DESCS[del]='Delete entry'
 del() {
-  local gid files
-  read -r gid _ <<< "$1"
+  local gid status files
+  read -r gid status _ <<< "$1"
 
-  readarray -t files < <(request files "$gid" |
-    jq -r '.[].path')
+  case "$status" in
+    complete|error|removed)
+      readarray -t files < <(request files "$gid" |
+        jq -r '.[].path')
 
-  request del "$gid"
+      for f in "${files[@]}"; do
+        [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
+      done
+      request purge "$gid"
+      ;;
+    *)
+      request del "$gid"
+      ;;
+  esac
 
-  for f in "${files[@]}"; do
-    [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
-  done
 }
 
 BINDS[dinc]=alt-l
@@ -245,6 +265,48 @@ ddec() {
 
   request setopt "$gid" \
     "$(printf '{ "max-download-limit":"%d" }' "$dlimit")"
+}
+
+BINDS[dgdec]=alt-a
+DESCS[dgdec]='Decrease Global Download Speed'
+dgdec() {
+  local gid dlimit
+
+  read -r gid _ <<< "$1"
+
+  read -r dlimit < <(
+    request getgopt "$gid" | jq -r '."max-overall-download-limit"')
+
+  if (( dlimit < 1024 * 1024 )); then
+    dlimit=$((dlimit - 1024 * 10))
+  else
+    dlimit=$((dlimit - 1024 * 1024))
+  fi
+
+  if (( dlimit < 0 )); then
+    dlimit=0
+  fi
+
+  request setgopt "$(printf '{ "max-overall-download-limit":"%d" }' "$dlimit")"
+}
+
+BINDS[dginc]=alt-e
+DESCS[dginc]='Increase Global Download Speed'
+dginc() {
+  local gid dlimit
+
+  read -r gid _ <<< "$1"
+
+  read -r dlimit < <(
+    request getgopt "$gid" | jq -r '."max-overall-download-limit"')
+
+  if (( dlimit < 1024 * 1024 )); then
+    dlimit=$((dlimit + 1024 * 10))
+  else
+    dlimit=$((dlimit + 1024 * 1024))
+  fi
+
+  request setgopt "$(printf '{ "max-overall-download-limit":"%d" }' "$dlimit")"
 }
 
 BINDS[toggle]=enter
