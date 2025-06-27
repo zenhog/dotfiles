@@ -87,7 +87,8 @@ request() {
       ;;
     add)
       local uri="$gid"
-      query aria2.addUri "\"$gid\""
+      local opts=("$@")
+      query aria2.addUri " [ \"$gid\" ] " "${opts[@]}"
       ;;
     del)
       query aria2.remove "\"$gid\""
@@ -219,7 +220,13 @@ del() {
 
       for f in "${files[@]}"; do
         [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
+
+        if [[ "$status" == error || "$status" == removed ]]; then
+          [[ -e "$f" ]] && rm "$f"
+        fi
+
       done
+
       request purge "$gid"
       ;;
     *)
@@ -325,12 +332,40 @@ toggle() {
   esac
 }
 
+BINDS[toggleall]=alt-enter
+DESCS[toggleall]='Toggle all'
+toggleall() {
+  local gid status
+  read -r gid status _ <<< "$1"
+
+  case "$status" in
+    paused)
+      request unpauseAll "$gid"
+      ;;
+    active)
+      request pauseAll "$gid"
+      ;;
+  esac
+}
+
 BINDS[refresh]=alt-r
 DESCS[refresh]='Refresh status'
 refresh() {
   :
 }
 
-restart() {
-  :
+BINDS[retry]=alt-m
+DESCS[retry]='Retry download'
+retry() {
+  local gid status files uri out
+  read -r gid status _ <<< "$1"
+
+  read -r uri < <(request files "$gid" | jq -r '.[0].uris.[0].uri')
+  read -r out < <(request files "$gid" | jq -r '.[0].path')
+
+  out="$(basename "$out")"
+
+  request add "$uri" " { \"out\": \"$out\" } "
+
+  del "$gid" "$status"
 }
