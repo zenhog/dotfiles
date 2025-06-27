@@ -68,7 +68,7 @@ request() {
           jq -r '(.numActive, .numWaiting, .numStoppedTotal)'
       )
 
-      printf "%d\n" $((numActive + numWaiting + numStoppedTotal))
+      printf "%d\n" $((numActive + numWaiting))
       ;;
     files)
       query aria2.getFiles "\"$gid\""
