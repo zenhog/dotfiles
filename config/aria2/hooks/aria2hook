@@ -4,20 +4,26 @@ notify() {
   notify-send -t 5000 -a "${0##*-}" "$1" "${*:2}"
 }
 
+gid="$1"
+numfiles="$2"
+
+shift 2
+
 case "${0##*-}" in
   complete)
-    notify Completed "$(basename "$3")"
+    notify Completed "$(basename "$1")"
+    gui aria del "$gid complete"
     ;;
   error)
-    notify Failed "$(basename "$3")"
+    notify Failed "$(basename "$1")"
     ;;
   pause)
     ;;
   start)
-    notify Added "$(basename "$3")"
+    notify Added "$(basename "$1")"
     ;;
   stop)
-    notify Stopped "$(basename "$3")"
+    notify Stopped "$(basename "$1")"
     ;;
 esac
 
