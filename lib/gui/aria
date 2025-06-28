@@ -370,5 +370,5 @@ retry() {
 
   request add "$uri" " { \"out\": \"$out\" } "
 
-  del "$gid" "$status"
+  del "$gid $status"
 }
