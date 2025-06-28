@@ -220,13 +220,16 @@ del() {
 
       for f in "${files[@]}"; do
         [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
-
-        if [[ "$status" == error || "$status" == removed ]]; then
-          [[ -e "$f" ]] && rm "$f"
-        fi
-
+        case "$status" in
+          complete)
+            mkdir -p "$HOME/downloads/aria2/complete"
+            mv "$f" "$HOME/downloads/aria2/complete/"
+            ;;
+          error|removed)
+            [[ -f "$f" ]] && rm "$f"
+            ;;
+        esac
       done
-
       request purge "$gid"
       ;;
     *)
