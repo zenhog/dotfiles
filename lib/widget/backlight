@@ -38,15 +38,19 @@ ctl() {
 }
 
 text() {
+  local backlight
+
 	read -r backlight < <(xbacklight | xargs printf "%02.f")
+
+  [[ $? -ne 0 ]] && backlight='**'
 
 	printf "%s" "$(fmt "$backlight")"
 }
 
 icon() {
 	local icon=
-	local icon=󰃠
 	local icon=󰃞
+	local icon=󰃠
 
 	local color=blueviolet
 

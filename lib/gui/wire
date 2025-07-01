@@ -1,0 +1,327 @@
+#!/usr/bin/env bash
+
+KEY=z
+MOD='S-M'
+ICON=󰐰
+
+HORIZONTAL=1
+
+view() {
+	local id class query
+
+  read -r id _ class _ <<< "$1"
+
+  IFS= read -r -d '' query << EOF
+  .[] | select(.type == "%s") | \
+    select(.info.props."media.class" == "%s") | \
+      select(.id == $id)
+EOF
+
+  read -r query < <(printf "$query" "PipeWire:Interface:Node" "$class")
+
+  yq -yC -r "$query" < <(pw-dump) | bat -p --force-colorization --language=yaml
+
+}
+
+BINDS[inc]=alt-k
+DESCS[inc]='Volume Up'
+inc() {
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	ctl "${mode%s}" inc "$@"
+}
+
+BINDS[dec]=alt-j
+DESCS[dec]='Volume Down'
+dec() {
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	ctl "${mode%s}" dec "$@"
+}
+
+BINDS[def]=Enter
+HOOKS[def]=clear
+DESCS[def]='Set Default'
+def() {
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+
+	case "$mode" in
+	sinks | sources)
+		ctl "${mode%s}" default "$@"
+		;;
+	sink-inputs | source-outputs)
+		local choice choices index
+
+		read -r index _ <<<"$1"
+
+		readarray -t choices < <(ctl "${mode%-inputs}" move)
+
+		read -r choice _ < <(choice "${choices[@]}")
+
+		pactl move-"${mode%s}" "$index" "$choice"
+		;;
+	esac
+}
+
+ctl() {
+	local index vol port
+	local mode="$1"
+	local ctl="$2"
+
+	shift 2
+
+	read -r index _ <<<"$1"
+
+	shift
+
+	if [[ -z "$index" || "$index" == default ]]; then
+		case "$mode" in
+		sink)
+			read -r dsink < <(pactl get-default-sink)
+
+			read -r index < <(pactl -f json list sinks | jq -r \
+				".[] | select (.name == \"$dsink\") | .index")
+
+			;;
+		source)
+			read -r dsource < <(pactl get-default-source)
+
+			read -r index < <(pactl -f json list sources | jq -r \
+				".[] | select (.name == \"$dsource\") | .index")
+			;;
+		esac
+	fi
+
+	case "$ctl" in
+	inc) ctl='+' ;;
+	dec) ctl='-' ;;
+	esac
+
+	case "$ctl" in
+	mute)
+		pactl set-"$mode"-mute "$index" toggle
+		;;
+	setvol)
+		vol="$1"
+		pactl set-"$mode"-volume "$index" "$vol"%
+		;;
+	getmute)
+		pactl -f json list "${mode}s" | jq -r \
+			".[] | select (.index == $index) | .mute"
+		;;
+	getvol)
+		pactl -f json list "${mode}s" | jq -r \
+			".[] | select (.index == $index) | .volume.\"front-left\".value_percent"
+		;;
+	default)
+		pactl set-default-"$mode" "$index"
+		# pactl set-"$mode"-port "$index" "$port"
+		;;
+	move)
+		local indices descriptions
+
+		readarray -t indices < <(pactl -f json list "${mode}s" |
+			jq -r ".[] | .index")
+
+		readarray -t descriptions < <(pactl -f json list "${mode}s" |
+			jq -r ".[] | .description")
+
+		for i in "${!indices[@]}"; do
+			printf "%s %s\n" "${indices[$i]}" "${descriptions[$i]}"
+		done
+		;;
+	ports) ;;
+	cards) ;;
+	*)
+		pactl set-"$mode"-volume "$index" "${ctl}5%"
+		;;
+	esac
+
+}
+
+BINDS[togglemute]=alt-m
+DESCS[togglemute]='Toggle Mute'
+togglemute() {
+	local index
+
+	read -r index _ <<<"$1"
+
+	local mode="$(get_opt mode)"
+
+	set_opt mode "$mode"
+	ctl "${mode%s}" mute "$@"
+}
+
+OPTS+=(--with-nth 3..)
+list() {
+  (
+  dump Node 'Audio/Sink'
+  dump Node 'Audio/Source'
+  dump Node 'Stream/Output/Audio'
+  dump Node 'Stream/Input/Audio'
+  dump Client ''
+  ) | column -t -s "$iSEP"
+}
+
+dump() {
+  local type="$1"
+  local class="$2"
+  local query
+
+  case "$type" in
+    Node)
+      ;;
+    Client)
+      ;;
+    Module)
+      ;;
+  esac
+
+  IFS= read -r -d '' query << EOF
+  .[] | select(.type == "%s") | select (.info.props."media.class" == "%s") | \
+    [ \
+      .id, \
+      .info.props."object.serial", \
+      .info.props."media.class", \
+      .Props.volume, \
+      .info.state, \
+      .info.props."audio.position", \
+      .info.props."node.name" \
+      ] | join("$iSEP")
+EOF
+
+  read -r query < <(printf "$query" "PipeWire:Interface:$type" "$class")
+
+  jq -r "$query" < <(pw-dump)
+}
+
+entries() {
+  local -A icons=(
+    [sinks]=SINK
+    [sources]=SOURCE
+    [sink-inputs]=INPUT
+    [source-outputs]=OUTPUT
+    [modules]=MODULE
+    [ports]=PORT
+    [cards]=CARD
+    [profiles]=PROFILE
+  )
+
+  # inputs < sinks
+  # outputs < sources
+  # profiles < cards
+  # ports < sinks/sources
+  # modules?
+
+	local kind="$1"
+	local json="$(pactl -f json list "$kind")"
+
+	local indices descs lvols rvols mutes dsource dsink default
+	local ports curports portnames
+
+	read -r dsink < <(pactl get-default-sink)
+	read -r dsource < <(pactl get-default-source)
+
+	readarray -t indices < <(jq -r '.[] | (.index|tostring)' <<<"$json")
+
+	case "$kind" in
+	sinks | sources)
+		readarray -t names < <(jq -r '.[] | .name' <<<"$json")
+		readarray -t descs < <(jq -r '.[] | .description' <<<"$json")
+		readarray -t states < <(jq -r '.[] | .state' <<<"$json")
+		readarray -t lvols < \
+			<(jq -r '.[] | .volume."front-left".value_percent' <<<"$json")
+		readarray -t rvols < \
+			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
+		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
+		readarray -t curports < <(jq -r ".[] | .active_port" <<<"$json")
+
+		mutes=("${mutes[@]/true/M}")
+		mutes=("${mutes[@]/false/-}")
+
+		unset default
+
+		case "$kind" in
+		sinks)
+			default="$dsink"
+			;;
+		sources)
+			default="$dsource"
+			;;
+		esac
+
+		for i in "${!indices[@]}"; do
+			# unset ports portnames
+
+			# readarray -t ports < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+			#      .ports | .[].description" <<<"$json")
+			# readarray -t portnames < <(jq -r ".[] | select(.index == ${indices[$i]}) |
+			#      .ports | .[].name" <<<"$json")
+
+			# for p in "${!ports[@]}"; do
+				read -r line < <(
+					printline \
+						"${indices[$i]}" "$iSEP" \
+						"${icons[$kind]}" "$iSEP" \
+						"${names[$i]}" "$iSEP" \
+            "${descs[$i]}" "$iSEP" \
+						"${lvols[$i]}" "$iSEP" \
+						"${mutes[$i]}" "$iSEP" \
+						"${states[$i]}" "$iSEP" \
+            "${curports[$i]}"
+				)
+				if [[ "${names[$i]}" == "$default" ]]; then
+					# [[ "${curports[$i]}" == "${portnames[$p]}" ]]; then
+					printf "%s\n" "$(colorize green "$line")"
+				else
+					printf "%s\n" "$line"
+				fi
+			# done
+		done | column -t -s "$iSEP"
+		;;
+	sink-inputs | source-outputs)
+		readarray -t descs < <(jq -r '.[] | .properties."media.name"' <<<"$json")
+
+		readarray -t names < \
+			<(jq -r '.[] | .properties."application.name"' <<<"$json")
+
+		readarray -t lvols < \
+			<(jq -r '.[] | .volume."front-left".value_percent' <<<"$json")
+
+		readarray -t rvols < \
+			<(jq -r '.[] | .volume."front-right".value_percent' <<<"$json")
+		readarray -t mutes < <(jq -r '.[] | .mute' <<<"$json")
+
+		readarray -t puts < <(jq -r ".[] | .${kind%-*}" <<<"$json")
+
+		local jsoff
+
+		IFS= read -r -d '' jsoff < <(pactl -f json list "${kind%-*}s")
+
+		for i in "${!puts[@]}"; do
+			puts[$i]="$(jq -r ".[] | select(.index == ${puts[$i]}) | .description" \
+				<<<"$jsoff")"
+		done
+
+		mutes=("${mutes[@]/true/M}")
+		mutes=("${mutes[@]/false/-}")
+
+		for i in "${!indices[@]}"; do
+			printline \
+				"${indices[$i]}" "$iSEP" \
+        "${icons[$kind]}" "$iSEP" \
+				"${names[$i]}" "$iSEP" \
+				"${lvols[$i]}" "$iSEP" \
+				"${mutes[$i]}" "$iSEP" \
+				"${descs[$i]}" "$iSEP" \
+				"(${puts[$i]})"
+		done | column -t -s "$iSEP"
+		;;
+	esac
+}

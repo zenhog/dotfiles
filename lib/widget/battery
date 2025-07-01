@@ -3,10 +3,15 @@
 PERIOD=1
 
 POWER_PATH=/sys/class/power_supply
-readarray -t BATTERIES < <(echo $POWER_PATH/BAT*)
+readarray -t BATTERIES < <(find "$POWER_PATH" -name 'BAT*')
 
 text() {
 	local cur max
+
+  if (( ${#BATTERIES[@]} == 0 )); then
+    printf -- '**'
+    return
+  fi
 
 	CUR=0
 	MAX=0

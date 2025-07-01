@@ -31,7 +31,11 @@ elif [[ "$category" = image ]]; then
 		) >"$UEBERZUG_FIFO"
 	else
 		chafa "$1"
-	fi
+  fi
+elif [[ "$category" = video ]]; then
+  TMP="$(mktemp --suffix .png)"
+	ffmpeg -i "$1" -vf "thumbnail,scale=320:trunc(ow/a/2)*2" -frames:v 1 "$TMP"
+  lessfilter "$TMP"
 elif [[ "$kind" = vnd.openxmlformats-officedocument.spreadsheetml.sheet ]] ||
 	[[ "$kind" = vnd.ms-excel ]]; then
 	in2csv "$1" | xsv table | bat -ltsv --color=always
