@@ -4,8 +4,9 @@ KEY=f
 MOD='S-M'
 ICON=󰴽
 
-HORIZONTAL=1
+# HORIZONTAL=1
 PREVIEW_LABEL_OFFSET=2
+RATIO=60
 
 label() {
 	local mode="$(get_opt mode)"
@@ -43,13 +44,29 @@ dolist() {
 		nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
 			connection show | head -1 | tr ' ' '–'
 		;;
+  SSID)
+    nmcli -c no -s -m multiline -f \
+      ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
+      device wifi list --rescan yes
+    ;;
+  CONN)
+    nmcli -c no -s -m multiline -f \
+      ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
+      connection show
+    ;;
 	esac
 }
-
 BINDS[rescan]=alt-r
 DESCS[rescan]='Rescan'
 reload() {
 	sudo nmcli device wifi rescan
+  # type: conn/wifi
+  # new:
+    # ethernet id eth0 prio ipv6?
+    # wifi id wlan0 prio ssid psk
+    # hotspot
+  # connect:
+    # wifi id wlan0 prio ssid psk
 }
 
 view() {
@@ -67,6 +84,16 @@ view() {
 		nmcli con show "$id"
 		;;
 	esac
+}
+
+BINDS[del]=alt-d
+HOOKS[del]=clear
+DESCS[del]='Delete connection'
+del() {
+	local active id
+  read -r _ id _ <<< "$1"
+
+  sudo nmcli connection delete "$id"
 }
 
 BINDS[open]=enter
@@ -97,11 +124,51 @@ open() {
 
 OPTS+=(--with-nth 3..)
 list() {
-	local mode="${1:-$(get_opt mode)}"
+  (
+  while IFS=$'\t: ' read -r key val; do
+    values+=("$val")
+    if [[ "$key" == SECURITY ]]; then
+      printfmt "${values[0]}" "${values[1]}" cast "${values[@]:2}"
+      unset values
+    fi
+  done < <(dolist SSID)
 
-	set_opt mode "$mode"
+  # 802-11-wireless.ssid
+  # 802-11-wireless.bssid
+  # 802-11-wireless-security.psk
+  # 802-11-wireless-security.key_mgmt
+  #
+  # name ethernet/wifi ifname autoconnect prio ssid psk bssid
+ 
+  local -A values
+  local ssid bssid psk mgmt keys=(
+    802-11-wireless.ssid
+    802-11-wireless.bssid
+    802-11-wireless-security.psk
+    802-11-wireless-security.key-mgmt
+  )
 
-	dolist "$mode"
+  while IFS=$'\t: ' read -r key val; do
+    values[$key]="$val"
+    if [[ "$key" == AUTOCONNECT-PRIORITY ]]; then
+      IFS=$'\n' read -r -d '' ssid bssid psk mgmt < <(sudo nmcli -c no -s -f \
+        "$(IFS=,; printf "%s" "${keys[*]}")" con show "${values[UUID]}" |
+        awk '{print $2}'
+      )
+
+      printfmt \
+        "${values[ACTIVE]}" \
+        "${values[UUID]}" \
+        "${values[TYPE]/ethernet/eth}" \
+        "$ssid" \
+        "${values[NAME]}" \
+        "$mgmt" \
+        "${values[AUTOCONNECT]}" \
+        "${values[AUTOCONNECT-PRIORITY]}"
+      values=()
+    fi
+  done < <(dolist CONN)
+  ) | column -t -s "$iSEP"
 }
 
 BINDS[rotate_mode]=alt-t

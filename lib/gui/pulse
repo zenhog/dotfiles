@@ -215,7 +215,7 @@ entries() {
 	local kind="$1"
 	local json="$(pactl -f json list "$kind")"
 
-	local indices descs lvols rvols mutes dsource dsink default
+	local indices descs lvols rvols mutes dsource dsink default nicks
 	local ports curports portnames
 
 	read -r dsink < <(pactl get-default-sink)
@@ -225,6 +225,7 @@ entries() {
 
 	case "$kind" in
 	sinks | sources)
+		readarray -t nicks < <(jq -r '.[] | .properties."node.nick"' <<<"$json")
 		readarray -t names < <(jq -r '.[] | .name' <<<"$json")
 		readarray -t descs < <(jq -r '.[] | .description' <<<"$json")
 		readarray -t states < <(jq -r '.[] | .state' <<<"$json")
@@ -262,12 +263,13 @@ entries() {
 					printline \
 						"${indices[$i]}" "$iSEP" \
 						"${icons[$kind]}" "$iSEP" \
+						"${nicks[$i]}" "$iSEP" \
 						"${names[$i]}" "$iSEP" \
-            "${descs[$i]}" "$iSEP" \
 						"${lvols[$i]}" "$iSEP" \
 						"${mutes[$i]}" "$iSEP" \
 						"${states[$i]}" "$iSEP" \
             "${curports[$i]}"
+            # "${descs[$i]}" "$iSEP" \
 				)
 				if [[ "${names[$i]}" == "$default" ]]; then
 					# [[ "${curports[$i]}" == "${portnames[$p]}" ]]; then

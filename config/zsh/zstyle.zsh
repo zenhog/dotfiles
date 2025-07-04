@@ -22,10 +22,10 @@ zstyle ':fzf-tab:*' switch-group 'ctrl-p' 'ctrl-n'
 zstyle ':fzf-tab:*' prefix ''
 
 zstyle ':fzf-tab:*' fzf-min-height 5
-zstyle ':fzf-tab:*' popup-min-size 50 1
+zstyle ':fzf-tab:*' popup-min-size 50 5
+
+zstyle ':fzf-tab:*:*:*' popup-pad 30 0
 
 #zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath}'
 #zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
 #        fzf-preview 'echo ${(P)word}'
-
-zstyle ':fzf-tab:*:*:*' popup-pad 30 0

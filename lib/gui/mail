@@ -42,21 +42,28 @@ mails() {
 OPTS+=(--with-nth 2..)
 list() {
 	# @menu-mail-list inbox|sent|draft|archive
-	local authors subjects mails
-	local author_color=red
-	local subject_color=yellow
+  # which mailbox?
+  # respond
+  # write-message
+  # forward => contacts?
+  # open
+  # tag
+  # delete/spam/important?
 
-	IFS= read -r -d '' mails < <(mails)
+  while IFS="$iSEP" read -r thread author subject; do
+    printfmt "$thread" \
+      "${author:0:30}" \
+      "$subject"
+  done < <(
+    mails |
+      jq -r ".[] | [ .thread, .authors, .subject ] | join(\"$iSEP\")") |
+        column -t -s "$iSEP"
 
-	readarray -t threads < <(jq -r ".[].thread" <<<"$mails")
-	readarray -t authors < <(jq -r ".[].authors" <<<"$mails")
-	readarray -t subjects < <(jq -r ".[].subject" <<<"$mails")
-
-	for i in "${!authors[@]}"; do
-		printf "%s%s%s%s%s\n" "${threads[$i]}" "$iSEP" \
-			"$(colorize "$author_color" "${authors[$i]:0:30}")" "$iSEP" \
-			"$(colorize "$subject_color" "${subjects[$i]}")"
-	done | column -t -s "$iSEP"
+	# for i in "${!authors[@]}"; do
+	# 	printf "%s%s%s%s%s\n" "${threads[$i]}" "$iSEP" \
+	# 		"$(colorize "$author_color" "${authors[$i]:0:30}")" "$iSEP" \
+	# 		"$(colorize "$subject_color" "${subjects[$i]}")"
+	# done | column -t -s "$iSEP"
 }
 
 BINDS[tag]=alt-q

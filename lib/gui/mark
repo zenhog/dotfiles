@@ -123,11 +123,9 @@ mod() {
 
 	read -r id title <<<"$1"
 
-	echo -n "$title" | tmux load-buffer -b preview -
+  echo -n "$title" | tmux load-buffer -
 
-	read -r title < <(input)
-
-	mute tmux delete-buffer -b preview
+	read -r title < <(input preview="'$title'" ghost="'$title'")
 
 	if [[ -n "$title" ]]; then
 		sqlite3 "$DB" \
@@ -144,16 +142,17 @@ add() {
 	fi
 
 	(
-		echo 'Return "TITLE" to use the default title available'
 		echo "TITLE: $title"
 		echo "URL: $url"
 	) | tmux load-buffer -b preview -
 
-	read -r mytitle < <(menu input)
+	read -r mytitle < <(menu input ghost=@ query=@)
+
+  tmux delete-buffer -b preview
 
 	[[ -z "$mytitle" ]] && return
 
-	[[ "$mytitle" == TITLE ]] && mytitle="$title"
+	[[ "$mytitle" == @ ]] && mytitle="$title"
 
 	insert "$url" "$mytitle"
 

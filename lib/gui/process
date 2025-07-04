@@ -19,6 +19,7 @@ view() {
     fsuser fsgroup
     longtname
     lxc lwp
+    cgroup cgname
     mntns netns pidns userns
     sig size slice stat state stime
     args
@@ -34,10 +35,14 @@ view() {
   done | column -t -s "$iSEP"
 }
 
+OPTS+=(--with-nth 2..)
 list() {
   LIBPROC_HIDE_KERNEL=1 ps axo pid,ppid,pidns,userns,user,pmem,cmd --sort pmem |
     tail -n +2 | tac
 }
+
+# kill/chgprio/ insert in namespaces?
+# htop-style
 
 BINDS[del]=alt-d
 HOOKS[del]=noclear
@@ -45,9 +50,12 @@ DESCS[del]='Kill process'
 del() {
   local pid
   read -r pid _ <<< "$1"
-  notify "$pid"
+  sudo kill -9 "$pid"
   #sudo kill -9 "$pid"
 }
 
-# kill
-# htop-style
+BINDS[reload]=alt-r
+DESCS[reload]='Reload List'
+reload() {
+  :
+}

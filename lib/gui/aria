@@ -8,6 +8,7 @@ HORIZONTAL=1
 
 export ICON_DL=
 export ICON_UL=
+export DL_PATH="$HOME/downloads/"
 
 query() {
   local query args params method="$1"
@@ -72,6 +73,59 @@ request() {
       ;;
     files)
       query aria2.getFiles "\"$gid\""
+      ;;
+    select)
+      request setopt "$gid" \
+        "$(printf '{ "select-file": "%s" }' "$(IFS=,; printf "%s" "$*")")"
+      ;;
+    selfile)
+      local choices choice ind sel query selections
+
+      readarray -t choices < <(view "$gid")
+
+      local output
+
+      local query selections
+
+      {
+        IFS= read -r query
+        readarray -t selections
+      } < <(input ghost="'@1 3-5 8'" "${choices[@]}")
+
+      if [[ "$query" == @* ]]; then
+        local args
+        read -r -a args <<< "${query#@}"
+        request select "$gid" "${args[@]}"
+        return
+      fi
+
+      choices=("${choices[@]%% *}")
+      choices=("${choices[@]#*:}")
+
+      selections=("${selections[@]%% *}")
+
+      for sel in "${selections[@]}"; do
+        IFS=: read -r ind sel <<< "$sel"
+
+        case "${choices[ind-1]}" in
+          true)
+            choices[ind-1]=false
+            ;;
+          false)
+            choices[ind-1]=true
+            ;;
+        esac
+      done
+
+      local r
+
+      for c in "${!choices[@]}"; do
+        if [[ "${choices[c]}" == true ]]; then
+          r+=($((c+1)))
+        fi
+      done
+
+      request select "$gid" "${r[@]}"
       ;;
     pause)
       query aria2.pause "\"$gid\""
@@ -143,7 +197,16 @@ view() {
   local gid
   read -r gid _ <<< "$1"
 
-  request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
+  # request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
+
+  while IFS="$iSEP" read -r dled ind length path sel; do
+    dled="$(numfmt --to=iec --suffix=B "$dled")"
+    length="$(numfmt --to=iec --suffix=B "$length")"
+    printfmt "$ind:$sel" "$dled/$length" "${path#${DL_PATH}}"
+  done < <(request files "$gid" | jq -r ".[] | \
+    [ .completedLength, .index, .length, .path, .selected ] | \
+      join(\"$iSEP\")") |
+        column -t -s "$iSEP"
 }
 
 OPTS+=(--with-nth 2..)
@@ -322,6 +385,16 @@ dginc() {
 BINDS[toggle]=enter
 DESCS[toggle]='Toggle pause'
 toggle() {
+  # alt-t: toggle K, M
+  # alt-m: toggle Global, Overall
+  # alt-enter: toggle all
+  # alt-r: restart
+  # alt-j: down
+  # alt-p: up
+  # alt-h: dec
+  # alt-l: inc
+  # alt-p: overall/global
+  # alt-n: overall/global
   local gid status
   read -r gid status _ <<< "$1"
 
@@ -331,6 +404,19 @@ toggle() {
       ;;
     active)
       request pause "$gid"
+      ;;
+    error)
+      local files uri out
+      read -r gid status _ <<< "$1"
+
+      read -r uri < <(request files "$gid" | jq -r '.[0].uris.[0].uri')
+      read -r out < <(request files "$gid" | jq -r '.[0].path')
+
+      out="$(basename "$out")"
+
+      request add "$uri" " { \"out\": \"$out\" } "
+
+      del "$gid $status"
       ;;
   esac
 }
@@ -351,24 +437,22 @@ toggleall() {
   esac
 }
 
+BINDS[sel]=tab
+HOOKS[sel]=sclear
+DESCS[sel]='Select Files'
+sel() {
+  local gid status
+  read -r gid status _ <<< "$1"
+
+  case "$status" in
+    paused|active)
+      request selfile "$gid"
+      ;;
+  esac
+}
+
 BINDS[refresh]=alt-r
 DESCS[refresh]='Refresh status'
 refresh() {
   :
-}
-
-BINDS[retry]=alt-m
-DESCS[retry]='Retry download'
-retry() {
-  local gid status files uri out
-  read -r gid status _ <<< "$1"
-
-  read -r uri < <(request files "$gid" | jq -r '.[0].uris.[0].uri')
-  read -r out < <(request files "$gid" | jq -r '.[0].path')
-
-  out="$(basename "$out")"
-
-  request add "$uri" " { \"out\": \"$out\" } "
-
-  del "$gid $status"
 }

@@ -189,7 +189,7 @@ dump() {
       .id, \
       .info.props."object.serial", \
       .info.props."media.class", \
-      .Props.volume, \
+      .info.props."node.nick", \
       .info.state, \
       .info.props."audio.position", \
       .info.props."node.name" \
@@ -198,7 +198,22 @@ EOF
 
   read -r query < <(printf "$query" "PipeWire:Interface:$type" "$class")
 
-  jq -r "$query" < <(pw-dump)
+  while IFS="$iSEP" read -r id pindex class nick state pos name; do
+    local vol mute q
+
+    IFS= read -r -d '' q << EOF
+      .[] | select(.index == "$pindex") | \
+        [
+          .volume."front-left".value_percent, \
+          .mute \
+        ] | join(",")
+EOF
+
+    IFS=, read -r vol mute < <(pactl -f json list "s${class#Audio/S}s" | jq -r "$q")
+
+    printfmt "$id" "$pindex" "$class" "$nick" "$state" "$vol" "$mute" "$pos" "$name"
+  done < <(pw-dump | jq -r "$query")
+
 }
 
 entries() {

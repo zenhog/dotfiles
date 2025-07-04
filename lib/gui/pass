@@ -166,10 +166,12 @@ mod() {
 
 	view "$dir" | tmux load-buffer -b preview -
 
-	read -r -a entries < <(input)
+	IFS=$'\t \n' read -r -a entries < <(input ghost="'key1:val1 key2:val2 -key3'")
 
 	tmux delete-buffer -b preview
 
+  # the way to do this is to actually parse bash code and eval it
+  # that way, you can do things like quoting and so on
 	for entry in "${entries[@]}"; do
 		if [[ "$entry" == -* ]]; then
 			pass rm -f "$dir/${entry:1}"
@@ -190,7 +192,7 @@ edit() {
 
 	view "$dir" | tmux load-buffer -b preview -
 
-	read -r newdir < <(input query="$dir")
+	read -r newdir < <(input ghost="$dir" query="$dir")
 
 	tmux delete-buffer -b preview
 
@@ -315,8 +317,9 @@ new() {
 	[[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" -- "$dir"
 
 	list | tmux load-buffer -b preview -
+	list | tmux load-buffer -
 
-	read -r dir < <(menu input "$dir")
+	read -r dir < <(menu input ghost="$dir" query="$dir")
 
 	tmux delete-buffer -b preview
 

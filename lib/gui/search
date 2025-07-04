@@ -139,9 +139,7 @@ rename() {
 	folder_restore
 	local entry="$1"
 
-	export MENU_INPUT_PREVIEW="$entry"
-
-	read -r input < <(cd "$FOLDER" && input "$entry")
+	read -r input < <(cd "$FOLDER" && input ghost="$entry" query="$entry")
 	mv -- "$FOLDER/$entry" "$FOLDER/$input"
 }
 

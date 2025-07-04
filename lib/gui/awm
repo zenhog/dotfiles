@@ -9,6 +9,7 @@ HORIZONTAL=1
 
 NOWRAP=1
 
+OPTS+=(--with-nth 2..)
 list() {
 	awesome-client <<EOF | sed -r '1d;$d' | column -t -s "$iSEP"
     require('awful')

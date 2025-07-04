@@ -79,7 +79,7 @@ unset_opt() {
 }
 
 list_opt() {
-	quiet tmux show -s | grep "^@menu-${MODULE}"
+	quiet tmux show -s | grep "^@menu-${1:-${MODULE}}"
 }
 
 save_opt() {
@@ -132,6 +132,14 @@ printline() {
 	done
 	printf "$s" "$@"
 	printf "\n"
+}
+
+printfmt() {
+  for p in "${@:1:$(($#-1))}"; do
+    printf "%s%s" "$p" "$iSEP"
+  done
+  shift $(($#-1))
+  printf "%s\n" "$1"
 }
 
 return 0 2>/dev/null
