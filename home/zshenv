@@ -43,8 +43,6 @@ FZF_BASE_FLAGS=(
   "--bind=ctrl-b:forward-word"
   "--bind=ctrl-z:backward-word"
 
-  "--bind=ctrl-s:toggle"
-
   "--bind=ctrl-g:clear-query"
   "--bind=ctrl-space:toggle-wrap+toggle-preview-wrap"
 
