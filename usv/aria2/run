@@ -4,10 +4,12 @@ exec 2>&1
 
 touch "$HOME/.aria2.session"
 
+mkdir -p "$HOME/downloads/aria2/active"
+
 HOOKS="$HOME/.config/aria2/hooks"
 
 #exec aria2c --dir="$HOME/downloads" \
-exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads" \
+exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads/aria2/active" \
     --on-download-complete="$HOOKS"/aria2hook-complete \
     --on-download-pause="$HOOKS"/aria2hook-pause \
     --on-download-start="$HOOKS"/aria2hook-start \
@@ -21,9 +23,11 @@ exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads" \
     --continue=true \
     --max-tries=0 \
     --retry-wait=3 \
-    --timeout=5 \
+    --timeout=60 \
+    --max-connection-per-server=4 \
+    --log-level=error \
     --http-accept-gzip=true \
-    --max-concurrent-downloads=10000 \
+    --max-concurrent-downloads=5 \
     --pause-metadata=false \
     --input-file="${HOME}/.aria2.session" \
     --save-session="${HOME}/.aria2.session" \
