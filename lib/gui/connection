@@ -4,9 +4,14 @@ KEY=f
 MOD='S-M'
 ICON=󰴽
 
-# HORIZONTAL=1
+HORIZONTAL=1
 PREVIEW_LABEL_OFFSET=2
-RATIO=60
+RATIO=50%
+
+FIELDS=(uuid state type ifname name ssid bssid prio
+  mode signal chan freq rate security)
+
+export S_FIELDS="$(declare -p FIELDS)"
 
 label() {
 	local mode="$(get_opt mode)"
@@ -14,52 +19,45 @@ label() {
 	echo " mode: $mode "
 }
 
-previewlabel() {
-	local mode="$(get_opt mode)"
-
-	echo " $(dolist "$mode-header") "
-}
-
 init() {
 	set_opt mode connections
 }
 
-dolist() {
-	local kind="$1"
-
-	case "$kind" in
-	ssids)
-		nmcli -c yes -s -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-			device wifi list --rescan yes | tail +2
-		;;
-	ssids-header)
-		nmcli -c yes -f ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-			device wifi list --rescan yes | head -1 | tr ' ' '–'
-		;;
-	connections)
-		sudo nmcli -c yes -s -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-			connection show | tail +2
-		;;
-	connections-header)
-		nmcli -c yes -f ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-			connection show | head -1 | tr ' ' '–'
-		;;
-  SSID)
-    nmcli -c no -s -m multiline -f \
-      ACTIVE,BSSID,SSID,CHAN,RATE,SIGNAL,FREQ,SECURITY \
-      device wifi list --rescan yes
-    ;;
-  CONN)
-    nmcli -c no -s -m multiline -f \
-      ACTIVE,UUID,NAME,TYPE,AUTOCONNECT,AUTOCONNECT-PRIORITY \
-      connection show
-    ;;
-	esac
-}
 BINDS[rescan]=alt-r
 DESCS[rescan]='Rescan'
 reload() {
 	sudo nmcli device wifi rescan
+}
+
+view() {
+  eval "$S_FIELDS"
+
+  eval local "${FIELDS[@]}"
+
+  eval read -r "${FIELDS[@]}" <<< "$1"
+
+  local val psk
+
+  if [[ "$type" == wifi ]]; then
+    IFS=: read -r _ psk < <(sudo nmcli -c no -t -s \
+      -f 802-11-wireless-security.psk connection show "$uuid")
+    echo "Password: $psk"
+    val="WIFI:T:$SECURITY;S:$ssid;P:$psk;;"
+    qrencode -m1 -l H -tANSI256 "$val"
+    # TODO: need fix with uberzug cuz its too big
+  fi
+}
+
+BINDS[del]=alt-d
+HOOKS[del]=clear
+DESCS[del]='Delete connection'
+del() {
+	local uuid
+  read -r uuid _ <<< "$1"
+
+  sudo nmcli connection delete "$uuid"
+}
+
   # type: conn/wifi
   # new:
     # ethernet id eth0 prio ipv6?
@@ -67,34 +65,6 @@ reload() {
     # hotspot
   # connect:
     # wifi id wlan0 prio ssid psk
-}
-
-view() {
-	local mode="$(get_opt mode)"
-
-	local active id
-
-	read -r active id _ <<<"$1"
-
-	case "$mode" in
-	connections)
-		sudo nmcli --show-secrets con show "$id"
-		;;
-	ssids)
-		nmcli con show "$id"
-		;;
-	esac
-}
-
-BINDS[del]=alt-d
-HOOKS[del]=clear
-DESCS[del]='Delete connection'
-del() {
-	local active id
-  read -r _ id _ <<< "$1"
-
-  sudo nmcli connection delete "$id"
-}
 
 BINDS[open]=enter
 HOOKS[open]=clear
@@ -122,53 +92,184 @@ open() {
 	esac
 }
 
-OPTS+=(--with-nth 3..)
-list() {
-  (
-  while IFS=$'\t: ' read -r key val; do
-    values+=("$val")
-    if [[ "$key" == SECURITY ]]; then
-      printfmt "${values[0]}" "${values[1]}" cast "${values[@]:2}"
-      unset values
-    fi
-  done < <(dolist SSID)
+# add: ethernet:xy bssid:EF:
+# del
+# clone name: ifname:wlan1
+# modify name:H
 
-  # 802-11-wireless.ssid
-  # 802-11-wireless.bssid
-  # 802-11-wireless-security.psk
-  # 802-11-wireless-security.key_mgmt
-  #
-  # name ethernet/wifi ifname autoconnect prio ssid psk bssid
- 
-  local -A values
-  local ssid bssid psk mgmt keys=(
-    802-11-wireless.ssid
-    802-11-wireless.bssid
-    802-11-wireless-security.psk
-    802-11-wireless-security.key-mgmt
-  )
+show() {
+  eval "$S_FIELDS"
+  eval "$S_WIFIS"
+  eval "$S_CONNS"
 
-  while IFS=$'\t: ' read -r key val; do
-    values[$key]="$val"
-    if [[ "$key" == AUTOCONNECT-PRIORITY ]]; then
-      IFS=$'\n' read -r -d '' ssid bssid psk mgmt < <(sudo nmcli -c no -s -f \
-        "$(IFS=,; printf "%s" "${keys[*]}")" con show "${values[UUID]}" |
-        awk '{print $2}'
+  local kind="$1"
+  local line
+
+  case "$kind" in
+    conns)
+      local -A keys=(
+        [connection.uuid]=uuid
+        [connection.id]=name
+        [connection.type]=type
+        [connection.interface-name]=ifname
+        [connection.autoconnect]=auto
+        [connection.autoconnect-priority]=prio
+        [802-11-wireless.ssid]=ssid
+        [802-11-wireless.bssid]=bssid
       )
 
-      printfmt \
-        "${values[ACTIVE]}" \
-        "${values[UUID]}" \
-        "${values[TYPE]/ethernet/eth}" \
-        "$ssid" \
-        "${values[NAME]}" \
-        "$mgmt" \
-        "${values[AUTOCONNECT]}" \
-        "${values[AUTOCONNECT-PRIORITY]}"
-      values=()
-    fi
-  done < <(dolist CONN)
-  ) | column -t -s "$iSEP"
+      local fields=("${!keys[@]}")
+
+      local columns=(uuid state type ifname name ssid bssid prio)
+
+      local fmts entries
+
+      readarray -t entries < <(nmcli -t -c no -f UUID,ACTIVE connection show)
+
+      local -A states
+
+      local uuid
+
+      for entry in "${!entries[@]}"; do
+        uuid="${entries[$entry]%%:*}"
+        states[$uuid]="${entries[$entry]#*:}"
+      done
+
+      unset uuid
+
+      local -A values
+
+      local key val lastcol fmts
+
+      readarray -t fmts < <(printf '"${values[%s]:---}"\n' "${FIELDS[@]}")
+
+      while IFS=: read -r key val; do
+        if [[ -n "$key" ]]; then
+          key="${keys[$key]}"
+          values[$key]="$val"
+        fi
+
+        lastcol="${#fields[@]}"
+        lastcol="$(( lastcol - 1 ))"
+        lastcol="${fields[lastcol]}"
+        lastcol="${keys[$lastcol]}"
+
+        if [[ "$key" == "$lastcol" ]]; then
+          uuid="${values[uuid]}"
+          values[state]="${states[$uuid]}"
+
+          values[prio]="${values[auto]/yes/+}${values[prio]}"
+          values[prio]="${values[prio]/#no/}"
+
+          values[type]="${values[type]/802-3-ethernet/ether}"
+          values[type]="${values[type]/802-11-wireless/wifi}"
+
+          read -r line < <(eval printfmt "${fmts[@]}")
+
+          CONNS[${values[uuid]}]="$line"
+
+          values=()
+          unset uuid
+        fi
+      done < <(
+        IFS=,
+        nmcli -t -c no -f "${fields[*]}" connection show "${entries[@]%%:*}"
+      )
+      ;;
+    wifis)
+      local columns=(
+        active device ssid mode signal chan freq rate security bssid)
+
+      local -A values
+
+      eval local "${columns[@]}" ifname
+      local type=--
+
+      local -A values
+
+      while eval IFS=: read -r "${columns[@]}"; do
+        [[ -z "$bssid" ]] && continue
+        read -r bssid < <(eval printf "%b" "$bssid")
+        signal="${signal}%"
+        ifname="$device"
+
+        readarray -t fmts < <(printf '"${%s:---}"\n' "${FIELDS[@]}")
+
+        read -r line < <(eval printfmt "${fmts[@]}")
+
+        WIFIS[$bssid,$ifname]="$line"
+      done < <(IFS=,; nmcli -t -c no -f "${columns[*]}" device wifi list)
+      ;;
+  esac
+}
+
+OPTS+=(--with-nth 3.. --header-lines=1)
+list() {
+  eval "$S_CONNS"
+  eval "$S_WIFIS"
+  eval "$S_FIELDS"
+
+  declare -A WIFIS
+  declare -A CONNS
+
+  local conns wifis
+
+  show conns
+  show wifis
+
+  local wifi keys fmts
+
+  readarray -t keys < <(printf "w_%s\n" "${FIELDS[@]}")
+
+  eval local "${FIELDS[@]}"
+  eval local "${keys[@]}"
+
+  (
+    for conn in "${CONNS[@]}"; do
+      eval IFS="$iSEP" read -r "${FIELDS[@]}" <<< "$conn"
+
+      wifi="${WIFIS[${bssid},${ifname}]}"
+
+      if [[ -n "$wifi" ]]; then
+        eval IFS="$iSEP" read -r "${keys[@]}" <<< "$wifi"
+
+        mode="$w_mode"
+        signal="$w_signal"
+        chan="$w_chan"
+        freq="$w_freq"
+        rate="$w_rate"
+        security="$w_security"
+
+        readarray -t fmts < <(printf '"${%s:---}"\n' "${FIELDS[@]}")
+
+        read -r conn < <(eval printfmt "${fmts[@]}")
+        WIFIS[${bssid},${ifname}]=
+      fi
+
+      if [[ "$state" == yes ]]; then
+        colorize green "$conn"
+      elif [[ "$signal" == -- ]]; then
+        colorize pink "$conn"
+      elif (( ${signal%%%} >= 80 )); then
+        colorize yellow "$conn"
+      elif (( ${signal%%%} >= 40 )); then
+        colorize red "$conn"
+      elif (( ${signal%%%} < 40 )); then
+        colorize violet "$conn"
+      else
+        echo "$conn"
+      fi
+
+    done
+    printf "%s\n" "${WIFIS[@]}"
+  ) | sort -t "$iSEP" -k 8 -k 10 |
+    (IFS=,; column -t -s "$iSEP" -N "${FIELDS[*]^^}" -R PRIO,SIGNAL,CHAN,RATE)
+
+  read -r S_CONNS < <(declare -p CONNS)
+  export S_CONNS
+
+  read -r S_WIFIS < <(declare -p WIFIS)
+  export S_WIFIS
 }
 
 BINDS[rotate_mode]=alt-t

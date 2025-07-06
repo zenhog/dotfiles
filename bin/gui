@@ -61,6 +61,28 @@ filter() {
 	esac
 }
 
+arrind() {
+  local -n arr="$1"
+  shift
+
+  local res
+
+  for ind in "${!arr[@]}"; do
+    for val in "$@"; do
+      if [[ "$val" == "${arr[ind]}" ]]; then
+        res+=($ind)
+      fi
+    done
+  done
+
+  if [[ -n "$res" ]]; then
+    (IFS=,; printf "%s\n" "${r[@]}")
+    return 0
+  fi
+
+  return 1
+}
+
 notify() {
 	silent notify-send -t 5000 -a menu "$MODULE" "$@"
 	widget push timeout

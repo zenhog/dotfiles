@@ -5,6 +5,7 @@ MOD='S-M'
 ICON=
 
 HORIZONTAL=1
+RATIO=45%
 
 export ICON_DL=
 export ICON_UL=
@@ -45,7 +46,7 @@ request() {
       query aria2.getGlobalStat
       ;;
     status)
-      query aria2.tellStatus "$gid"
+      query aria2.tellStatus "\"$gid\""
       ;;
     list)
       local numWaiting numStoppedTotal
@@ -73,6 +74,12 @@ request() {
       ;;
     files)
       query aria2.getFiles "\"$gid\""
+      ;;
+    chpos)
+      local pos="$1"
+      local how="$2"
+
+      query aria2.changePosition "\"$gid\"" "$pos" "\"$how\""
       ;;
     select)
       request setopt "$gid" \
@@ -172,9 +179,19 @@ request() {
   esac
 }
 
-label() {
+# TODO:
+# max-concurrent-download-limit
+# --optimize-concurrent-downloads  option
 
-  local ul dl maxuspeed maxdspeed
+init() {
+  set_opt mode global
+  set_opt flow download
+  set_opt unit K
+  set_opt rate 10
+}
+
+label() {
+  local ul dl maxuspeed maxdspeed gmaxuspeed gmaxdspeed
 
   IFS=$'\n' read -r -d '' dl ul < <(
     request stats | jq -r '(.downloadSpeed, .uploadSpeed)'
@@ -184,32 +201,49 @@ label() {
     request getgopt | jq -r '."max-overall-download-limit"')
   read -r maxuspeed < <(request getgopt | jq -r '."max-overall-upload-limit"')
 
+  read -r gmaxdspeed < <(
+    request getgopt | jq -r '."max-download-limit"')
+  read -r gmaxuspeed < <(request getgopt | jq -r '."max-upload-limit"')
+
   maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
   maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
+
+  gmaxdspeed="$(numfmt --to=iec --suffix=Bps "$gmaxdspeed")"
+  gmaxuspeed="$(numfmt --to=iec --suffix=Bps "$gmaxuspeed")"
  
   dl="$(numfmt --to=iec --suffix=Bps "$dl")"
   ul="$(numfmt --to=iec --suffix=Bps "$ul")"
 
-  printf " $ICON_DL %s $ICON_UL %s " "$dl/$maxdspeed" "$ul/$maxuspeed"
+	local unit="$(get_opt unit)"
+  local mode="$(get_opt mode)"
+  local flow="$(get_opt flow)"
+  local rate="$(get_opt rate)"
+
+	echo -n "[ mode: $mode, unit: $unit, flow: $flow, rate: $rate ]"
+
+  printf "[ $ICON_DL %s $ICON_UL %s ]" \
+    "$dl/$maxdspeed/$gmaxdspeed" "$ul/$maxuspeed/$gmaxuspeed"
 }
 
 view() {
   local gid
   read -r gid _ <<< "$1"
 
-  # request files "$gid" | yq -yC | bat -p --force-colorization --language=yaml
+  local dled ind length path sel
 
   while IFS="$iSEP" read -r dled ind length path sel; do
     dled="$(numfmt --to=iec --suffix=B "$dled")"
     length="$(numfmt --to=iec --suffix=B "$length")"
-    printfmt "$ind:$sel" "$dled/$length" "${path#${DL_PATH}}"
+    printfmt "$ind:$sel" "$dled/$length" "${path#"${DL_PATH}"}"
   done < <(request files "$gid" | jq -r ".[] | \
     [ .completedLength, .index, .length, .path, .selected ] | \
       join(\"$iSEP\")") |
         column -t -s "$iSEP"
+  # sepline
+  # request status "$gid" | yq -yC | bat -p --force-colorization --language=yaml
 }
 
-OPTS+=(--with-nth 2..)
+OPTS+=(--with-nth 2.. --header-lines=1)
 list() {
   local list
 
@@ -228,46 +262,50 @@ list() {
   readarray -t uspeed < <(jq -r '.[] | .uploadSpeed' <<< "$list")
   readarray -t names < <(jq -r '.[] | .files.[0].path' <<< "$list")
 
-  for i in "${!gid[@]}"; do
-    unset dsh ush dlh ulh th maxuspeed maxdspeed name
+  {
+    printfmt GID STATUS PERCENT DL.B/Total DL/Limit UL US/Limit NAME
 
-    dsh="$(numfmt --to=iec --suffix=Bps "${dspeed[$i]}")"
-    ush="$(numfmt --to=iec --suffix=Bps "${uspeed[$i]}")"
+    for i in "${!gid[@]}"; do
+      unset dsh ush dlh ulh th maxuspeed maxdspeed name
 
-    dlh="$(numfmt --to=iec --suffix=B "${dled[$i]}")"
-    ulh="$(numfmt --to=iec --suffix=B "${uled[$i]}")"
+      dsh="$(numfmt --to=iec --suffix=Bps "${dspeed[$i]}")"
+      ush="$(numfmt --to=iec --suffix=Bps "${uspeed[$i]}")"
 
-    th="$(numfmt --to=iec --suffix=B "${total[$i]}")"
+      dlh="$(numfmt --to=iec --suffix=B "${dled[$i]}")"
+      ulh="$(numfmt --to=iec --suffix=B "${uled[$i]}")"
 
-    read -r maxdspeed < <(request getopt "${gid[$i]}" |
-      jq -r '."max-download-limit"')
-    read -r maxuspeed < <(request getopt "${gid[$i]}" |
-      jq -r '."max-upload-limit"')
+      th="$(numfmt --to=iec --suffix=B "${total[$i]}")"
 
-    maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
-    maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
+      read -r maxdspeed < <(request getopt "${gid[$i]}" |
+        jq -r '."max-download-limit"')
+      read -r maxuspeed < <(request getopt "${gid[$i]}" |
+        jq -r '."max-upload-limit"')
 
-    progress[$i]="$(printf "%0.0f" \
-      "$(echo "${dled[$i]} * 100. / ${total[$i]}" | bc)")"
+      maxdspeed="$(numfmt --to=iec --suffix=Bps "$maxdspeed")"
+      maxuspeed="$(numfmt --to=iec --suffix=Bps "$maxuspeed")"
 
-    name="${names[$i]}"
-    if [[ -z "$name" ]]; then
-      read -r name < <(jq -r ".[] | select (.gid == ${gid[$i]}) |
-        .[] | .files.[0].uris.[0].uri")
-    fi
+      progress[$i]="$(printf "%0.0f" \
+        "$(echo "${dled[$i]} * 100. / ${total[$i]}" | bc)")"
 
-    name="$(basename "$name")"
+      name="${names[$i]}"
+      if [[ -z "$name" ]]; then
+        read -r name < <(jq -r ".[] | select (.gid == ${gid[$i]}) |
+          .[] | .files.[0].uris.[0].uri")
+      fi
 
-    printline \
-      "${gid[$i]}" "$iSEP" \
-      "${status[$i]}" "$iSEP" \
-      "$(colorize blueviolet "${progress[$i]}%")" "$iSEP" \
-      "$(colorize royalblue "$ICON_DL $dlh/$th")" "$iSEP" \
-      "$(colorize royalblue "$dsh/$maxdspeed")" "$iSEP" \
-      "$(colorize yellow "$ICON_UL $ulh")" "$iSEP" \
-      "$(colorize yellow "$ush/$maxuspeed")" "$iSEP" \
-      "$(colorize red "$(basename "$name")")"
-  done | column -t -s "$iSEP"
+      name="$(basename "$name")"
+
+      printline \
+        "${gid[$i]}" "$iSEP" \
+        "${status[$i]}" "$iSEP" \
+        "$(colorize blueviolet "${progress[$i]}%")" "$iSEP" \
+        "$(colorize royalblue "$ICON_DL $dlh/$th")" "$iSEP" \
+        "$(colorize royalblue "$dsh/$maxdspeed")" "$iSEP" \
+        "$(colorize yellow "$ICON_UL $ulh")" "$iSEP" \
+        "$(colorize yellow "$ush/$maxuspeed")" "$iSEP" \
+        "$(colorize red "$(basename "$name")")"
+    done
+  } | column -t -s "$iSEP"
 }
 
 BINDS[del]=alt-d
@@ -302,99 +340,160 @@ del() {
 
 }
 
-BINDS[dinc]=alt-l
-DESCS[dinc]='Increase Download Speed'
-dinc() {
-  local gid dlimit
+limit() {
+  local limit flow="$1" op="$2" unit="$3" rate="$4" gid="$5"
 
-  read -r gid _ <<< "$1"
+  case "$unit" in
+    K)
+      rate=$((rate * 1024))
+      ;;
+    M)
+      rate=$((rate * 1024 * 1024))
+      ;;
+  esac
 
-  read -r dlimit < <(request getopt "$gid" | jq -r '."max-download-limit"')
+  case "$gid" in
+    ?*)
+      read -r limit < <(request getopt "$gid" | jq -r ".\"max-$flow-limit\"")
 
-  if (( dlimit < 1024 * 1024 )); then
-    dlimit=$((dlimit + 1024 * 10))
-  else
-    dlimit=$((dlimit + 1024 * 1024))
-  fi
+      limit=$(( limit $op rate ))
 
-  request setopt "$gid" \
-    "$(printf '{ "max-download-limit":"%d" }' "$dlimit")"
+      request setopt "$gid" \
+        "$(printf '{ "max-%s-limit":"%d" }' "$flow" "$limit")"
+      ;;
+    *)
+      read -r limit < <(request getgopt | jq -r ".\"max-$flow-limit\"")
+
+      limit=$(( limit $op rate ))
+
+      request setgopt \
+        "$(printf '{ "max-%s-limit":"%d" }' "$flow" "$limit")"
+      ;;
+  esac
 }
 
-BINDS[ddec]=alt-h
-DESCS[ddec]='Decrease Download Speed'
-ddec() {
-  local gid dlimit
+ctl() {
+  local gid limit op="$1"
+
+  shift
 
   read -r gid _ <<< "$1"
 
-  read -r dlimit < <(request getopt "$gid" | jq -r '."max-download-limit"')
+  local flow="$(get_opt flow)"
+  local mode="$(get_opt mode)"
+  local unit="$(get_opt unit)"
+  local rate="$(get_opt rate)"
 
-  if (( dlimit < 1024 * 1024 )); then
-    dlimit=$((dlimit - 1024 * 10))
-  else
-    dlimit=$((dlimit - 1024 * 1024))
+  if [[ "$unit" == M ]]; then
+    rate=$((rate/10))
   fi
 
-  request setopt "$gid" \
-    "$(printf '{ "max-download-limit":"%d" }' "$dlimit")"
+  if [[ -z "$gid" && "$mode" == overall ]]; then
+    flow="overall-$flow"
+  fi
+
+  limit "$flow" "$op" "$unit" "$rate" "$gid"
 }
 
-BINDS[dgdec]=alt-a
-DESCS[dgdec]='Decrease Global Download Speed'
-dgdec() {
-  local gid dlimit
-
-  read -r gid _ <<< "$1"
-
-  read -r dlimit < <(
-    request getgopt "$gid" | jq -r '."max-overall-download-limit"')
-
-  if (( dlimit < 1024 * 1024 )); then
-    dlimit=$((dlimit - 1024 * 10))
-  else
-    dlimit=$((dlimit - 1024 * 1024))
-  fi
-
-  if (( dlimit < 0 )); then
-    dlimit=0
-  fi
-
-  request setgopt "$(printf '{ "max-overall-download-limit":"%d" }' "$dlimit")"
+BINDS[inc]=alt-l
+DESCS[inc]='Increase Download Speed'
+inc() {
+  ctl + "$@"
 }
 
-BINDS[dginc]=alt-e
-DESCS[dginc]='Increase Global Download Speed'
-dginc() {
-  local gid dlimit
+BINDS[dec]=alt-h
+DESCS[dec]='Decrease Download Speed'
+dec() {
+  ctl - "$@"
+}
+  # alt-p: overall/global
+  # alt-n: overall/global
 
+BINDS[ginc]=alt-p
+DESCS[ginc]='Increase Global/Overall Speed'
+ginc() {
+  ctl +
+}
+
+BINDS[gdec]=alt-n
+DESCS[gdec]='Decrease Global/Overall Speed'
+gdec() {
+  ctl -
+}
+
+BINDS[up]=alt-k
+DESCS[up]='Go up'
+up() {
+  local gid
   read -r gid _ <<< "$1"
+  request chpos "$gid" -1 POS_CUR
+}
 
-  read -r dlimit < <(
-    request getgopt "$gid" | jq -r '."max-overall-download-limit"')
+BINDS[down]=alt-j
+DESCS[down]='Go up'
+down() {
+  local gid
+  read -r gid _ <<< "$1"
+  request chpos "$gid" 1 POS_CUR
+}
 
-  if (( dlimit < 1024 * 1024 )); then
-    dlimit=$((dlimit + 1024 * 10))
-  else
-    dlimit=$((dlimit + 1024 * 1024))
-  fi
+BINDS[unit]=alt-u
+DESCS[unit]='Rotate unit'
+unit() {
+  local unit="$(get_opt unit)"
 
-  request setgopt "$(printf '{ "max-overall-download-limit":"%d" }' "$dlimit")"
+  case "$unit" in
+    K)
+      set_opt unit M
+      ;;
+    M)
+      set_opt unit K
+      ;;
+  esac
+}
+
+BINDS[mode]=alt-t
+DESCS[mode]='Rotate limit between global and overall'
+mode() {
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    global)
+      set_opt mode overall
+      ;;
+    overall)
+      set_opt mode global
+      ;;
+  esac
+}
+
+BINDS[flow]=alt-y
+DESCS[flow]='Rotate flow between download and upload'
+flow() {
+  local flow="$(get_opt flow)"
+
+  case "$flow" in
+    download)
+      set_opt flow upload
+      ;;
+    upload)
+      set_opt flow download
+      ;;
+  esac
+}
+
+BINDS[rate]=alt-m
+DESCS[rate]='Rotate rate between multiple orders of magnitude'
+rate() {
+  local rate="$(get_opt rate)"
+  set_opt rate $(((rate + 10) % 100))
 }
 
 BINDS[toggle]=enter
 DESCS[toggle]='Toggle pause'
 toggle() {
-  # alt-t: toggle K, M
-  # alt-m: toggle Global, Overall
   # alt-enter: toggle all
   # alt-r: restart
-  # alt-j: down
-  # alt-p: up
-  # alt-h: dec
-  # alt-l: inc
-  # alt-p: overall/global
-  # alt-n: overall/global
   local gid status
   read -r gid status _ <<< "$1"
 
@@ -406,17 +505,20 @@ toggle() {
       request pause "$gid"
       ;;
     error)
-      local files uri out
-      read -r gid status _ <<< "$1"
+      local uri out
 
       read -r uri < <(request files "$gid" | jq -r '.[0].uris.[0].uri')
       read -r out < <(request files "$gid" | jq -r '.[0].path')
 
       out="$(basename "$out")"
 
-      request add "$uri" " { \"out\": \"$out\" } "
-
       del "$gid $status"
+
+      local json
+      read -r json < <(
+        printf '{ "out": "%s", "gid": "%s", "continue": true }' "$out" "$gid")
+
+      request add "$uri" "$json"
       ;;
   esac
 }

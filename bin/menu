@@ -11,9 +11,9 @@ atexit() {
 # BINDS[help]=alt-h
 # HOOKS[help]=help
 help() {
-	eval "$SDESCS"
-	eval "$SBINDS"
-	eval "$SGDESCS"
+	eval "$S_DESCS"
+	eval "$S_BINDS"
+	eval "$S_GDESCS"
 
 	sepline " Global bindings "
 	for func in "${!GDESCS[@]}"; do
@@ -153,16 +153,23 @@ main() {
 		export -f "$func"
 	done < <(declare -F)
 
-	read -r SBINDS < <(declare -p BINDS)
-	export SBINDS
-	read -r SHOOKS < <(declare -p HOOKS)
-	export SHOOKS
-	read -r SCALLS < <(declare -p CALLS)
-	export SCALLS
-	read -r SDESCS < <(declare -p DESCS)
-	export SDESCS
-	read -r SGDESCS < <(declare -p GDESCS)
-	export SGDESCS
+  EXPORTS+=(BINDS HOOKS CALLS DESCS GDESCS)
+
+  for exp in "${EXPORTS[@]}"; do
+    eval read -r S_$exp < <(eval declare -p ${exp})
+    eval export S_$exp
+  done
+
+	# read -r S_BINDS < <(declare -p BINDS)
+	# export S_BINDS
+	# read -r S_HOOKS < <(declare -p HOOKS)
+	# export S_HOOKS
+	# read -r S_CALLS < <(declare -p CALLS)
+	# export S_CALLS
+	# read -r S_DESCS < <(declare -p DESCS)
+	# export S_DESCS
+	# read -r S_GDESCS < <(declare -p GDESCS)
+	# export S_GDESCS
 
 	COMMAND+=(fzf)
 	COMMAND+=(--prompt="$MODULE> ")

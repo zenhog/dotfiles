@@ -162,11 +162,21 @@ BINDS[mod]=alt-w
 HOOKS[mod]=sclear
 DESCS[mod]='Modify entries'
 mod() {
-	local dir="$1" entries
+	local dir="$1" entry entries
 
 	view "$dir" | tmux load-buffer -b preview -
 
-	IFS=$'\t \n' read -r -a entries < <(input ghost="'key1:val1 key2:val2 -key3'")
+	# IFS=$'\t \n' read -r -a entries < <(input ghost="'key1:val1 key2:val2 -key3'")
+	IFS= read -r entry < <(input ghost="'key1:val1 key2:val2 -key3'")
+
+  local args=("$@")
+
+  eval "set -- $entry"
+
+  entries=("$@")
+  set -- "$@"
+
+  unset entry
 
 	tmux delete-buffer -b preview
 
