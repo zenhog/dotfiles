@@ -263,8 +263,6 @@ list() {
   readarray -t names < <(jq -r '.[] | .files.[0].path' <<< "$list")
 
   {
-    printfmt GID STATUS PERCENT DL.B/Total DL/Limit UL US/Limit NAME
-
     for i in "${!gid[@]}"; do
       unset dsh ush dlh ulh th maxuspeed maxdspeed name
 
@@ -305,7 +303,10 @@ list() {
         "$(colorize yellow "$ush/$maxuspeed")" "$iSEP" \
         "$(colorize red "$(basename "$name")")"
     done
-  } | column -t -s "$iSEP"
+  } | column -t -s "$iSEP" \
+      -N GID,STATUS,PERCENT,DL.B/TOTAL,DL/LIMIT,UL.B,UL/LIMIT,NAME \
+      -R PERCENT,DL.B/TOTAL,DL/LIMIT,UL.B,UL/LIMIT
+
 }
 
 BINDS[del]=alt-d

@@ -6,27 +6,30 @@ ICON=󰴽
 
 HORIZONTAL=1
 PREVIEW_LABEL_OFFSET=2
-RATIO=50%
+RATIO=40%
 
-FIELDS=(uuid state type ifname name ssid bssid prio
+FIELDS=(uuid state type ifname name bssid ssid prio
   mode signal chan freq rate security)
 
 export S_FIELDS="$(declare -p FIELDS)"
 
 label() {
-	local mode="$(get_opt mode)"
-
-	echo " mode: $mode "
-}
-
-init() {
-	set_opt mode connections
+  view "$1" label
 }
 
 BINDS[rescan]=alt-r
 DESCS[rescan]='Rescan'
-reload() {
-	sudo nmcli device wifi rescan
+rescan() {
+  local devices
+
+  readarray -t devices < <(nmcli -c no -t -f device,type,state device status)
+
+  local ifname type status
+  for device in "${devices[@]}"; do
+    IFS=: read -r ifname type state <<< "$device"
+    [[ "$state" == unmanaged ]] && continue
+    [[ "$type" == wifi ]] && sudo nmcli device wifi rescan ifname "$ifname"
+  done
 }
 
 view() {
@@ -36,15 +39,20 @@ view() {
 
   eval read -r "${FIELDS[@]}" <<< "$1"
 
-  local val psk
+  local label="$2"
+  local psk
 
   if [[ "$type" == wifi ]]; then
     IFS=: read -r _ psk < <(sudo nmcli -c no -t -s \
       -f 802-11-wireless-security.psk connection show "$uuid")
-    echo "Password: $psk"
+
+    if [[ -n "$label" ]]; then
+      echo " [$psk] "
+      return
+    fi
+
     val="WIFI:T:$SECURITY;S:$ssid;P:$psk;;"
     qrencode -m1 -l H -tANSI256 "$val"
-    # TODO: need fix with uberzug cuz its too big
   fi
 }
 
@@ -58,44 +66,129 @@ del() {
   sudo nmcli connection delete "$uuid"
 }
 
-  # type: conn/wifi
+toggle() {
+	local uuid state
+
+	read -r uuid state _ <<< "$1"
+
+  [[ "$uuid" == -- ]] && return
+
+  case "$state" in
+    yes)
+      sudo nmcli con down "$uuid"
+      ;;
+    no)
+      sudo nmcli con up "$uuid"
+      ;;
+  esac
+}
+
+# clone newname
+
   # new:
-    # ethernet id eth0 prio ipv6?
-    # wifi id wlan0 prio ssid psk
-    # hotspot
   # connect:
     # wifi id wlan0 prio ssid psk
 
-BINDS[open]=enter
-HOOKS[open]=clear
-DESCS[open]='Toggle connection or wifi'
-open() {
-	local mode="$(get_opt mode)"
-
-	local active id
-
-	read -r active id _ <<<"$1"
-
-	case "$mode" in
-	connections)
-		case "$active" in
-		yes) sudo nmcli con down "$id" ;;
-		no) sudo nmcli con up "$id" ;;
-		esac
-		;;
-	ssids)
-		case "$active" in
-		yes) sudo nmcli con down "$id" ;;
-		no) sudo nmcli con up "$id" ;;
-		esac
-		;;
-	esac
-}
-
+# modify 
 # add: ethernet:xy bssid:EF:
-# del
-# clone name: ifname:wlan1
-# modify name:H
+# creates new wifi and connects to it?
+# connects to existing wifi?
+BINDS[add]=enter
+HOOKS[add]=clear
+DESCS[add]='Creates or toggle a connection'
+add() {
+	local uuid state type ifname bssid ssid prio
+
+  read -r uuid state type ifname _ bssid ssid _ <<< "$1"
+
+  if [[ "$uuid" != -- ]]; then
+    toggle "$uuid $state"
+    return
+  fi
+
+  local -A values
+
+  values[wifi.bssid]="$bssid"
+  values[wifi-sec.key-mgmt]=wpa-psk
+  values[autoconnect]=yes
+  values[connection.autoconnect-priority]=100
+  values[save]=yes
+  values[ssid]="$ssid"
+  values[ifname]="$ifname"
+  values[type]=wifi
+
+  local defaults=(
+    "+name"
+    "+psk"
+    "save:yes"
+    "prio:+100"
+    "type:wifi"
+    "ifname:$ifname"
+    "bssid:$bssid"
+    "ssid:$ssid"
+    "mgmt:wpa-psk"
+  )
+
+  local query entry entries
+
+  IFS= read -r -d '' query < <(printf "%s\n" "${defaults[@]}" | column -t -s:)
+
+  tmux load-buffer -b preview - <<< "$query"
+
+  tmux load-buffer - <<< "$bssid"
+
+  IFS= read -r entry < <(input query="name:")
+
+  local args=("$@")
+
+  eval "set -- $entry"
+
+  entries=("$@")
+  set -- "$@"
+
+  unset entry
+
+	tmux delete-buffer -b preview
+
+	for entry in "${entries[@]}"; do
+    local lhs rhs
+    IFS=: read -r lhs rhs <<< "$entry"
+    case "$lhs" in
+      prio)
+        if [[ "${rhs:0:1}" == - ]]; then
+          values[autoconnect]=no
+          rhs="${rhs:1}"
+        fi
+        values[connection.autoconnect-priority]="$rhs"
+        ;;
+      bssid)
+        values[wifi.bssid]="$rhs"
+        ;;
+      name)
+        values[con-name]="$rhs"
+        ;;
+      mgmt)
+        values[wifi-sec.key-mgmt]="$rhs"
+        ;;
+      psk)
+        values[wifi-sec.psk]="$rhs"
+        ;;
+      *)
+        values[$lhs]="$rhs"
+        ;;
+    esac
+	done
+
+  for key in "${!values[@]}"; do
+    if [[ "$key" == type ]]; then
+      opts=("$key" "${values[$key]}" "${opts[@]}")
+    else
+      opts+=("$key" "${values[$key]}")
+    fi
+  done
+
+  sudo nmcli connection add "${opts[@]}"  > /tmp/add 2>&1
+}
 
 show() {
   eval "$S_FIELDS"
@@ -188,7 +281,7 @@ show() {
       local -A values
 
       while eval IFS=: read -r "${columns[@]}"; do
-        [[ -z "$bssid" ]] && continue
+        [[ -z "$ssid" ]] && continue
         read -r bssid < <(eval printf "%b" "$bssid")
         signal="${signal}%"
         ifname="$device"
@@ -198,12 +291,42 @@ show() {
         read -r line < <(eval printfmt "${fmts[@]}")
 
         WIFIS[$bssid,$ifname]="$line"
-      done < <(IFS=,; nmcli -t -c no -f "${columns[*]}" device wifi list)
+      done < <(
+        IFS=,
+        nmcli -t -c no -f "${columns[*]}" device wifi list --rescan yes
+      )
       ;;
   esac
 }
 
-OPTS+=(--with-nth 3.. --header-lines=1)
+paint() {
+  local state="$1" signal="$2"
+
+  [[ -z "$state" ]] && return
+
+  shift 2
+
+  local conn="$*"
+
+  if [[ "$state" == yes ]]; then
+    colorize green "$conn"
+  elif [[ "$signal" == -- ]]; then
+    echo "$conn"
+  elif (( signal >= 75 )); then
+    colorize cyan "$conn"
+  elif (( signal >= 50 )); then
+    colorize yellow "$conn"
+  elif (( signal >= 25 )); then
+    colorize magenta "$conn"
+  elif (( signal < 25 )); then
+    colorize red "$conn"
+  else
+    echo "$conn"
+  fi
+
+}
+
+OPTS+=(--with-nth 3.. --header-lines=1 --preview-window hidden)
 list() {
   eval "$S_CONNS"
   eval "$S_WIFIS"
@@ -245,24 +368,14 @@ list() {
         read -r conn < <(eval printfmt "${fmts[@]}")
         WIFIS[${bssid},${ifname}]=
       fi
-
-      if [[ "$state" == yes ]]; then
-        colorize green "$conn"
-      elif [[ "$signal" == -- ]]; then
-        colorize pink "$conn"
-      elif (( ${signal%%%} >= 80 )); then
-        colorize yellow "$conn"
-      elif (( ${signal%%%} >= 40 )); then
-        colorize red "$conn"
-      elif (( ${signal%%%} < 40 )); then
-        colorize violet "$conn"
-      else
-        echo "$conn"
-      fi
-
+      paint "$state" "${signal%%%}" "$conn"
     done
-    printf "%s\n" "${WIFIS[@]}"
-  ) | sort -t "$iSEP" -k 8 -k 10 |
+    printf "%s\n" "${WIFIS[@]}" > /tmp/wifis
+    for wifi in "${WIFIS[@]}"; do
+      IFS="$iSEP" read -r _ state _ _ _ _ _ _ _ signal _ <<< "$wifi"
+      paint "$state" "${signal%%%}" "$wifi"
+    done
+  ) | sort -t "$iSEP" -k 8 -k 10 -k 4 |
     (IFS=,; column -t -s "$iSEP" -N "${FIELDS[*]^^}" -R PRIO,SIGNAL,CHAN,RATE)
 
   read -r S_CONNS < <(declare -p CONNS)
@@ -270,16 +383,4 @@ list() {
 
   read -r S_WIFIS < <(declare -p WIFIS)
   export S_WIFIS
-}
-
-BINDS[rotate_mode]=alt-t
-HOOKS[rotate_mode]=clear
-DESCS[rotate_mode]='Rotate mode'
-rotate_mode() {
-	local mode="$(get_opt mode)"
-
-	case "$mode" in
-	connections) set_opt mode ssids ;;
-	ssids) set_opt mode connections ;;
-	esac
 }
