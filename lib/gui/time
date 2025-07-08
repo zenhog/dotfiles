@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+KEY=h
+MOD='S-M'
+ICON=󱑎
+COLOR=bisque
+
+# HORIZONTAL=1
+NOWRAP=1
+RATIO=60%
+
+label() {
+  local tz
+  IFS=$'/' read -r _ _ _ _ tz < <(readlink /etc/localtime)
+  echo " [ $tz ] "
+}
+
+view() {
+  cal --color=always -m -y
+}
+
+# OPTS+=(--preview-window hidden)
+list() {
+  local tzdir=/usr/share/zoneinfo
+  local tzs
+
+  readarray -t tzs < <(cd "$tzdir" && find * -mindepth 1 -type f -or -type l)
+
+  for tz in "${tzs[@]}"; do
+    printfmt "$tz" "$(TZ=$tz date "+%H:%M %a %b %d")"
+  done | column -t -s "$iSEP"
+}
+
+BINDS[open]=enter
+DESCS[open]='Change timezone and sync with NTP'
+open() {
+  local tz
+
+  read -r tz _ <<< "$1"
+
+  sudo ln -svf "/usr/share/zoneinfo/$tz" /etc/localtime
+  sync
+  widget timedate timeout
+}
+
+sync() {
+  sudo ntpdate && sudo hwclock --systohc --utc
+}

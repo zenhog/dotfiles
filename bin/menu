@@ -179,6 +179,7 @@ main() {
 	COMMAND+=(--ansi)
 	COMMAND+=(--cycle)
 	COMMAND+=(--no-multi)
+  COMMAND+=(--no-hscroll)
 
 	if [[ "$1" == -- ]]; then
 		COMMAND+=(--query "${*:2}")

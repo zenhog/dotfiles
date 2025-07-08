@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+PERIOD=1
+
+run() {
+  menu auto time
+}
+
+text() {
+	local time=$(date '+%R')
+	local time=$(date '+%I:%M %p')
+	local time=$(date '+%H:%M %a %b %d')
+	local time=$(date '+%H:%M')
+
+	printf "%s" "$time"
+}
+
+icon() {
+	local icon=󱑍
+	printf "%s" "$icon"
+}
+
+output() {
+	printf ":"
+	text
+}
