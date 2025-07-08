@@ -162,8 +162,8 @@ parse() {
 	done
 
 	case "$type" in
-	lhs) echo "${lhs[@]}" ;;
-	rhs) echo "${rhs[@]}" ;;
+	lhs) printf -- "%s\n" "${lhs[@]}" ;;
+	rhs) printf -- "%s\n" "${rhs[@]}" ;;
 	esac
 }
 

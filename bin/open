@@ -2,57 +2,59 @@
 
 shopt -s nullglob
 
-read -r mime < <(file -bL --mime-type "$1")
+file="$1"
+
+read -r mime < <(file -bL --mime-type "$file")
 
 category="${mime%%/*}"
 kind="${mime##*/}"
 
 if [[ "$mime" == inode/directory ]]; then
-  if [[ -r "$1/.dirtype" ]]; then
-    read -r mime < "$1/.dirtype"
+  if [[ -r "$file/.dirtype" ]]; then
+    read -r mime < "$file/.dirtype"
   else
-    cd "$1" &&
-      exec gui tmux window local "$(hostname)" "$(basename "$1")" "${@:2}"
+    cd "$file" &&
+      exec gui tmux window local "$(hostname)" "$(basename "$file")" "${@:2}"
   fi
 fi
 
 case "${mime}" in
   text/*)
-    gui tmux window local "$(hostname)" "$(basename "$1")" nvim "$1"
+    gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$file"
     ;;
   image/*)
-    gui awm runonce fg -- nsxiv -a -s f -- "$(realpath -s "$1")"
+    gui awm runonce fg -- nsxiv -a -s f -- "'$(realpath -s "$file")'"
     ;;
   video/*)
-    gui awm runonce fg -- mpv "$(realpath -s "$1")"
+    gui awm runonce fg -- mpv "$(realpath -s "$file")"
     ;;
   application/pdf)
-    gui awm runonce fg -- mupdf "$(realpath -s "$1")"
+    gui awm runonce fg -- mupdf "$(realpath -s "$file")"
     ;;
   *)
-    case "$1" in
+    case "$file" in
       file://*)
-        gui tmux window local "$(hostname)" "$(basename "$1")" \
-          nvim "${1#file://}"
+        gui tmux window local "$(hostname)" "$(basename "$file")" \
+          nvim "${file#file://}"
         ;;
       irc:*)
           ;;
       ircs:*)
           ;;
       mailto:*)
-        gui tmux window local "$(hostname)" mail neomutt "${1#mailto:}"
+        gui tmux window local "$(hostname)" mail neomutt "${file#mailto:}"
         ;;
       magnet:*)
-        gui aria request add "$1"
+        gui aria request add "$file"
         ;;
       ftp://*)
-        browser "$1"
+        browser "$file"
         ;;
       http://*)
-        browser "$1"
+        browser "$file"
         ;;
       https://*)
-        browser "$1"
+        browser "$file"
         ;;
       esac
 esac

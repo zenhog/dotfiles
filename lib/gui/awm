@@ -50,7 +50,7 @@ close() {
 
 raise() {
 	local lhs conds success
-	read -r -a lhs < <(parse lhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
 
 	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 
@@ -80,7 +80,7 @@ EOF
 
 winkill() {
 	local lhs conds success
-	read -r -a lhs < <(parse lhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
 
 	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 
@@ -120,8 +120,8 @@ runonce() {
 
 	shift
 
-	read -r -a lhs < <(parse lhs "$@")
-	read -r -a rhs < <(parse rhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
 
 	case "$mode" in
 	fg)
@@ -193,7 +193,8 @@ cmdfmt() {
 	props | attrs)
 		(
 			IFS=,
-			printf "{%s}" "${str[*]}"
+      # (( ${#str[*]} )) && printf '{%s}' "${str[*]}" || printf '{}'
+      printf '{%s}' "${str[*]}"
 		)
 		;;
 	esac
@@ -202,8 +203,8 @@ cmdfmt() {
 getattributes() {
 	local lhs rhs conds props output
 
-	read -r -a lhs < <(parse lhs "$@")
-	read -r -a rhs < <(parse rhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
 
 	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 	read -r props < <(cmdfmt props "${rhs[@]}")
@@ -248,8 +249,8 @@ waitfor() {
 setattributes() {
 	local lhs rhs conds props
 
-	read -r -a lhs < <(parse lhs "$@")
-	read -r -a rhs < <(parse rhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
 
 	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
 	read -r props < <(cmdfmt props "${rhs[@]}")
@@ -283,14 +284,18 @@ spawn() {
 
 	local lhs rhs attrs pid
 
-	read -r -a lhs < <(parse lhs "$@")
-	read -r -a rhs < <(parse rhs "$@")
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
+
+  [[ -z "$lhs" ]] && unset lhs
+
+  local args=("${rhs[@]:1}")
 
 	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
 
 	read -r pid < <(
 		awesome-client <<EOF | sed -r 's/[^0-9]//g'
-    local s = '${rhs[*]}'
+    local s = "${rhs[0]} ${args[@]@Q}"
     return require('awful').spawn(s, ${attrs})
 EOF
 	)

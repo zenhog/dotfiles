@@ -14,7 +14,7 @@ FIELDS=(uuid state type ifname name bssid ssid prio
 export S_FIELDS="$(declare -p FIELDS)"
 
 label() {
-  view "$1" label
+  info "$1" label
 }
 
 BINDS[rescan]=alt-r
@@ -32,7 +32,7 @@ rescan() {
   done
 }
 
-view() {
+info() {
   eval "$S_FIELDS"
 
   eval local "${FIELDS[@]}"
@@ -52,8 +52,21 @@ view() {
     fi
 
     val="WIFI:T:$SECURITY;S:$ssid;P:$psk;;"
-    qrencode -m1 -l H -tANSI256 "$val"
+    qrencode -m1 -tANSI256 "$val"
   fi
+}
+
+BINDS[qrcode]=alt-s
+HOOKS[qrcode]=qrcode
+CALLS[qrcode]='reload-sync(qrcode {} {q})+clear-query'
+DESCS[qrcode]='Generate QR Code'
+qrcode() {
+  local lines
+
+  readarray -t lines < <(info "$1")
+
+  echo
+  printf -- "-- -- %s\n" "${lines[@]}"
 }
 
 BINDS[del]=alt-d
@@ -66,6 +79,8 @@ del() {
   sudo nmcli connection delete "$uuid"
 }
 
+BINDS[toggle]=tab
+DESCS[toggle]='Toggle connection'
 toggle() {
 	local uuid state
 
@@ -83,26 +98,41 @@ toggle() {
   esac
 }
 
-# clone newname
+BINDS[clone]=alt-m
+HOOKS[clone]=sclear
+DESCS[clone]='Clone connection'
+clone() {
+  local uuid newname
 
-  # new:
-  # connect:
-    # wifi id wlan0 prio ssid psk
+  read -r uuid _ <<< "$1"
 
-# modify 
-# add: ethernet:xy bssid:EF:
-# creates new wifi and connects to it?
-# connects to existing wifi?
+  [[ "$uuid" == -- ]] && return
+
+  read -r newname < <(input)
+
+  [[ -z "$newname" ]] && return
+
+  sudo nmcli connection clone "$uuid" "$newname"
+}
+
+# alt-c: copy BSSID;SSID;PSK;MGMT
+# alt-c: copy BSSID
+# alt-c: copy PSK
+# alt-m: copy PSK
+# alt-x: qrencode in the middle of the screen?
+# extract BSSID,SSID,
+
 BINDS[add]=enter
-HOOKS[add]=clear
-DESCS[add]='Creates or toggle a connection'
+HOOKS[add]=sclear
+DESCS[add]='Create or modify connection'
 add() {
 	local uuid state type ifname bssid ssid prio
 
   read -r uuid state type ifname _ bssid ssid _ <<< "$1"
 
   if [[ "$uuid" != -- ]]; then
-    toggle "$uuid $state"
+    # toggle "$uuid $state"
+    # modify 
     return
   fi
 
@@ -118,20 +148,20 @@ add() {
   values[type]=wifi
 
   local defaults=(
-    "+name"
-    "+psk"
-    "save:yes"
-    "prio:+100"
-    "type:wifi"
-    "ifname:$ifname"
-    "bssid:$bssid"
-    "ssid:$ssid"
-    "mgmt:wpa-psk"
+    "+NAME"
+    "+PSK"
+    "SAVE=yes"
+    "PRIO=+100"
+    "TYPE=wifi"
+    "IFNAME=$ifname"
+    "BSSID=$bssid"
+    "SSID=$ssid"
+    "MGMT=wpa-psk"
   )
 
   local query entry entries
 
-  IFS= read -r -d '' query < <(printf "%s\n" "${defaults[@]}" | column -t -s:)
+  IFS= read -r -d '' query < <(printf "%s\n" "${defaults[@]}" | column -t -s=)
 
   tmux load-buffer -b preview - <<< "$query"
 
@@ -187,7 +217,7 @@ add() {
     fi
   done
 
-  sudo nmcli connection add "${opts[@]}"  > /tmp/add 2>&1
+  sudo nmcli connection add "${opts[@]}"
 }
 
 show() {
@@ -370,7 +400,6 @@ list() {
       fi
       paint "$state" "${signal%%%}" "$conn"
     done
-    printf "%s\n" "${WIFIS[@]}" > /tmp/wifis
     for wifi in "${WIFIS[@]}"; do
       IFS="$iSEP" read -r _ state _ _ _ _ _ _ _ signal _ <<< "$wifi"
       paint "$state" "${signal%%%}" "$wifi"
