@@ -51,6 +51,7 @@ view() {
 		yq -y | bat -p --force-colorization --language yaml
 }
 
+OPTS+=(--with-nth 2..)
 list() {
 	# @menu-word-language fr|en
 	# @menu-word-hidden 1|0
