@@ -5,9 +5,9 @@ PERIOD=10
 text() {
   local type ifname signal name
 
-  IFS=: read -r _ _ type signal name < <(gui connection name)
+  IFS=: read -r _ type _ signal name < <(gui connection name)
 
-  [[ "$type" == wifi ]] && name="$name (${signal}%)"
+  [[ "$type" == wifi ]] && name="$name/${signal}%"
 
   printf "%s" "$name"
 }
