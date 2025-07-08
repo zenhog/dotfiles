@@ -2,17 +2,14 @@
 
 PERIOD=10
 
-read -r PROFILE < <(nmcli -t connection show --active)
-read -r TYPE < <(awk -F: '{print $3}' <<< "$PROFILE")
-
 text() {
-    local connection
-    read -r connection < <(awk -F: '{print $1}' <<< "$PROFILE")
+  local type ifname signal name
 
-    [[ "$TYPE" =~ (wireless|ethernet)$ ]] || unset connection
+  IFS=: read -r _ _ type signal name < <(gui connection name)
 
-    printf "%s" "$connection"
-    #printf "%s_%s" "C4:12:F5:CE:71:E1" "D-Link"
+  [[ "$type" == wifi ]] && name="$name (${signal}%)"
+
+  printf "%s" "$name"
 }
 
 icon() {
@@ -23,9 +20,13 @@ icon() {
     local ethernet=󰈁
     local ethernet=󰈀
 
-    case "$TYPE" in
-        *wireless) icon="$wireless";;
-        *ethernet) icon="$ethernet";;
+    local type
+
+    IFS=: read -r _ type _ < <(gui connection name)
+
+    case "$type" in
+        wifi) icon="$wireless";;
+        ethernet) icon="$ethernet";;
         *) icon="$unknown";;
     esac
 

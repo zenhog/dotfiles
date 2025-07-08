@@ -14,7 +14,7 @@ esac
 #tty -s && echo -ne "\e[5 q"
 
 FZF_HELPCMD=(fzf --preview help --preview-window noborder,top,99%
-  --border=rounded)
+  --border=rounded --no-input)
 
 FZF_BASE_FLAGS=(
   "--color=$THEME"

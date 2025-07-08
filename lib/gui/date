@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+KEY=a
+MOD='S-M'
+ICON=
+COLOR=bisque
+
+HORIZONTAL=1
+
+NOWRAP=1
+
+OPTS+=(--preview)
+list() {
+  local tzdir=/usr/share/zoneinfo
+  local tzs
+
+  readarray -t tzs < <(cd "$tzdir" && find * -mindepth 1 -type f -or -type l)
+
+  for tz in "${tzs[@]}"; do
+    printfmt "$tz" "$(TZ=$tz date "+%H:%M %a %b %d")"
+  done | column -t -s "$iSEP"
+}
+
+# open: links to /etc/localtime
+# sync: sudo ntpdate && sudo hwclock --sys-to-hwclock --utc
+# 2 menus
+#   time -> this one (timezones)
+#   date -> calendar && khal

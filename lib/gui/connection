@@ -56,9 +56,38 @@ info() {
   fi
 }
 
+name() {
+  local output statuses ifname type state uuid name prio bssid ssid signal
+
+  readarray -t statuses < <(
+    nmcli -c no -t -f DEVICE,TYPE,STATE,CON-UUID,CONNECTION dev status
+  )
+
+  for status in "${statuses[@]}"; do
+    IFS=: read -r ifname type state uuid name <<< "$status"
+    if [[ "$state" == connected ]]; then
+      read -r prio < <(
+        nmcli -c no -g connection.autoconnect-priority con show "$uuid")
+      if [[ "$type" == wifi ]]; then
+        read -r ssid < <(nmcli -c no -g 802-11-wireless.ssid con show "$uuid")
+        read -r bssid < <(
+          nmcli -c no -e no -g 802-11-wireless.bssid con show "$uuid")
+        read -r signal < <(
+          nmcli -c no -g signal dev wifi list ifname "$ifname" bssid "$bssid")
+        output+=("$prio:$type:$ifname:$signal:$ssid")
+      else
+        output+=("$prio:$type:$ifname::$name")
+      fi
+    fi
+  done
+
+  printf "%s\n" "${output[@]}" | sort -r
+
+}
+
 BINDS[qrcode]=alt-s
 HOOKS[qrcode]=qrcode
-CALLS[qrcode]='reload-sync(qrcode {} {q})+clear-query'
+CALLS[qrcode]='reload-sync(qrcode {} {q})+clear-query+toggle-input'
 DESCS[qrcode]='Generate QR Code'
 qrcode() {
   local lines
@@ -90,12 +119,14 @@ toggle() {
 
   case "$state" in
     yes)
-      sudo nmcli con down "$uuid"
+      sudo nmcli --wait 4 con down "$uuid"
       ;;
     no)
-      sudo nmcli con up "$uuid"
+      sudo nmcli --wait 4 con up "$uuid"
       ;;
   esac
+
+  widget timeout connection
 }
 
 BINDS[clone]=alt-m
@@ -361,6 +392,8 @@ list() {
   eval "$S_CONNS"
   eval "$S_WIFIS"
   eval "$S_FIELDS"
+
+  sudo nmcli connection reload
 
   declare -A WIFIS
   declare -A CONNS

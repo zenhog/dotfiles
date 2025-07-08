@@ -25,6 +25,22 @@ noinit() {
 EOF
 }
 
+# add word
+# del word
+# quiz #num
+# - adverbial, verb, adjective forms
+# - grammar?
+# - french translation?
+# - english translation?
+# - pronunciation (mb with TTS?)
+# - definition
+# - phonetics
+# - part of speech
+# - examples
+# - synonyms
+# - antonyms
+# - link to https://dictionary.cambridge.org/dictionary/english/$WORD
+
 view() {
 	local id word
 	read -r id word _ <<<"$1"
