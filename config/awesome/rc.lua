@@ -263,35 +263,22 @@ local function set_clientimg(c)
 	end
 end
 
--- gears.timer.delayed_call(function()
--- 	os.execute("echo ab >> /tmp/ab")
--- 	require("awful")
--- 	for _, c in ipairs(client.get()) do
--- 		os.execute(string.format("echo %s >> /tmp/ab", c.profile or "no"))
--- 		if c.profile then
--- 			if c.profile:match("firefox.*") then
--- 				set_clientimg(c)
--- 			end
--- 		end
--- 	end
--- end)
+-- Fix clients that dynamically change their own icon on a whim
+client.connect_signal("property::icon", function(c)
+  if c and not c.mutex then
+    if c.alticon and c.alticon ~= c.icon then
+      c.mutex = true
+      c:emit_signal("icon_mutex")
+    end
+  end
+end)
 
--- gears.timer.delayed_call(function()
--- 	for c in client.get() do
--- 		os.execute(string.format("echo %s >> /tmp/ab", c.profile or "no"))
--- 		if c.profile:match("firefox.*") then
--- 			set_clientimg(c)
--- 		end
--- 	end
--- end)
-
--- client.connect_signal("property::icon", function(c)
--- 	set_clientimg(c)
--- end)
-
--- client.connect_signal("property::icon_sizes", function(c)
--- 	-- set_clientimg(c)
--- end)
+client.connect_signal("icon_mutex", function(c)
+  if c.mutex then
+    c.icon = c.alticon
+    c.mutex = nil
+  end
+end)
 
 local function set_clienttag(c)
 	local tags = c.screen.tags
