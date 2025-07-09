@@ -364,11 +364,13 @@ awful.screen.connect_for_each_screen(function(s)
 		color = color or "gray"
 
 		local buttons = {}
+
 		if lcommand then
 			buttons = gears.table.join(awful.button({}, 1, function()
 				awful.spawn(lcommand)
 			end))
 		end
+
 		if rcommand then
 			buttons = gears.table.join(awful.button({}, 3, function()
 				awful.spawn(rcommand)
@@ -394,17 +396,20 @@ awful.screen.connect_for_each_screen(function(s)
 	for line in pipe:lines() do
 		local icon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S*)$")
 		local buttons = {}
+    local lcommand = string.format('menu loop %s', command)
+    local rcommand = string.format('gui %s click', command)
 
 		if command then
-			s.menus[command] = iconwidget(icon, command, command, color or nil)
-			s.menus[command]:buttons(addbutton(buttons, 1, "menu loop " .. command))
-
+      buttons = addbutton(buttons, 1, lcommand)
+      buttons = addbutton(buttons, 3, rcommand)
+			s.menus[command] = iconwidget(icon, lcommand, rcommand, color or nil)
       if command == 'run' and _G.layout then
         if _G.layout.icons then
           _G.layout.icons['max'] = icon
           _G.layout.color = color
         end
       end
+			s.menus[command]:buttons(buttons)
 		end
 	end
 	pipe:close()

@@ -70,6 +70,10 @@ local function update_clients_visibility(t)
     return
   end
 
+  if focused.class == 'menu' then
+    return
+  end
+
   local in_fullscreen = false
 
   for _, c in ipairs(clients) do
@@ -79,6 +83,10 @@ local function update_clients_visibility(t)
   end
 
   for _, c in ipairs(clients) do
+    if c.class == 'menu' then
+      goto continue
+    end
+
     if c == focused then
       c.opacity = c.transparency
     elseif in_fullscreen then
@@ -90,6 +98,7 @@ local function update_clients_visibility(t)
         c.opacity = c.transparency
       end
     end
+    ::continue::
   end
 end
 
@@ -375,7 +384,11 @@ local function set_attributes(c)
 	local s = awful.screen.focused()
 	local w, h = s.geometry.width, s.geometry.height
 
-  if c.class:match("tmux") or c.class:match("Alacritty") then
+  if c.class:match("tmux") or
+    c.class:match("rmux") or
+    c.class:match("Alacritty") or
+    c.class:match("URxvt")
+  then
     c.opacity = 0.75
   end
 
@@ -396,7 +409,7 @@ local function set_attributes(c)
 		c.y = h / 2 - c.height / 2
 	end
 
-    c.transparency = c.opacity
+  c.transparency = c.opacity or 1
 end
 
 local roundedrect = function(cr, w, h)
@@ -410,6 +423,8 @@ client.connect_signal("manage", function(c)
 	--set_titlebars(c)
 	set_attributes(c)
 	set_clientimg(c)
+
+  update_clients_visibility(c.first_tag)
 
 	if awesome.startup and not c.size_hints.user_position and not c.size_hints.program_position then
 		awful.placement.no_offscreen(c)
