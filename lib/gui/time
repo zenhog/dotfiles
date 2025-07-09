@@ -8,6 +8,7 @@ COLOR=bisque
 # HORIZONTAL=1
 NOWRAP=1
 RATIO=60%
+FOLLOW=1
 
 label() {
   local tz
@@ -16,6 +17,9 @@ label() {
 }
 
 view() {
+  # weather
+  # calendar mb on the calendar
+  # calendar event
   cal --color=always -m -y
 }
 

@@ -3,6 +3,7 @@
 KEY=l
 MOD='S-M'
 ICON=
+ICON=
 COLOR=yellow
 
 export ALACRITTY_DIR="$HOME/.config/alacritty"

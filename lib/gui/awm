@@ -3,24 +3,25 @@
 KEY=t
 MOD='S-M'
 ICON=
-COLOR=bisque
+COLOR=yellow
 
 HORIZONTAL=1
 
 NOWRAP=1
 
-OPTS+=(--with-nth 2..)
+OPTS+=(--with-nth 3.. --header-lines=1)
 list() {
-	awesome-client <<EOF | sed -r '1d;$d' | column -t -s "$iSEP"
+	awesome-client "
     require('awful')
     local r = '\n'
     for _, c in ipairs(client.get()) do
-      r = r .. string.format('%s\x01%s\x01%s\x01%s\x01%d\x01[%s]\n',
+      r = r .. string.format('%s\x01%d\x01%s\x01%s\x01%s\x01[%s]\n',
         string.format('0x%08x', c.window),
-          c.profile, c.class, c.instance, c.pid, c.name)
+          c.pid, c.profile, c.class, c.instance, c.name)
     end
     return r
-EOF
+  " | sed -r '1d;$d' | column -t -s "$iSEP" -N \
+    WID,PID,PROFILE,CLASS,INSTANCE,NAME
 }
 
 view() {

@@ -3,7 +3,9 @@
 KEY=v
 MOD='S-M'
 ICON=󰝨
-COLOR=cadetblue
+ICON=
+ICON=
+COLOR=aqua
 
 FOLLOW=1
 NOWRAP=1

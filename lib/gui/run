@@ -3,9 +3,18 @@
 KEY=r
 MOD='S-M'
 ICON=
+ICON=
+ICON=
 COLOR=aqua
 
 export APP_DIR="$HOME/.lib/app"
+
+click() {
+  awesome-client "
+    local commands = require('commands')
+    commands.layout()
+  "
+}
 
 view() {
 	command preview "$APP_DIR/$1"

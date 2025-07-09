@@ -51,6 +51,7 @@ icon() {
 	local icon=
 	local icon=󰃞
 	local icon=󰃠
+  local icon=󰌶
 
 	local color=blueviolet
 
