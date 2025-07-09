@@ -246,17 +246,20 @@ del() {
 }
 
 dom() {
-	local IFS='.' i=0 found
+	local IFS='.' i=0 matches
+
 	local zones=($@)
 
 	while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
-		#read -r found < <(fd -td -H --base-directory "$STORE" "^${zones[*]:$i}")
-		read -r found < <(cd "$STORE" && find -- * \( -type d -or -type l \) \
-			-name "*${zones[*]:$i}" | tac)
-		[[ -n "$found" ]] && break
+		readarray -t matches < <(cd "$STORE" &&
+      find -- * \( -type d -or -type l \) -name "*${zones[*]:$i}")
+
+		[[ -n "$matches" ]] && break
+
 		((++i))
 	done
-	[[ -n "$found" ]] && printf "%s\n" "${found}"
+
+	[[ -n "$matches" ]] && printf "%s\n" "${matches[@]}"
 }
 
 baseurl() {

@@ -1,7 +1,26 @@
+local function symbols_filter(entry, ctx)
+  if ctx.symbols_filter == nil then
+    ctx.symbols_filter = LazyVim.config.get_kind_filter(ctx.bufnr) or false
+  end
+  if ctx.symbols_filter == false then
+    return true
+  end
+  return vim.tbl_contains(ctx.symbols_filter, entry.kind)
+end
+
 local keys = {
+    {
+      "<bslash>ss",
+      function()
+        require("fzf-lua").lsp_document_symbols({
+          regex_filter = symbols_filter,
+        })
+      end,
+      desc = "Goto Symbol",
+    },
   {
     "<C-a>",
-    "<cmd>FzfLua lsp_document_symbols<CR>",
+    "<cmd>FzfLua lsp_document_symbols query=Function<CR>",
     desc = "FZF Symbols",
   },
   {
@@ -195,6 +214,20 @@ local config = {
     --   foldmethod = "manual",
     -- },
   },
+  -- lsp = {
+  --   symbols = {
+  --     symbol_hl = function(s)
+  --       return "TroubleIcon" .. s
+  --     end,
+  --     symbol_fmt = function(s)
+  --       return s:lower() .. "\t"
+  --     end,
+  --     child_prefix = false,
+  --   },
+  --   code_actions = {
+  --     previewer = vim.fn.executable("delta") == 1 and "codeaction_native" or nil,
+  --   },
+  -- },
 }
 
 return {
