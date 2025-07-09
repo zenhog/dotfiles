@@ -454,7 +454,7 @@ awful.screen.connect_for_each_screen(function(s)
 	s.topbar:setup({
 		{
 			layout = wibox.layout.align.horizontal,
-			expand = "outside",
+			expand = "none",
 			{
 				layout = wibox.layout.fixed.horizontal,
 				spacing = 1,
@@ -479,7 +479,7 @@ awful.screen.connect_for_each_screen(function(s)
 				{
 					layout = wibox.layout.fixed.horizontal,
 					spacing = 1,
-          scroll(widgets.music, 295),
+          scroll(widgets.music, 298),
           scroll(widgets.connection, 100),
 					block(M.group(widgets.mail, widgets.news, widgets.download)),
 					block(M.group(widgets.battery)),
