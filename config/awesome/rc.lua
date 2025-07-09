@@ -70,13 +70,19 @@ local function update_clients_visibility(t)
     return
   end
 
-  if focused.class == 'menu' then
-    return
+  local in_fullscreen = false
+
+  for _, c in ipairs(clients) do
+    if c.fullscreen then
+      in_fullscreen = true
+    end
   end
 
   for _, c in ipairs(clients) do
     if c == focused then
       c.opacity = c.transparency
+    elseif in_fullscreen then
+      c.opacity = 0
     else
       if layout == 'max' then
         c.opacity = 0
@@ -84,8 +90,6 @@ local function update_clients_visibility(t)
         c.opacity = c.transparency
       end
     end
-
-    ::continue::
   end
 end
 
@@ -115,14 +119,11 @@ local function update_wibox_visibility(s)
 	s.topbar.visible = not should_hide
 end
 
--- tag.connect_signal("property::layout",
---     function(t)
---         if ntf then naughty.destroy(ntf) end
---         ntf = naughty.notify({
---             title = "Layout Changed",
---             text = awful.layout.getname(),
---             timeout = 2})
---     end)
+tag.connect_signal("property::layout", function(t)
+  update_layout_icon(t)
+  update_wibox_visibility(t.screen)
+  update_clients_visibility(t)
+end)
 
 -- Update when tag is selected
 tag.connect_signal("property::selected", function(t)
@@ -141,8 +142,8 @@ end)
 
 -- Fullscreen property handler
 client.connect_signal("property::fullscreen", function(c)
-	update_wibox_visibility(c.screen)
-  update_clients_visibility(c.first_tag)
+  -- c.first_tag.layout = awful.layout.layouts[1]
+  c.first_tag:emit_signal("property::selected")
 end)
 
 -- Client unmanaged handler
