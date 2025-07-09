@@ -16,6 +16,12 @@ local last_focused_screen = awful.screen.focused()
 
 theme.init(os.getenv("HOME") .. "/.config/awesome/theme.lua")
 
+_G.layout = {
+  icons = {
+    tileleft = ''
+  }
+}
+
 local keys = require("keys")
 local wibars = require("wibars")
 
@@ -51,6 +57,47 @@ _G.tags = sharedtags({
 	},
 })
 
+local function update_clients_visibility(t)
+  if not t then
+    return
+  end
+
+  local clients = t:clients()
+  local layout = t.layout.name
+  local focused = client.focus
+
+  if not focused then
+    return
+  end
+
+  if focused.class == 'menu' then
+    return
+  end
+
+  for _, c in ipairs(clients) do
+    if c == focused then
+      c.opacity = c.transparency
+    else
+      if layout == 'max' then
+        c.opacity = 0
+      elseif layout == 'tileleft' then
+        c.opacity = c.transparency
+      end
+    end
+
+    ::continue::
+  end
+end
+
+local function update_layout_icon(t)
+    local icons = _G.layout.icons
+
+    local name = t.layout.name
+    t.screen.menus.run.markup = string.format(
+      '<b><span color="%s">%s</span></b>', _G.layout.color, icons[name]
+    )
+end
+
 -- Update wibox visibility for a screen
 local function update_wibox_visibility(s)
 	-- Check if current tag has any fullscreen clients
@@ -68,6 +115,23 @@ local function update_wibox_visibility(s)
 	s.topbar.visible = not should_hide
 end
 
+-- tag.connect_signal("property::layout",
+--     function(t)
+--         if ntf then naughty.destroy(ntf) end
+--         ntf = naughty.notify({
+--             title = "Layout Changed",
+--             text = awful.layout.getname(),
+--             timeout = 2})
+--     end)
+
+-- Update when tag is selected
+tag.connect_signal("property::selected", function(t)
+  update_layout_icon(t)
+  update_wibox_visibility(t.screen)
+  update_clients_visibility(t)
+  -- update_client_visibility?
+end)
+
 -- Update when client moves between tags
 client.connect_signal("tagged", function(c)
 	for _, s in ipairs(screen) do
@@ -78,11 +142,7 @@ end)
 -- Fullscreen property handler
 client.connect_signal("property::fullscreen", function(c)
 	update_wibox_visibility(c.screen)
-end)
-
--- Tag switched handler
-tag.connect_signal("property::selected", function(t)
-	update_wibox_visibility(t.screen)
+  update_clients_visibility(c.first_tag)
 end)
 
 -- Client unmanaged handler
@@ -323,25 +383,16 @@ local function set_titlebars(c)
 	})
 end
 
-function update_terminal_visibility()
-	local focused_screen = awful.screen.focused()
-	for _, c in ipairs(client.get()) do
-		if not is_exception(c) then
-			if c.class:match("tmux") or c.class:match("Alacritty") then
-				c.opacity = (c.screen == focused_screen and c.active) and 1 or 0.75
-			else
-				c.opacity = 1.0 -- Non-terminals remain fully visible
-			end
-		end
-	end
-end
-
 local function set_attributes(c)
 	local s = awful.screen.focused()
 	local w, h = s.geometry.width, s.geometry.height
 
+  if c.class:match("tmux") or c.class:match("Alacritty") then
+    c.opacity = 0.75
+  end
+
 	if c.class == "menu" and c.instance == "loop" then
-		--c.opacity = 1
+		c.opacity = 1
 		c.hidden = true
 		c.minimized = true
 		c.titlebars_enabled = false
@@ -351,11 +402,13 @@ local function set_attributes(c)
 		c.ontop = true
 		c.above = true
 		c.skip_taskbar = true
-		c.width = w / 1.2
-		c.height = h / 1.2
+		c.width = w / 1.1
+		c.height = h / 1.1
 		c.x = w / 2 - c.width / 2
 		c.y = h / 2 - c.height / 2
 	end
+
+    c.transparency = c.opacity
 end
 
 local roundedrect = function(cr, w, h)
@@ -398,23 +451,22 @@ end
 
 client.connect_signal("focus", function(c, context)
 	last_focused_screen = c.screen
-	update_terminal_visibility()
 	focus_menu()
+	update_clients_visibility(c.first_tag)
 end)
 
 client.connect_signal("property::screen", function(c)
-	if c.active then
-		update_terminal_visibility()
-	end
+	-- if c.active then
+	--    update_clients_visibility(c.first_tag)
+	-- end
 end)
 
 client.connect_signal("unfocus", function(c)
-	if not is_exception(c) and (c.class:match("tmux") or c.class:match("Alacritty")) then
-		c.opacity = c.screen == awful.screen.focused() and 0.3 or 1.0
-	end
+  -- update_clients_visibility(c.first_tag)
 end)
 
 client.connect_signal("request::activate", function(c, context)
+  -- update_clients_visibility(c.first_tag)
 	focus_menu()
 end)
 
@@ -444,6 +496,6 @@ awful.rules.rules = {
 	},
 }
 
-update_terminal_visibility()
+-- update_terminal_visibility()
 
 awful.spawn.with_shell("autostart", awful.rules.rules)

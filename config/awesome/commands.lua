@@ -61,6 +61,7 @@ end
 
 commands.layout = function()
 	awful.layout.inc(1)
+  awful.tag.selected():emit_signal("property::selected")
 end
 
 commands.gototag = function(tagnum)

@@ -379,7 +379,8 @@ awful.screen.connect_for_each_screen(function(s)
 
 		widget.align = "center"
 		widget.valign = "center"
-		widget.markup = string.format('<b><span color="%s">%s</span></b>', color, icon)
+		widget.markup = string.format(
+      '<b><span color="%s">%s</span></b>', color, icon)
 		widget.forced_width = theme.iconsize
 
 		widget:buttons(buttons)
@@ -397,6 +398,13 @@ awful.screen.connect_for_each_screen(function(s)
 		if command then
 			s.menus[command] = iconwidget(icon, command, command, color or nil)
 			s.menus[command]:buttons(addbutton(buttons, 1, "menu loop " .. command))
+
+      if command == 'run' and _G.layout then
+        if _G.layout.icons then
+          _G.layout.icons['max'] = icon
+          _G.layout.color = color
+        end
+      end
 		end
 	end
 	pipe:close()
