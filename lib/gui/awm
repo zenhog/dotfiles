@@ -113,7 +113,7 @@ properties() {
 	getattributes "$@" -- \
 		window name type pid role icon_name class instance minimized maximized \
 		ontop above below sticky urgent hidden fullscreen opacity startup_id \
-		maximized_horizontal maximized_vertical
+		maximized_horizontal maximized_vertical alticon mutex
 }
 
 runonce() {

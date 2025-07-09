@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PERIOD=30
+PERIOD=60
 
 run() {
 	menu auto aria
