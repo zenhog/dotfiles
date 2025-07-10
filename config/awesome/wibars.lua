@@ -19,7 +19,7 @@ local function rrect(radius)
 end
 
 local function block(widget, forced_width)
-	return wibox.widget({
+	local w = wibox.widget({
 		{
 			widget,
 			margins = theme.spacing,
@@ -30,6 +30,11 @@ local function block(widget, forced_width)
 		forced_width = forced_width,
 		widget = wibox.container.background,
 	})
+
+  w:buttons(w.widget.widget:buttons())
+  w.widget:buttons(w.widget.widget:buttons())
+
+  return w
 end
 
 local function scroll(widget, width)
@@ -99,11 +104,13 @@ end
 
 function M.group(...)
 	local args = table.pack(...)
+
 	local group = {
 		spacing = theme.spacing,
 		spacing = 1,
 		layout = wibox.layout.fixed.horizontal,
 	}
+
 	for i = 1, args.n do
 		if args[i] then
 			local w = wibox.widget({
@@ -130,6 +137,7 @@ function M.group(...)
 
 			w:connect_signal("mouse::enter", mouse_in)
 			w:connect_signal("mouse::leave", mouse_out)
+
 			table.insert(group, w)
 		end
 	end
@@ -359,7 +367,7 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 	}))
 
-	local function iconwidget(icon, lcommand, rcommand, color)
+	local function iconwidget(icon, command, lcommand, rcommand, color)
 		local widget = wibox.widget.textbox()
 		color = color or "gray"
 
@@ -384,6 +392,8 @@ awful.screen.connect_for_each_screen(function(s)
 		widget.markup = string.format(
       '<b><span color="%s">%s</span></b>', color, icon)
 		widget.forced_width = theme.iconsize
+    widget.id = command
+    widget.id = 'iconwidget'
 
 		widget:buttons(buttons)
 		return widget
@@ -395,21 +405,20 @@ awful.screen.connect_for_each_screen(function(s)
 
 	for line in pipe:lines() do
 		local icon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S*)$")
-		local buttons = {}
     local lcommand = string.format('menu loop %s', command)
     local rcommand = string.format('gui %s click', command)
 
 		if command then
-      buttons = addbutton(buttons, 1, lcommand)
-      buttons = addbutton(buttons, 3, rcommand)
-			s.menus[command] = iconwidget(icon, lcommand, rcommand, color or nil)
+			s.menus[command] = iconwidget(
+        icon, command, lcommand, rcommand, color or nil)
+
       if command == 'run' and _G.layout then
         if _G.layout.icons then
           _G.layout.icons['max'] = icon
           _G.layout.color = color
         end
       end
-			s.menus[command]:buttons(buttons)
+
 		end
 	end
 	pipe:close()
