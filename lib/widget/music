@@ -12,6 +12,10 @@ next() {
     mpc next
 }
 
+run() {
+  menu loop music
+}
+
 KEYS[toggle]='C-M:space'
 toggle() {
     mpc toggle
