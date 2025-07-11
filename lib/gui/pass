@@ -299,7 +299,7 @@ grab() {
       read -r entry _
     } < <(quiet menu input "${entries[@]}")
   else
-    entry="${entries[$index]}"
+    entry="${entries[$((index-1))]}"
   fi
 
   read -r entry < <(quiet get "$entry" "$key")
