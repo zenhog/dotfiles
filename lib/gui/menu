@@ -2,8 +2,8 @@
 
 KEY=space
 MOD='S-M'
-ICON=
-COLOR=yellow
+ICON=
+COLOR=aqua
 
 POSITION=RIGHT
 NOWRAP=1

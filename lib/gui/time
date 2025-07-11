@@ -48,5 +48,5 @@ open() {
 }
 
 sync() {
-  sudo ntpdate && sudo hwclock --systohc --utc
+  sudo ntpdate pool.ntp.org && sudo hwclock --systohc --utc
 }

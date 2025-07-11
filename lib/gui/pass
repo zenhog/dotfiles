@@ -259,7 +259,7 @@ dom() {
 		((++i))
 	done
 
-	[[ -n "$matches" ]] && printf "%s\n" "${matches[@]}"
+	printf "%s\n" "${matches[@]}"
 }
 
 baseurl() {
@@ -282,13 +282,36 @@ baseurl() {
 }
 
 grab() {
-	local domain="$1" key="$2" dir
+	local domain="$1" key="$2" index="$3" dirs
 
-	read -r dir < <(dom "$domain") || return 1
+  readarray -t entries < <(dom "$domain")
 
-	quiet get "$dir" "$key" &&
-		notify "Copied '$dir/$key'" ||
-		notify "Could not copy '$dir/$key'"
+  (( ${#entries[@]} == 0 )) && {
+    notify "No entry found for '$domain'"
+    return 1
+  }
+
+  local entry
+
+  if [[ -z "$index" ]]; then
+    {
+      read -r _
+      read -r entry _
+    } < <(quiet menu input "${entries[@]}")
+  else
+    entry="${entries[$index]}"
+  fi
+
+  read -r entry < <(quiet get "$entry" "$key")
+
+  if [[ -n "$entry" ]]; then
+    echo "$entry"
+		notify "Copied '$entry/$key'"
+    return 0
+  fi
+
+  notify "Could not find entry '$domain/$key'"
+  return 1
 }
 
 BINDS[open]=enter

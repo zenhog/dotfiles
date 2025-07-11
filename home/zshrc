@@ -10,23 +10,32 @@ ZLE_RPROMPT_INDENT=0
 [[ -r "$HOME/.profile" ]] && source "$HOME/.profile"
 
 prompt_netgrp () {
+  local icon=
+
   local cgroup="$(awk -F: '/net_cls/{print $3}' < /proc/$$/cgroup)"
   cgroup="${cgroup#/}"
-	[[ -n "$cgroup" ]] && p10k segment -f 208 -i '󰛸' -t "$cgroup"
+	[[ -n "$cgroup" ]] && p10k segment -f 208 -i "$icon" -t "$cgroup"
 }
 
 prompt_histmark () {
-  [[ -z "$HISTFILE" ]] && p10k segment -f 190 -i '?'
+  local icon=
+  local icon=󱏾
+  local icon=
+
+  [[ -z "$HISTFILE" ]] && p10k segment -f 190 -i "$icon"
 }
 
 prompt_dotpush () {
   local dotfiles="$HOME/.dotfiles"
 
+  local icon=
+  local icon=󰓦
+
   for r in master public private/private; do
     [[ ! -d "$dotfiles/$r" ]] && continue
     if [[ -n "$(bash -c "cd $dotfiles/$r && git status --porcelain=v1")" ]]
     then
-      p10k segment -f 3 -i 
+      p10k segment -f 3 -i "$icon"
       break
     fi
   done

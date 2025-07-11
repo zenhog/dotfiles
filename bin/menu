@@ -156,20 +156,9 @@ main() {
   EXPORTS+=(BINDS HOOKS CALLS DESCS GDESCS)
 
   for exp in "${EXPORTS[@]}"; do
-    eval read -r S_$exp < <(eval declare -p ${exp})
-    eval export S_$exp
+    eval read -r "S_$exp" < <(eval declare -p "$exp")
+    eval export "S_$exp"
   done
-
-	# read -r S_BINDS < <(declare -p BINDS)
-	# export S_BINDS
-	# read -r S_HOOKS < <(declare -p HOOKS)
-	# export S_HOOKS
-	# read -r S_CALLS < <(declare -p CALLS)
-	# export S_CALLS
-	# read -r S_DESCS < <(declare -p DESCS)
-	# export S_DESCS
-	# read -r S_GDESCS < <(declare -p GDESCS)
-	# export S_GDESCS
 
 	COMMAND+=(fzf)
 	COMMAND+=(--prompt="$MODULE> ")

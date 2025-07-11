@@ -2,10 +2,8 @@
 
 KEY=v
 MOD='S-M'
-ICON=󰝨
-ICON=
-ICON=
-COLOR=aqua
+ICON=󰘳
+COLOR=yellow
 
 FOLLOW=1
 NOWRAP=1

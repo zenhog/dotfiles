@@ -3,7 +3,7 @@
 KEY=e
 MOD='S-M'
 ICON=
-COLOR=darkred
+COLOR=red
 
 export MUXSOCK="$HOME/.vmux.S"
 export SOCKDIR="$HOME/.sockets"

@@ -5,6 +5,7 @@ MOD='S-M'
 ICON=
 ICON=
 ICON=
+ICON=
 COLOR=aqua
 
 export APP_DIR="$HOME/.lib/app"
