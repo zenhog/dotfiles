@@ -405,6 +405,7 @@ awful.screen.connect_for_each_screen(function(s)
 
 	for line in pipe:lines() do
 		local icon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S*)$")
+    local buttons = {}
     local lcommand = string.format('menu loop %s', command)
     local rcommand = string.format('gui %s click', command)
 
@@ -418,6 +419,10 @@ awful.screen.connect_for_each_screen(function(s)
           _G.layout.color = color
         end
       end
+
+      buttons = addbutton(buttons, 1, lcommand)
+      buttons = addbutton(buttons, 3, rcommand)
+      s.menus[command]:buttons(buttons)
 
 		end
 	end
@@ -467,7 +472,7 @@ awful.screen.connect_for_each_screen(function(s)
 			{
 				layout = wibox.layout.fixed.horizontal,
 				spacing = 1,
-				block(M.group(s.menus.run), theme.iconsize),
+				block(M.group(s.menus.menu), theme.iconsize),
 				block(M.group(s.menus.awm), theme.iconsize),
 				block(M.group(s.menus.ssh), theme.iconsize),
 				block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
@@ -494,7 +499,7 @@ awful.screen.connect_for_each_screen(function(s)
             block(M.group(widgets.battery)),
             block(M.group(widgets.time, widgets.date)),
             block(M.group(s.menus.service), theme.iconsize),
-            block(M.group(s.menus.menu), theme.iconsize),
+            block(M.group(s.menus.run), theme.iconsize),
           },
         },
 				nil,
