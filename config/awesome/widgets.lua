@@ -78,6 +78,9 @@ for _, line in ipairs(pipexec('widget')) do
             },
         })
 
+    w.watches[widget].widget.iconbox:buttons(buttons)
+    w.watches[widget].widget.textbox:buttons(buttons)
+    w.watches[widget].widget:buttons(buttons)
     w.watches[widget]:buttons(buttons)
 end
 

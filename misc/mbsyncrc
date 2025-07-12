@@ -1,7 +1,7 @@
 IMAPStore mailbox-remote
 Host imap.mailbox.org
-UserCmd "pass show www/mail/mailbox.org/username"
-PassCmd "pass show www/mail/mailbox.org/password"
+UserCmd "pass show iz/www/mail/mailbox.org/0/username"
+PassCmd "pass show iz/www/mail/mailbox.org/0/password"
 TLSType IMAPS
 
 MaildirStore mailbox-local
@@ -20,8 +20,8 @@ Sync All
 
 IMAPStore disroot-remote-1
 Host disroot.org
-UserCmd "pass show www/mail/disroot.org/email"
-PassCmd "pass show www/mail/disroot.org/password"
+UserCmd "pass show iz/www/mail/disroot.org/0/email"
+PassCmd "pass show iz/www/mail/disroot.org/0/password"
 TLSType IMAPS
 
 MaildirStore disroot-local-1
@@ -41,7 +41,7 @@ Sync All
 IMAPStore disroot-remote-2
 Host disroot.org
 UserCmd "echo stuck@disroot.org"
-PassCmd "pass show www/mail/disroot.org/password"
+PassCmd "pass show iz/www/mail/disroot.org/0/password"
 TLSType IMAPS
 
 MaildirStore disroot-local-2
@@ -61,7 +61,7 @@ Sync All
 IMAPStore disroot-remote-3
 Host disroot.org
 UserCmd "echo izemmouri@disroot.org"
-PassCmd "pass show www/mail/disroot.org/password"
+PassCmd "pass show iz/www/mail/disroot.org/0/password"
 TLSType IMAPS
 
 MaildirStore disroot-local-3

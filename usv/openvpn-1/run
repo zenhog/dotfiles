@@ -12,8 +12,8 @@ SCRIPT="$PWD/config/routes.sh"
 CAFILE="$PWD/config/ca.rsa.4096.crt"
 CRLFILE="$PWD/config/crl.rsa.4096.pem"
 
-read -r VPNUSER < <(pass show www/vpn/proton.me/user)
-read -r VPNPASS < <(pass show www/vpn/proton.me/pass)
+read -r VPNUSER < <(pass show iz/www/vpn/proton.me/0/user)
+read -r VPNPASS < <(pass show iz/www/vpn/proton.me/0/pass)
 
 ipt() {
   sudo iptables -v -w -C "$@" || sudo iptables -v -w -A "$@"

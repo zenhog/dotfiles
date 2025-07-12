@@ -188,64 +188,6 @@ local function handle_errors()
 	end
 end
 
-local function is_exception(c)
-	return c.class == "menu"
-end
-
-local function set_clienticon(c)
-	local homedir = os.getenv("HOME")
-
-	local contents, environ, envicon, envfile
-
-	if c.pid and c.pid ~= 6 then
-		envicon = io.popen("getenv " .. c.pid .. " ICON"):read("all*")
-
-		--envfile = string.format('/proc/%u/environ', c.pid)
-		--envfile = '/proc/' .. c.pid .. '/environ'
-		--log(string.format('got envfile:%s', envfile))
-
-		--if gears.filesystem.file_readable(envfile) then
-		--    contents = io.open(envfile)
-		--    log(string.format('file readable and contents=%s',contents))
-		--    if contents then
-		--        environ = contents:read('all*')
-		--        contents:close()
-		--    log(string.format('environ read: %s',environ))
-		--    end
-		--end
-		--    log(string.format('environ read: %s',environ))
-
-		--if environ then
-		--    for var in string.gmatch(environ, '[^\x00]+') do
-		--        if var:match('^ICON=') then
-		--            envicon = var:match('^ICON=(%S+)\x00')
-		--        end
-		--    log(string.format('environ read: %s',environ))
-		--    end
-		--end
-		--    log(string.format('environ read: %s',environ))
-	end
-
-	if envicon == "" then
-		envicon = nil
-	end
-
-	c.profile = c.profile or envicon or ""
-	c.profile = envicon or c.profile
-
-	if not c.profile and not c.class and not c.instance then
-		return
-	end
-
-	c.profile = c.profile or string.lower(c.class)
-
-	local iconpath = string.format("%s/.icons/%s.png", homedir, c.profile)
-
-	if gears.filesystem.file_readable(iconpath) then
-		os.execute(string.format("xseticon -id 0x%08x %s", c.window, iconpath))
-	end
-end
-
 local function set_clientimg(c)
 	local cairo = require("lgi").cairo
 	local homedir = os.getenv("HOME")
@@ -410,10 +352,6 @@ local function set_attributes(c)
 	end
 
   c.transparency = c.opacity or 1
-end
-
-local roundedrect = function(cr, w, h)
-	return gears.shape.rounded_rect(cr, w, h, theme.global_radius / 2)
 end
 
 client.connect_signal("manage", function(c)

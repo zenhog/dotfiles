@@ -15,8 +15,8 @@ fileext = ".vcf"
 [storage mailboxremote]
 type = "carddav"
 url = "https://dav.mailbox.org/carddav"
-username.fetch = [ "command", "bash", "-c", "pass show www/mail/mailbox.org/davuser" ]
-password.fetch = [ "command", "bash", "-c", "pass show www/mail/mailbox.org/davpass" ]
+username.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/mailbox.org/0/davuser" ]
+password.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/mailbox.org/0/davpass" ]
 
 [pair disrootpair]
 a = "disrootlocal"
@@ -32,5 +32,5 @@ fileext = ".vcf"
 [storage disrootremote]
 type = "carddav"
 url = "https://cloud.disroot.org/remote.php/dav/addressbooks/users/prisoner/z-server-generated--system/"
-username.fetch = [ "command", "bash", "-c", "pass show www/mail/disroot.org/username" ]
-password.fetch = [ "command", "bash", "-c", "pass show www/mail/disroot.org/password" ]
+username.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/0/username" ]
+password.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/0/password" ]

@@ -6,8 +6,8 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "echo -n 'user '; pass show www/mail/mailbox.org/username"
-eval "echo -n 'from '; pass show www/mail/mailbox.org/username"
+eval "echo -n 'user '; pass show iz/www/mail/mailbox.org/0/username"
+eval "echo -n 'from '; pass show iz/www/mail/mailbox.org/0/username"
 passwordeval "pass show www/mail/mailbox.org/password"
 
 account disroot
@@ -18,6 +18,6 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "printf 'user %s@disroot.org' `pass show www/mail/disroot.org/email`"
-eval "printf 'from %s@disroot.org' `pass show www/mail/disroot.org/email`"
+eval "printf 'user %s@disroot.org' `pass show iz/www/mail/disroot.org/0/email`"
+eval "printf 'from %s@disroot.org' `pass show iz/www/mail/disroot.org/0/email`"
 passwordeval "pass show www/mail/disroot.org/password"

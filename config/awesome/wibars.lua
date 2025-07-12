@@ -125,6 +125,8 @@ function M.group(...)
 			})
 
 			w:buttons(w.widget.widget:buttons())
+			w.widget:buttons(w.widget.widget:buttons())
+			w.widget:buttons(w.widget.widget:buttons())
 
 			w:connect_signal("button::press", function()
 				w.bgp = w.bg
