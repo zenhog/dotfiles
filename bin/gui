@@ -83,6 +83,15 @@ arrind() {
   return 1
 }
 
+readeval() {
+  local entry
+  IFS= read -r entry
+
+  eval "set -- $entry"
+
+  printf "%s\n" "$@"
+}
+
 notify() {
 	silent notify-send -t 5000 -a menu "$MODULE" "$@"
 	widget push timeout

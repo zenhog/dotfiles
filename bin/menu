@@ -5,6 +5,7 @@ source "$HOME/.bin/gui"
 export UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
 
 atexit() {
+  mute tmux delete-buffer -b preview
 	silent declare -F atfinish && atfinish
 }
 
@@ -123,7 +124,7 @@ input() {
 
   {
     if [[ -n "$fifo" ]]; then
-      "${cmd[@]}" 2>/dev/tty >"$fifo"
+      "${cmd[@]}" 2>/dev/tty > "$fifo"
     else
       "${cmd[@]}" 2>/dev/tty
     fi

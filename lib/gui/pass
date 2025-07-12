@@ -6,12 +6,16 @@ ICON=󰍁
 COLOR=springgreen
 
 NOWRAP=1
-RATIO=75
+RATIO=65
 
 export STORE="$HOME/.password-store"
 
+atfinish() {
+  mute tmux delete-buffer -b location
+}
+
 label() {
-	quiet tmux show-buffer -b label
+	quiet tmux show-buffer -b location
 }
 
 extract() {
@@ -19,28 +23,30 @@ extract() {
 }
 
 view() {
-	local dir entries
+  local id dir tag dom ind
 
-	dir="$1"
+  read -r id dir tag dom ind <<< "$1"
 
-	[[ -z "$dir" ]] && return
+  local path="$id/$dir/$tag/$dom/$ind"
 
-	readarray -t entries < <(cd "$STORE/$dir" && find -- * -type f)
+	local entries
+
+	readarray -t entries < <(cd "$STORE/$path" && find -- * -type f)
 
 	local val
 	for entry in "${entries[@]}"; do
 		unset val
 
 		if [[ "$entry" == *.gpg ]]; then
-			read -r val < <(quiet pass show "$dir/${entry%.gpg}")
+			read -r val < <(quiet pass show "$path/${entry%.gpg}")
 		else
-			read -r val <"$STORE/$dir/$entry"
+			read -r val <"$STORE/$path/$entry"
 		fi
 
 		if [[ "$entry" == password* ]]; then
 			local charspec
 
-			read -r charspec < <(get "$dir" charspec)
+			read -r charspec < <(get "$path" charspec)
 
 			if silent check "$val" "$charspec"; then
 				read -r val < <(colorize green "$val")
@@ -49,21 +55,54 @@ view() {
 			fi
 		fi
 
+    if [[ "$entry" == location* ]]; then
+      local newloc
+
+      IFS= read -r newloc < <(quiet tmux show-buffer -b location)
+ 
+      if [[ -n "$newloc" && "$newloc" == "$val" ]]; then
+        read -r val < <(colorize green "$val")
+      elif [[ -n "$newloc" && "$newloc" != "$val" ]]; then
+        read -r val < <(colorize red "$val")
+      fi
+    fi
+
+    if [[ "$entry" == *.gpg ]]; then
+      read -r entry < <(colorize cyan "${entry%.gpg}")
+    else
+      read -r entry < <(colorize yellow "${entry}")
+    fi
+
 		printf "%s%s%s\n" "$entry" "$iSEP" "$val"
 	done | column -t -s "$iSEP" -o "$oSEP"
 	echo
 	#qrencode -m1 -tANSI256 <<< "$val"
 }
 
+OPTS+=(--header-lines=1)
 list() {
-	(cd "$STORE" && find -- * .* \( -type d -or -type l \) -exec sh -c \
+  local entries
+  readarray -t entries < <(
+	cd "$STORE" && find -- * \( -type d -or -type l \) -exec sh -c \
 		'test -z "$(find "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
+
+  local id dir tag dom ind
+
+  for entry in "${entries[@]}"; do
+    IFS=/ read -r id dir tag dom ind <<< "$entry"
+    printfmt \
+      "$(colorize cyan "$id")" \
+      "$(colorize red "$dir")" \
+      "$(colorize yellow "$tag")" \
+      "$(colorize green "$dom")" \
+      "$(colorize magenta "$ind")"
+  done | column -t -s "$iSEP" -N ID,DIR,TAG,DOM,IND -R DOM
 }
 
 rename() {
-	local rand
+	local rand file="$STORE/$1.gpg"
 	read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=5)
-	mv -v -- "${STORE}/$1.gpg" "${STORE}/$1.old.$rand.gpg"
+  [[ -f "$file" ]] && mv -v -- "$file" "${file%.gpg}.old.$rand.gpg"
 }
 
 get() {
@@ -72,7 +111,7 @@ get() {
 }
 
 insert() {
-	local dir="$1" key="$2" val="$3" force="$4" curval
+	local dir="$1" key="$2" val="$3" curval
 
 	[[ -z "${key?}" ]] && return 1
 
@@ -138,15 +177,13 @@ BINDS[reloc]=alt-u
 HOOKS[reloc]=noclear
 DESCS[reloc]='Overwrite location'
 reloc() {
-	local dir="$1"
-	#eval "$(tmux show-environment -t menu LOCATION 2>/dev/null)"
-	#tmux set-environment -t menu -u LOCATION
+	local entry="${1?}"
 
-	local newloc="$(tmux show-buffer -b label)"
+  read -r newloc < <(quiet tmux show-buffer -b location)
 
 	if [[ -n "$newloc" ]]; then
-		rename "$dir/location"
-		insert "$dir" location "$newloc" force
+		rename "$entry/location"
+		insert "$entry" location "$newloc"
 	fi
 }
 
@@ -162,35 +199,22 @@ BINDS[mod]=alt-w
 HOOKS[mod]=sclear
 DESCS[mod]='Modify entries'
 mod() {
-	local dir="$1" entry entries
+	local dir="$1" entries
 
 	view "$dir" | tmux load-buffer -b preview -
 
-	# IFS=$'\t \n' read -r -a entries < <(input ghost="'key1:val1 key2:val2 -key3'")
-	IFS= read -r entry < <(input ghost="'key1:val1 key2:val2 -key3'")
+  readarray -t entries < <(readeval < <(input))
 
-  local args=("$@")
+	mute tmux delete-buffer -b preview
 
-  eval "set -- $entry"
-
-  entries=("$@")
-  set -- "$@"
-
-  unset entry
-
-	tmux delete-buffer -b preview
-
-  # the way to do this is to actually parse bash code and eval it
-  # that way, you can do things like quoting and so on
 	for entry in "${entries[@]}"; do
-		if [[ "$entry" == -* ]]; then
-			pass rm -f "$dir/${entry:1}"
-		else
-			local lhs rhs
-			IFS=: read -r lhs rhs <<<"$entry"
-			rename "$dir/$lhs"
-			insert "$dir" "$lhs" "$rhs"
-		fi
+    IFS=: read -r key val <<< "$entry"
+    if [[ -z "$val" ]]; then
+      rename "$dir/$key"
+      continue
+    fi
+    rename "$dir/$key"
+    insert "$dir" "$key" "$val"
 	done
 }
 
@@ -230,9 +254,11 @@ BINDS[add]=alt-a
 HOOKS[add]=sclear
 DESCS[add]='Add directory entry'
 add() {
-	local dir
-	read -r dir < <(input query="www/")
-	mkdir -p "${STORE}/${dir}"
+	local entry="$1"
+
+	read -r entry < <(input query="${entry:-0/www/}")
+
+  mkdir -p "$STORE/$entry"
 }
 
 BINDS[del]=alt-d
@@ -344,25 +370,39 @@ fopen() {
 }
 
 new() {
-	local domain="${1}" location="${2}" force="${3}" dir dom
+  local dom="${1?}" loc="${2?}" index="${3:-0}"
 
-	echo -n "$location" | tmux load-buffer -b label -
+  local entry entries
 
-	read -r dir < <(dom "${domain}" || baseurl "${domain}")
+  readarray -t entries < <(dom "$dom")
 
-	[[ -d "${STORE}/${dir}" ]] && exec menu auto "$MODULE" -- "$dir"
+  if [[ -z "${entries[$index]}" ]]; then
+    read -r entry < <(baseurl "$dom")
+  else
+    entry="${entries[$index]}"
+  fi
+
+  [[ -z "$entry" ]] && read -r entry < <(baseurl "$dom")
+
+  entry="$index/$entry"
+
+  local path="$STORE/$index/$entry"
+
+  echo -n "$loc" | tmux load-buffer -b location -
+
+  [[ -d "$path" ]] && exec menu auto "$MODULE" -- "$entry"
 
 	list | tmux load-buffer -b preview -
-	list | tmux load-buffer -
 
-	read -r dir < <(menu input ghost="$dir" query="$dir")
+  read -r entry < <(menu input "ghost=$entry" "query=$entry")
 
 	tmux delete-buffer -b preview
 
-	[[ -n "$dir" ]] &&
-		insert "$dir" location "$location" "$force" &&
-		regen "$dir" &&
-		notify "Initialized dir '${dir}'"
-	[[ -n "${dir}" ]]
+  if [[ -n "$entry" ]]; then
+    insert "$entry" location "$loc"
+    regen "$entry"
+    notify "Initialized entry '$entry'"
+  fi
 
+  [[ -n "$entry" ]]
 }

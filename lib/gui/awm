@@ -17,7 +17,7 @@ list() {
     for _, c in ipairs(client.get()) do
       r = r .. string.format('%s\x01%d\x01%s\x01%s\x01%s\x01[%s]\n',
         string.format('0x%08x', c.window),
-          c.pid, c.profile, c.class, c.instance, c.name)
+          c.pid or -1, c.profile, c.class, c.instance, c.name)
     end
     return r
   " | sed -r '1d;$d' | column -t -s "$iSEP" -N \
