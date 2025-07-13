@@ -47,7 +47,7 @@ return {
         deepseek = function()
           return require("codecompanion.adapters").extend("openai_compatible", {
             env = {
-              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
+              api_key = "cmd:pass show iz/www/llm/openrouter.ai/0/apikey",
               url = "https://openrouter.ai/api",
               chat_url = "/v1/chat/completions",
             },
@@ -61,7 +61,7 @@ return {
         deepqwen = function()
           return require("codecompanion.adapters").extend("openai_compatible", {
             env = {
-              api_key = "cmd:pass show www/ai/openrouter.ai/apikey",
+              api_key = "cmd:pass show iz/www/llm/openrouter.ai/0/apikey",
               url = "https://openrouter.ai/api",
               chat_url = "/v1/chat/completions",
             },

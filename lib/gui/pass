@@ -52,7 +52,7 @@ view() {
 		fi
 
     if [[ "$entry" == *.last ]]; then
-      printf "%s%s%s\n" "$entry" "$iSEP" "$(basename "$val")"
+      printfmt "$(colorize magenta "$entry")" "$(basename "$val")"
       continue
     fi
 
@@ -88,7 +88,6 @@ view() {
 
 		printf "%s%s%s\n" "$entry" "$iSEP" "$val"
 	done | column -t -s "$iSEP" -o "$oSEP"
-	echo
 }
 
 # TODO:
@@ -229,6 +228,31 @@ cleanup() {
 
 # TODO:
 # restore last entry from $entry.old.test
+
+BINDS[reset]=alt-s
+HOOKS[reset]=sclear
+DESCS[reset]='Reset entry to its last value'
+reset() {
+  local path entries selection target
+
+  read -r path < <(restore "$1")
+
+  readarray -t entries < <(view "$1")
+
+  {
+    read _
+    read -r selection _
+  } < <(input "${entries[@]}")
+
+  local dir="$STORE/$path"
+
+  if [[ -e "$dir/$selection.old.last" ]]; then
+    read -r target < <(readlink -s "$dir/$selection.old.last")
+    mv -v -- "$target" "$dir/tmp.gpg"
+    mv -v -- "$dir/$selection.gpg" "$target"
+    mv -v -- "$dir/tmp.gpg" "$dir/$selection.gpg"
+  fi
+}
 
 BINDS[mod]=alt-w
 HOOKS[mod]=sclear
