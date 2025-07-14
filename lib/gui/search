@@ -12,9 +12,8 @@ export UEBERZUG_PREVIEW=1
 init() {
 	#set_opt pwd "$HOME/.marks"
 	[[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
-	set_opt hide 0
-	set_opt mode 0
-	set_opt mode-mod 3
+	set_opt hide hidden
+	set_opt mode dirs
 }
 
 folder_save() {
@@ -45,7 +44,8 @@ label() {
 	local path="$(path "$FOLDER")"
 	local mode="$(get_opt mode)"
 	local hide="$(get_opt hide)"
-	printf "%s - hide = %s - mode = %s" "$path" "$hide" "$mode"
+
+	printf "[ %s - hide = %s - mode = %s ]" "$path" "$hide" "$mode"
 }
 
 mimetype() {
@@ -67,32 +67,6 @@ view() {
 state_update() {
 	folder_restore
 	restore_opt hide
-
-	read -r HIDE < <(get_opt hide)
-	read -r MODE < <(get_opt mode)
-
-	case "$HIDE" in
-	1)
-		LSD_OPTS=('-A')
-		FD_OPTS=('-H')
-		;;
-	0)
-		LSD_OPTS=()
-		FD_OPTS=()
-		;;
-	esac
-
-	case "$MODE" in
-	0) FD_OPTS+=(-td) ;; # find dirs
-	1) FD_OPTS+=(-tf) ;; # find files
-	2) FD_OPTS+=(-tl) ;; # find links
-	*) ;;
-	esac
-
-	FD_OPTS+=(--base-directory "$FOLDER")
-
-	LIST_CMD=(lsd -1 --no-symlink --group-dirs=first "${LSD_OPTS[@]}")
-	SEARCH_CMD=(fd "${FD_OPTS[@]}")
 }
 
 BINDS[list]=alt-w
@@ -100,36 +74,77 @@ DESCS[list]='Reload current directory listing'
 list() {
 	local dir="$1"
 
+  local lsd_opts
+
 	state_update
+
+  case "$hide" in
+    hidden)
+      lsd_opts=()
+      ;;
+    visible)
+      lsd_opts=('-A')
+      ;;
+  esac
 
 	if [[ -n "$dir" ]]; then
 		folder_cd "$dir" && folder_restore
 	fi
 
-	"${LIST_CMD[@]}" "$FOLDER/"
+  lsd -1 --no-symlink --group-dirs=first "${lsd_opts[@]}" "$FOLDER/"
 }
 
 BINDS[search]=alt-s
 HOOKS[search]=search
-CALLS[search]='reload-sync(%s {} {q})+clear-query'
+CALLS[search]='reload-sync(%s)+clear-query'
 DESCS[search]='Search arbitrary pattern with fd'
 search() {
 	state_update
-	cd "$FOLDER" && "${SEARCH_CMD[@]}" "$2"
+
+  local mode="$(get_opt mode)"
+
+  local fd_opts
+
+  case "$mode" in
+    dirs)
+      fd_opts=(-td)
+      ;;
+    files)
+      fd_opts=(-tf)
+      ;;
+  esac
+
+  fd --base-directory "$FOLDER" --color=always -L "${fd_opts[@]}"
 }
 
 BINDS[rotate_mode]=alt-y
-HOOKS[rotate_mode]=search
 DESCS[rotate_mode]='Rotate mode'
 rotate_mode() {
-	rotate_opt mode
-	search "$1" "$2"
+  local mode="$(get_opt mode)"
+
+  case "$mode" in
+    dirs)
+      set_opt mode files
+      ;;
+    files)
+      set_opt mode dirs
+      ;;
+  esac
 }
 
 BINDS[toggle_hide]=alt-t
 DESCS[toggle_hide]='Toggle hidden'
 toggle_hide() {
-	toggle_opt hide
+  local hidden="$(get_opt hide)"
+
+  case "$hidden" in
+    hidden)
+      set_opt hide visible
+      ;;
+    visible)
+      set_opt hide hidden
+      ;;
+  esac
 }
 
 BINDS[rename]=alt-r
@@ -217,7 +232,9 @@ vimsession() {
 BINDS[enter]=enter
 DESCS[enter]='Change Directory'
 enter() {
-	folder_cd "$1"
+  local entry="$1"
+
+	folder_cd "${entry%/*}"
 }
 
 BINDS[back]=esc

@@ -397,10 +397,10 @@ grab() {
       read -r entry _
     } < <(quiet menu input "${entries[@]}")
   else
-    entry="${entries[$((index-1))]}"
+    entry="${entries[index]}"
   fi
-
-  read -r entry < <(quiet get "$entry" "$key")
+ 
+  read -r entry < <(quiet get "$entry/${index:-0}" "$key")
 
   if [[ -n "$entry" ]]; then
     echo "$entry"
