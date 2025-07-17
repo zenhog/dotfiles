@@ -324,8 +324,8 @@ del() {
         [[ -e "${f}.aria2" ]] && rm "${f}.aria2"
         case "$status" in
           complete)
-            mkdir -p "$HOME/downloads/aria2/complete"
-            mv "$f" "$HOME/downloads/aria2/complete/"
+            mkdir -p "$HOME/downloads"
+            mv "$f" "$HOME/downloads/"
             ;;
           error|removed)
             [[ -f "$f" ]] && rm "$f"

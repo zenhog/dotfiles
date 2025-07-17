@@ -350,12 +350,16 @@ dom() {
 
 	while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
 		readarray -t matches < <(cd "$STORE" &&
-      find -- * \( -type d -or -type l \) -name "*${zones[*]:$i}")
+      find -L -- * -type d -wholename "*${zones[*]:$i}/*")
 
 		[[ -n "$matches" ]] && break
 
 		((++i))
 	done
+
+  if (( ${#matches[@]} == 0 )); then
+    return
+  fi
 
 	printf "%s\n" "${matches[@]}"
 }
@@ -376,7 +380,7 @@ baseurl() {
 		zones=(${chunks[@]})
 	fi
 
-	printf "iz/www/%s\n" "${zones[*]}"
+	printf "iz/www/%s/0\n" "${zones[*]}"
 }
 
 grab() {
@@ -400,7 +404,7 @@ grab() {
     entry="${entries[index]}"
   fi
  
-  read -r entry < <(quiet get "$entry/${index:-0}" "$key")
+  read -r entry < <(quiet get "$entry" "$key")
 
   if [[ -n "$entry" ]]; then
     echo "$entry"
@@ -445,29 +449,60 @@ fopen() {
 	urlopen "$location"
 }
 
-new() {
-  local dom="${1?}" loc="${2?}" index="${3:-0}"
+# clone with new index? with new password? same location?
+BINDS[clone]=alt-o
+HOOKS[clone]=sclear
+DESCS[clone]='Clone entry and edit'
+clone() {
+  local path id dir tag dom ind
 
-  local entry entries
+  read -r path < <(restore "$1")
+  read -r id dir tag dom ind <<< "$1"
+
+  local entries
 
   readarray -t entries < <(dom "$dom")
 
-  if [[ -z "${entries[$index]}" ]]; then
+  local newpath="$id/$dir/$tag/$dom/${#entries[@]}"
+
+  add "$newpath"
+
+  read -r oldloc < <(get "$path" location)
+
+  [[ -n "$oldloc" ]] && insert "$newpath" location "$oldloc"
+
+  regen "$newpath"
+}
+
+new() {
+  local dom="${1?}" loc="${2?}"
+
+  local dir entry entries
+
+  readarray -t entries < <(dom "$dom")
+
+  local len=${#entries[@]}
+
+  if (( len == 0 )); then
     read -r entry < <(baseurl "$dom")
-    entry="$entry/$index"
+    dir="$entry"
   else
-    entry="${entries[$index]}"
+    dir="${entries[$((len-1))]}"
+    entry="${dir%/*}"
+    entry="${dir//\// }"
   fi
 
-  local path="$STORE/$entry"
+  local path="$STORE/$dir"
 
   echo -n "$loc" | tmux load-buffer -b location -
 
-  [[ -d "$path" ]] && exec menu auto "$MODULE" -- "${entry//\// }"
+  [[ -d "$path" ]] && exec menu auto "$MODULE" -- "$entry"
 
 	list | tmux load-buffer -b preview -
 
   read -r entry < <(menu input "ghost=$entry" "query=$entry")
+
+  [[ -z "$entry" ]] && return
 
 	tmux delete-buffer -b preview
 
@@ -477,5 +512,10 @@ new() {
     notify "Initialized entry '$entry'"
   fi
 
-  [[ -n "$entry" ]]
+  path="$STORE/$entry"
+
+  entry="${entry%/*}"
+  entry="${entry//\// }"
+
+  [[ -d "$path" ]] && exec menu auto "$MODULE" -- "$entry"
 }
