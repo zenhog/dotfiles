@@ -1,18 +1,19 @@
 [calendars]
 
-[[calendars_local]]
-path = ~/.calendars/*
+[[calendars]]
+path = ~/.calendars/**
 type = discover
+color = yellow
 
-[[birthdays_family]]
-path = ~/.contacts/family
+[[birthdays_friends]]
+path = ~/.contacts/disroot/contacts/friends
 type = birthdays
 color = brown
 
-[[birthdays_friends]]
-path = ~/.contacts/friends
+[[birthdays_family]]
+path = ~/.contacts/disroot/contacts/family
 type = birthdays
-color = light blue
+color = light red
 
 [default]
 highlight_event_days = True

@@ -1,36 +1,19 @@
 [general]
 status_path = "~/.vdirsyncer/status/"
 
-[pair mailbox]
-a = "mailboxlocal"
-b = "mailboxremote"
-collections = [ ["contacts", "contacts", "32"], ["friends", "friends", "51"] ]
+[pair main]
+a = "lmain"
+b = "rmain"
+collections = [ "family", "friends", "others" ]
 conflict_resolution = "a wins"
 
-[storage mailboxlocal]
+[storage lmain]
 type = "filesystem"
-path = "~/.contacts/mailbox"
+path = "~/.contacts"
 fileext = ".vcf"
 
-[storage mailboxremote]
+[storage rmain]
 type = "carddav"
-url = "https://dav.mailbox.org/carddav"
-username.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/mailbox.org/0/davuser" ]
-password.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/mailbox.org/0/davpass" ]
-
-[pair disrootpair]
-a = "disrootlocal"
-b = "disrootremote"
-collections = [ "from a", "from b" ]
-conflict_resolution = "a wins"
-
-[storage disrootlocal]
-type = "filesystem"
-path = "~/.contacts/disroot"
-fileext = ".vcf"
-
-[storage disrootremote]
-type = "carddav"
-url = "https://cloud.disroot.org/remote.php/dav/addressbooks/users/prisoner/z-server-generated--system/"
+url = "https://cloud.disroot.org/remote.php/dav/addressbooks/users/prisoner"
 username.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/0/username" ]
 password.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/0/password" ]
