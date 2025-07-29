@@ -17,10 +17,11 @@ label() {
 }
 
 view() {
-  # weather
-  # calendar mb on the calendar
-  # calendar event
-  cal --color=always -m -y
+  # weather for the timezone?
+  # holiday events for the timezone?
+  # cal --color=always -m -y
+  local year="$(date +%Y)"
+  khal --color calendar "$year-01-01" "$year-12-31"
 }
 
 # OPTS+=(--preview-window hidden)

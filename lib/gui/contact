@@ -5,19 +5,89 @@ MOD='S-M'
 ICON=󰀆
 COLOR=royalblue
 
+RATIO=50%
+
 POSITION=BOTTOM
 
-view() {
-	local id
+label() {
+	local uid
 
-	read -r id _ <<<"$1"
+	read -r uid _ <<<"$1"
 
-	khard show -u "$id" --format yaml 2>/dev/null | yq -y | bat -p \
-		--force-colorization --language=yaml
+  echo " [$uid] "
 }
 
+view() {
+	local uid
+
+	read -r uid _ <<<"$1"
+
+  quiet khard --skip-unparsable show "uid:$uid"
+}
+
+BINDS[edit]=alt-e
+HOOKS[edit]=accept
+DESCS[edit]='Edit in tmux'
+edit() {
+  local uid
+
+  read -r uid _ <<< "$1"
+
+  gui tmux window local "$(hostname)" khard khard edit "uid:$uid"
+}
+
+# new
+# edit
+# add addr
+
+flatten() {
+  jq -r 'to_entries[] | .key as $k | .value[] | "\(.)"'
+}
+
+OPTS+=(--with-nth 2.. --header-lines=1)
 list() {
-	local uids
-	readarray -t uids < <(khard list -p -F uid)
-	printf "%s\n" "${uids[@]}"
+	local books uid lname fname phones emails addrs bday age
+
+  readarray -t books < <(khard abooks)
+
+  for book in "${books[@]}"; do
+    while IFS="$iSEP" read -r uid lname fname phones emails bday _; do
+      unset age
+
+      read -r bday _ <<< "$bday"
+
+      if [[ -n "$bday" ]]; then
+        age="$(ddiff -f %Y "$bday" "$(date "+%F")")"
+        bday="$(date -d "$bday" "+%b %d %Y")"
+      fi
+
+      readarray -t phones < <(flatten <<< "${phones//\'/\"}")
+      readarray -t emails < <(flatten <<< "${emails//\'/\"}")
+
+      local longest=${#emails[@]}
+
+      (( ${#phones[@]} > longest )) && longest=${#phones[@]}
+      (( ${#addrs[@]} > longest ))  && longest=${#addrs[@]}
+
+        for i in $(seq 0 $((longest - 1))); do
+        printfmt "$uid" "$book" "${lname:---}" "${fname:---}" \
+          "${phones[$i]:---}" "${emails[$i]:---}"  "${bday:---}" "${age:---}"
+      done
+    done < <(
+      quiet khard list -a "$book" -p -F \
+        uid,last_name,first_name,phone_numbers,emails,birthday |
+        tr $'\t' "$iSEP"
+    )
+  done | column -t -s "$iSEP" -N UID,ABOOK,LNAME,FNAME,NUMBER,EMAIL,BDAY,AGE \
+    -R FNAME,EMAIL
+}
+
+BINDS[del]=alt-d
+DESCS[del]='Delete contact'
+del() {
+  local uid
+
+  read -r uid _ <<< "$1"
+
+  khard del --force "uid:$uid"
 }

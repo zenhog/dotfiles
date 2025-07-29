@@ -142,6 +142,11 @@ declare ARG="${1:-GR_ALL}"
 
 declare -n PATS="$ARG"
 
+if [[ "$ARG" == SELECT ]]; then
+  printf -- "-- %s\n" "${PATTERN_GROUPS[@]}"
+  exit 0
+fi
+
 for gr in "${!PATTERN_GROUPS[@]}"; do
   if [[ "${PATTERN_GROUPS[$gr]}" == "$ARG" ]]; then
     NEXT_PATTERN="${PATTERN_GROUPS[$(( (gr+1) % ${#PATTERN_GROUPS[@]} ))]}"
@@ -163,7 +168,7 @@ done
 for pat in "${PATS[@]}"; do
   match "$pat"
 done | column -t -s$'\x01' |
-  fzf --ansi --preview-window 'right,60%,wrap,+{1}-5' \
+  fzf --with-nth 2.. --ansi --preview-window 'right,60%,wrap,+{1}-5' \
     --border \
     --preview "rg --passthru --color=always -F -- {3..} < $INPUT" \
     --border-label="${LABELS[*]}" \
@@ -174,6 +179,7 @@ done | column -t -s$'\x01' |
     --bind="ctrl-n:become(command extract $NEXT_PATTERN < $INPUT 2>/dev/tty)" \
     --bind="ctrl-p:become(command extract $PREV_PATTERN < $INPUT 2>/dev/tty)" \
     --bind="ctrl-e:execute-silent(echo -n {3..} | tmux load-buffer -)+execute-silent(tmux paste-buffer -t $PANE)+accept" \
+    --bind="ctrl-s:reload-sync(command extract SELECT)" \
     --prompt='extract> '
 
 # open
