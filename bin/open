@@ -3,33 +3,34 @@
 shopt -s nullglob
 
 file="$1"
+path="$(realpath -s "$file")"
 
-read -r mime < <(file -bL --mime-type "$file")
+read -r mime < <(file -bL --mime-type "$path")
 
 category="${mime%%/*}"
 kind="${mime##*/}"
 
 if [[ "$mime" == inode/directory ]]; then
   if [[ -r "$file/.dirtype" ]]; then
-    read -r mime < "$file/.dirtype"
+    read -r mime < "$path/.dirtype"
   else
     cd "$file" &&
-      exec gui tmux window local "$(hostname)" "$(basename "$file")" "${@:2}"
+      exec gui tmux window local "$(hostname)" "$(basename "$path")" "${@:2}"
   fi
 fi
 
 case "${mime}" in
   text/*)
-    gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$file"
+    gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$path"
     ;;
   image/*)
-    gui awm runonce fg -- nsxiv -a -s f -- "'$(realpath -s "$file")'"
+    gui awm runonce fg -- nsxiv -a -s f -- "$path"
     ;;
   video/*)
-    gui awm runonce fg -- mpv "$(realpath -s "$file")"
+    gui awm runonce fg -- mpv "$path"
     ;;
   application/pdf)
-    gui awm runonce fg -- mupdf "$(realpath -s "$file")"
+    gui awm runonce fg -- mupdf "$path"
     ;;
   *)
     case "$file" in

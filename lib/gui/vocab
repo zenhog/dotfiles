@@ -8,7 +8,66 @@ COLOR=gold
 HORIZONTAL=1
 
 export DB="$HOME/.db/vocabulary.db"
-export API="https://api.dictionaryapi.dev/api/v2/entries/en"
+
+export DICT_API_URL="https://api.dictionaryapi.dev/api/v2/entries/en"
+
+translate() {
+  local sl="$1"
+  local dl="$2"
+  local text="$(jq -rR @uri <<< "${*:3}")"
+
+  local endpoint='https://ftapi.pythonanywhere.com'
+  local query
+
+  read -r query < <(printf '%s/translate?sl=%s&dl=%s&text=%s' \
+    "$endpoint" "$sl" "$dl" "$text"
+  )
+
+  curl -sSL "$query" #| yq -y | bat -p --force-colorization --language yaml
+}
+
+muse() {
+  local endpoint='https://api.datamuse.com'
+
+  local query
+
+  read -r query < <(IFS=+; printf "%s/words?ml=%s\n" "$endpoint" "$*")
+
+  echo "$query"
+
+  curl -sSL "$query" #| yq -y | bat -p --force-colorization --language yaml
+}
+
+lookup() {
+  local word="$1"
+  local endpoint="https://api.dictionaryapi.dev/api/v2/entries/en"
+
+  curl -sSL "$endpoint/$word" #|
+    # yq -y | bat -p --force-colorization --language yaml
+
+}
+
+# - link to https://dictionary.cambridge.org/dictionary/english/$WORD
+
+# add word
+# del word
+# quiz #num
+# make the call and cache it
+
+apicall() {
+  local cache="$HOME/.cache/gui/vocab"
+  local api="$1"
+
+  shift
+
+  mkdir -p "$cache/$api"
+
+  local path
+
+  read -r path < <(IFS=_; printf "%s/%s" "$cache/$api" "$*")
+
+  [[ -f "$path" ]] && cat "$path" || "$api" "$@" | tee "$path"
+}
 
 noinit() {
 	rm -f "$DB"
@@ -16,39 +75,21 @@ noinit() {
   CREATE TABLE words(
     id integer primary key,
     word_en text unique,
-    word_fr text unique,
-    word_es text unique,
-    word_ar text unique,
-    word_ru text unique,
+    word_fr text,
+    word_es text,
+    word_ar text,
+    word_ru text,
+    word_ja text,
     learnt boolean
   );
 EOF
 }
 
-# add word
-# del word
-# quiz #num
-# - adverbial, verb, adjective forms
-# - grammar?
-# - french translation?
-# - english translation?
-# - pronunciation (mb with TTS?)
-# - definition
-# - phonetics
-# - part of speech
-# - examples
-# - synonyms
-# - antonyms
-# - link to https://dictionary.cambridge.org/dictionary/english/$WORD
-
 view() {
 	local id word
 	read -r id word _ <<<"$1"
 
-	curl -sL "${API}/${word}" |
-		jq 'def f: recurse | select(IN([], {}));
-      until(isempty(f); del(f)) | map(del(.phonetics,.license,.sourceUrls))' |
-		yq -y | bat -p --force-colorization --language yaml
+  apicall lookup "$word"
 }
 
 OPTS+=(--with-nth 2..)
@@ -82,16 +123,17 @@ BINDS[add]=enter
 DESCS[add]='Add word to vocabulary database'
 add() {
 	#local word language domain
-	local -a words
-	read -r -a words <<<"$2"
+	local words
+
+	read -r -a words <<< "$2"
+
 	for word in "${words[@]}"; do
 		local word_fr
-		read -r word_fr < <(dt -src en -tg fr -txt "$word" |
-			sed -rn '/^Translation result:/ s/^Translation result: (.*)$/\1/p')
-		sqlite3 "$DB" <<EOF
+    read -r word_fr < <(apicall translate en fr "$word")
+		sqlite3 "$DB" "
       INSERT INTO words (word_en, word_fr, learnt)
       values ('${word}', '${word_fr}', false)
-EOF
+    "
 	done
 }
 
