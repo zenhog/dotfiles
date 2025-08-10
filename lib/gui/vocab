@@ -9,8 +9,6 @@ HORIZONTAL=1
 
 export DB="$HOME/.db/vocabulary.db"
 
-export DICT_API_URL="https://api.dictionaryapi.dev/api/v2/entries/en"
-
 translate() {
   local sl="$1"
   local dl="$2"
@@ -23,7 +21,7 @@ translate() {
     "$endpoint" "$sl" "$dl" "$text"
   )
 
-  curl -sSL "$query" #| yq -y | bat -p --force-colorization --language yaml
+  curl -sSL "$query"
 }
 
 muse() {
@@ -35,38 +33,20 @@ muse() {
 
   echo "$query"
 
-  curl -sSL "$query" #| yq -y | bat -p --force-colorization --language yaml
+  curl -sSL "$query"
 }
 
 lookup() {
   local word="$1"
   local endpoint="https://api.dictionaryapi.dev/api/v2/entries/en"
 
-  curl -sSL "$endpoint/$word" #|
-    # yq -y | bat -p --force-colorization --language yaml
-
+  curl -sSL "$endpoint/$word"
 }
 
-# - link to https://dictionary.cambridge.org/dictionary/english/$WORD
+mpvcall() {
+  local link="$1"
 
-# add word
-# del word
-# quiz #num
-# make the call and cache it
-
-apicall() {
-  local cache="$HOME/.cache/gui/vocab"
-  local api="$1"
-
-  shift
-
-  mkdir -p "$cache/$api"
-
-  local path
-
-  read -r path < <(IFS=_; printf "%s/%s" "$cache/$api" "$*")
-
-  [[ -f "$path" ]] && cat "$path" || "$api" "$@" | tee "$path"
+  mpv "$link"
 }
 
 noinit() {
@@ -89,7 +69,9 @@ view() {
 	local id word
 	read -r id word _ <<<"$1"
 
-  apicall lookup "$word"
+  apicall translate en fr "$word" | yq -y | bat -p --force-colorization --language yaml
+  sepline
+  apicall lookup "$word" | yq -y | bat -p --force-colorization --language yaml
 }
 
 OPTS+=(--with-nth 2..)
@@ -121,19 +103,53 @@ pronounce() {
 
 BINDS[add]=enter
 DESCS[add]='Add word to vocabulary database'
+# - link to https://dictionary.cambridge.org/dictionary/english/$WORD
+# quiz #num
+
+# add word
+
+trans() {
+  local src="$1"
+  local dst="$2"
+  local word="$3"
+
+  apicall translate "$src" "$dst" "$word" | jq -r '."destination-text"'
+}
+
 add() {
 	#local word language domain
-	local words
+	local words lang word
 
 	read -r -a words <<< "$2"
 
+  local en fr es it de ru ar
+
 	for word in "${words[@]}"; do
-		local word_fr
-    read -r word_fr < <(apicall translate en fr "$word")
-		sqlite3 "$DB" "
-      INSERT INTO words (word_en, word_fr, learnt)
-      values ('${word}', '${word_fr}', false)
-    "
+    IFS=: read -r lang word <<< "$word"
+
+    if [[ -z "$word" ]]; then
+      word="$lang"
+      lang=en
+    fi
+
+    case "$lang" in
+      en)
+        ;;
+      *)
+        read -r word < <(trans "$lang" en "$word")
+        ;;
+    esac
+
+    for l in fr es it de ru ar; do
+      eval read -r "$l" < <(trans en "$l" "$word")
+    done
+
+    echo "$word":$fr:$es:$it:$ru:$ar
+
+		# sqlite3 "$DB" "
+		#     INSERT INTO words (word_en, word_fr, learnt)
+		#     values ('${word}', '${word_fr}', false)
+		#   "
 	done
 }
 

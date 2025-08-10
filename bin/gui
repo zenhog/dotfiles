@@ -97,6 +97,29 @@ notify() {
 	widget push timeout
 }
 
+apicall() {
+  local cache="$HOME/.cache/gui/$MODULE"
+  local api="$1"
+
+  shift
+
+  mkdir -p "$cache/$api"
+
+  local path
+
+  read -r path < <(IFS=_; printf "%s/%s" "$cache/$api" "$*")
+
+  if [[ -r "$path" ]]; then
+    cat "$path"
+  else
+    "$api" "$@" | tee "$path"
+  fi
+}
+
+urlencode() {
+  jq -rR @uri <<< "$*"
+}
+
 get_opt() {
 	quiet tmux show -sv "@menu-${MODULE}-$1"
 }
