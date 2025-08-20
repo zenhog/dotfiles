@@ -280,6 +280,7 @@ local function set_clienttag(c)
 		navigator = 2,
 		chromium = 2,
 		firefox = 2,
+    zen = 2,
 		qutebrowser = 2,
 
 		feh = 3,
@@ -299,6 +300,8 @@ local function set_clienttag(c)
 		steam = 5,
 	}
 
+	tagmap["zen-vpn1"] = 3
+	tagmap["zen-vpn2"] = 3
 	tagmap["firefox-vpn1"] = 3
 	tagmap["firefox-vpn2"] = 3
 	tagmap["qutebrowser-vpn1"] = 3

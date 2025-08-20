@@ -3,17 +3,17 @@
 [[calendars]]
 path = ~/.calendars/**
 type = discover
-color = yellow
+color = light blue
 
 [[birthdays_friends]]
-path = ~/.contacts/disroot/contacts/friends
-type = birthdays
-color = brown
-
-[[birthdays_family]]
-path = ~/.contacts/disroot/contacts/family
+path = ~/.contacts/friends
 type = birthdays
 color = light red
+
+[[birthdays_family]]
+path = ~/.contacts/family
+type = birthdays
+color = light green
 
 [default]
 highlight_event_days = True
@@ -28,6 +28,6 @@ event_view_always_visible = True
 [locale]
 timeformat = %H:%M
 dateformat = %Y-%m-%d
-longdateformat = %Y-%m-%d
+longdateformat = %a %d %b %Y
 datetimeformat = %Y-%m-%d %H:%M
-longdatetimeformat = %Y-%m-%d %H:%M
+longdatetimeformat = %a %d %b %Y %H:%M
