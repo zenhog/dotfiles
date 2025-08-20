@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='C-W:e'
-
-ATTRIBUTES=(profile=firefox-vpn2)
-
-runner() {
-  browser firefox vpn2
-}

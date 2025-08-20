@@ -172,6 +172,17 @@ mark() {
 	(cd "$marksdir" && ln -svf "$target" "${link#.}")
 }
 
+# screenshots
+# uploads : goto $HOME/.uploads
+# upload : uploads text files with wgetpaste or image files with imgur
+#   wgetpaste (rotate service/language/expiration) and copy link
+#   file is created in .uploads
+#     filepath_URL_expdate
+# open_upload
+#     if curl returns 200, then restore/copy/open it
+#     else delete and reupload
+
+# ?? WTF IS THIS??
 BINDS[attach]=alt-f
 DESCS[attach]='Select entry'
 attach() {

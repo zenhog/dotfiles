@@ -312,7 +312,7 @@ dispatch() {
 		tmux popup -BE -w 100% -h 100% menu main "$@"
 		;;
 	loop)
-		socat STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(
+		socat -u STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(
 			IFS=:
 			printf "%s\n" "$*"
 		)

@@ -15,6 +15,9 @@ if [[ "$CTTY" == "$RTTY" ]]; then
       echo firefox
       echo firefox-vpn1
       echo firefox-vpn2
+      echo zen
+      echo zen-vpn1
+      echo zen-vpn2
       ;;
     qutebrowser)
       shift
@@ -62,7 +65,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
         "${cmd[@]}" --target tab "$@"
       fi
       ;;
-    firefox)
+    firefox|zen)
       shift
 
       if [[ "$type" == vpn* ]]; then
@@ -71,19 +74,19 @@ if [[ "$CTTY" == "$RTTY" ]]; then
         type=wan
       fi
 
-      profile="firefox-$type"
+      profile="$kind-$type"
 
-      [[ "$type" == wan ]] && profile=firefox
+      [[ "$type" == wan ]] && profile="$kind"
 
       cmd+=(gui awm runonce bg "profile=$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-      cmd+=(firefox -p "$type" --new-instance --class "$profile")
+      cmd+=("$kind" -p "$type" --new-instance --class "$profile")
 
       if gui awm exists "profile=$profile"; then
         "${cmd[@]}"
-        [[ -n "$*" ]] && firefox -p "$type" "$@"
+        [[ -n "$*" ]] && "$kind" -p "$type" "$@"
       else
         "${cmd[@]}" "$@"
       fi

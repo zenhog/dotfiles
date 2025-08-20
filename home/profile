@@ -21,6 +21,7 @@ prependpath '/usr/bin'
 prependpath '/usr/sbin'
 prependpath '/usr/local/bin'
 prependpath '/usr/local/sbin'
+prependpath '/opt/bin'
 
 prependpath "$HOME/.node_modules/bin"
 prependpath "$HOME/.luarocks/bin"

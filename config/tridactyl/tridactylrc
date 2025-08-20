@@ -27,15 +27,17 @@ unbind --mode=browser <CS-6>
 
 bind --mode=browser <A-w> escapehatch
 bind --mode=browser <A-o> jsb escapehatch(); fillcmdline('open')
-bind --mode=browser <A-,> tabprev
-bind --mode=browser <A-.> tabnext
-bind --mode=browser <A-q> tabclose
+" bind --mode=browser <A-,> tabprev
+" bind --mode=browser <A-.> tabnext
+bind --mode=browser <A-k> tabprev
+bind --mode=browser <A-j> tabnext
+" bind --mode=browser <A-q> tabclose
 bind --mode=browser <A-t> jsb escapehatch(); fillcmdline('tabopen')
-bind --mode=browser <A-u> undo
+" bind --mode=browser <A-u> undo
 bind --mode=browser <A-s> source
 bind --mode=browser <A-c> tabonly
-bind --mode=browser <A-h> back
-bind --mode=browser <A-l> forward
+" bind --mode=browser <A-h> back
+" bind --mode=browser <A-l> forward
 
 
 autocmd DocStart ^http(s?)://www.reddit.com js tri.excmds.urlmodify("-t", "www", "old")

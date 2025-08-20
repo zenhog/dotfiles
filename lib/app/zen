@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEY='W:e'
+
+ATTRIBUTES=(profile=zen)
+
+runner() {
+  browser zen
+}

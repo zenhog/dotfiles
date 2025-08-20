@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='W:e'
-
-ATTRIBUTES=(profile=firefox)
-
-runner() {
-  browser firefox
-}
