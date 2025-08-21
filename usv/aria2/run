@@ -4,12 +4,14 @@ exec 2>&1
 
 touch "$HOME/.aria2.session"
 
-mkdir -p "$HOME/downloads/aria2"
+DL_DIR="$HOME/.aria2downloads"
+
+mkdir -p "$DL_DIR"
 
 HOOKS="$HOME/.config/aria2/hooks"
 
 #exec aria2c --dir="$HOME/downloads" \
-exec cgexec -g net_cls:vpn1 aria2c --dir="$HOME/downloads/aria2" \
+exec cgexec -g net_cls:vpn1 aria2c --dir="$DL_DIR" \
     --on-download-complete="$HOOKS"/aria2hook-complete \
     --on-download-pause="$HOOKS"/aria2hook-pause \
     --on-download-start="$HOOKS"/aria2hook-start \
