@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.sqlite
+!/default/
+!/default/moz-extension*/
+!/default/moz-extension*/**
+!/default/chrome/
+!/default/chrome/**
+!/permanent/
+!/permanent/**

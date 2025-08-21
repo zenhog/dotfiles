@@ -1,0 +1,12 @@
+*
+!.gitignore
+!*.json
+!*.json.lz4
+!*.ini
+!*.js
+!extensions/
+!extensions/**
+!storage/
+!storage/**
+!chrome/
+!chrome/**
