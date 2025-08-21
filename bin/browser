@@ -1,10 +1,26 @@
 #!/usr/bin/env bash
 
+TRIDACTYL_URL='https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh'
+
+VDHCOAPP_URL='https://github.com/aclap-dev/vdhcoapp/releases/latest/download/install.sh'
+
+ZENBROWSER_URL='https://github.com/zen-browser/desktop/releases/latest/download/zen.linux-x86_64.tar.xz'
+
+NMH_PATH="$HOME/.mozilla/native-messaging-hosts"
+
+TRIDACTYL_PATH="$NMH_PATH/tridactyl.json"
+VDHCOAPP_PATH="$NMH_PATH/net.downloadhelper.coapp.json"
+ZENBROWSER_PATH="$HOME/.local/share/zen"
+
 read -r CTTY < <(cat /sys/class/tty/tty0/active)
 read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
 
 kind="$1"
 type="$2"
+
+#  sync)
+#   $1: wan? -> profile-dir
+#     copy the git version -> vpn? before launch
 
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
@@ -67,6 +83,20 @@ if [[ "$CTTY" == "$RTTY" ]]; then
       ;;
     firefox|zen)
       shift
+
+      if [[ "$kind" == zen && ! -d "$ZENBROWSER_PATH" ]]; then
+        curl -fSL "$ZENBROWSER_URL" --output - | tar xJf - \
+          -C "${ZENBROWSER_PATH%/*}" &&
+            ln -svf "$ZENBROWSER_PATH/zen" "$HOME/.local/bin"
+      fi
+
+      if [[ ! -r "$TRIDACTYL_PATH" ]]; then
+        curl -sSLf "$TRIDACTYL_URL" | bash
+      fi
+
+      if [[ ! -r "$VDHCOAPP_PATH" ]]; then
+        curl -sSLf "$VDHCOAPP_URL" | bash
+      fi
 
       if [[ "$type" == vpn* ]]; then
         shift

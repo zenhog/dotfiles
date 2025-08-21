@@ -42,12 +42,6 @@ bind --mode=browser <A-c> tabonly
 
 autocmd DocStart ^http(s?)://www.reddit.com js tri.excmds.urlmodify("-t", "www", "old")
 
-"bindurl www.google.com f hint -Jc #search div:not(.action-menu) > a
-"bindurl www.google.com f hint -Jc #search div:not(.action-menu) > a
-
-"bindurl ^https://duckduckgo.com f hint -Jc [class~=result__a]
-"bindurl ^https://duckduckgo.com F hint -Jbc [class~=result__a]
-
 unbind --mode=ex <Space>
 bind --mode=insert <C-j> !s xdotool key Down
 bind --mode=insert <C-k> !s xdotool key Up

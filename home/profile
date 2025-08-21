@@ -47,6 +47,8 @@ export LESS="-rFX"
 export LESSQUIET=1
 export LESSOPEN='| LESSQUIET=1 lesspipe.sh %s'
 
+export GTK_A11Y=none
+export NO_AT_BRIDGE=1
 export BROWSER=browser
 
 #if [[ -n "$DISPLAY" ]]; then
