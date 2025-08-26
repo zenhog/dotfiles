@@ -14,7 +14,7 @@ GITURL=https://github.com/zenhog/dotfiles
 
 BASEDIR="$HOME/.dotfiles"
 
-BRANCHES=(master public private)
+BRANCHES=(master public private zen)
 
 init() {
 	local branch="${1?}"
