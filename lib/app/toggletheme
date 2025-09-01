@@ -2,6 +2,116 @@
 
 KEY='W:a'
 
+inittheme() {
+  local current theme
+  read -r current < "$HOME/.colorscheme"
+
+  case "$current" in
+    light)  theme=light;;
+    *)     theme=dark;;
+  esac
+
+  settheme "$theme"
+}
+
+
+settheme() {
+  local theme="$1"
+
+  # alacritty
+  mkdir -p "$HOME/.themes/alacritty"
+  ln -vf \
+    "$HOME/.config/alacritty/colors.${theme}.toml" \
+    "$HOME/.themes/alacritty/colors.toml"
+
+  # lscolors
+  mkdir -p "$HOME/.themes/lscolors"
+  ln -svf \
+    "$HOME/.config/lsd/lscolors/lscolors.${theme}" \
+    "$HOME/.themes/lscolors/lscolors"
+
+  # lsd
+  mkdir -p "$HOME/.themes/lsd"
+  ln -svf \
+    "$HOME/.config/lsd/themes/${theme}.yaml" \
+    "$HOME/.themes/lsd/colors.yaml"
+
+  # qutebrowser
+  mkdir -p "$HOME/.themes/qutebrowser"
+  ln -svf \
+    "$HOME/.config/qutebrowser/${theme}.py" \
+    "$HOME/.themes/qutebrowser/theme.py"
+
+  # tridactyl
+  mkdir -p "$HOME/.themes/tridactyl"
+  ln -svf \
+    "$HOME/.config/tridactyl/themes/custom-${theme}.css" \
+    "$HOME/.themes/tridactyl/theme.css"
+
+  # wallpapers
+  mkdir -p "$HOME/.themes/wallpapers"
+  ln -svf \
+    "$HOME/.wallpapers/main.${theme}" \
+    "$HOME/.themes/wallpapers/main"
+
+  # write new theme
+  echo "$theme" > "$HOME/.colorscheme"
+}
+
+applytheme() {
+  local theme="$1"
+
+  settheme "$theme"
+
+  for d in /tmp/qutebrowser/instances/*; do
+    local p="$(basename "$d")"
+    [[ "$p" == wan ]] && p=qutebrowser || p=qutebrowser-"$p"
+    if gui awm exists profile="$p"; then
+      qutebrowser -B "$d" :config-source
+    fi
+  done
+
+  feh --bg-scale "$HOME/.wallpapers/main"
+
+  # neovim
+  # local panes
+  # readarray -t panes < \
+  #   <(tmux list-panes -a -F '#S:#I.#P #{pane_current_command}' | grep 'vim$')
+
+  # for p in "${panes[@]}"; do
+  #   local id
+  #   read -r id _ <<< "$p"
+  #   tmux send-keys -t "$id" Escape ":lua vim.opt.bg = '${theme}'" Enter
+  #   tmux send-keys -t "$id" Escape \
+  #     ":lua vim.cmd('colorscheme ' .. vim.g['theme_${theme}'])" Enter
+  #   tmux send-keys -t "$id" Escape \
+  #     ":lua require('lualine').setup({ options = { theme = vim.g.lualine_theme_${theme} } })" Enter
+  # done
+ 
+  readarray -t sockets < <(find "/tmp/nvim.$USER" -type s -iname 'nvim.*')
+
+  for s in "${sockets[@]}"; do
+    echo "$s"
+    vim --server "$s" --remote-send ":lua vim.opt.bg = '${theme}'<CR>"
+    vim --server "$s" --remote-send \
+      ":lua vim.cmd('colorscheme ' .. vim.g['theme_${theme}'])<CR>"
+    vim --server "$s" --remote-send \
+      ":lua require('lualine').setup({ options = { theme = vim.g.lualine_theme_${theme} } })<CR>"
+  done
+
+  # tmux
+  gui tmux colors
+}
+
 runner() {
-  gui action open toggletheme
+  local current theme
+
+  read -r current < "$HOME/.colorscheme"
+
+  case "$current" in
+    dark)  theme=light;;
+    *)     theme=dark;;
+  esac
+
+  applytheme "$theme"
 }

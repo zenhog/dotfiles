@@ -95,9 +95,9 @@ return {
         lualine_a = {
           "mode",
           lspname,
-          {
-            require("mcphub.extensions.lualine"),
-          },
+          -- {
+          --   require("mcphub.extensions.lualine"),
+          -- },
         },
         lualine_b = {
           {

@@ -148,6 +148,10 @@ main() {
 
 	source "$MODULES_DIR/$MODULE" || exit 1
 
+  mkdir -p /tmp/menus/$MODULE
+
+  exec &> >(tee "/tmp/menus/$MODULE/output-$(date).txt")
+
 	shift 1
 
 	while read -r _ _ func _; do

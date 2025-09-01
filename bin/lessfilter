@@ -39,6 +39,8 @@ elif [[ "$category" = video ]]; then
 elif [[ "$kind" = vnd.openxmlformats-officedocument.spreadsheetml.sheet ]] ||
 	[[ "$kind" = vnd.ms-excel ]]; then
 	in2csv "$1" | xsv table | bat -ltsv --color=always
+elif [[ "$kind" = vnd.sqlite3 ]]; then
+  sqlite3 "$1" .dump
 elif [[ "$mime" == text/* || "$mime" == application/javascript ]]; then
 	bat --plain --force-colorization "$@"
 else

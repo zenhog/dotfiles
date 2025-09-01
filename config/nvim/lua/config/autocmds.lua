@@ -11,3 +11,18 @@ vim.api.nvim_create_autocmd("BufEnter", {
     vim.diagnostic.config({ virtual_text = false })
   end,
 })
+
+vim.api.nvim_create_autocmd("Signal", {
+  pattern = "SIGUSR1",
+  callback = function()
+    local cmd = string.format("colorscheme %s",' test')
+
+    vim.o.bg = 'dark'
+    vim.cmd(cmd)
+    require('lualine').setup({
+      options = {
+        theme = 'dark',
+      }
+    })
+  end,
+})
