@@ -14,7 +14,7 @@ znap source romkatv/powerlevel10k
 
 znap source Aloxaf/fzf-tab
 
-znap source junegunn/fzf-git.sh
+#znap source junegunn/fzf-git.sh
 
 # replace with my own widgets
 znap source hchbaw/zce.zsh
@@ -25,4 +25,4 @@ znap source asdf-vm/asdf
 
 znap source Tarrasch/zsh-autoenv
 
-zle -N zce && bindkey "^@" zce
+#zle -N zce && bindkey "^@" zce

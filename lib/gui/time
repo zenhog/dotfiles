@@ -30,10 +30,11 @@ weather() {
 
   read -r response < <(curl -sSL "$query")
 
-  local icon code desc temp hum lat lon name
+  local icon code desc realtemp feeltemp hum lat lon name
 
   read -r code < <(jq -r '.data.values.weatherCode' <<< "$response")
-  read -r temp < <(jq -r '.data.values.temperature' <<< "$response")
+  read -r realtemp < <(jq -r '.data.values.temperature' <<< "$response")
+  read -r feeltemp < <(jq -r '.data.values.temperatureApparent' <<< "$response")
   read -r hum < <(jq -r '.data.values.humidity' <<< "$response")
   read -r lat < <(jq -r '.location.lat' <<< "$response")
   read -r lon < <(jq -r '.location.lon' <<< "$response")
@@ -42,7 +43,7 @@ weather() {
   read -r desc < <(
     jq -r ".weatherCode.\"$code\"" < "$HOME/.lib/data/weather_codes.json")
 
-  for val in name lat lon temp hum desc; do
+  for val in name lat lon realtemp feeltemp hum desc; do
     eval echo "$val$iSEP\$$val"
   done | column -t -s "$iSEP" -o "$oSEP"
 }
