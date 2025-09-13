@@ -6,11 +6,28 @@ VDHCOAPP_URL='https://github.com/aclap-dev/vdhcoapp/releases/latest/download/ins
 
 ZENBROWSER_URL='https://github.com/zen-browser/desktop/releases/latest/download/zen.linux-x86_64.tar.xz'
 
+TABWRITER_URL='https://raw.githubusercontent.com/snpshtwrx/tabflow/refs/heads/main/native/tabwriter'
+
 NMH_PATH="$HOME/.mozilla/native-messaging-hosts"
 
+TABWRITER_BIN="$HOME/.local/bin/tabwriter"
+TABWRITER_PATH="$NMH_PATH/tabwriter.json"
 TRIDACTYL_PATH="$NMH_PATH/tridactyl.json"
 VDHCOAPP_PATH="$NMH_PATH/net.downloadhelper.coapp.json"
 ZENBROWSER_PATH="$HOME/.local/share/zen"
+
+TABWRITER_JSON="$(cat << EOF
+{
+  "name": "tabwriter",
+  "description": "Native app to write open tabs to disk",
+  "path": "$HOME/.local/bin/tabwriter",
+  "type": "stdio",
+  "allowed_extensions": ["@tabflow"]
+}
+EOF
+)"
+
+
 
 read -r CTTY < <(cat /sys/class/tty/tty0/active)
 read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
@@ -92,6 +109,15 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       if [[ ! -r "$VDHCOAPP_PATH" ]]; then
         curl -sSLf "$VDHCOAPP_URL" | bash
+      fi
+
+      if [[ ! -x "$TABWRITER_BIN" ]]; then
+        curl -fSL "$TABWRITER_URL" --output "$TABWRITER_BIN" &&
+          chmod a+x "$TABWRITER_BIN"
+      fi
+
+      if [[ ! -r "$TABWRITER_PATH" ]]; then
+        echo "$TABWRITER_JSON" > "$TABWRITER_PATH"
       fi
 
       if [[ "$type" == vpn* ]]; then
