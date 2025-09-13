@@ -34,11 +34,13 @@ urlopen() {
 
 	readarray -t alternatives < <(browser list)
 
-	read -r choice < <(choice "${alternatives[@]}")
+	read -r choice < <(input "${alternatives[@]}")
+
+  [[ -z "$choice" ]] && return
 
 	local cmd
 
-	IFS=$'-' read -r -a cmd <<<"$choice"
+	IFS=$'-' read -r -a cmd <<< "$choice"
 
 	browser "${cmd[@]}" "$@"
 }

@@ -112,7 +112,7 @@ bind --mode=ex     <C-w> text.backward_kill_word
 bind --mode=normal gc js tri.native.run(`menu mark`)
 bind --mode=normal gp js tri.native.run(`menu pass`)
 
-bind --mode=normal <C-g><C-m> js (async function() { \
+bind --mode=normal <C-m> js (async function() { \
   await tri.native.run(`gui mark add '${document.URL}' '${document.title}'`); \
   })();
 
