@@ -7,6 +7,8 @@ api.mapkey('<ctrl-y>', 'Show me the money', function() {
 api.map('gt', 'T');
 api.map('gx', 'T');
 
+api.map('<ctrl-space>', 'T')
+
 // an example to remove mapkey `Ctrl-i`
 api.unmap('<ctrl-i>');
 
