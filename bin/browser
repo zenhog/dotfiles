@@ -141,7 +141,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       if gui awm exists "profile=$profile"; then
         "${cmd[@]}"
-        [[ -n "$*" ]] && "$kind" -p "$type" "$@"
+        [[ -n "$*" ]] && "$kind" -p "$type" --new-tab "$1"
       else
         "${cmd[@]}" "$@"
       fi
