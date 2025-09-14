@@ -1,5 +1,5 @@
 // an example to create a new mapping `ctrl-y`
-api.mapkey('<ctrl-y>', 'Show me the money', function() {
+api.mapkey('gq', 'Show me the money', function() {
     api.Front.showPopup('a well-known phrase uttered by characters in the 1996 film Jerry Maguire (Escape to close).');
 });
 
