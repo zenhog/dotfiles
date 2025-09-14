@@ -1,3 +1,7 @@
+api.mapkey('<Space>', 'Choose a tab with omnibar', function() {
+    api.Front.openOmnibar({type: "Tabs"});
+});
+
 // an example to create a new mapping `ctrl-y`
 api.mapkey('gq', 'Show me the money', function() {
     api.Front.showPopup('a well-known phrase uttered by characters in the 1996 film Jerry Maguire (Escape to close).');
