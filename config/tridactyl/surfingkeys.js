@@ -16,7 +16,7 @@ function uniqueLinks(els) {
   });
 }
 
-mapkey('f', 'Open non-duplicate link', () => {
+api.mapkey('f', 'Open non-duplicate link', () => {
   const allLinks = document.querySelectorAll('a[href]');
   const filtered = uniqueLinks(allLinks);
   Hints.create(filtered, Hints.dispatchMouseClick);
