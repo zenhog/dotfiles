@@ -1,0 +1,36 @@
+*
+!.gitignore
+!/default/
+!/default/chrome/
+!/default/chrome/**
+!/default/moz-extension*/
+!/default/moz-extension*/.metadata*
+!/default/moz-extension*/idb/
+!/default/moz-extension*/idb/*.sqlite
+!/default/moz-extension*/ls/
+!/default/moz-extension*/ls/**
+# !/default/moz-extension*/idb/*.sqlite-shm
+# !/default/moz-extension*/idb/*.sqlite-wal
+# !/default/moz-extension*/idb/*.files/
+# !/default/moz-extension*/idb/*.files/**
+!/permanent/
+!/permanent/chrome/
+!/permanent/chrome/.metadata*
+!/permanent/chrome/idb/
+!/permanent/chrome/idb/*.sqlite
+!/permanent/chrome/ls/
+!/permanent/chrome/ls/**
+# !/permanent/chrome/idb/*.sqlite-shm
+# !/permanent/chrome/idb/*.sqlite-wal
+!/permanent/chrome/idb/*.files/
+!/permanent/chrome/idb/*.files/*
+!/permanent/indexeddb*/
+!/permanent/indexeddb*/.metadata*
+!/permanent/indexeddb*/idb/
+!/permanent/indexeddb*/idb/*.sqlite
+!/permanent/indexeddb*/ls/
+!/permanent/indexeddb*/ls/**
+# !/permanent/indexeddb*/idb/*.sqlite-shm
+# !/permanent/indexeddb*/idb/*.sqlite-wal
+!/permanent/indexeddb*/idb/*.files/
+!/permanent/indexeddb*/idb/*.files/**
