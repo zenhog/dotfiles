@@ -1,0 +1,21 @@
+*
+!.gitignore
+!*.json
+!*.json.lz4
+!*.ini
+!*.js
+!*.mozlz4
+!permissions.sqlite
+# !permissions.sqlite-wal
+# !permissions.sqlite-shm
+!storage-sync-v2.sqlite
+# !storage-sync-v2.sqlite-wal
+# !storage-sync-v2.sqlite-shm
+!extensions/
+!extensions/**
+!storage/
+!storage/**
+!chrome/
+!chrome/**
+broadcast-listeners.json
+shield-preference-experiments.json

@@ -1,0 +1,7 @@
+*
+!.linkdir
+!.gitignore
+!/installs.ini
+!/profiles.ini
+!/wan/
+!/wan/**
