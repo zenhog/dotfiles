@@ -1,28 +1,6 @@
-api.mapkey('<Space>', 'Choose a tab with omnibar', function() {
-    api.Front.openOmnibar({type: "Tabs"});
-});
-
-api.mapkey('gw', 'Choose a tab with omnibar', function() {
-    api.Front.openOmnibar({type: "Tabs"});
-});
-
 api.mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
     api.Front.openOmnibar({type: "Tabs"});
 });
-
-// an example to create a new mapping `ctrl-y`
-api.mapkey('gq', 'Show me the money', function() {
-    api.Front.showPopup('a well-known phrase uttered by characters in the 1996 film Jerry Maguire (Escape to close).');
-});
-
-// an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.
-api.map('gt', 'T');
-api.map('gx', 'T');
-
-api.map('<ctrl-space>', 'T')
-
-// an example to remove mapkey `Ctrl-i`
-api.unmap('<ctrl-i>');
 
 // set theme
 settings.theme = `
