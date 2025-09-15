@@ -2,6 +2,10 @@ api.mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
     api.Front.openOmnibar({type: "Tabs"});
 });
 
+// an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.
+api.map('gt', 'T');
+api.map('gx', 'T');
+
 // set theme
 settings.theme = `
 .sk_theme {
