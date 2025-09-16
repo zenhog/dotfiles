@@ -38,15 +38,15 @@ type="$2"
 if [[ "$CTTY" == "$RTTY" ]]; then
   case "$kind" in
     list)
+      echo zen
+      echo zen-vpn1
+      echo zen-vpn2
       echo qutebrowser
       echo qutebrowser-vpn1
       echo qutebrowser-vpn2
       echo firefox
       echo firefox-vpn1
       echo firefox-vpn2
-      echo zen
-      echo zen-vpn1
-      echo zen-vpn2
       ;;
     qutebrowser)
       shift
@@ -122,9 +122,13 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       if [[ "$type" == vpn* ]]; then
         shift
-        rm -rf "$HOME/.zen/$type"
-        (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ | tar -xf -)
-        (cd "$HOME/.zen/$type" && mv wan/* . && rm -rf wan)
+        if ! gui awm exists "profile=$profile"; then
+          rm -rf "$HOME/.zen/$type"
+
+          (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ |
+            tar -xf -)
+          (cd "$HOME/.zen/$type" && mv wan/* . && rm -rf wan)
+        fi
       else
         type=wan
       fi

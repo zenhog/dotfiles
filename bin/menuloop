@@ -32,7 +32,7 @@ if [[ -S "${SOCKET}" ]]; then
 fi
 
 while true; do
-  IFS=: read -r -a args
+  IFS=$'\x01' read -r -a args
 
   echo "INPUT_COMMAND: ${args[*]}" >&2
   [[ -z "$args" ]] && break

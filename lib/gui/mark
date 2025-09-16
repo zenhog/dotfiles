@@ -77,7 +77,7 @@ _open() {
 	local id url
 	read -r id _ <<<"$1"
 	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
-	urlopen "$url"
+  urlopen "$url"
 }
 
 BINDS[bgopen]=tab

@@ -132,7 +132,7 @@ bind --mode=normal <C-y> js (async function() { \
   await tri.native.run(`gui pass new '${document.location.hostname}' '${document.URL}'`); \
   })();
 
-bind --mode=insert <C-e><C-e> js (async function() { \
+bind --mode=insert <C-Return><C-Return> js (async function() { \
   var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username`); \
   await navigator.clipboard.writeText(res.content); \
   document.execCommand('paste'); \
