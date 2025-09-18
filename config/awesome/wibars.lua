@@ -5,6 +5,8 @@ local theme = require("beautiful")
 local widgets = require("widgets").watches
 local addbutton = require("widgets").addbutton
 
+local cfixed = require("cfixed")
+
 local M = {}
 
 awful.layout.layouts = {
@@ -486,26 +488,21 @@ awful.screen.connect_for_each_screen(function(s)
 				widget = wibox.container.margin,
 				block(s.taglist),
 				left = 1,
+        right = 1,
 			},
-			{
-				layout = wibox.layout.align.horizontal,
-        scroll(widgets.music, 295),
-        {
-          widget = wibox.container.margin,
-          left = 1,
-          {
-            layout = wibox.layout.fixed.horizontal,
-            spacing = 1,
-            scroll(widgets.connection, 100),
-            block(M.group(widgets.mail, widgets.news, widgets.download)),
-            block(M.group(widgets.battery)),
-            block(M.group(widgets.time, widgets.date)),
-            block(M.group(s.menus.service), theme.iconsize),
-            block(M.group(s.menus.run), theme.iconsize),
-          },
-        },
-				nil,
-			},
+      {
+        layout = cfixed.horizontal,
+        spacing = 1,
+        scroll(widgets.music),
+        scroll(widgets.connection, 100),
+        block(M.group(widgets.weather)),
+        block(M.group(widgets.mail, widgets.news, widgets.download)),
+        block(M.group(widgets.battery)),
+        block(M.group(widgets.date)),
+        block(M.group(s.menus.service), theme.iconsize),
+        block(M.group(s.menus.run), theme.iconsize),
+        block(M.group(widgets.time)),
+      },
 		},
 		left = 1,
 		right = 1,
