@@ -79,9 +79,11 @@ weather() {
 
   icon="${icons[$code]}"
 
+  [[ -z "$icon" ]] && icon=
+
   for val in name lat lon realtemp feeltemp hum desc; do
-    eval echo "$val$iSEP\$$val"
-  done | column -t -s "$iSEP" -o "$oSEP"
+    eval echo "$val \$$val"
+  done | column -t
 }
 
 view() {

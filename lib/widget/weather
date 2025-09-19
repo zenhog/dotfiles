@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+PERIOD=300
+
+run() {
+  menu auto time
+}
+
+text() {
+  local text=26
+  echo -n "$text"
+}
+
+icon() {
+  local icon=
+
+  echo -n "$icon"
+}

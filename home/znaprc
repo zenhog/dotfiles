@@ -20,8 +20,8 @@ znap source Aloxaf/fzf-tab
 znap source hchbaw/zce.zsh
 znap source joshskidmore/zsh-fzf-history-search
 
-znap install asdf-vm/asdf
-znap source asdf-vm/asdf
+# znap install asdf-vm/asdf
+# znap source asdf-vm/asdf
 
 znap source Tarrasch/zsh-autoenv
 

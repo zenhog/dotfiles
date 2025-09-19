@@ -105,5 +105,7 @@ done
 # mute gui action inittheme
 (mute source "$HOME/.lib/app/toggletheme" && mute inittheme)
 
+mute which mise && eval "$(mise activate --shims)"
+
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /usr/bin/terraform terraform

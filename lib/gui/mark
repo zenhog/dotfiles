@@ -51,13 +51,16 @@ label() {
 
 	read -r id _ <<<"$1"
 
-	sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id"
+	local url
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")
+
+  printf " [%s] " "$url"
 }
 
-OPTS=(--with-nth 2..)
+OPTS=(--with-nth 2.. --header-lines=1)
 list() {
 	sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
-		column -t -s "$iSEP"
+		column -t -s "$iSEP" | column -t -l 3 -N ID,CATEGORY,TITLE
 }
 
 BINDS[open]=enter
