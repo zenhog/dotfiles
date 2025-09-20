@@ -69,16 +69,17 @@ return {
           },
         },
         documentation = {
-          auto_show = true,
+          auto_show = false,
           auto_show_delay_ms = 200,
         },
         ghost_text = {
           enabled = vim.g.ai_cmp,
+          enabled = false;
         },
       },
 
       -- experimental signature help support
-      signature = { enabled = true },
+      signature = { enabled = false },
 
       sources = {
         -- adding any nvim-cmp sources here will enable them
