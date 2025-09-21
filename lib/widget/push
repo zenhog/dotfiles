@@ -64,7 +64,7 @@ text() {
 }
 
 icon() {
-	local icon=󰛸
+	local icon=
 	local color=seagreen
 
 	colorize "$color" "$icon"
