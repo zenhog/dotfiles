@@ -6,21 +6,21 @@ api.mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 api.map('gt', 'T');
 api.map('gx', 'T');
 
-function uniqueLinks(els) {
-  const seen = new Set();
-  return Array.from(els).filter(e => {
-    const url = e.href;
-    if (seen.has(url)) return false;
-    seen.add(url);
-    return true;
-  });
-}
-
-api.mapkey('f', 'Open non-duplicate link', () => {
-  const allLinks = document.querySelectorAll('a[href]');
-  const filtered = uniqueLinks(allLinks);
-  Hints.create(filtered, Hints.dispatchMouseClick);
-});
+// function uniqueLinks(els) {
+//   const seen = new Set();
+//   return Array.from(els).filter(e => {
+//     const url = e.href;
+//     if (seen.has(url)) return false;
+//     seen.add(url);
+//     return true;
+//   });
+// }
+//
+// api.mapkey('f', 'Open non-duplicate link', () => {
+//   const allLinks = document.querySelectorAll('a[href]');
+//   const filtered = uniqueLinks(allLinks);
+//   Hints.create(filtered, Hints.dispatchMouseClick);
+// });
 
 // set theme
 settings.theme = `
