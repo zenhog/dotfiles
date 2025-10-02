@@ -2,7 +2,7 @@
 
 F="$HOME/.config/neomutt/config/mailboxes"
 
-readarray -t mailboxes < <(awk '/^.+/{print $2}' "$F" | tr -d '"')
+readarray -t mailboxes < <(awk '/^virtual-mailboxes/{print $2}' "$F" | tr -d '"')
 
 mailbox="$(printf "%s\n" "${mailboxes[@]}" | fzf)"
 
