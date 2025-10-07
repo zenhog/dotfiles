@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PERIOD=30
+PERIOD=5
 
 text() {
 	read -r text < <(sensors |

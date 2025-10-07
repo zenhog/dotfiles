@@ -141,7 +141,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-      cmd+=("$kind" -p "$type" --new-instance --class "$profile")
+      cmd+=("$kind" -p "$type" --class "$profile" --new-instance)
 
       if gui awm exists "profile=$profile"; then
         "${cmd[@]}"

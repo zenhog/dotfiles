@@ -16,6 +16,7 @@ end
 -- vim.g.theme_current = theme or "dark"
 -- vim.cmd(string.format("colorscheme %s", vim.g["theme_" .. vim.g.theme_current]))
 -- vim.opt.bg = theme
+--
 
 vim.g.mapleader = ""
 vim.g.maplocalleader = " "
@@ -31,6 +32,12 @@ vim.g.trouble_lualine = true
 vim.g.snacks_animate = false
 
 local opt = vim.opt
+
+opt.relativenumber = false
+opt.foldcolumn = "0"
+opt.signcolumn = "auto"
+opt.number = true
+opt.numberwidth = 1
 
 -- opt.laststatus = 3
 opt.timeout = false
