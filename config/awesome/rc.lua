@@ -287,6 +287,8 @@ local function set_clienttag(c)
 		nsxiv = 3,
 		mupdf = 3,
 
+		youtube = 4,
+		fmovies = 4,
 		discord = 4,
 		spotify = 4,
 		whatsie = 4,
