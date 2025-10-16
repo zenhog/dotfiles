@@ -54,3 +54,5 @@ cleanup-on-quit yes
 feedlist-format     "%15u %-85t %30T %>"
 articlelist-format  "%4f %-10D %?T?%-25T  ?%-t"
 notify-format       "%d new articles (%n unread articles, %f unread feeds)"
+
+browser "open %u"
