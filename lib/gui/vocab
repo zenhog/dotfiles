@@ -7,7 +7,7 @@ COLOR=gold
 
 HORIZONTAL=1
 
-export DB="$HOME/.db/vocabulary.db"
+export DB="$HOME/.db/vocab.db"
 
 translate() {
   local sl="$1"
@@ -113,7 +113,7 @@ trans() {
   local dst="$2"
   local word="$3"
 
-  apicall translate "$src" "$dst" "$word" | jq -r '."destination-text"'
+  bkt translate "$src" "$dst" "$word" | jq -r '."destination-text"'
 }
 
 add() {

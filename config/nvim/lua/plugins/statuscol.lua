@@ -28,7 +28,7 @@ return {
           { text = { "%s" }, click = "v:lua.ScSa" }, -- sign column
           { text = { "%l" }, click = "v:lua.ScLa" }, -- line number
           {
-            text = { " ┃ " },
+            text = { " ┃" },
             condition = { true },
             click = "v:lua.ScLa",
           },

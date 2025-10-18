@@ -170,15 +170,52 @@ encrypt() {
 
 	silent passphrase
 
+  local gitdir encdir files
+
 	for secret in "${secrets[@]}"; do
-		encsecret "$(dirname "$secret")"
+    read -r gitdir < <(dirname "$secret")
+
+    readarray -t files < <(cd "$gitdir" && find * .* \
+      ! -name '*.tar.gz.gpg' -type f -or ! -name '*.tar.gz.gpg' -type l)
+
+    encdir="$gitdir.enc"
+
+    for f in "${files[@]}"; do
+      d="$(dirname "$f")"
+
+      mkdir -p "$encdir/$d"
+
+      case "$d" in
+        *objects*)
+          if [[ "$f" == *objects/info/* ]]; then
+            encsecret "$gitdir/$f" "$encdir/$f.tar.gz.gpg"
+            continue
+          fi
+
+          [[ -f "$encdir/$f.tar.gz.gpg" ]] && continue
+
+          encsecret "$gitdir/$f" "$encdir/$f.tar.gz.gpg"
+          ;;
+        *)
+          encsecret "$gitdir/$f" "$encdir/$f.tar.gz.gpg"
+          ;;
+      esac
+    done
 	done
 
 	# remove archives whose associated secret folder was deleted
 	readarray -t archives < <(find "$dir" -name '*.tar.gz.gpg')
 
+  local clearfile
+
 	for archive in "${archives[@]}"; do
-		[[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || verbose rm -vf "$archive"
+    unset clearfile
+
+    clearfile="${archive/remote.enc/remote}"
+    clearfile="${clearfile%.tar.gz.gpg}"
+
+    [[ -f "$clearfile" ]] || verbose rm -vf "$archive"
+		# [[ -f "${archive%.tar.gz.gpg}/.gitsecret" ]] || verbose rm -vf "$archive"
 	done
 }
 
@@ -194,8 +231,27 @@ decrypt() {
 
 	silent passphrase
 
+  local clearfile
+
 	for archive in "${archives[@]}"; do
-		(cd "$(dirname "$archive")" && decsecret "$archive")
+    unset clearfile
+
+    clearfile="${archive/remote.enc/remote}"
+    clearfile="${clearfile%.tar.gz.gpg}"
+
+    case "$archive" in
+      *objects*)
+        if [[ "$archive" == *objects/info/* ]]; then
+          decsecret "$archive" "$clearfile"
+          continue
+        fi
+
+        [[ -f "$clearfile" ]] && continue || decsecret "$archive" "$clearfile"
+        ;;
+      *)
+        decsecret "$archive" "$clearfile"
+        ;;
+    esac
 	done
 }
 

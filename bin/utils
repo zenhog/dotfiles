@@ -248,6 +248,7 @@ tarcreate() {
 		--file "${dst:-/dev/stdout}"
 		--exclude-vcs-ignores
 		--sort=name
+    --preserve-permissions
 	)
 
 	tar "${opts[@]}" -C "${src[1]}" "${src[2]}"
@@ -370,7 +371,16 @@ tardiff() {
 
 decsecret() {
 	local src="$(realpath -sm "${1?}")"
-	(cd "$(dirname "$src")" && dec --output - "$src" | tarextract)
+	local dst
+
+  if [[ -n "$2" ]]; then
+    dst="$(realpath -sm "$2")"
+    # extra_opts+=(--to-stdout)
+    (cd "$(dirname "$src")" && dec --output - "$src" | tarextract)
+    mv -vf "${src%.tar.gz.gpg}" "$dst"
+  else
+    (cd "$(dirname "$src")" && dec --output - "$src" | tarextract)
+  fi
 }
 
 dumpsecret() {
@@ -393,9 +403,15 @@ diffsecret() {
 
 encsecret() {
 	local src="$(realpath -sm "${1?}")"
-	local dst="$src.tar.gz.gpg"
+	local dst
 
-	if [[ -n "$nodiff" ]] || ! mute diffsecret "$src"; then
+  if [[ -n "$2" ]]; then
+    dst="$(realpath -sm "$2")"
+  else
+    dst="$src.tar.gz.gpg"
+  fi
+
+	if [[ -n "$nodiff" ]] || ! mute diffsecret "$src" "$dst"; then
 		if tarcreate "$src" | enc --output "$dst" -; then
 			printf 'Successful encryption of %s into %s\n' "$src" "$dst" >&2
 		fi

@@ -9,13 +9,13 @@ HORIZONTAL=1
 NOWRAP=1
 RATIO=20%
 
-export DB="$HOME/.db/bookmarks.db"
+export DB="$HOME/.db/marks.db"
+export SQL="${DB%.db}.sql"
 
 initdb() {
 	sqlite3 "$DB" <<EOF
     CREATE TABLE IF NOT EXISTS bookmarks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      url TEXT NOT NULL UNIQUE,
+      url TEXT PRIMARY KEY,
       title TEXT NOT NULL
     );
     CREATE INDEX bookmarks_index ON bookmarks (title);
@@ -26,6 +26,13 @@ insert() {
 	local url="$1"
 	local title="$2"
 
+  if [[ "$title" == @* ]]; then
+    title="${title#@}"
+  else
+    read -r url < <(sed -E 's/[#?].*//g' <<< "$url")
+    read -r url < <(sed -E 's/\/$//' <<< "$url")
+  fi
+
 	sqlite3 "$DB" "
     INSERT INTO bookmarks (url, title)
     VALUES ('$url', '$title')
@@ -33,43 +40,27 @@ insert() {
 }
 
 view() {
-	local id
-
-	read -r id _ <<<"$1"
-
-	{
-		printf "URL: %s %s\n" "$iSEP" \
-			"$(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")"
-
-		printf "Title: %s %s\n" "$iSEP" \
-			"$(sqlite3 "$DB" "SELECT title FROM bookmarks WHERE id = $id")"
-	} | column -t -s "$iSEP"
+  :
 }
 
 label() {
-	local id
-
-	read -r id _ <<<"$1"
-
 	local url
-  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id = $id")
-
+  read -r url _ <<<"$1"
   printf " [%s] " "$url"
 }
 
-OPTS=(--with-nth 2.. --header-lines=1)
+OPTS=(--with-nth 2.. --header-lines=1 --preview-window=hidden)
 list() {
-	sqlite3 -separator "$iSEP" "$DB" "SELECT id, title FROM bookmarks" |
-		column -t -s "$iSEP" | column -t -l 3 -N ID,CATEGORY,TITLE
+	sqlite3 -separator "$iSEP" "$DB" "SELECT url, title FROM bookmarks" |
+		column -t -s "$iSEP" | column -t -l 3 -N URL,CATEGORY,TITLE
 }
 
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open bookmark'
 open() {
-	local id url
-	read -r id _ <<<"$1"
-	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	local url
+	read -r url _ <<<"$1"
 	command open "$url"
 }
 
@@ -77,9 +68,8 @@ BINDS[_open]=alt-enter
 HOOKS[_open]=clear
 DESCS[_open]='Open bookmark with vpnfox'
 _open() {
-	local id url
-	read -r id _ <<<"$1"
-	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	local url
+	read -r url _ <<<"$1"
   urlopen "$url"
 }
 
@@ -93,46 +83,55 @@ bgopen() {
 BINDS[copy]=alt-c
 DESCS[copy]='Clipboard bookmark URL'
 copy() {
-	local id url
+	local url
 
-	read -r id _ <<<"$1"
-	read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE id == $id")
+	read -r url _ <<<"$1"
 
 	tmux load-buffer - <<<"$url"
 }
 
 check() {
-	local id
+	local url
 
-	read -r id < <(sqlite3 "$DB" "SELECT id FROM bookmarks WHERE url == '$1'")
+  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE url == '$1'")
+
+  [[ -n "$url" ]]
 }
 
 BINDS[rm]=alt-d
 HOOKS[rm]=noclear
 DESCS[rm]='Delete bookmark'
 rm() {
-	local id
+	local url
 
-	read -r id _ <<<"$1"
+	read -r url _ <<<"$1"
 
-	sqlite3 "$DB" "DELETE FROM bookmarks WHERE id == $id"
+	sqlite3 "$DB" "DELETE FROM bookmarks WHERE url == '$url'"
 }
 
-BINDS[mod]=alt-e
+BINDS[mod]=alt-w
 HOOKS[mod]=sclear
 DESCS[mod]='Rename bookmark'
 mod() {
-	local id title
+	local url title
 
-	read -r id title <<<"$1"
+	read -r url title <<< "$1"
+
+  read -r title < <(sed -E 's/ +/ /g' <<< "$title")
 
   echo -n "$title" | tmux load-buffer -
 
-	read -r title < <(input preview="'$title'" ghost="'$title'")
+  (
+    echo "$title"
+    sepline
+    list | awk '{print $2}' | sort -u | column -x
+  ) | tmux load-buffer -b preview -
+
+	read -r title < <(input preview="'$preview'" label="' [$url] '")
 
 	if [[ -n "$title" ]]; then
 		sqlite3 "$DB" \
-			"UPDATE bookmarks SET title = '${title}' WHERE id == ${id}"
+			"UPDATE bookmarks SET title = '${title}' WHERE url == '$url'"
 	fi
 }
 
@@ -144,14 +143,13 @@ add() {
 		return 1
 	fi
 
-	(
-		echo "TITLE: $title"
-		echo "URL: $url"
-	) | tmux load-buffer -b preview -
+  (
+    echo "$title"
+    sepline
+    list | awk '{print $2}' | sort -u | column -x
+  ) | tmux load-buffer -b preview -
 
-	read -r mytitle < <(menu input ghost=@ query=@)
-
-  tmux delete-buffer -b preview
+	read -r mytitle < <(menu input label="' [$url] '" ghost=@)
 
 	[[ -z "$mytitle" ]] && return
 
@@ -168,8 +166,9 @@ add() {
 
 del() {
 	local url="$1"
+
 	if check "$url"; then
-		sqlite3 "$DB" "DELETE FROM bookmarks where url == '$1'"
+		sqlite3 "$DB" "DELETE FROM bookmarks WHERE url == '$url'"
 		if check "$url"; then
 			notify "Failed to delete '$url'"
 		else

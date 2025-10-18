@@ -19,6 +19,22 @@ if [[ "$mime" == inode/directory ]]; then
   fi
 fi
 
+urlopen() {
+  if [[ "$file" == *youtube.com* ]]; then
+    browser zen youtube "$file"
+  elif [[ "$file" == *whatsapp.com* ]]; then
+    browser zen whatsie "$file"
+  elif [[ "$file" == *discord.com* ]]; then
+    browser zen discord "$file"
+  elif [[ "$file" == *seeflix.to* || "$file" == *fastflix.to* ]]; then
+    browser zen fmovies "$file"
+  elif [[ "$file" == *spotify.com* ]]; then
+    browser zen spotify "$file"
+  else
+    browser "$file"
+  fi
+}
+
 case "${mime}" in
   text/*)
     gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$path"
@@ -52,10 +68,10 @@ case "${mime}" in
         browser "$file"
         ;;
       http://*)
-        browser "$file"
+        urlopen "$file"
         ;;
       https://*)
-        browser "$file"
+        urlopen "$file"
         ;;
       esac
 esac

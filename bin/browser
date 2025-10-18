@@ -120,22 +120,65 @@ if [[ "$CTTY" == "$RTTY" ]]; then
         echo "$TABWRITER_JSON" > "$TABWRITER_PATH"
       fi
 
-      if [[ "$type" == vpn* ]]; then
-        shift
-        if ! gui awm exists "profile=$profile"; then
-          rm -rf "$HOME/.zen/$type"
+      declare -A types=(
+        [whatsie]='https://web.whatsapp.com/'
+        [discord]='https://discord.com/channels/@me'
+        [fmovies]='https://ww4.seeflix.to/home/'
+        [spotify]='https://open.spotify.com/'
+        [youtube]='https://www.youtube.com/'
+        [vpn]='https://www.showmyip.com/'
+      )
 
-          (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ |
-            tar -xf -)
-          (cd "$HOME/.zen/$type" && mv wan/* . && rm -rf wan)
+      declare -A doms=(
+        [whatsie]='whatsapp.com'
+        [discord]='discord.com'
+        [fmovies]='seeflix.to'
+        [spotify]='spotify.com'
+        [youtube]='youtube.com'
+      )
+
+      for t in "${!types[@]}"; do
+        if [[ "$type" == "$t"* ]]; then
+          shift
+
+          found=1
+
+          profile="$type"
+
+          if [[ "$type" == vpn* ]]; then
+            profile="$kind-$type"
+          fi
+
+          if ! gui awm exists "profile=$profile"; then
+            rm -rf "$HOME/.zen/$type"
+
+            (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ |
+              tar -xf -)
+
+            (cd "$HOME/.zen/$type" && mv wan/* . && rm -rf wan)
+
+            (cd "$HOME/.zen/wan" && cp -r cookies.sqlite* ../"$type"/)
+            (cd "$HOME/.zen/wan" && cp -r storage.sqlite* ../"$type"/)
+
+            (cd "$HOME/.zen/wan" &&
+              cp -r storage/default/https+++*"${doms[$type]}"/ \
+              ../"$type"/storage/default)
+
+
+            url="${types[$t]}"
+            set "$url" "$@"
+          fi
         fi
-      else
-        type=wan
+      done
+
+      if [[ -z "$found" ]]; then
+        if [[ "$type" == wan ]]; then
+          shift
+        else
+          type=wan
+        fi
+        profile="$kind"
       fi
-
-      profile="$kind-$type"
-
-      [[ "$type" == wan ]] && profile="$kind"
 
       cmd+=(gui awm runonce bg "profile=$profile" --)
 
@@ -145,7 +188,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       if gui awm exists "profile=$profile"; then
         "${cmd[@]}"
-        [[ -n "$*" ]] && "$kind" -p "$type" --new-tab "$1"
+        [[ -n "$1" ]] && "$kind" -p "$type" --new-tab "$1"
       else
         "${cmd[@]}" "$@"
       fi

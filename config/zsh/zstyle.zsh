@@ -18,11 +18,11 @@ zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*\~'
 
 zstyle ':fzf-tab:*' show-group brief
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
-zstyle ':fzf-tab:*' fzf-flags "${FZF_TAB_FLAGS[@]}"
-zstyle ':fzf-tab:*' switch-group 'ctrl-p' 'ctrl-n'
+# zstyle ':fzf-tab:*' fzf-flags "${FZF_TAB_FLAGS[@]}"
+zstyle ':fzf-tab:*' switch-group '<' '>'
 zstyle ':fzf-tab:*' prefix ''
 
-# zstyle ':fzf-tab:*' fzf-min-height 5
+zstyle ':fzf-tab:*' fzf-min-height 5
 zstyle ':fzf-tab:*' popup-min-size 50 10
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 #

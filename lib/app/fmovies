@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-KEY='W:r'
+KEY='W:v'
 
-ATTRIBUTES=(profile=discord)
+ATTRIBUTES=(profile=fmovies)
 
 runner() {
   #flatpak run com.discordapp.Discord
   # Discord
-  browser zen discord
+  browser zen fmovies
 }

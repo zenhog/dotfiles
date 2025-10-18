@@ -104,6 +104,7 @@ input() {
 	cmd+=('--info=inline-right')
 	cmd+=('--no-separator')
 	cmd+=('--preview' "echo '$preview'")
+  cmd+=('--border-label' "$label")
 	cmd+=('--preview-window' 'bottom,60%,border-top')
   cmd+=('--ghost' "$ghost")
 	# cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
