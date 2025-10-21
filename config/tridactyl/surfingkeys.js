@@ -6,6 +6,8 @@ api.mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 api.map('gt', 'T');
 api.map('gx', 'T');
 
+api.unmap('<Alt-y>');
+
 // function uniqueLinks(els) {
 //   const seen = new Set();
 //   return Array.from(els).filter(e => {
