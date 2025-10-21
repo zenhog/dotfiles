@@ -1,12 +1,39 @@
-api.mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
+const {
+    Clipboard,
+    Front,
+    Hints,
+    Normal,
+    RUNTIME,
+    Visual,
+    aceVimMap,
+    addSearchAlias,
+    cmap,
+    getClickableElements,
+    imap,
+    imapkey,
+    iunmap,
+    map,
+    mapkey,
+    readText,
+    removeSearchAlias,
+    tabOpenLink,
+    unmap,
+    unmapAllExcept,
+    vmapkey,
+    vunmap
+} = api;
+
+mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
     api.Front.openOmnibar({type: "Tabs"});
 });
 
 // an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.
-api.map('gt', 'T');
-api.map('gx', 'T');
+map('gt', 'T');
+map('gx', 'T');
 
-api.unmap('<Alt-y>');
+mapkey('q', 'click on images', function() {
+    Hints.create("div.media_box img", Hints.dispatchMouseClick);
+});
 
 // function uniqueLinks(els) {
 //   const seen = new Set();
