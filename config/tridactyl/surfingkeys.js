@@ -31,12 +31,22 @@ mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 map('gt', 'T');
 map('gx', 'T');
 
-api.mapkey('gi', 'Hint images', function() {
-  const imgs = Array.from(document.querySelectorAll('img[src]'));
-    api.Hints.create(imgs, function(imageEl) {
-      window.location.href = imageEl.src;
-    });
-});
+// api.mapkey('gi', 'Hint images', function() {
+//   const imgs = Array.from(document.querySelectorAll('img[src]'));
+//     api.Hints.create(imgs, function(imageEl) {
+//       window.location.href = imageEl.src;
+//     });
+// });
+
+mapkey("F", "Hint images", function() {
+  Hints.create("img", Hints.dispatchMouseClick);
+})
+
+mapkey("gf", "Toggle spotify", function() {
+  const el = document.querySelector('[aria-label="Pause"]');
+  if (el) el.click();
+  else Front.showPopup('No element found with aria-label="Pause"');
+})
 
 mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
