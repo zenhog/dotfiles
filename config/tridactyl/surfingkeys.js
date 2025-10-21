@@ -43,9 +43,10 @@ mapkey("F", "Hint images", function() {
 })
 
 mapkey("gf", "Toggle spotify", function() {
-  const el = document.querySelector('[aria-label="Pause"]');
-  if (el) el.click();
-  else Front.showPopup('No element found with aria-label="Pause"');
+  const pause = document.querySelector('[aria-label="Pause"]');
+  const play = document.querySelector('[aria-label="Play"]');
+  if (play) play.click();
+  if (pause) pause.click();
 })
 
 mapkey("F", "Hint images", function() {
