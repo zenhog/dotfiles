@@ -395,6 +395,8 @@ grab() {
 
   local entry
 
+  (( ${#entries[@]} == 1 )) && index=0
+
   if [[ -z "$index" ]]; then
     {
       read -r _

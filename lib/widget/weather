@@ -7,8 +7,13 @@ run() {
 }
 
 text() {
-  local text=26
-  echo -n "$text"
+  local temp city
+
+  read -r city < <(basename "$(readlink /etc/localtime)")
+  read -r temp < <(bkt --ttl 5m --stale 10s -- gui time weather "$city" |
+    awk '/^feeltemp/ {print $2}')
+
+  echo -n "$temp"
 }
 
 icon() {

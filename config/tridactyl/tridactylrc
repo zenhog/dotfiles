@@ -128,61 +128,19 @@ bind --mode=normal gy js (async function() { \
   await tri.native.run(`gui clip fork '${document.location.origin}' '${document.location.pathname}'`); \
   })();
 
-bind --mode=normal <C-y> js (async function() { \
+bind --mode=browser <A-y> js (async function() { \
   await tri.native.run(`gui pass new '${document.location.hostname}' '${document.URL}'`); \
   })();
 
-bind --mode=insert <A-e><A-e> js (async function() { \
+bind --mode=insert <A-e> js (async function() { \
   var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username`); \
   await navigator.clipboard.writeText(res.content); \
   document.execCommand('paste'); \
   await navigator.clipboard.writeText(`${document.location.hostname}`); \
   })();
 
-bind --mode=insert <A-e><A-1> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username 0`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <C-e><C-2> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username 1`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <C-e><C-3> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' username 2`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <A-r><A-r> js (async function() { \
+bind --mode=insert <A-r> js (async function() { \
   var res = await tri.native.run(`gui pass grab '${document.location.hostname}' password`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <A-r><A-1> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' password 0`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <C-r><C-2> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' password 1`); \
-  await navigator.clipboard.writeText(res.content); \
-  document.execCommand('paste'); \
-  await navigator.clipboard.writeText(`${document.location.hostname}`); \
-  })();
-
-bind --mode=insert <C-r><C-3> js (async function() { \
-  var res = await tri.native.run(`gui pass grab '${document.location.hostname}' password 2`); \
   await navigator.clipboard.writeText(res.content); \
   document.execCommand('paste'); \
   await navigator.clipboard.writeText(`${document.location.hostname}`); \
