@@ -38,11 +38,9 @@ api.mapkey('gi', 'Hint images', function() {
     });
 });
 
-mapkey(
-  "F",
-  "Open a link",
-  Hints.create("img", Hints.dispatchMouseClick)
-);
+mapkey("F", "Hint images", function() {
+  Hints.create("img", Hints.dispatchMouseClick);
+})
 
 // function uniqueLinks(els) {
 //   const seen = new Set();
