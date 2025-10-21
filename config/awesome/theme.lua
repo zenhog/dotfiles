@@ -36,7 +36,7 @@ theme.tasklist_bg_focus = "#e0e0e0"
 theme.tasklist_bg_normal = "#606060"
 theme.tasklist_bg_urgent = "#ff6600"
 theme.tasklist_bg_minimize = theme.bg_normal
-theme.tasklist_bg_minimize = "#00000080"
+theme.tasklist_bg_minimize = "#30303080"
 
 theme.titlebar_bg_focus = theme.bg_wrap
 theme.titlebar_bg_focus = theme.bg_normal

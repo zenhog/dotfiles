@@ -7,11 +7,14 @@ local addbutton = require("widgets").addbutton
 
 local cfixed = require("cfixed")
 
+local ctile = require("ctile")
+
 local M = {}
 
 awful.layout.layouts = {
 	awful.layout.suit.max,
-	awful.layout.suit.tile.left,
+	-- awful.layout.suit.tile.left,
+  ctile.left,
 }
 
 local function rrect(radius)
