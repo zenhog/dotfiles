@@ -38,7 +38,7 @@ mapkey('q', 'click on images', function() {
 mapkey(
   "F",
   "Open a link",
-  "Hints.create("img", Hints.dispatchMouseClick)"
+  Hints.create("img", Hints.dispatchMouseClick)
 );
 
 // function uniqueLinks(els) {
