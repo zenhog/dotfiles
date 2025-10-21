@@ -31,8 +31,11 @@ mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 map('gt', 'T');
 map('gx', 'T');
 
-mapkey('q', 'click on images', function() {
-    Hints.create("div.media_box img", Hints.dispatchMouseClick);
+api.mapkey('gi', 'Hint images', function() {
+  const imgs = Array.from(document.querySelectorAll('img[src]'));
+    api.Hints.create(imgs, function(imageEl) {
+      window.location.href = imageEl.src;
+    });
 });
 
 mapkey(
