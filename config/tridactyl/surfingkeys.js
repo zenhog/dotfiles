@@ -35,6 +35,12 @@ mapkey('q', 'click on images', function() {
     Hints.create("div.media_box img", Hints.dispatchMouseClick);
 });
 
+mapkey(
+  "F",
+  "Open a link",
+  "Hints.create("img", Hints.dispatchMouseClick)"
+);
+
 // function uniqueLinks(els) {
 //   const seen = new Set();
 //   return Array.from(els).filter(e => {
