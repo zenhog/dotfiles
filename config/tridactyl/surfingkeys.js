@@ -60,26 +60,25 @@ mapkey("gx", 'List all role=button in spotify', function() {
   }
 
   const items = buttons.map((el, i) => {
-    const label = el.getAttribute('aria-label') ||
-      el.textContent.trim() ||
+    const label = el.getAttribute('aria-labelledby') ||
       el.textContent.trim() ||
       el.title ||
       '(no label)';
     return {
       title: label,
-      url: '',
-      element: el,
+      url: label,
+      // element: el,
     }
   });
 
   Front.openOmnibar({
-    type: "Custom",
+    type: "UserURLs",
     title: "Spotify playlists",
-    list: items,
-    onSelect: function(item) {
-      item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => item.element.click(), 100);
-    }
+    extra: items,
+    // onSelect: function(item) {
+    //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    //   setTimeout(() => item.element.click(), 100);
+    // }
   })
 })
 
