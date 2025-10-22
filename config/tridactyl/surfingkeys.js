@@ -59,13 +59,27 @@ mapkey("gx", 'List all role=button in spotify', function() {
     Front.showPopup(`Found ${buttons.length} buttons`);
   }
 
+  function getDeepLabel(el) {
+    let label = '';
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT {
+      acceptNode: node => node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    });
+    let node;
+    while (( node = walker.nextNode())) {
+      const txt = node.nodeValue.trim();
+      if (txt.length > label.length) label = txt;
+
+      return label || el.getAttribute('aria-label') || el.title || '(no label)';
+    }
+  }
+
   const items = buttons.map((el, i) => {
     const label = el.getAttribute('aria-labelledby') ||
       el.textContent.trim() ||
       el.title ||
       '(no label)';
     return {
-      title: label,
+      title: getDeepLabel(el),
       url: label,
       // element: el,
     }
