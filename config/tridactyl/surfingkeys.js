@@ -61,7 +61,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
 
   function getDeepLabel(el) {
     let label = '';
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    const walker = document.createTreeWalker(el.parentNode, NodeFilter.SHOW_TEXT, {
       acceptNode: node => node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
     });
     let node;
@@ -69,7 +69,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
       const txt = node.nodeValue.trim();
       if (txt.length > label.length) label = txt;
 
-      return label || el.getAttribute('aria-label') || el.title || '(no label)';
+      return label;
     }
   }
 
