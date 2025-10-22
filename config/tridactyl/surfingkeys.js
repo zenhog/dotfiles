@@ -49,6 +49,37 @@ mapkey("gf", "Toggle spotify", function() {
   if (pause) pause.click();
 })
 
+mapkey("gx", 'List all role=button in spotify', function() {
+  const buttons = Array.from(document.querySelectorAll('[role="button"]'));
+  if (buttons.length === 0) {
+    Front.showPopup('No buttons found on this page.');
+    return;
+  }
+
+  const items = buttons.map((el, i) => {
+    const label = el.getAttribute('aria-label') ||
+      el.textContent.trim() ||
+      el.textContent.trim() ||
+      el.title ||
+      '(no label)';
+    return {
+      title: label,
+      url: '',
+      element: el,
+    }
+  });
+
+  Front.openOmnibar({
+    type: "Custom",
+    title: "Spotify playlists",
+    list: items,
+    onSelect: function(item) {
+      item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => item.element.click(), 100);
+    }
+  })
+})
+
 mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
 })
