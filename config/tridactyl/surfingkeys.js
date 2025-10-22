@@ -86,9 +86,13 @@ mapkey("gx", 'List all role=button in spotify', function() {
   });
 
   Front.openOmnibar({
-    type: "UserURLs",
+    type: "Custom",
     title: "Spotify playlists",
-    extra: items,
+    // extra: items,
+    list: items,
+    onSelect: function(item) {
+      item.element.click();
+    }
     // onSelect: function(item) {
     //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     //   setTimeout(() => item.element.click(), 100);
