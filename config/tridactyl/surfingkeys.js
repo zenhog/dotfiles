@@ -80,7 +80,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
       '(no label)';
     return {
       title: getDeepLabel(el),
-      url: label,
+      url: getDeepLabel(el),
       // element: el,
     }
   });
