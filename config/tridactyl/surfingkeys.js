@@ -55,6 +55,10 @@ mapkey("gx", 'List all role=button in spotify', function() {
     return;
   }
 
+  if (buttons.length > 0) {
+    Front.showPopup(`Found ${buttons.length} buttons`);
+  }
+
   const items = buttons.map((el, i) => {
     const label = el.getAttribute('aria-label') ||
       el.textContent.trim() ||
