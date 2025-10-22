@@ -29,7 +29,6 @@ mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 
 // an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.
 map('gt', 'T');
-map('gx', 'T');
 
 // api.mapkey('gi', 'Hint images', function() {
 //   const imgs = Array.from(document.querySelectorAll('img[src]'));
