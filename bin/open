@@ -29,7 +29,7 @@ urlopen() {
   elif [[ "$file" == *seeflix.to* || "$file" == *fastflix.to* ]]; then
     browser zen fmovies "$file"
   elif [[ "$file" == *spotify.com* ]]; then
-    browser zen spotify "$file"
+      browser zen spotify "$file"
   else
     browser "$file"
   fi

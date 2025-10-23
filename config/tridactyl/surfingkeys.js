@@ -81,18 +81,22 @@ mapkey("gx", 'List all role=button in spotify', function() {
     return {
       title: getDeepLabel(el),
       url: getDeepLabel(el),
-      // element: el,
+      element: el,
     }
   });
 
   Front.openOmnibar({
     type: "Custom",
-    title: "Spotify playlists",
+    // title: "Spotify playlists",
     // extra: items,
-    list: items,
-    onSelect: function(item) {
-      item.element.click();
-    }
+    // list: items,
+    extra: {
+      prompt: "Playlists",
+      onInput: console.log,
+    },
+    // onSelect: function(item) {
+    //   item.element.click();
+    // }
     // onSelect: function(item) {
     //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     //   setTimeout(() => item.element.click(), 100);
