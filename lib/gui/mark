@@ -43,6 +43,23 @@ view() {
   :
 }
 
+ytplaylist() {
+  local baseurl="https://www.youtube.com/watch_videos?video_ids="
+  local ids
+
+  for url in "$@"; do
+    local id
+
+    IFS=$'=' read -r v id <<< "$url"
+
+    ids+=("$id")
+  done
+
+  read -r ids < <(IFS=,; printf "%s" "${ids[*]}")
+
+  echo "$baseurl$ids"
+}
+
 label() {
 	local url
   read -r url _ <<<"$1"
