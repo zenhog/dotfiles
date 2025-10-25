@@ -94,9 +94,9 @@ mapkey("gx", 'List all role=button in spotify', function() {
     //   prompt: "Playlists",
     //   onInput: console.log,
     // },
-    onSelect: function(item) {
-      Front.showPopup('Yay! Got executed mate');
-    }
+    // onSelect: function(item) {
+    //   Front.showPopup('Yay! Got executed mate');
+    // }
     // onSelect: function(item) {
     //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     //   setTimeout(() => item.element.click(), 100);
