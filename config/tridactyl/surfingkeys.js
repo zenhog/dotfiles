@@ -54,13 +54,15 @@ mapkey("gf", "Toggle spotify", function() {
 })
 
 mapkey("gz", 'Select spotify playlist', function() {
-  const buttons = Array.from(document.querySelectorAll('[role="button"]'));
-  Hints.create(buttons, Hints.dispatchMouseClick);
+  const rows = Array.from(document.querySelectorAll('[role="row"]'));
+  Hints.create(rows, Hints.dispatchMouseClick);
 })
 
 mapkey("gb", 'Focus playlists', function() {
-  const grid = document.querySelector('[role="grid"]');
-  grid.focus();
+  const rows = Array.from(document.querySelectorAll('[role="row"]'));
+  Hints.create(rows, function(el) {
+    el.focus();
+  });
 })
 
 mapkey("gx", 'List all role=button in spotify', function() {
