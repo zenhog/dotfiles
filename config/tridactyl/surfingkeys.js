@@ -91,14 +91,14 @@ mapkey("gx", 'List all role=button in spotify', function() {
   });
 
   Front.openOmnibar({
-    // type: "Custom",
-    // title: "Spotify playlists",
-    type: "UserURLs",
+    type: "Custom",
+    title: "Spotify playlists",
+    // type: "UserURLs",
     extra: items,
-    // extra: {
-    //   title: 'Spotify',
-    //   items: items,
-    // },
+    extra: {
+      title: 'Spotify',
+      items: items,
+    },
   })
 })
 
