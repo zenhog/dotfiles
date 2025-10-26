@@ -61,6 +61,7 @@ mapkey("gz", 'Select spotify playlist', function() {
 mapkey("gb", 'Focus playlists', function() {
   const rows = Array.from(document.querySelectorAll('[role="row"]'));
   Hints.create(rows, function(el) {
+    el.tabIndex = -1;
     el.focus();
   });
 })
