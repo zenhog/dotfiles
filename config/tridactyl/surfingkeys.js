@@ -58,6 +58,15 @@ mapkey("gz", 'Select spotify playlist', function() {
   Hints.create(buttons, Hints.dispatchMouseClick);
 })
 
+mapkey("gn", 'playlist down', function() {
+  const sbar = Array.from(document.querySelector('.os-scrollbar os-scrollbar-vertical'));
+  sbar.pointerdown();
+})
+mapkey("gp", 'Playlist up', function() {
+  const sbar = Array.from(document.querySelector('.os-scrollbar os-scrollbar-vertical'));
+  sbar.pointerup();
+})
+
 mapkey("gx", 'List all role=button in spotify', function() {
   const buttons = Array.from(document.querySelectorAll('[role="button"]'));
   if (buttons.length === 0) {
