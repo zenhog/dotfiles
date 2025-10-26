@@ -94,7 +94,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
     type: "Custom",
     title: "Spotify playlists",
     // type: "UserURLs",
-    extra: items,
+    // extra: items,
     extra: {
       title: 'Spotify',
       items: items,
