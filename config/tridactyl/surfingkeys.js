@@ -81,7 +81,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
     return {
       title: label,
       url: label,
-      // element: el,
+      element: el,
     }
   });
 
