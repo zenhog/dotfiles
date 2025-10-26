@@ -59,11 +59,11 @@ mapkey("gz", 'Select spotify playlist', function() {
 })
 
 mapkey("gn", 'playlist down', function() {
-  const sbar = document.querySelector('.os-scrollbar os-scrollbar-vertical');
+  const sbar = document.querySelector('.os-scrollbar .os-scrollbar-vertical');
   sbar.pointerdown();
 })
 mapkey("gp", 'Playlist up', function() {
-  const sbar = document.querySelector('.os-scrollbar os-scrollbar-vertical');
+  const sbar = document.querySelector('.os-scrollbar .os-scrollbar-vertical');
   sbar.pointerup();
 })
 
