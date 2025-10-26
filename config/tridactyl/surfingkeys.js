@@ -84,35 +84,29 @@ mapkey("gx", 'List all role=button in spotify', function() {
     }
   });
 
-  window._pendingCallback = (item) => {
-    Front.showPopup('Yay! Executed from outside');
-  };
+  insertJS(() => {
+    window._omnifunc = () => {
+      Front.showPopup('Test!');
+    }
+  });
 
   Front.openOmnibar({
-    type: "Custom",
+    // type: "Custom",
     // title: "Spotify playlists",
-    extra: {
-      title: 'Spotify',
-      items: items,
-    },
-    // list: items,
+    type: "UserURLs",
+    extra: items,
     // extra: {
-    //   prompt: "Playlists",
-    //   onInput: console.log,
+    //   title: 'Spotify',
+    //   items: items,
     // },
-    // onSelect: function(item) {
-    //   Front.showPopup('Yay! Got executed mate');
-    // }
-    // onSelect: function(item) {
-    //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    //   setTimeout(() => item.element.click(), 100);
-    // }
   })
 })
 
 mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
 })
+
+
 
 // function uniqueLinks(els) {
 //   const seen = new Set();
