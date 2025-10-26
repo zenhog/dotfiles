@@ -30,6 +30,11 @@ mapkey('<Ctrl-Space>', 'Choose a tab with omnibar', function() {
 // an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.
 map('gt', 'T');
 
+imap('<Ctrl-w>', '<Alt-w>');
+imap('<Ctrl-f>', '<Alt-f>');
+iunmap('<Alt-w>');
+iunmap('<Alt-f>');
+
 // api.mapkey('gi', 'Hint images', function() {
 //   const imgs = Array.from(document.querySelectorAll('img[src]'));
 //     api.Hints.create(imgs, function(imageEl) {
@@ -47,6 +52,21 @@ mapkey("gf", "Toggle spotify", function() {
   if (play) play.click();
   if (pause) pause.click();
 })
+
+ api.mapkey('f', 'Open non-duplicate link', () => {
+  function uniqueLinks(els) {
+    const seen = new Set();
+    return Array.from(els).filter(e => {
+      const url = e.href;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    });
+  }
+   const allLinks = document.querySelectorAll('a[href]');
+   const filtered = uniqueLinks(allLinks);
+   Hints.create(filtered, Hints.dispatchMouseClick);
+ });
 
 mapkey("gx", 'List all role=button in spotify', function() {
   const buttons = Array.from(document.querySelectorAll('[role="button"]'));
@@ -96,7 +116,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
     // extra: items,
     extra: {
       title: 'Spotify',
-      items: items,
+      items: items
     },
   })
 })
@@ -105,23 +125,6 @@ mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
 })
 
-
-
-// function uniqueLinks(els) {
-//   const seen = new Set();
-//   return Array.from(els).filter(e => {
-//     const url = e.href;
-//     if (seen.has(url)) return false;
-//     seen.add(url);
-//     return true;
-//   });
-// }
-//
-// api.mapkey('f', 'Open non-duplicate link', () => {
-//   const allLinks = document.querySelectorAll('a[href]');
-//   const filtered = uniqueLinks(allLinks);
-//   Hints.create(filtered, Hints.dispatchMouseClick);
-// });
 
 // set theme
 settings.theme = `
