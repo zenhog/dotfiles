@@ -53,20 +53,10 @@ mapkey("gf", "Toggle spotify", function() {
   if (pause) pause.click();
 })
 
- // api.mapkey('f', 'Open non-duplicate link', () => {
- //  function uniqueLinks(els) {
- //    const seen = new Set();
- //    return Array.from(els).filter(e => {
- //      const url = e.href;
- //      if (seen.has(url)) return false;
- //      seen.add(url);
- //      return true;
- //    });
- //  }
- //   const allLinks = document.querySelectorAll('a[href]');
- //   const filtered = uniqueLinks(allLinks);
- //   Hints.create(filtered, Hints.dispatchMouseClick);
- // });
+mapkey("gz", 'Select spotify playlist', function() {
+  const buttons = Array.from(document.querySelectorAll('[role="button"]'));
+  Hints.create(buttons, Hints.dispatchMouseClick);
+})
 
 mapkey("gx", 'List all role=button in spotify', function() {
   const buttons = Array.from(document.querySelectorAll('[role="button"]'));
