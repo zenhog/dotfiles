@@ -60,7 +60,7 @@ mapkey("gz", 'Select spotify playlist', function() {
 
 mapkey("gn", 'playlist down', function() {
   const sbar = document.querySelector('.os-scrollbar .os-scrollbar-vertical');
-  sbar.pointerdown();
+  sbar.scrollBy(0, 100);
 })
 mapkey("gp", 'Playlist up', function() {
   const sbar = document.querySelector('.os-scrollbar .os-scrollbar-vertical');
