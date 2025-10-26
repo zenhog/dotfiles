@@ -104,6 +104,7 @@ mapkey("gx", 'List all role=button in spotify', function() {
     //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     //   setTimeout(() => item.element.click(), 100);
     // }
+  })
 })
 
 mapkey("F", "Hint images", function() {
