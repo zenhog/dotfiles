@@ -84,13 +84,16 @@ mapkey("gx", 'List all role=button in spotify', function() {
     }
   });
 
+  window._pendingCallback = (item) => {
+    Front.showPopup('Yay! Executed from outside');
+  };
+
   Front.openOmnibar({
     type: "Custom",
     // title: "Spotify playlists",
     extra: {
       title: 'Spotify',
       items: items,
-      callback: "(item) => { Front.showPopup('Yay! Executed from outside'); }",
     },
     // list: items,
     // extra: {
