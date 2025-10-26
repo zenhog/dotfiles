@@ -48,62 +48,95 @@ mapkey("gf", "Toggle spotify", function() {
   if (pause) pause.click();
 })
 
-mapkey("gx", 'List all role=button in spotify', function() {
-  const buttons = Array.from(document.querySelectorAll('[role="button"]'));
-  if (buttons.length === 0) {
-    Front.showPopup('No buttons found on this page.');
-    return;
-  }
+// mapkey("gx", 'List all role=button in spotify', function() {
+//   const buttons = Array.from(document.querySelectorAll('[role="button"]'));
+//   if (buttons.length === 0) {
+//     Front.showPopup('No buttons found on this page.');
+//     return;
+//   }
+//
+//   if (buttons.length > 0) {
+//     Front.showPopup(`Found ${buttons.length} buttons`);
+//   }
+//
+//   function getDeepLabel(el) {
+//     let label = '';
+//     const walker = document.createTreeWalker(el.parentNode, NodeFilter.SHOW_TEXT, {
+//       acceptNode: node => node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+//     });
+//     let node;
+//     while (( node = walker.nextNode())) {
+//       const txt = node.nodeValue.trim();
+//       if (txt.length > label.length) label = txt;
+//
+//       return label;
+//     }
+//   }
+//
+//   const items = buttons.map((el) => {
+//     const label = el.getAttribute('aria-labelledby') ||
+//       el.textContent.trim() ||
+//       el.title ||
+//       '(no label)';
+//     return {
+//       title: label,
+//       url: label,
+//     }
+//   });
+//
+//   Front.openOmnibar({
+//     type: "Custom",
+//     // title: "Spotify playlists",
+//     extra: { title: 'Spotify', items: items, callback: (item) => {
+//       Front.showPopup('Yay! Executed from outside');
+//     }},
+//     // list: items,
+//     // extra: {
+//     //   prompt: "Playlists",
+//     //   onInput: console.log,
+//     // },
+//     // onSelect: function(item) {
+//     //   Front.showPopup('Yay! Got executed mate');
+//     // }
+//     // onSelect: function(item) {
+//     //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+//     //   setTimeout(() => item.element.click(), 100);
+//     // }
+//   })
+// })
 
-  if (buttons.length > 0) {
-    Front.showPopup(`Found ${buttons.length} buttons`);
-  }
+mapkey("gx", "Open custom URL selector", function() {
+    // Your custom data
+    const items = [
+        { title: "Lofi Beats", url: "https://open.spotify.com/playlist/xyz" },
+        { title: "Focus Mix", url: "https://open.spotify.com/playlist/abc" },
+        { title: "Jazz Vibes", url: "https://open.spotify.com/playlist/def" }
+    ];
 
-  function getDeepLabel(el) {
-    let label = '';
-    const walker = document.createTreeWalker(el.parentNode, NodeFilter.SHOW_TEXT, {
-      acceptNode: node => node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    // Save old handler so we can restore it later
+    const oldOnEnter = Omnibar.onEnter;
+
+    // Override the default enter handler
+    Omnibar.onEnter = function() {
+        const item = Omnibar.list[Omnibar.cursor];
+        if (item && item.url) {
+            RUNTIME("openLink", { tab: { active: true }, url: item.url });
+        } else {
+            Front.showPopup("No item selected.");
+        }
+        // Restore default handler after use
+        Omnibar.onEnter = oldOnEnter;
+    };
+
+    // Open the omnibar with your custom list
+    Front.openOmnibar({
+        type: "Urls",
+        extra: {
+            title: "Custom Links",
+            items: items
+        }
     });
-    let node;
-    while (( node = walker.nextNode())) {
-      const txt = node.nodeValue.trim();
-      if (txt.length > label.length) label = txt;
-
-      return label;
-    }
-  }
-
-  const items = buttons.map((el) => {
-    const label = el.getAttribute('aria-labelledby') ||
-      el.textContent.trim() ||
-      el.title ||
-      '(no label)';
-    return {
-      title: label,
-      url: label,
-    }
-  });
-
-  Front.openOmnibar({
-    type: "Custom",
-    // title: "Spotify playlists",
-    extra: { title: 'Spotify', items: items, callback: (item) => {
-      Front.showPopup('Yay! Executed from outside');
-    }},
-    // list: items,
-    // extra: {
-    //   prompt: "Playlists",
-    //   onInput: console.log,
-    // },
-    // onSelect: function(item) {
-    //   Front.showPopup('Yay! Got executed mate');
-    // }
-    // onSelect: function(item) {
-    //   item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    //   setTimeout(() => item.element.click(), 100);
-    // }
-  })
-})
+});
 
 mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
