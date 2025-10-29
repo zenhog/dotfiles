@@ -129,8 +129,28 @@ mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
 })
 
+const imgSelector = 'img, a:has(div)';
+
 mapkey("gd", "Hint and Download Multiple Images", function() {
-  Hints.create("img", Hints.dispatchMouseClick, {
+  Hints.create(imgSelector, async function(el) {
+    const url = el.tagName.toLowerCase() == 'img' ? el.src : el.href;
+
+    // fetch and download as blob
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = crypto.randomUUID() + '.jpg';
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch(err) {
+      front.showPopup('Failed: ' + err.message);
+    }
+  }, {
     tabbed: true, active: false, multipleHits: true
   });
 })
