@@ -129,6 +129,11 @@ mapkey("F", "Hint images", function() {
   Hints.create("img", Hints.dispatchMouseClick);
 })
 
+mapkey("gd", "Hint and Download Multiple Images", function() {
+  Hints.create("img", Hints.dispatchMouseClick, {
+    tabbed: true, active: false, multipleHits: true
+  });
+})
 
 // set theme
 settings.theme = `

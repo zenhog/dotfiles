@@ -56,7 +56,7 @@ return {
             },
             schema = {
               model = {
-                default = "deepseek/deepseek-chat-v3-0324:free",
+                default = "deepseek/deepseek-chat-v3.1:free",
               },
             },
           })

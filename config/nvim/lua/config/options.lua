@@ -6,6 +6,8 @@ vim.g.theme_dark = "catppuccin-mocha"
 vim.g.theme_dark = "tokyonight-night"
 vim.g.theme_light = "gruvbox"
 
+vim.lsp.inlay_hint.enable(false)
+
 local theme = vim.fn.systemlist("cat $HOME/.colorscheme")[1]
 
 if theme == "" or not theme then
