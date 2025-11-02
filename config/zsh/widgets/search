@@ -1,5 +1,6 @@
 search() {
-  menu popup search list "$(pwd)"
+  local indir="$(tmux set -s @menu-search-altdir "$(pwd)" 2>/dev/null)"
+  menu popup search list
 
   local dir="$(tmux show -sv @menu-search-cdir 2>/dev/null)"
 

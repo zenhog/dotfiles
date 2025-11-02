@@ -1,0 +1,21 @@
+{
+  "name": "surfingkeys",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --outfile=dist/config.js --format=esm",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Surfingkeys config",
+  "dependencies": {
+    "esbuild": "^0.25.11",
+    "express": "^5.1.0",
+    "dompurify": "^2.4.1",
+    "github-reserved-names": "^2.0.4",
+    "uhtml": "^3.1.0"
+  }
+}

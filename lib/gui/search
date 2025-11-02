@@ -72,7 +72,29 @@ state_update() {
 BINDS[list]=alt-w
 DESCS[list]='Reload current directory listing'
 list() {
-	local dir="$1"
+  local dir="$(get_opt altdir)"
+
+  echo "$@" > /tmp/boom
+  if [[ $# -gt 0 ]]; then
+    local multiple="$1"
+    local directory="$2"
+    local save="$3"
+    local path="$4"
+    local out="$5"
+
+    if [[ "$save" == 1 ]]; then
+      local basename="$(basename "$path")"
+      local dirname="$(dirname "$path")"
+      echo "$HOME/downloads/$basename" > "$out"
+    fi
+  fi
+
+  # check out "$@" for
+  # 1: multiple
+  # 2: directory
+  # 3: save
+  # 4: path, suggested
+  # 5: outfile
 
   local lsd_opts
 
@@ -89,9 +111,12 @@ list() {
 
 	if [[ -n "$dir" ]]; then
 		folder_cd "$dir" && folder_restore
+    unset_opt altdir
 	fi
 
   lsd -1 --no-symlink --group-dirs=first "${lsd_opts[@]}" "$FOLDER/"
+  echo /home/maiz/.dotfiles/master/lib/gui/search > /tmp/termfilechooser-1000.portal
+
 }
 
 BINDS[search]=alt-s

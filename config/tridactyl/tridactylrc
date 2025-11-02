@@ -31,13 +31,20 @@ bind --mode=browser <A-,> tabprev
 bind --mode=browser <A-.> tabnext
 bind --mode=browser <A-k> tabprev
 bind --mode=browser <A-j> tabnext
-bind --mode=browser <A-q> tabclose
 bind --mode=browser <A-t> jsb escapehatch(); fillcmdline('tabopen')
-bind --mode=browser <A-u> undo
 bind --mode=browser <A-s> source
 bind --mode=browser <A-c> tabonly
+
 bind --mode=browser <A-h> back
 bind --mode=browser <A-l> forward
+
+bind --mode=browser <A-u> undo
+bind --mode=browser <A-q> tabclose
+
+bind --mode=browser <C-k> scrollline -5
+bind --mode=browser <C-j> scrollline +5
+bind --mode=browser <C-u> scrollline -10
+bind --mode=browser <C-d> scrollline +10
 
 
 autocmd DocStart ^http(s?)://www.reddit.com js tri.excmds.urlmodify("-t", "www", "old")

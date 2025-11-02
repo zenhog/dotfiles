@@ -165,7 +165,7 @@ main() {
 	if [[ "$1" == -- ]]; then
 		COMMAND+=(--query "${*:2}")
 	else
-		LIST_ARGS=("${@:2}")
+		LIST_ARGS=("$@")
 	fi
 
 	if [[ -n "$PREVIEW_CMD" ]]; then

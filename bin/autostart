@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-gui run bg zen
-gui run bg discord
+# gui run bg zen
+# gui run bg discord
