@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+exec 2>&1
+
+if [[ -d "$HOME/.config/surfingkeys/dist" ]]; then
+  cd "$HOME/.config/surfingkeys" && exec npm run start
+fi

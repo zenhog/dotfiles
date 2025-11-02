@@ -93,3 +93,4 @@ register
 gui action inittheme &>/dev/null
 
 awesome
+# i3
