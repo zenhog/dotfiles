@@ -50,6 +50,7 @@ export LESSOPEN='| LESSQUIET=1 lesspipe.sh %s'
 export GTK_A11Y=none
 export NO_AT_BRIDGE=1
 # export XDG_CURRENT_DESKTOP=gnome
+export GTK_USE_PORTAL=1
 export BROWSER=browser
 
 #if [[ -n "$DISPLAY" ]]; then
@@ -64,7 +65,6 @@ fi
 if [[ -z "$PIPEWIRE_RUNTIME_DIR" ]]; then
 	export PIPEWIRE_RUNTIME_DIR="/tmp/user-$USER/$USER"
 fi
-export XDG_CURRENT_DESKTOP=KDE
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_CONFIG_HOME="$HOME/.config"

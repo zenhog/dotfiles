@@ -160,13 +160,28 @@ main() {
 	COMMAND+=(--ansi)
 	COMMAND+=(--cycle)
 	COMMAND+=(--no-multi)
+	# COMMAND+=(--multi)
   COMMAND+=(--no-hscroll)
 
-	if [[ "$1" == -- ]]; then
-		COMMAND+=(--query "${*:2}")
-	else
-		LIST_ARGS=("$@")
-	fi
+	# if [[ "$1" == -- ]]; then
+	# 	COMMAND+=(--query "${*:2}")
+	# else
+	# LIST_ARGS=("$@")
+	# fi
+
+  for arg in "$@"; do
+    if [[ "$arg" == -- ]]; then
+      COMMAND+=(--query "${*:2}")
+      break
+    fi
+
+    if [[ "$arg" == *=* ]]; then
+      eval "$arg"
+    else
+      LIST_ARGS+=("$arg")
+    fi
+    shift
+  done
 
 	if [[ -n "$PREVIEW_CMD" ]]; then
 		COMMAND+=(--preview="$PREVIEW_CMD")
@@ -261,7 +276,11 @@ main() {
 
 	mute declare -F init && init
 
-	list "${LIST_ARGS[@]}" | "${COMMAND[@]}"
+  if [[ -n "$fifo" ]]; then
+    list "${LIST_ARGS[@]}" | "${COMMAND[@]}" > "$fifo"
+  else
+    list "${LIST_ARGS[@]}" | "${COMMAND[@]}"
+  fi
 }
 
 dispatch() {
@@ -303,10 +322,23 @@ dispatch() {
 		tmux popup -BE -w 100% -h 100% menu main "$@"
 		;;
 	loop)
+		local fifo="$(mktemp --dry-run --suffix=.fifo)"
+		mkfifo "$fifo"
+
+    set "$1" fifo="$fifo" "${@:2}"
+
 		socat -u STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(
 			IFS=$'\x01'
 			printf "%s\n" "$*"
 		)
+
+		local output
+
+		IFS= read -r -d '' output < "$fifo"
+    rm -f "$fifo"
+    echo "$output"
+
+    return 0
 		;;
 	auto)
 		if on_xsession; then

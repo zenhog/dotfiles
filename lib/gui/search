@@ -12,7 +12,7 @@ export UEBERZUG_PREVIEW=1
 init() {
 	#set_opt pwd "$HOME/.marks"
 	[[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
-	set_opt hide hidden
+	set_opt hide visible
 	set_opt mode dirs
 }
 
@@ -44,8 +44,9 @@ label() {
 	local path="$(path "$FOLDER")"
 	local mode="$(get_opt mode)"
 	local hide="$(get_opt hide)"
+  local save="$(get_opt save)"
 
-	printf "[ %s - hide = %s - mode = %s ]" "$path" "$hide" "$mode"
+	printf "[ %s - hide = %s - mode = %s - save = %s ]" "$path" "$hide" "$mode" "$save"
 }
 
 mimetype() {
@@ -71,34 +72,23 @@ state_update() {
 
 BINDS[list]=alt-w
 DESCS[list]='Reload current directory listing'
+OPTS+=(--multi)
 list() {
   local dir="$(get_opt altdir)"
 
-  echo "$@" > /tmp/boom
   if [[ $# -gt 0 ]]; then
-    local multiple="$1"
-    local directory="$2"
-    local save="$3"
-    local path="$4"
-    local out="$5"
-
-    if [[ "$save" == 1 ]]; then
-      local basename="$(basename "$path")"
-      local dirname="$(dirname "$path")"
-      echo "$HOME/downloads/$basename" > "$out"
-    fi
+    set_opt mult "$1"
+    set_opt dir "$2"
+    set_opt save "$3"
+    set_opt path "$4"
+    set_opt out "$5"
   fi
-
-  # check out "$@" for
-  # 1: multiple
-  # 2: directory
-  # 3: save
-  # 4: path, suggested
-  # 5: outfile
 
   local lsd_opts
 
 	state_update
+
+  local hide="$(get_opt hide)"
 
   case "$hide" in
     hidden)
@@ -115,8 +105,53 @@ list() {
 	fi
 
   lsd -1 --no-symlink --group-dirs=first "${lsd_opts[@]}" "$FOLDER/"
-  echo /home/maiz/.dotfiles/master/lib/gui/search > /tmp/termfilechooser-1000.portal
+}
 
+BINDS[choose]=alt-i
+HOOKS[choose]=choose
+CALLS[choose]='execute-silent(choose {q} {+})+accept'
+DESCS[choose]='Choose file or directory'
+choose() {
+  local query="$1"
+  shift
+  local items=("$@")
+
+  local save="$(get_opt save)"
+  local path="$(get_opt path)"
+  local out="$(get_opt out)"
+  local mult="$(get_opt mult)"
+  local dir="$(get_opt dir)"
+
+  if [[ "$save" == 1 ]]; then
+    local base=$(basename "$path")
+
+    if [[ -n "$query" ]]; then
+      base="$query"
+    fi
+
+    echo "$HOME/downloads/$base" > "$out"
+    return
+  fi
+
+  if [[ "$dir" == 1 ]]; then
+      items="$(path "$items")"
+      [[ -d "$items" ]] && echo "$items" > "$out"
+      return
+  fi
+
+  if [[ "$mult" == 1 ]]; then
+    for item in "${items[@]}"; do
+      item="$(path "$item")"
+      rm -f "$out"
+      [[ -f "$item" ]] && echo "$item" >> "$out"
+    done
+    return
+  else
+      items="$(path "$items")"
+      rm -f "$out"
+      [[ -f "$items" ]] && echo "$items" > "$out"
+      return
+  fi
 }
 
 BINDS[search]=alt-s
@@ -160,9 +195,9 @@ rotate_mode() {
 BINDS[toggle_hide]=alt-t
 DESCS[toggle_hide]='Toggle hidden'
 toggle_hide() {
-  local hidden="$(get_opt hide)"
+  local hide="$(get_opt hide)"
 
-  case "$hidden" in
+  case "$hide" in
     hidden)
       set_opt hide visible
       ;;
@@ -283,4 +318,9 @@ atfinish() {
 	#unset_opt pwd
 	unset_opt hide
 	unset_opt mode
+  unset_opt save
+  unset_opt path
+  unset_opt out
+  unset_opt mult
+  unset_opt dir
 }

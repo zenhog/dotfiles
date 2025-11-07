@@ -180,6 +180,16 @@ actions.togglePdfViewer = () =>
     }
   })
 
+actions.javascriptURI = () => {
+  const js = "alert('javascript: execute successfully'); void(0);";
+  const url = 'javascript:' + encodeURIComponent(js);
+
+  RUNTIME("openLink", {
+    tab: { tabbed: false, active: true },
+    url: url,
+  })
+}
+
 actions.previewLink = () =>
   util.createHints("a[href]", (a) =>
     Front.showEditor(a.href, (url) => actions.openLink(url), "url")
@@ -189,6 +199,8 @@ actions.scrollElement = (el, dir) => {
   actions.dispatchMouseEvents(el, "mousedown")
   Normal.scroll(dir)
 }
+
+actions.scrollBody = (dir) => actions.scrollElement(document.body, dir)
 
 // FakeSpot
 // --------
@@ -1128,6 +1140,7 @@ actions.re.focusSearch = () =>
 
 actions.re.scrollSidebar = (dir) =>
   actions.scrollElement(document.getElementById("sidebar-content"), dir)
+
 actions.re.scrollContent = (dir) => actions.scrollElement(document.body, dir)
 
 // devdocs.io

@@ -167,7 +167,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
       cmd+=("$kind" -p "$type" --class "$profile" --new-instance)
 
       if gui awm exists "profile=$profile"; then
-        "${cmd[@]}"
+        # "${cmd[@]}"
         [[ -n "$1" ]] && "$kind" -p "$type" --new-tab "$1"
       else
         "${cmd[@]}" "$@"

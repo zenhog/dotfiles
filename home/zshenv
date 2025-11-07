@@ -34,6 +34,8 @@ FZF_BASE_FLAGS=(
   "--bind=left-click:accept"
   "--bind=right-click:toggle"
 
+  "--bind=ctrl-o:toggle"
+
   "--bind=ctrl-k:up"
   "--bind=ctrl-j:down"
 

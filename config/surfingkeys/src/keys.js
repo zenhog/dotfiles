@@ -55,6 +55,12 @@ maps.global = [
     description: "Open a link in non-active new tab",
   },
   {
+    alias: "gx",
+    description: "Test javascript: URL",
+    // category: categories.mouseClick,
+    callback: actions.javascriptURI,
+  },
+  {
     alias: "zf",
     category: categories.mouseClick,
     description: "Open link URL in vim editor",
