@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KEY='C-W:w'
+#KEY='C-W:w'
 
 ATTRIBUTES=(profile=qutebrowser-vpn2)
 

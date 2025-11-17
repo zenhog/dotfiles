@@ -292,21 +292,22 @@ dispatch() {
 
 	case "$mode" in
 	input)
+    menu auto input "$@"
 		# local query="$*"
 
-		local fifo="$(mktemp --dry-run --suffix=.fifo)"
-
-		mkfifo "$fifo"
-
-    menu loop input fifo="$fifo" "$@"
-
-		local output
-
-		IFS= read -r -d '' output < "$fifo"
-
-		rm -f "$fifo"
-
-    printf "%s" "$output"
+		# local fifo="$(mktemp --dry-run --suffix=.fifo)"
+		#
+		# mkfifo "$fifo"
+		#
+		#   menu loop input fifo="$fifo" "$@"
+		#
+		# local output
+		#
+		# IFS= read -r -d '' output < "$fifo"
+		#
+		# rm -f "$fifo"
+		#
+		#   printf "%s" "$output"
 		;;
 	main)
 		main "$@"

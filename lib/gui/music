@@ -13,3 +13,35 @@ view() {
 list() {
   mpc playlist
 }
+
+spotdl() {
+  local dir="$1"
+  local url="$2"
+
+  local syncfile="/music/.sync.spotdl"
+
+  local providers=(
+    soundcloud
+    youtube
+    youtube-music
+    piped
+    bandcamp
+  )
+
+  local cmd=(docker run --rm -v "$HOME/music/$dir":/music spotdl)
+
+  # cmd+=(--audio="piped" --audio="youtube-music")
+  # for p in "${providers[@]}"; do
+  #   cmd+=(--audio="$p")
+  # done
+
+  cmd+=(sync)
+
+  if [[ -n "$url" ]]; then
+    cmd+=("$url" --save-file "$syncfile")
+  else
+    cmd+=("$syncfile")
+  fi
+
+  "${cmd[@]}"
+}

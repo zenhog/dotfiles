@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 TRIDACTYL_URL='https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh'
 
 VDHCOAPP_URL='https://github.com/aclap-dev/vdhcoapp/releases/latest/download/install.sh'
@@ -142,7 +143,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
             #   cp -r storage/default/https+++*"${doms[$type]}"/ \
             #   ../"$type"/storage/default)
 
-            (cd "$HOME/.zen" && cp -av wan "$type")
+            (cd "$HOME/.zen" && cp -a wan "$type")
             rm -rf "$HOME/.zen/$type/sessionstore-backups/"
 
             url="${types[$t]}"
@@ -164,7 +165,17 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
-      cmd+=("$kind" -p "$type" --class "$profile" --new-instance)
+      cmd+=(
+        env
+        GTK_CLASS_OVERRIDE="$profile"
+        "$kind"
+        --new-instance
+        # --no-remote
+        -p
+        "$type"
+        --class
+        "$profile"
+      )
 
       if gui awm exists "profile=$profile"; then
         # "${cmd[@]}"

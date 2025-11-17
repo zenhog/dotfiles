@@ -108,20 +108,20 @@ mapkey("gx", 'List all role=button in spotify', function() {
     }
   });
 
-  insertJS(() => {
-    window._omnifunc = () => {
-      Front.showPopup('Test!');
-    }
-  });
+  // insertJS(() => {
+  //   window._omnifunc = () => {
+  //     Front.showPopup('Test!');
+  //   }
+  // });
 
   Front.openOmnibar({
-    // type: "UserURLs",
-    type: "Custom",
-    // extra: items,
-    extra: {
-      title: 'Spotify',
-      items: items
-    },
+    type: "UserURLs",
+    // type: "Custom",
+    extra: items,
+    // extra: {
+    //   title: 'Spotify',
+    //   items: items
+    // },
   })
 })
 

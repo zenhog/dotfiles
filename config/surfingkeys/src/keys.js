@@ -49,11 +49,11 @@ const unmaps = {
 const maps = {}
 
 maps.global = [
-  {
-    map: "gf",
-    category: categories.mouseClick,
-    description: "Open a link in non-active new tab",
-  },
+  // {
+  //   map: "gf",
+  //   category: categories.mouseClick,
+  //   description: "Open a link in non-active new tab",
+  // },
   {
     alias: "gx",
     description: "Test javascript: URL",
@@ -281,6 +281,64 @@ maps.global = [
     description: "Open URL from history",
     callback: () => Front.openOmnibar({ type: "History" }),
   },
+  {
+    alias: 'gf',
+    category: categories.misc,
+    description: 'Spotify toggle',
+    callback: function () {
+      const pause = document.querySelector('[aria-label="Pause"]');
+      const play = document.querySelector('[aria-label="Play"]');
+      if (play) play.click();
+      if (pause) pause.click();
+
+    },
+  },
+  {
+    alias: "=B",
+    category: categories.misc,
+    description: "Test",
+    callback: function () {
+      const buttons = Array.from(document.querySelectorAll('[role="button"]'));
+
+      function getDeepLabel(el) {
+        let label = '';
+        const walker = document.createTreeWalker(el.parentNode, NodeFilter.SHOW_TEXT, {
+          acceptNode: node => node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+        });
+        let node;
+        while (( node = walker.nextNode())) {
+          const txt = node.nodeValue.trim();
+          if (txt.length > label.length) label = txt;
+
+          return label;
+        }
+      }
+
+      const items = buttons.map((el) => {
+        const title = getDeepLabel(el);
+        const attr = el.getAttribute('aria-describedby');
+
+        const type = attr.split(":")[1];
+        const id = attr.split(":")[2];
+
+        const url = `https://open.spotify.com/${type}/${id}`;
+
+        if (id === undefined) {
+          return null;
+        }
+
+        return {
+          title: title,
+          url: url,
+        }
+      });
+
+      Front.openOmnibar({
+        type: "UserURLs",
+        extra: items,
+      })
+    },
+  },
   // {
   //   alias:       "\\A",
   //   description: "Open AWS service",
@@ -288,48 +346,48 @@ maps.global = [
   // },
 ]
 
-maps["amazon.com"] = [
-  {
-    alias: "fs",
-    description: "Fakespot",
-    callback: actions.fakeSpot,
-  },
-  {
-    alias: "a",
-    description: "View product",
-    callback: actions.az.viewProduct,
-  },
-  {
-    alias: "c",
-    description: "Add to Cart",
-    callback: () => util.createHints("#add-to-cart-button"),
-  },
-  {
-    alias: "R",
-    description: "View Product Reviews",
-    callback: () => actions.openLink("#customerReviews"),
-  },
-  {
-    alias: "Q",
-    description: "View Product Q&A",
-    callback: () => actions.openLink("#Ask"),
-  },
-  {
-    alias: "A",
-    description: "Open Account page",
-    callback: () => actions.openLink("/gp/css/homepage.html"),
-  },
-  {
-    alias: "C",
-    description: "Open Cart page",
-    callback: () => actions.openLink("/gp/cart/view.html"),
-  },
-  {
-    alias: "O",
-    description: "Open Orders page",
-    callback: () => actions.openLink("/gp/css/order-history"),
-  },
-]
+// maps["amazon.com"] = [
+//   {
+//     alias: "fs",
+//     description: "Fakespot",
+//     callback: actions.fakeSpot,
+//   },
+//   {
+//     alias: "a",
+//     description: "View product",
+//     callback: actions.az.viewProduct,
+//   },
+//   {
+//     alias: "c",
+//     description: "Add to Cart",
+//     callback: () => util.createHints("#add-to-cart-button"),
+//   },
+//   {
+//     alias: "R",
+//     description: "View Product Reviews",
+//     callback: () => actions.openLink("#customerReviews"),
+//   },
+//   {
+//     alias: "Q",
+//     description: "View Product Q&A",
+//     callback: () => actions.openLink("#Ask"),
+//   },
+//   {
+//     alias: "A",
+//     description: "Open Account page",
+//     callback: () => actions.openLink("/gp/css/homepage.html"),
+//   },
+//   {
+//     alias: "C",
+//     description: "Open Cart page",
+//     callback: () => actions.openLink("/gp/cart/view.html"),
+//   },
+//   {
+//     alias: "O",
+//     description: "Open Orders page",
+//     callback: () => actions.openLink("/gp/css/order-history"),
+//   },
+// ]
 
 const googleSearchResultSelector = [
   "a h3",
@@ -365,14 +423,6 @@ maps["www.google.com"] = [
     alias: "d",
     description: "Open search in DuckDuckGo",
     callback: actions.go.ddg,
-  },
-]
-
-maps["algolia.com"] = [
-  {
-    alias: "a",
-    description: "Open search result",
-    callback: () => util.createHints(".item-main h2>a:first-child"),
   },
 ]
 
@@ -418,14 +468,6 @@ maps["duckduckgo.com"] = [
     alias: "sre",
     description: "Search site:reddit.com",
     callback: () => actions.dg.siteSearch("reddit.com"),
-  },
-]
-
-maps["www.yelp.com"] = [
-  {
-    alias: "fs",
-    description: "Fakespot",
-    callback: actions.fakeSpot,
   },
 ]
 

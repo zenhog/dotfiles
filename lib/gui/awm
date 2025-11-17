@@ -11,16 +11,7 @@ NOWRAP=1
 
 OPTS+=(--with-nth 3.. --header-lines=1)
 list() {
-	awesome-client "
-    require('awful')
-    local r = '\n'
-    for _, c in ipairs(client.get()) do
-      r = r .. string.format('%s\x01%d\x01%s\x01%s\x01%s\x01[%s]\n',
-        string.format('0x%08x', c.window),
-          c.pid or -1, c.profile, c.class, c.instance, c.name)
-    end
-    return r
-  " | sed -r '1d;$d' | column -t -s "$iSEP" -N \
+  awm 'list()' | sed -r '1d;$d' | column -t -s "$iSEP" -N \
     WID,PID,PROFILE,CLASS,INSTANCE,NAME
 }
 
@@ -47,6 +38,43 @@ close() {
 
 	read -r window _ <<<"$1"
 	winkill @window="$window"
+}
+
+call() {
+  local retval retcode
+  local code="$*"
+
+  IFS= read -r -d '' retval < <(awesome-client "$code")
+
+  retcode=$?
+
+  echo -n "$retval"
+
+  return "$retcode"
+}
+
+awm() {
+  local args="$*"
+
+  call "return require('awm').${args}"
+}
+
+reise() {
+	local lhs conds success
+
+	readarray -t lhs < <(parse lhs "$@")
+
+	[[ -z "$mode" ]] && local mode=fg
+
+  local args
+
+  for s in "${lhs[@]}"; do
+    args+=($(fmtstr "$s"))
+  done
+
+  read -r args < <(IFS=,; printf "%s" "${args[*]}")
+
+  awm "$mode($args)"
 }
 
 raise() {
@@ -134,6 +162,23 @@ runonce() {
 	esac
 }
 
+fmtstr() {
+	local attr="$1"
+
+	[[ "$attr" == *=* ]] || return
+
+	local lhs="${attr%%=*}"
+	local rhs="${attr#*=}"
+
+	if [[ '@' == "${lhs:0:1}" ]]; then
+		lhs="${lhs:1}"
+	else
+		rhs="'${rhs}'"
+	fi
+
+	echo "'$lhs'" "$rhs"
+}
+
 strfmt() {
 	local attr="$1"
 
@@ -199,6 +244,44 @@ cmdfmt() {
 		)
 		;;
 	esac
+}
+
+getprops() {
+  local lhs rhs
+
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
+
+  local args
+
+  for s in "${lhs[@]}"; do
+    args+=($(fmtstr "$s"))
+  done
+
+  read -r args < <(IFS=,; printf "%s" "${args[*]}")
+
+	read -r props < <(cmdfmt props "${rhs[@]}")
+
+  awm "getprops($props, $args)"
+}
+
+setprops() {
+  local lhs rhs
+
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
+
+  local args
+
+  for s in "${lhs[@]}"; do
+    args+=($(fmtstr "$s"))
+  done
+
+  read -r args < <(IFS=,; printf "%s" "${args[*]}")
+
+	read -r props < <(cmdfmt props "${rhs[@]}")
+
+  awm "getprops($props, $args)"
 }
 
 getattributes() {
@@ -276,6 +359,33 @@ EOF
 	rhs=("${rhs[@]%%=*}")
 
 	getattributes "${lhs[@]}" -- "${rhs[@]#@}"
+}
+
+spewn() {
+	local mode="$1"
+
+	shift
+
+	local lhs rhs attrs pid
+
+	readarray -t lhs < <(parse lhs "$@")
+	readarray -t rhs < <(parse rhs "$@")
+
+  [[ -z "$lhs" ]] && unset lhs
+
+  local args=("${rhs[@]:1}")
+
+	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
+
+  echo "${rhs[0]}" "${args[@]@Q}"
+  echo "${attrs}"
+
+# 	read -r pid < <(
+# 		awesome-client <<EOF | sed -r 's/[^0-9]//g'
+#     local s = "${rhs[0]} ${args[@]@Q}"
+#     return require('awful').spawn(s, ${attrs})
+# EOF
+# 	)
 }
 
 spawn() {
