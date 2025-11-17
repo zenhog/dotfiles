@@ -427,6 +427,13 @@ awful.screen.connect_for_each_screen(function(s)
         end
       end
 
+      if command == 'menu' and _G.menus then
+        if _G.menus.icons then
+          _G.menus.icons['enabled'] = icon
+          _G.menus.color = color
+        end
+      end
+
       buttons = addbutton(buttons, 1, lcommand)
       buttons = addbutton(buttons, 3, rcommand)
       s.menus[command]:buttons(buttons)

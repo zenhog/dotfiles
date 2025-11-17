@@ -17,6 +17,10 @@ local last_focused_screen = awful.screen.focused()
 theme.init(os.getenv("HOME") .. "/.config/awesome/theme.lua")
 
 _G.layout = {
+  updates = {
+    updating = '',
+    disabled = '󰒱',
+  },
   icons = {
     tileleft = ''
   }
@@ -286,6 +290,7 @@ local function set_clienttag(c)
 		feh = 3,
 		nsxiv = 3,
 		mupdf = 3,
+		mpv = 3,
 
 		youtube = 4,
 		fmovies = 4,
@@ -293,7 +298,6 @@ local function set_clienttag(c)
 		spotify = 4,
 		whatsie = 4,
 		vlc = 4,
-		mpv = 4,
 		goofcord = 4,
 		ts3client_linux_amd64 = 4,
 
