@@ -138,12 +138,38 @@ tag.connect_signal("property::layout", function(t)
   update_clients_visibility(t)
 end)
 
+screen.connect_signal("screenupdate", function(t)
+  local count = 0
+
+  for s in screen do
+    if s.mutex then
+      count = count + 1
+    end
+  end
+
+  if count == #screen then
+    for s in screen do
+      s.mutex = nil
+    end
+  end
+end)
+
+local function update_screen_tags()
+  for s in screen do
+    if s ~= awful.screen.focused() then
+      for _, t in ipairs(s.tags) do
+        t:emit_signal("property::name")
+      end
+    end
+  end
+end
+
 -- Update when tag is selected
 tag.connect_signal("property::selected", function(t)
   update_layout_icon(t)
   update_wibox_visibility(t.screen)
   update_clients_visibility(t)
-  -- update_client_visibility?
+  update_screen_tags()
 end)
 
 -- Update when client moves between tags
@@ -151,6 +177,7 @@ client.connect_signal("tagged", function(c)
 	for _, s in ipairs(screen) do
 		update_wibox_visibility(s)
 	end
+  update_screen_tags()
 end)
 
 -- Fullscreen property handler
@@ -164,6 +191,7 @@ client.connect_signal("unmanage", function(c)
 	if c.fullscreen then
 		update_wibox_visibility(c.screen)
 	end
+  update_screen_tags()
 end)
 
 local function handle_errors()
