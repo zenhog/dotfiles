@@ -5,6 +5,6 @@ KEY='E:Pause'
 runner() {
   local image="$HOME/.wallpapers/whysosleepy.png"
 
-  gui awm spawn bg -- i3lock -nueti "$image" && sudo zzz
+  gui awm bg -- i3lock -nueti "$image" && sudo zzz
   #sudo zzz
 }

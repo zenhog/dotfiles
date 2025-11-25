@@ -732,7 +732,7 @@ attach() {
     failwith "Failed to create $kind session '$name' on ${host:-localhost}"
 
   if on_xsession; then
-    gui awm runonce "${mode:-fg}" "instance=$name" -- \
+    gui awm "${mode:-fg}" "instance=$name" -- \
       alacritty --class "$class,$name" --command tmux attach -dxt "$name"
 
   elif [[ "$TERM" == linux ]] && [[ "$(tty)" == /dev/pts/* ]]; then

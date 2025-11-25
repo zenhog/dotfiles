@@ -9,16 +9,26 @@ HORIZONTAL=1
 
 NOWRAP=1
 
-OPTS+=(--with-nth 3.. --header-lines=1)
+OPTS+=(--with-nth 1.. --header-lines=1)
 list() {
-  awm 'list()' | sed -r '1d;$d' | column -t -s "$iSEP" -N \
-    WID,PID,PROFILE,CLASS,INSTANCE,NAME
+  local entries
+
+  readarray -s 1 -t entries < <(awm 'list()')
+
+  local n
+
+  (( n = ${#entries[@]} - 1 ))
+
+  printf "%s\n" "${entries[@]:0:$n}" | column -t -s "$iSEP" -N \
+    WID,PID,INITAG,PROFILE,CLASS,INSTANCE,NAME
 }
 
 view() {
-	local window
-	read -r window _ <<<"$1"
-	properties @window="$window"
+	local wid lines
+
+	read -r wid _ <<< "$1"
+
+  properties @window="$wid" | column -x
 }
 
 BINDS[open]=enter
@@ -46,11 +56,13 @@ call() {
 
   IFS= read -r -d '' retval < <(awesome-client "$code")
 
-  retcode=$?
-
   echo -n "$retval"
 
-  return "$retcode"
+  if [[ "$retval" =~ false ]]; then
+    return 1
+  fi
+
+  return 0
 }
 
 awm() {
@@ -59,12 +71,10 @@ awm() {
   call "return require('awm').${args}"
 }
 
-reise() {
+raise() {
 	local lhs conds success
 
 	readarray -t lhs < <(parse lhs "$@")
-
-	[[ -z "$mode" ]] && local mode=fg
 
   local args
 
@@ -74,38 +84,38 @@ reise() {
 
   read -r args < <(IFS=,; printf "%s" "${args[*]}")
 
-  awm "$mode($args)"
+  awm "raise($args)"
 }
 
-raise() {
-	local lhs conds success
-	readarray -t lhs < <(parse lhs "$@")
-
-	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
-
-	[[ -z "$mode" ]] && local mode=fg
-
-	read -r success < <(
-		awesome-client <<EOF
-    require('awful')
-    for _, c in ipairs(client.get()) do
-      if ${conds} then
-        c.hidden = false
-        c.minimized = false
-        c:raise()
-        if not (c.above and c.sticky) and '${mode}' == 'fg' then
-          c.first_tag:view_only()
-        end
-        client.focus = c
-        return true
-      end
-    end
-    return false
-EOF
-	)
-
-	[[ "boolean true" == "$success" ]]
-}
+# raise() {
+# 	local lhs conds success
+# 	readarray -t lhs < <(parse lhs "$@")
+#
+# 	IFS= read -r conds < <(cmdfmt conds "${lhs[@]}")
+#
+# 	[[ -z "$mode" ]] && local mode=fg
+#
+# 	read -r success < <(
+# 		awesome-client <<EOF
+#     require('awful')
+#     for _, c in ipairs(client.get()) do
+#       if ${conds} then
+#         c.hidden = false
+#         c.minimized = false
+#         c:raise()
+#         if not (c.above and c.sticky) and '${mode}' == 'fg' then
+#           c.first_tag:view_only()
+#         end
+#         client.focus = c
+#         return true
+#       end
+#     end
+#     return false
+# EOF
+# 	)
+#
+# 	[[ "boolean true" == "$success" ]]
+# }
 
 winkill() {
 	local lhs conds success
@@ -139,9 +149,15 @@ EOF
 
 properties() {
 	getattributes "$@" -- \
-		window name type pid role icon_name class instance minimized maximized \
-		ontop above below sticky urgent hidden fullscreen opacity transparency \
-    startup_id maximized_horizontal maximized_vertical alticon mutex
+    selected tagnum \
+		startup_id type role minimized hidden urgent \
+    icon alticon iconpath mutex \
+    sticky ontop above below \
+    fullscreen maximized maximized_horizontal maximized_vertical \
+    opacity transparency \
+    size_hints_honor \
+    size_hints \
+    custom
 }
 
 runonce() {
@@ -281,7 +297,7 @@ setprops() {
 
 	read -r props < <(cmdfmt props "${rhs[@]}")
 
-  awm "getprops($props, $args)"
+  awm "setprops($props, $args)"
 }
 
 getattributes() {
@@ -361,31 +377,12 @@ EOF
 	getattributes "${lhs[@]}" -- "${rhs[@]#@}"
 }
 
-spewn() {
-	local mode="$1"
+fg() {
+  spawn fg "$@"
+}
 
-	shift
-
-	local lhs rhs attrs pid
-
-	readarray -t lhs < <(parse lhs "$@")
-	readarray -t rhs < <(parse rhs "$@")
-
-  [[ -z "$lhs" ]] && unset lhs
-
-  local args=("${rhs[@]:1}")
-
-	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
-
-  echo "${rhs[0]}" "${args[@]@Q}"
-  echo "${attrs}"
-
-# 	read -r pid < <(
-# 		awesome-client <<EOF | sed -r 's/[^0-9]//g'
-#     local s = "${rhs[0]} ${args[@]@Q}"
-#     return require('awful').spawn(s, ${attrs})
-# EOF
-# 	)
+bg() {
+  spawn bg "$@"
 }
 
 spawn() {
@@ -402,20 +399,53 @@ spawn() {
 
   local args=("${rhs[@]:1}")
 
-	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
+  local attrs
 
-	read -r pid < <(
-		awesome-client <<EOF | sed -r 's/[^0-9]//g'
-    local s = "${rhs[0]} ${args[@]@Q}"
-    return require('awful').spawn(s, ${attrs})
-EOF
-	)
+  for s in "${lhs[@]}"; do
+    attrs+=($(fmtstr "$s"))
+  done
 
-	[[ "$pid" =~ [0-9]+ ]] || return
-	[[ "$rhs" == i3lock ]] && return
+  read -r attrs < <(IFS=,; printf "%s" "${attrs[*]}")
 
-	if [[ -n "$lhs" ]]; then
-		gui awm waitfor "${lhs[@]}"
-		[[ "$mode" == fg ]] && raise "${lhs[@]}"
-	fi
+  local cmd=("${rhs[0]}" "${args[@]@Q}")
+
+  read -r cmd < <(IFS=' '; printf "%s" "${cmd[*]}")
+
+  if [[ -z "$attrs" ]]; then
+    awm "$mode(\"$cmd\")"
+  else
+    awm "$mode(\"$cmd\", ${attrs})"
+  fi
 }
+
+# spawn() {
+# 	local mode="$1"
+#
+# 	shift
+#
+# 	local lhs rhs attrs pid
+#
+# 	readarray -t lhs < <(parse lhs "$@")
+# 	readarray -t rhs < <(parse rhs "$@")
+#
+#   [[ -z "$lhs" ]] && unset lhs
+#
+#   local args=("${rhs[@]:1}")
+#
+# 	read -r attrs < <(cmdfmt attrs "${lhs[@]}")
+#
+# 	read -r pid < <(
+# 		awesome-client <<EOF | sed -r 's/[^0-9]//g'
+#     local s = "${rhs[0]} ${args[@]@Q}"
+#     return require('awful').spawn(s, ${attrs})
+# EOF
+# 	)
+#
+# 	[[ "$pid" =~ [0-9]+ ]] || return
+# 	[[ "$rhs" == i3lock ]] && return
+#
+# 	if [[ -n "$lhs" ]]; then
+# 		gui awm waitfor "${lhs[@]}"
+# 		[[ "$mode" == fg ]] && raise "${lhs[@]}"
+# 	fi
+# }

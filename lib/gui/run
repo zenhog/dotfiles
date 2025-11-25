@@ -62,14 +62,14 @@ HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 fg() {
 	source "$HOME/.lib/app/$1"
-	gui awm runonce fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+	gui awm fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 bg() {
 	source "$HOME/.lib/app/$1"
-	gui awm runonce bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+	gui awm bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
 }
 
 BINDS[close]=alt-d

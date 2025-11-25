@@ -86,7 +86,7 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
       [[ "$type" == wan ]] && profile=qutebrowser
 
-      cmd+=(gui awm runonce bg "profile=$profile" --)
+      cmd+=(gui awm fg "profile=$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
@@ -161,20 +161,20 @@ if [[ "$CTTY" == "$RTTY" ]]; then
         profile="$kind"
       fi
 
-      cmd+=(gui awm runonce bg "profile=$profile" --)
+      cmd+=(gui awm fg "profile=$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
       cmd+=(
-        env
-        GTK_CLASS_OVERRIDE="$profile"
+        # env
+        # GTK_CLASS_OVERRIDE="$profile"
         "$kind"
         --new-instance
         # --no-remote
         -p
         "$type"
-        --class
-        "$profile"
+        # --class
+        # "$profile"
       )
 
       if gui awm exists "profile=$profile"; then

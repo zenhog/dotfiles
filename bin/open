@@ -40,13 +40,13 @@ case "${mime}" in
     gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$path"
     ;;
   image/*)
-    gui awm runonce fg -- nsxiv -a -s f -- "$path"
+    gui awm bg -- nsxiv -a -s f -- "$path"
     ;;
   video/*)
-    gui awm runonce fg -- mpv "$path"
+    gui awm bg -- mpv "$path"
     ;;
   application/pdf)
-    gui awm runonce fg -- mupdf "$path"
+    gui awm bg -- mupdf "$path"
     ;;
   *)
     case "$file" in
