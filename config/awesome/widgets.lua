@@ -2,7 +2,6 @@ local awful = require('awful')
 local wibox = require('wibox')
 local gears = require('gears')
 local theme = require('beautiful')
-local utils = require('utils')
 
 local w = {
     watches = {},
