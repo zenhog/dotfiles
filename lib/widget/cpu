@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+PERIOD=5
+
+toggle() {
+	function setgov() {
+		local nbcpus
+		read -r nbcpus < <(cpufreq-info | grep -c 'CPU [[:digit:]]:')
+		for i in $(seq 0 $((nbcpus - 1))); do
+			sudo cpufreq-set -c "$i" -g "$1"
+		done
+	}
+	local governor
+	read -r governor < <(cpufreq-info |
+    sed -rn '/may decide/s/.*"(.*)".*/\1/p' | head -1)
+	case "$governor" in
+	powersave) setgov performance ;;
+	performance) setgov powersave ;;
+	esac
+}
+
+run() {
+	menu process
+}
+
+text() {
+  local load1 load5 load15 numcores avg
+
+  read -r load1 load5 load15 _ < /proc/loadavg
+  read -r numcores < <(grep -c '^processor' /proc/cpuinfo)
+
+  read -r avg < <(echo "scale=2; $load1 * 0.6 + $load5 * 0.3 + $load15 * 0.1" |
+    bc)
+
+  read -r avg < <(echo "scale=2; ($avg / $numcores) * 100" | bc)
+
+  read -r avg < <(echo "scale=0; ($avg + 0.5) / 1" | bc)
+
+  printf "%s" "$(fmt "$avg")"
+}
+
+icon() {
+	local cpupath=/sys/devices/system/cpu
+	local -a governors
+	readarray -t governors < <(cat $cpupath/cpu*/cpufreq/scaling_governor | uniq)
+
+	local powersave=󰌲
+	local performance=󰍛
+	local ambiguous=󰌨
+	local icon="$ambiguous"
+	local color=lime
+
+	((${#governors[@]} <= 0 || ${#governors[@]} >= 2)) && ICON=
+
+	((${#governors[@]} <= 0 || ${#governors[@]} >= 2)) ||
+		case "${governors[0]}" in
+		powersave) icon="$powersave" ;;
+		performance) icon="$performance" ;;
+		esac
+
+	printf "%s" "$(colorize "$color" "$icon")"
+}

@@ -3,11 +3,23 @@
 KEY=t
 MOD='S-M'
 ICON=
+ALTICON=
 COLOR=yellow
 
 HORIZONTAL=1
 
 NOWRAP=1
+
+click() {
+  awesome-client "require('commands').layout()"
+}
+
+iconupdate() {
+  local module="$1"
+  local icon="$2"
+
+  call "require('commands').updateicon('$module', '$icon')"
+}
 
 OPTS+=(--with-nth 1.. --header-lines=1)
 list() {
@@ -149,7 +161,8 @@ EOF
 
 properties() {
 	getattributes "$@" -- \
-    selected tagnum \
+    valid selected tagnum machine skip_taskbar icon_name screen icon_sizes \
+    border_width border_color is_fixed marked \
 		startup_id type role minimized hidden urgent \
     icon alticon iconpath mutex \
     sticky ontop above below \

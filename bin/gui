@@ -184,11 +184,11 @@ case $# in
 	readarray -t modules < <(realpath $MODULES_DIR/*)
 	readarray -t modules < <(basename -a "${modules[@]}")
 	for mod in "${modules[@]}"; do
-		unset ICON MOD KEY COLOR
+		unset ICON ALTICON MOD KEY COLOR
 		COLOR=white
 		source "$MODULES_DIR/$mod"
-		[[ -n "$KEY" ]] && printf "%s:%s:%s:%s:%s\n" "$ICON" "$mod" "$MOD" "$KEY" \
-			"$COLOR"
+		[[ -n "$KEY" ]] && printf "%s:%s:%s:%s:%s:%s\n" "$ICON" \
+      "${ALTICON:-$ICON}" "$mod" "$MOD" "$KEY" "$COLOR"
 	done
 	;;
 1) # list module functions

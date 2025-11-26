@@ -2,11 +2,29 @@
 
 KEY=space
 MOD='S-M'
-ICON=
+ALTICON=
+ICON=
 COLOR=aqua
 
 POSITION=RIGHT
 NOWRAP=1
+
+click() {
+  local status icon
+
+  IFS=: read -r status _ < <(sudo sv status sysupdate)
+
+  case "$status" in
+    down)
+      sudo sv start sysupdate && icon=icon
+      ;;
+    run)
+      sudo sv stop sysupdate && icon=alticon
+      ;;
+  esac
+
+  gui awm iconupdate "$MODULE" "$icon"
+}
 
 view() {
 	local menu

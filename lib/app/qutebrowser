@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-# KEY='W:w'
-
-ATTRIBUTES=(profile=qutebrowser)
-
-runner() {
-  browser qutebrowser
-}

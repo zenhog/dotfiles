@@ -3,37 +3,46 @@
 KEY=r
 MOD='S-M'
 ICON=
-ICON=
-ICON=
-ICON=
 COLOR=aqua
 
 export APP_DIR="$HOME/.lib/app"
 
-click() {
-  awesome-client "
-    local commands = require('commands')
-    commands.layout()
-  "
-}
-
 view() {
-	command preview "$APP_DIR/$1"
+  local folder app
+  read -r folder app _ <<< "$1"
+	command preview "$APP_DIR/$folder/$app"
 }
 
 list() {
 	local apps
-	readarray -t apps < <(ls -1 $HOME/.lib/app)
-	printf "%s\n" "${apps[@]}"
+
+  readarray -t apps < <(cd "$APP_DIR" && find * -type f)
+
+  local folder
+
+  for app in "${apps[@]}"; do
+    unset folder
+    IFS=/ read -r folder app _ <<< "$app"
+    printf "%s%s%s\n" "$folder" "$iSEP" "$app"
+  done | column -t -s "$iSEP"
+
+	# printf "%s\n" "${apps[@]}"
 }
 
 key() {
-	source "$HOME/.lib/app/$1"
-	echo "$1:$KEY"
+  local app="$1"
+
+	source "$APP_DIR/$app"
+
+	echo "$app:$KEY"
 }
 
 keys() {
-	for app in $(basename -a "${APP_DIR}"/*); do
+  local apps
+
+  readarray -t apps < <(cd "$APP_DIR" && find * -type f)
+
+  for app in "${apps[@]}"; do
 		gui run key "$app"
 	done
 }
@@ -42,7 +51,11 @@ BINDS[edit]=alt-e
 HOOKS[edit]=accept
 DESCS[edit]='Edit in $EDITOR'
 edit() {
-	open "$APP_DIR/$1"
+  local folder app
+
+  read -r folder app _ <<< "$1"
+
+	open "$APP_DIR/$folder/$app"
 }
 
 run() {
@@ -50,7 +63,7 @@ run() {
 
 	shift 2
 
-	source "$HOME/.lib/app/$file"
+	source "$APP_DIR/$file"
 
 	if silent declare -F runner; then
 		runner "${@:3}"
@@ -61,20 +74,35 @@ BINDS[fg]=enter
 HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 fg() {
-	source "$HOME/.lib/app/$1"
-	gui awm fg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+  local folder app
+
+  IFS=$'/\t ' read -r folder app _ <<< "$1"
+
+	source "$HOME/.lib/app/$folder/$app"
+
+	gui awm fg "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:2}"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 bg() {
-	source "$HOME/.lib/app/$1"
-	gui awm bg "${ATTRIBUTES[@]}" -- gui run run "$1" "${@:2}"
+  local folder app
+
+  IFS=$'/\t ' read -r folder app _ <<< "$1"
+
+	source "$HOME/.lib/app/$folder/$app"
+
+	gui awm bg "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:2}"
 }
 
 BINDS[close]=alt-d
 DESCS[close]='Terminate window'
 close() {
-	source "$HOME/.lib/app/$1"
+  local folder app
+
+  read -r folder app _ <<< "$1"
+
+	source "$HOME/.lib/app/$folder/$app"
+
 	gui awm winkill "${ATTRIBUTES[@]}"
 }

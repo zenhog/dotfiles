@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+KEY='E:Home'
+
+runner() {
+  gui menu click
+}
