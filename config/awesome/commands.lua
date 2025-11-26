@@ -64,6 +64,12 @@ commands.layout = function()
   awful.tag.selected():emit_signal("property::selected")
 end
 
+commands.updateicon = function(menu, icon)
+  for s in screen do
+    s.menus[menu]:emit_signal("menus::" .. menu, icon)
+  end
+end
+
 commands.gototag = function(tagnum)
 	return function()
 		--local screen = awful.screen.focused()

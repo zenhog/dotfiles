@@ -96,11 +96,13 @@ for i = 1, 9 do
 end
 
 for _, line in ipairs(pipexec("gui")) do
-	local _, command, mod, key, _ = line:match("^(%S+):(%S+):(%S+):(%S+):(%S+)$")
+	local _, _, command, mod, key, _ =
+    line:match("^(%S+):(%S+):(%S+):(%S+):(%S+):(%S+)$")
 
 	globalkeys = gears.table.join(
 		globalkeys,
-		mapkey(mods[mod], key, spawn(string.format("menu loop %s", command)), "menu", command)
+		mapkey(mods[mod], key,
+      spawn(string.format("menu loop %s", command)), "menu", command)
 	)
 end
 
@@ -108,7 +110,8 @@ for _, line in ipairs(pipexec("gui run keys")) do
 	local app, mod, key = line:match("^(%S+):(%S+):(%S+)$")
 
 	globalkeys =
-		gears.table.join(globalkeys, mapkey(mods[mod], key, spawn(string.format("gui run fg %s", app)), "app", app))
+		gears.table.join(globalkeys, mapkey(mods[mod],
+      key, spawn(string.format("gui run fg %s", app)), "app", app))
 end
 
 for _, line in ipairs(pipexec("widget")) do

@@ -374,7 +374,7 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 	}))
 
-	local function iconwidget(icon, command, lcommand, rcommand, color)
+	local function iconwidget(icon, alticon, command, lcommand, rcommand, color)
 		local widget = wibox.widget.textbox()
 		color = color or "gray"
 
@@ -392,17 +392,32 @@ awful.screen.connect_for_each_screen(function(s)
 			end))
 		end
 
-		widget.font = theme.iconfont
-
-		widget.align = "center"
-		widget.valign = "center"
-		widget.markup = string.format(
-      '<b><span color="%s">%s</span></b>', color, icon)
-		widget.forced_width = theme.iconsize
+    widget.icon = icon
+    widget.alticon = alticon
+    widget.color = color
+    widget.align = "center"
+    widget.valign = "center"
+    widget.font = theme.iconfont
+    widget.forced_width = theme.iconsize
     widget.id = command
     widget.id = 'iconwidget'
+    widget.cmd = command
+
+    widget.update = function(kind)
+      widget.markup = string.format(
+        '<b><span color="%s">%s</span></b>', widget.color, widget[kind])
+    end
+
+    widget.update('icon')
 
 		widget:buttons(buttons)
+
+    local signame = string.format("menus::%s", widget.cmd)
+
+    widget:connect_signal(signame, function(w, newicon)
+      w.update(newicon)
+    end)
+
 		return widget
 	end
 
@@ -411,28 +426,16 @@ awful.screen.connect_for_each_screen(function(s)
 	local pipe = io.popen("gui")
 
 	for line in pipe:lines() do
-		local icon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S*)$")
+		local icon, alticon, command, _, _, color = line:match(
+      "^(%S+):(%S+):(%S+):(%S+):(%S+):(%S*)$")
     local buttons = {}
+
     local lcommand = string.format('menu loop %s', command)
     local rcommand = string.format('gui %s click', command)
 
 		if command then
 			s.menus[command] = iconwidget(
-        icon, command, lcommand, rcommand, color or nil)
-
-      if command == 'run' and _G.layout then
-        if _G.layout.icons then
-          _G.layout.icons['max'] = icon
-          _G.layout.color = color
-        end
-      end
-
-      if command == 'menu' and _G.menus then
-        if _G.menus.icons then
-          _G.menus.icons['enabled'] = icon
-          _G.menus.color = color
-        end
-      end
+        icon, alticon, command, lcommand, rcommand, color or nil)
 
       buttons = addbutton(buttons, 1, lcommand)
       buttons = addbutton(buttons, 3, rcommand)
@@ -486,12 +489,12 @@ awful.screen.connect_for_each_screen(function(s)
 			{
 				layout = wibox.layout.fixed.horizontal,
 				spacing = 1,
-				block(M.group(s.menus.menu), theme.iconsize),
+				block(M.group(s.menus.run), theme.iconsize),
 				block(M.group(s.menus.awm), theme.iconsize),
 				block(M.group(s.menus.ssh), theme.iconsize),
 				block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
 				block(M.group(widgets.ping_wan, widgets.ping_vpn1)),
-				block(M.group(widgets.ram, widgets.disk, widgets.temp)),
+				block(M.group(widgets.cpu, widgets.ram, widgets.disk, widgets.temp)),
         scroll(widgets.push),
 			},
 			{
@@ -509,9 +512,9 @@ awful.screen.connect_for_each_screen(function(s)
         block(M.group(widgets.mail, widgets.news, widgets.download)),
         block(M.group(widgets.battery)),
         block(M.group(widgets.date)),
-        block(M.group(s.menus.service), theme.iconsize),
-        block(M.group(s.menus.run), theme.iconsize),
         block(M.group(widgets.time)),
+        block(M.group(s.menus.service), theme.iconsize),
+        block(M.group(s.menus.menu), theme.iconsize),
       },
 		},
 		left = 1,

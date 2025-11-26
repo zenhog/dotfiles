@@ -17,13 +17,21 @@ M.register_handlers = function ()
 
       _G[obj].connect_signal(signame, function(c, ...)
         local args = { ... }
+
         if obj == 'client' then
           print(string.format("Signal [%s.%s] => (%d, [%s:%s.%s], %s)",
             obj, signame, c.pid or -1, c.profile, c.class, c.instance, c.name))
         end
-        if obj == 'tag' or obj == 'awesome' then
+
+        if obj == 'tag' then
+          print(string.format("Signal [%s.%s] => ([%d:%d], [.%s])",
+            obj, signame, c.screen.index or -1, c.index or -1, c.name))
+        end
+
+        if obj == 'awesome' then
           print(string.format("Signal [%s.%s]", obj, signame))
         end
+
         sighandler(c, table.unpack(args))
       end)
     end
@@ -31,15 +39,18 @@ M.register_handlers = function ()
 end
 
 local function update_layout_icon(t)
-    local icons = _G.layout.icons
+  local name = t.layout.name
 
-    local name = t.layout.name
-    t.screen.menus.run.markup = string.format(
-      '<b><span color="%s">%s</span></b>', _G.layout.color, icons[name]
-    )
+  local icon = 'icon'
+
+  if name:match('tile') then
+    icon = 'alticon'
+  end
+
+  t.screen.menus.awm:emit_signal("menus::awm", icon)
 end
 
-local function get_tagnum(c)
+local function set_tagnum(c)
   for i = 1,5 do
     local iconpath = string.format("%s/.icons/%d/%s.png",
       os.getenv("HOME"), i, c.profile)
@@ -66,7 +77,6 @@ end
 
 local function set_clienttag(c)
 	local tags = _G.tags
-  print(serpent.dump(tags))
 
 	if c.instance == "loop" then
 		c:move_to_tag(tags[5])
@@ -75,7 +85,7 @@ local function set_clienttag(c)
 
   set_profile(c)
 
-  c.initag = get_tagnum(c)
+  c.initag = set_tagnum(c)
   c.tagnum = c.initag
 
   c:move_to_tag(tags[c.tagnum])
@@ -91,12 +101,14 @@ local function set_attributes(c)
     end
   end
 
-  if c.class:match("tmux") or
-    c.class:match("rmux") or
-    c.class:match("Alacritty") or
-    c.class:match("URxvt")
-  then
-    c.opacity = 0.75
+  if c.class then
+    if c.class:match("tmux") or
+      c.class:match("rmux") or
+      c.class:match("Alacritty") or
+      c.class:match("URxvt")
+    then
+      c.opacity = 0.75
+    end
   end
 
 	if c.class == "menu" and c.instance == "loop" then
@@ -295,7 +307,6 @@ handlers.client['request::activate'] = function(c)
 	focus_menu()
 end
 
-
 handlers.client.unmanage = function(c)
 	if c.fullscreen then
 		update_wibox_visibility(c.screen)
@@ -326,12 +337,12 @@ handlers.client['property::icon'] = function(c)
   if c and not c.mutex then
     if c.alticon and c.alticon ~= c.icon then
       c.mutex = true
-      c:emit_signal("icon_mutex")
+      c:emit_signal("icon::mutex")
     end
   end
 end
 
-handlers.client.icon_mutex = function(c)
+handlers.client["icon::mutex"] = function(c)
   if c.mutex then
     c.icon = c.alticon
     c.mutex = nil
