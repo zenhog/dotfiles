@@ -16,16 +16,6 @@ local naughty = require("naughty")
 
 theme.init(os.getenv("HOME") .. "/.config/awesome/theme.lua")
 
-_G.layout = {
-  updates = {
-    updating = '',
-    disabled = '󰒱',
-  },
-  icons = {
-    tileleft = ''
-  }
-}
-
 local keys = require("keys")
 local wibars = require("wibars")
 
