@@ -16,7 +16,7 @@ view() {
 list() {
 	local apps
 
-  readarray -t apps < <(cd "$APP_DIR" && find * -type f)
+  readarray -t apps < <(cd "$APP_DIR" && find * -type f -or -type l)
 
   local folder
 
@@ -59,7 +59,7 @@ edit() {
 }
 
 run() {
-	local file="$1" mode="$2"
+	local file="$1"
 
 	shift 2
 
@@ -70,29 +70,33 @@ run() {
 	fi
 }
 
+spawn() {
+  local folder app mode="$1"
+
+  IFS=$'/\t ' read -r folder app _ <<< "$2"
+
+  local ATTRIBUTES
+
+  if [[ "$folder" == window ]]; then
+    ATTRIBUTES=(profile="$app")
+  fi
+
+	source "$HOME/.lib/app/$folder/$app"
+
+	gui awm "$mode" "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:3}"
+}
+
 BINDS[fg]=enter
 HOOKS[fg]=accept
 DESCS[fg]='Run in the foreground'
 fg() {
-  local folder app
-
-  IFS=$'/\t ' read -r folder app _ <<< "$1"
-
-	source "$HOME/.lib/app/$folder/$app"
-
-	gui awm fg "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:2}"
+  spawn fg "$@"
 }
 
 BINDS[bg]=tab
 DESCS[bg]='Run in the background'
 bg() {
-  local folder app
-
-  IFS=$'/\t ' read -r folder app _ <<< "$1"
-
-	source "$HOME/.lib/app/$folder/$app"
-
-	gui awm bg "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:2}"
+  spawn bg "$@"
 }
 
 BINDS[close]=alt-d

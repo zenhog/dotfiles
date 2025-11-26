@@ -1,9 +1,1 @@
-#!/usr/bin/env bash
-
-KEY='S-W:e'
-
-ATTRIBUTES=(profile=zen-vpn2)
-
-runner() {
-  browser zen vpn2
-}
+firefox

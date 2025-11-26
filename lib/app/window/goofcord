@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-ATTRIBUTES=(profile=goofcord)
-
-runner() {
-  flatpak run io.github.milkshiift.GoofCord
-}

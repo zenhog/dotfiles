@@ -2,8 +2,6 @@
 
 KEY='S-W:Return'
 
-ATTRIBUTES=(profile=ctfbox)
-
 runner() {
   gui ssh mux ctfbox
 }

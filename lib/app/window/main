@@ -2,8 +2,6 @@
 
 KEY='W:Return'
 
-ATTRIBUTES=(profile=main)
-
 runner() {
   gui tmux attach local "$(hostname)"
 }

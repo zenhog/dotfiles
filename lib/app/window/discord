@@ -1,11 +1,1 @@
-#!/usr/bin/env bash
-
-KEY='W:r'
-
-ATTRIBUTES=(profile=discord)
-
-runner() {
-  #flatpak run com.discordapp.Discord
-  # Discord
-  browser zen discord
-}
+firefox
