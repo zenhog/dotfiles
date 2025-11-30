@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='W:y'
-
-runner() {
-  browser zen "$app"
-}

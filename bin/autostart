@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
 
-gui run bg window/zen
 gui run bg window/youtube
 gui run bg window/discord
-gui run bg window/spotify
-gui run bg window/whatsie
-gui run bg window/fmovies

@@ -40,7 +40,7 @@ while true; do
   gui awm setattributes class=menu instance=loop -- \
     @hidden=false @minimized=false >&2
 
-  gui awm raise class=menu instance=loop >&2
+  gui awm fg class=menu instance=loop >&2
 
   menu main "${args[@]}"
 

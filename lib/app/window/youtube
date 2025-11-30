@@ -1,1 +1,7 @@
-firefox
+#!/usr/bin/env bash
+
+KEY='W:z'
+
+runner() {
+  browser "$app"
+}

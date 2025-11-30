@@ -59,14 +59,14 @@ edit() {
 }
 
 run() {
-	local file="$1"
+	local folder="$1" app="$2"
 
-	shift 2
+  shift 2
 
-	source "$APP_DIR/$file"
+	source "$APP_DIR/$folder/$app"
 
 	if silent declare -F runner; then
-		runner "${@:3}"
+		runner "$@"
 	fi
 }
 
@@ -81,9 +81,9 @@ spawn() {
     ATTRIBUTES=(profile="$app")
   fi
 
-	source "$HOME/.lib/app/$folder/$app"
+	source "$APP_DIR/$folder/$app"
 
-	gui awm "$mode" "${ATTRIBUTES[@]}" -- gui run run "$folder/$app" "${@:3}"
+	gui awm "$mode" "${ATTRIBUTES[@]}" -- gui run run "$folder" "$app" "${@:3}"
 }
 
 BINDS[fg]=enter

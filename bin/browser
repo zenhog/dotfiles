@@ -13,6 +13,10 @@ TRIDACTYL_PATH="$NMH_PATH/tridactyl.json"
 VDHCOAPP_PATH="$NMH_PATH/net.downloadhelper.coapp.json"
 ZENBROWSER_PATH="$HOME/.local/share/zen"
 
+LOCKDIR="$HOME/.lockdir"
+
+mkdir -p "$LOCKDIR"
+
 read -r CTTY < <(cat /sys/class/tty/tty0/active)
 read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
 
@@ -123,12 +127,15 @@ if [[ "$CTTY" == "$RTTY" ]]; then
           found=1
 
           profile="$type"
+          lockfile="$LOCKDIR/$profile.lock"
 
           if [[ "$type" == vpn* ]]; then
             profile="$kind-$type"
+            lockfile="$LOCKDIR/$profile.lock"
           fi
 
-          if ! gui awm exists "profile=$profile"; then
+          if [[ ! -e "$lockfile" ]] && ! gui awm exists "profile=$profile"
+          then
             rm -rf "$HOME/.zen/$type"
 
             # (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ |
@@ -145,6 +152,8 @@ if [[ "$CTTY" == "$RTTY" ]]; then
 
             (cd "$HOME/.zen" && cp -a wan "$type")
             rm -rf "$HOME/.zen/$type/sessionstore-backups/"
+            sed -i '/zen.view.compact.should-enable-at-startup/s/false/true/' \
+              "$HOME/.zen/$type/prefs.js"
 
             url="${types[$t]}"
             set "$url" "$@"
@@ -159,9 +168,10 @@ if [[ "$CTTY" == "$RTTY" ]]; then
           type=wan
         fi
         profile="$kind"
+        lockfile="$LOCKDIR/$profile.lock"
       fi
 
-      cmd+=(gui awm fg "profile=$profile" --)
+      cmd+=(gui awm fg lockfile="$lockfile" profile="$profile" --)
 
       [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
 
@@ -176,6 +186,12 @@ if [[ "$CTTY" == "$RTTY" ]]; then
         # --class
         # "$profile"
       )
+
+      if [[ -e "$lockfile" ]]; then
+        exit 1
+      fi
+
+      touch "$lockfile"
 
       if gui awm exists "profile=$profile"; then
         # "${cmd[@]}"
