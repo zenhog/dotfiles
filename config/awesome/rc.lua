@@ -19,6 +19,8 @@ theme.init(os.getenv("HOME") .. "/.config/awesome/theme.lua")
 local keys = require("keys")
 local wibars = require("wibars")
 
+_G.cmds = {}
+
 _G.tags = sharedtags({
 	{
 		name = "1",

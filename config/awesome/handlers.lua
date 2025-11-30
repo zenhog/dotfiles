@@ -73,20 +73,23 @@ local function set_profile(c)
 	if c.profile == os.getenv("HOSTNAME") then
 		c.profile = 'main'
 	end
+
+  if c.class == 'menu' and c.instance == 'loop' then
+    c.profile = 'menuloop'
+  end
 end
 
 local function set_clienttag(c)
 	local tags = _G.tags
 
-	if c.instance == "loop" then
-		c:move_to_tag(tags[5])
-		return
-	end
-
   set_profile(c)
 
-  c.initag = set_tagnum(c)
-  c.tagnum = c.initag
+	if c.profile == "menuloop" then
+    c.tagnum = 0
+    return
+	end
+
+  c.tagnum = c.tagnum or set_tagnum(c)
 
   c:move_to_tag(tags[c.tagnum])
 end
@@ -95,8 +98,8 @@ local function set_attributes(c)
 	local s = awful.screen.focused()
 	local w, h = s.geometry.width, s.geometry.height
 
-  if _G.attrs and _G.attrs[c.pid] then
-    for k, v in pairs(_G.attrs[c.pid]) do
+  if c.state then
+    for k, v in pairs(c.state.attrs) do
       c[k] = v
     end
   end
@@ -148,7 +151,7 @@ end
 
 local function focus_menu()
 	for _, c in ipairs(client.get()) do
-		if c.instance == "loop" and c.hidden == false then
+		if c.profile == "menuloop" and c.hidden == false then
 			client.focus = c
 		end
 	end
@@ -229,12 +232,17 @@ local function set_clientimg(c)
 	end
 end
 
+local function set_statusbars(c)
+	c.screen.leftbar.visible = not c.fullscreen
+	c.screen.topbar.visible = not c.fullscreen
+end
+
 local function update_wibox_visibility(s)
 	local current_tag = s.selected_tag
 	local should_hide = false
 
-	for _, c in ipairs(client.get()) do
-		if c.screen == s and c.fullscreen and c:tags()[1] == current_tag then
+  for _, c in ipairs(current_tag:clients()) do
+		if c.fullscreen then
 			should_hide = true
 			break
 		end
@@ -245,20 +253,22 @@ local function update_wibox_visibility(s)
 end
 
 handlers.client.tagged = function(c)
-  if c.tagnum then
+  if c.tagnum and c.tagnum ~= 0 then
     local tags = _G.tags
     c:move_to_tag(tags[c.tagnum])
-    c.tagnum = nil
   end
 
-  for _, s in ipairs(screen) do
-    update_wibox_visibility(s)
-  end
+  -- for _, s in ipairs(screen) do
+  --   update_wibox_visibility(s)
+  -- end
+
+  set_statusbars(c)
 
   update_screen_tags()
 end
 
 handlers.client['property::fullscreen'] = function(c)
+  set_statusbars(c)
   c.first_tag:emit_signal("property::selected")
 end
 
@@ -269,6 +279,23 @@ handlers.awesome.exit = function(restarting)
 end
 
 handlers.client.manage = function(c)
+
+  if _G.states and _G.states[c.pid] then
+    c.state = _G.states[c.pid]
+  end
+
+  for _, cc in ipairs(client.get()) do
+    if c ~= cc and c.state and cc.state then
+      if awm.cmp(c.state.attrs, cc.state.attrs) then
+        print(string.format('Client "%s" already exists!', c.state.cmd))
+        -- if c.lockfile then
+        --   os.execute('rm -f ' .. c.lockfile)
+        -- end
+        c:kill()
+      end
+    end
+  end
+
 	set_attributes(c)
 	set_clienttag(c)
 	set_clientimg(c)
@@ -276,13 +303,10 @@ handlers.client.manage = function(c)
 
   set_visibility(c.first_tag)
 
-  if _G.modes and _G.modes[c.pid] then
-    if _G.modes[c.pid] == 'fg' then
-      c:raise()
-      client.focus = c
-      c.first_tag:view_only()
-    end
-    _G.modes[c.pid] = nil
+  if c.state and c.state.mode and c.state.mode == 'fg' then
+    c:raise()
+    client.focus = c
+    c.first_tag:view_only()
   end
 end
 
@@ -304,32 +328,35 @@ end
 
 handlers.client['request::activate'] = function(c)
   -- set_visibility(c.first_tag)
+  -- update_wibox_visibility(c.screen)
+  set_statusbars(c)
 	focus_menu()
 end
 
 handlers.client.unmanage = function(c)
-	if c.fullscreen then
-		update_wibox_visibility(c.screen)
-	end
+	-- if c.fullscreen then
+	-- 	update_wibox_visibility(c.screen)
+	-- end
+
+  set_statusbars(c)
+
   update_screen_tags()
-  if _G.attrs and _G.attrs[c.pid] then
-    _G.attrs[c.pid] = nil
-  end
-  if _G.modes and _G.modes[c.pid] then
-    _G.modes[c.pid] = nil
+
+  if c.lockfile then
+    os.execute('rm -f ' .. c.lockfile)
   end
 end
 
 handlers.tag['property::selected'] = function(t)
   update_layout_icon(t)
-  update_wibox_visibility(t.screen)
+  -- update_wibox_visibility(t.screen)
   update_screen_tags()
   set_visibility(t)
 end
 
 handlers.tag['property::layout'] = function(t)
   update_layout_icon(t)
-  update_wibox_visibility(t.screen)
+  -- update_wibox_visibility(t.screen)
   set_visibility(t)
 end
 
@@ -347,6 +374,33 @@ handlers.client["icon::mutex"] = function(c)
     c.icon = c.alticon
     c.mutex = nil
   end
+end
+
+local unwanted_props = {
+  "maximized",
+  "maximized_horizontal",
+  "maximized_vertical",
+  "above",
+  "below",
+  "sticky",
+  "ontop",
+}
+
+local function prevent_unwanted(c)
+  c.maximized = false
+  c.maximized_vertical = false
+  c.maximized_horizontal = false
+  c.above = false
+  c.below = false
+
+  if c.profile ~= "menuloop" then
+    c.sticky = false
+    c.ontop = false
+  end
+end
+
+for _, prop in ipairs(unwanted_props) do
+  handlers.client["property::" .. prop] = prevent_unwanted
 end
 
 return M

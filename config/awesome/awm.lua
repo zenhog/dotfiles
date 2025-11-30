@@ -8,43 +8,50 @@ local path = fs.get_cache_dir() .. 'persistent_state.lua'
 
 local awm = {}
 
-awm.match = function(prop, val, clients)
-  local res = {}
+awm.parse = function(args)
+  local attrs = {}
+  local props = {}
 
-  if not clients then
-    clients = client.get()
-  end
-
-  for _, c in ipairs(clients) do
-    if c[prop] == val then
-      table.insert(res, c)
-    end
-  end
-
-  return res
-end
-
-awm.find = function(...)
-  local args = { ... }
-  local clients = nil
+  local sep = false
 
   for i, arg in ipairs(args) do
-    if i % 2 == 1 then
-      goto continue
+    if arg == '--' then
+      sep = true
+    elseif not sep then
+      if i % 2 == 0 then
+        attrs[args[i-1]] = arg
+      end
+    else
+      if i % 2 == 1 then
+        props[args[i-1]] = arg
+      end
     end
-    clients = awm.match(args[i-1], arg, clients)
-    ::continue::
   end
 
-  if clients and clients[1] then
-    return clients[1]
+  return attrs, props
+end
+
+awm.match = function(c, attrs)
+  if not next(attrs) then
+    return false
+  end
+
+  for k, v in pairs(attrs) do
+    if c[k] ~= v then
+      return false
+    end
+  end
+  return true
+end
+
+awm.find = function(attrs)
+  for _, c in ipairs(client.get()) do
+    if awm.match(c, attrs) then
+      return c
+    end
   end
 
   return nil
-end
-
-awm.view = function(window)
-  local c = awm.find('window', window)
 end
 
 awm.list = function()
@@ -57,7 +64,7 @@ awm.list = function()
     res = res .. string.format(fmt,
       string.format('0x%08x', c.window or -1),
       c.pid or -1,
-      c.initag or -1,
+      c.tagnum or -1,
       c.profile,
       c.class,
       c.instance,
@@ -67,37 +74,7 @@ awm.list = function()
   return res
 end
 
-awm.setprops = function(props, ...)
-  local args = { ... }
-
-  local c = awm.find(table.unpack(args))
-
-  for k, v in pairs(props) do
-    c[k] = v
-  end
-end
-
-awm.getprops = function(props, ...)
-  local args = { ... }
-
-  local res = '\n'
-
-  local c = awm.find(table.unpack(args))
-
-  for _, v in ipairs(props) do
-    local fmt
-    if c and type(c[v]) == string then
-      fmt = '%s: "%s"\n'
-    else
-      fmt = '%s: %s\n'
-    end
-    res = res .. string.format(fmt, v, tostring(c[v] or nil))
-  end
-
-  return res
-end
-
-local raise = function(c)
+awm.raise = function(c)
   if c then
     c.hidden = false
     c.minimized = false
@@ -106,47 +83,70 @@ local raise = function(c)
       c.first_tag:view_only()
     end
     client.focus = c
-    return c.pid
+    return true
   end
-
   return false
 end
 
-awm.raise = function(...)
+awm.cmp = function(t1, t2)
+  if not next(t1) then return false end
+  if not next(t2) then return false end
+
+  if type(t1) ~= "table" or type(t2) ~= "table" then return false end
+
+  for k, v in pairs(t1) do
+    if t2[k] ~= v then
+      return false
+    end
+  end
+
+  for k, v in pairs(t2) do
+    if t1[k] ~= v then
+      return false
+    end
+  end
+
+  return true
+end
+
+awm.inspect = function()
+  for pid, attrs in pairs(_G.attrs) do
+    for k, v in pairs(attrs) do
+      print(string.format('attrs[%d].%s = %s',
+        pid, k, v)
+      )
+    end
+  end
+end
+
+awm.getattributes = function(...)
   local args = { ... }
 
-  local c = awm.find(table.unpack(args))
+  local c = awm.find(args)
 
-  raise(c)
+
 end
 
 awm.spawn = function(mode, cmd, ...)
   local args = { ... }
-  local attrs = {}
 
-  for i, arg in ipairs(args) do
-    if i % 2 == 0 then
-      attrs[args[i-1]] = arg
-    end
-  end
+  local attrs = awm.parse(args)
 
-  local c = awm.find(table.unpack(args))
+  local c = awm.find(attrs)
 
-  if c then
-    if mode == 'fg' then
-      return raise(c)
-    else
-      return c.pid
-    end
+  if c and mode == 'fg' then
+    return awm.raise(c)
   end
 
   local pid = awful.spawn(cmd)
 
   if pid and type(pid) == 'number' then
-    _G.attrs = _G.attrs or {}
-    _G.modes = _G.modes or {}
-    _G.attrs[pid] = attrs
-    _G.modes[pid] = mode
+    _G.states = _G.states or {}
+    _G.states[pid] = {
+      attrs = attrs,
+      mode = mode,
+      cmd = cmd,
+    }
     return pid
   end
 
@@ -172,8 +172,7 @@ awm.load = function()
 
   if not data then return end
 
-  _G.attrs = data.attrs or {}
-  _G.modes = data.modes or {}
+  _G.states = data.states or {}
 
   local state = data.state or nil
 
@@ -213,8 +212,7 @@ end
 
 awm.save = function()
   local data = {
-    attrs = _G.attrs,
-    modes = _G.modes,
+    states = _G.states
   }
 
   data.state = {}
