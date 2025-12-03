@@ -146,27 +146,6 @@ sepline() {
 	[[ -n "$NONEWLINE" ]] || echo
 }
 
-parse() {
-	local lhs rhs side=lhs type="$1"
-
-	shift
-
-	for item in "$@"; do
-		if [[ "$item" == "--" ]]; then
-			side=rhs
-			continue
-		fi
-
-		[[ "$side" == lhs ]] && lhs+=("$item")
-		[[ "$side" == rhs ]] && rhs+=("$item")
-	done
-
-	case "$type" in
-	lhs) printf -- "%s\n" "${lhs[@]}" ;;
-	rhs) printf -- "%s\n" "${rhs[@]}" ;;
-	esac
-}
-
 zug() {
 	mute which ueberzug || return
 }

@@ -3,5 +3,5 @@
 KEY='W:r'
 
 runner() {
-  browser "$app"
+  browser zen discord
 }

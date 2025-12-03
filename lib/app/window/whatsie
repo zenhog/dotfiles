@@ -3,5 +3,5 @@
 KEY='W:t'
 
 runner() {
-  browser "$app"
+  browser zen whatsie
 }

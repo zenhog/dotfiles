@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-KEY='W:v'
+KEY='W:d'
 
 runner() {
-  browser zen fmovies
+  browser zen telegram
 }

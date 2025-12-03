@@ -3,5 +3,5 @@
 KEY='W:s'
 
 runner() {
-  browser "$app"
+  browser zen spotify
 }

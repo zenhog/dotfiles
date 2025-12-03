@@ -3,5 +3,5 @@
 KEY='W:w'
 
 runner() {
-  browser "$app"
+  browser zen wan
 }

@@ -3,5 +3,5 @@
 KEY='W:z'
 
 runner() {
-  browser "$app"
+  browser zen youtube
 }

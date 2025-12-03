@@ -1,209 +1,153 @@
 #!/usr/bin/env bash
 
-
-TRIDACTYL_URL='https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh'
-
-VDHCOAPP_URL='https://github.com/aclap-dev/vdhcoapp/releases/latest/download/install.sh'
-
-ZENBROWSER_URL='https://github.com/zen-browser/desktop/releases/latest/download/zen.linux-x86_64.tar.xz'
-
-NMH_PATH="$HOME/.mozilla/native-messaging-hosts"
-
-TRIDACTYL_PATH="$NMH_PATH/tridactyl.json"
-VDHCOAPP_PATH="$NMH_PATH/net.downloadhelper.coapp.json"
-ZENBROWSER_PATH="$HOME/.local/share/zen"
-
 LOCKDIR="$HOME/.lockdir"
 
-mkdir -p "$LOCKDIR"
-
-read -r CTTY < <(cat /sys/class/tty/tty0/active)
-read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
-
-kind="$1"
-type="$2"
-
-declare -A types=(
+declare -A SUBPATHS=(
   [whatsie]='https://web.whatsapp.com/'
   [discord]='https://discord.com/channels/@me'
   [fmovies]='https://ww4.seeflix.to/home/'
   [spotify]='https://open.spotify.com/'
   [youtube]='https://www.youtube.com/'
+  [telegram]='https://web.telegram.org/k/'
   [vpn]='https://www.showmyip.com/'
 )
 
-declare -A doms=(
-  [whatsie]='whatsapp.com'
-  [discord]='discord.com'
-  [fmovies]='seeflix.to'
-  [spotify]='spotify.com'
-  [youtube]='youtube.com'
+setup() {
+  local nmh_path="$HOME/.mozilla/native-messaging-hosts"
+
+  local zen_path="$HOME/.local/share/zen"
+  local tri_path="$nmh_path/tridactyl.json"
+  local vdh_path="$nmh_path/net.downloadhelper.coapp.json"
+
+  local zen_url=(
+    'https://github.com/zen-browser/desktop'
+    '/releases/latest/download/zen.linux-x86_64.tar.xz'
+  )
+
+  local tri_url=(
+    'https://raw.githubusercontent.com/tridactyl/native_messenger'
+    '/master/installers/install.sh'
+  )
+
+  local vdh_url=(
+    'https://github.com/aclap-dev/vdhcoapp'
+    '/releases/latest/download/install.sh'
+  )
+
+  url() (IFS=; printf "%s" "$*")
+
+  read -r zen_url < <(url "${zen_url[@]}")
+  read -r tri_url < <(url "${tri_url[@]}")
+  read -r vdh_url < <(url "${vdh_url[@]}")
+
+  if [[ ! -d "$zen_path" ]]; then
+    if curl -fSL "$zen_url" --output - | tar xJf - -C "${zen_path%/*}"; then
+      ln -svf "$zen_path/zen" "$HOME/.local/bin"
+    fi
+  fi
+
+  if [[ ! -f "$tri_path" ]]; then
+    curl -sSLf "$tri_url" | bash
+  fi
+
+  if [[ ! -f "$vdh_path" ]]; then
+    curl -sSLf "$vdh_url" | bash
+  fi
+}
+
+clone() (
+  local subpath="$1"
+
+  local basedir="$HOME/.zen"
+
+  if cd "$basedir"; then
+    rm -rf "$subpath"
+    cp -a wan "$subpath"
+    rm -rf "$subpath/sessionstore-backups/"
+    # save storage specific to subpath
+  fi
 )
 
+spawn() {
+  local browser="$1"
+  local subpath="$2"
+  local profile="$3"
+  local lockfile="$LOCKDIR/$profile.lock"
 
-if [[ "$CTTY" == "$RTTY" ]]; then
-  case "$kind" in
-    list)
-      for dom in "${!doms[@]}"; do
-        echo "$dom"
-      done
-      echo zen
-      echo zen-vpn1
-      echo zen-vpn2
-      echo qutebrowser
-      echo qutebrowser-vpn1
-      echo qutebrowser-vpn2
-      echo firefox
-      echo firefox-vpn1
-      echo firefox-vpn2
+  shift 3
+
+  exec 9>"$lockfile"
+
+  flock -n 9 || exit 1
+
+  if [[ "$subpath" != wan ]]; then
+    clone "$subpath"
+  fi
+
+  exec "$@"
+}
+
+browse() {
+  local browser="$1"
+  local subpath="$2"
+
+  local profile="$browser.$subpath"
+
+  local url="$3"
+
+  for path in "${!SUBPATHS[@]}"; do
+    if [[ -z "$url" && "$subpath" == "$path"* ]]; then
+      url="${SUBPATHS[$path]}"
+      break
+    fi
+  done
+
+  local cmd=(gui awm fg profile="$profile" --)
+
+  cmd+=(browser spawn "$browser" "$subpath" "$profile")
+
+  if [[ "$subpath" == vpn* ]]; then
+    cmd+=(cgexec -g net_cls:"$subpath")
+  fi
+
+  local subcmd+=("$browser" -p "$subpath")
+
+  if [[ -n "$url" ]]; then
+    subcmd+=("$url")
+  fi
+
+  cmd+=("${subcmd[@]}")
+
+  if gui awm exists profile="$profile" && [[ -n "$url" ]]; then
+    exec "${subcmd[@]}"
+  fi
+
+  exec "${cmd[@]}"
+}
+
+main() {
+  local browser="$1"
+  local subpath="$2"
+
+  shift 2
+
+  read -r CTTY < <(cat /sys/class/tty/tty0/active)
+  read -r RTTY < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+
+  [[ "$CTTY" != "$RTTY" ]] && exec w3m "$@"
+
+  case "$browser" in
+    spawn)
+      spawn "$subpath" "$@"
       ;;
-    qutebrowser)
-      shift
-
-      if [[ "$type" == vpn* ]]; then
-        shift
-      else
-        type=wan
-      fi
-
-      tmpdir="/tmp/qutebrowser/instances/$type"
-
-      mkdir -p "$tmpdir/config"
-
-      for f in $HOME/.config/qutebrowser/*; do
-        ln -s "$f" "$tmpdir/config/" 2>/dev/null
-      done
-
-      mkdir -p "$tmpdir/data/sessions"
-
-      QUTEDATA="$HOME/.local/share/qutebrowser"
-
-      for f in "$QUTEDATA"/sessions/*; do
-        ln -s "$f" "$tmpdir/data/sessions/" 2>/dev/null
-      done
-
-      for f in "$QUTEDATA"/{blocked-hosts,adblock-cache.dat}; do
-        ln -s "$f" "$tmpdir/data/" 2>/dev/null
-      done
-
-      profile="$kind-$type"
-
-      [[ "$type" == wan ]] && profile=qutebrowser
-
-      cmd+=(gui awm fg "profile=$profile" --)
-
-      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
-
-      cmd+=(qutebrowser --qt-arg name "$profile" -B "$tmpdir")
-
-      if gui awm exists "profile=$profile"; then
-        "${cmd[@]}"
-        [[ -n "$*" ]] && qutebrowser -B "$tmpdir" --target tab "$@"
-      else
-        "${cmd[@]}" --target tab "$@"
-      fi
-      ;;
-    firefox|zen)
-      shift
-
-      if [[ "$kind" == zen && ! -d "$ZENBROWSER_PATH" ]]; then
-        curl -fSL "$ZENBROWSER_URL" --output - | tar xJf - \
-          -C "${ZENBROWSER_PATH%/*}" &&
-            ln -svf "$ZENBROWSER_PATH/zen" "$HOME/.local/bin"
-      fi
-
-      if [[ ! -f "$TRIDACTYL_PATH" ]]; then
-        curl -sSLf "$TRIDACTYL_URL" | bash
-      fi
-
-      if [[ ! -f "$VDHCOAPP_PATH" ]]; then
-        curl -sSLf "$VDHCOAPP_URL" | bash
-      fi
-
-      for t in "${!types[@]}"; do
-        if [[ "$type" == "$t"* ]]; then
-          shift
-
-          found=1
-
-          profile="$type"
-          lockfile="$LOCKDIR/$profile.lock"
-
-          if [[ "$type" == vpn* ]]; then
-            profile="$kind-$type"
-            lockfile="$LOCKDIR/$profile.lock"
-          fi
-
-          if [[ ! -e "$lockfile" ]] && ! gui awm exists "profile=$profile"
-          then
-            rm -rf "$HOME/.zen/$type"
-
-            # (cd "$HOME/.zen" && git archive zen wan --prefix "$type"/ |
-            #   tar -xf -)
-
-            # (cd "$HOME/.zen/$type" && mv wan/* . && rm -rf wan)
-            #
-            # (cd "$HOME/.zen/wan" && cp -r cookies.sqlite* ../"$type"/)
-            # (cd "$HOME/.zen/wan" && cp -r storage.sqlite* ../"$type"/)
-            #
-            # (cd "$HOME/.zen/wan" &&
-            #   cp -r storage/default/https+++*"${doms[$type]}"/ \
-            #   ../"$type"/storage/default)
-
-            (cd "$HOME/.zen" && cp -a wan "$type")
-            rm -rf "$HOME/.zen/$type/sessionstore-backups/"
-            sed -i '/zen.view.compact.should-enable-at-startup/s/false/true/' \
-              "$HOME/.zen/$type/prefs.js"
-
-            url="${types[$t]}"
-            set "$url" "$@"
-          fi
-        fi
-      done
-
-      if [[ -z "$found" ]]; then
-        if [[ "$type" == wan ]]; then
-          shift
-        else
-          type=wan
-        fi
-        profile="$kind"
-        lockfile="$LOCKDIR/$profile.lock"
-      fi
-
-      cmd+=(gui awm fg lockfile="$lockfile" profile="$profile" --)
-
-      [[ "$type" == vpn* ]] && cmd+=(cgexec -g "net_cls:$type")
-
-      cmd+=(
-        # env
-        # GTK_CLASS_OVERRIDE="$profile"
-        "$kind"
-        --new-instance
-        # --no-remote
-        -p
-        "$type"
-        # --class
-        # "$profile"
-      )
-
-      if [[ -e "$lockfile" ]]; then
-        exit 1
-      fi
-
-      touch "$lockfile"
-
-      if gui awm exists "profile=$profile"; then
-        # "${cmd[@]}"
-        [[ -n "$1" ]] && "$kind" -p "$type" --new-tab "$1"
-      else
-        "${cmd[@]}" "$@"
-      fi
+    zen|firefox)
+      setup
+      browse "$browser" "$subpath" "$@"
       ;;
     *)
-      browser zen "$@"
+      browser zen wan "$@"
       ;;
   esac
-else
-  w3m "$@"
-fi
+}
+
+main "$@"
