@@ -282,7 +282,7 @@ awm.load = function()
     end)
   end
 
-  -- os.remove(path)
+  os.remove(path)
 end
 
 awm.save = function()
