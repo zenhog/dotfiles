@@ -1,7 +1,6 @@
 local awm = require('awm')
 local awful = require('awful')
 local gears = require('gears')
-local serpent = require('serpent')
 local fs = gears.filesystem
 
 local M = {}
@@ -19,17 +18,17 @@ M.register_handlers = function ()
         local args = { ... }
 
         if obj == 'client' then
-          print(string.format("Signal [%s.%s] => (%d, [%s:%s.%s], %s)",
-            obj, signame, c.pid or -1, c.profile, c.class, c.instance, c.name))
+          print(
+            string.format("Caught [%s.%s] on [%s]", obj, signame, c.profile)
+          )
         end
 
         if obj == 'tag' then
-          print(string.format("Signal [%s.%s] => ([%d:%d], [.%s])",
-            obj, signame, c.screen.index or -1, c.index or -1, c.name))
+          print(string.format("Caught [%s.%s] on [%s]", obj, signame, c.name))
         end
 
         if obj == 'awesome' then
-          print(string.format("Signal [%s.%s]", obj, signame))
+          print(string.format("Caught [%s.%s]", obj, signame))
         end
 
         sighandler(c, table.unpack(args))
@@ -294,7 +293,30 @@ handlers.client.manage = function(c)
   if c.state and c.state.mode and c.state.mode == 'fg' then
     c:raise()
     client.focus = c
-    c.first_tag:view_only()
+    return c.first_tag:view_only()
+  end
+
+  local current_screen = awful.screen.focused()
+
+  local belongs_elsewhere = false
+
+  for _, t in ipairs(c:tags()) do
+    if t.screen ~= current_screen then
+      belongs_elsewhere = true
+      break
+    end
+  end
+
+  if belongs_elsewhere then
+    c:lower()
+    if client.focus == c then
+      client.focus = nil
+    end
+
+    c:tags({})
+    gears.timer.delayed_call(function()
+      c:tags(c:tags())
+    end)
   end
 end
 
@@ -339,13 +361,13 @@ handlers.tag['property::selected'] = function(t)
   update_layout_icon(t)
   -- update_wibox_visibility(t.screen)
   update_screen_tags()
-  set_visibility(t)
+  -- set_visibility(t)
 end
 
 handlers.tag['property::layout'] = function(t)
   update_layout_icon(t)
   -- update_wibox_visibility(t.screen)
-  set_visibility(t)
+  -- set_visibility(t)
 end
 
 handlers.client['property::icon'] = function(c)

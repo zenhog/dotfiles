@@ -83,8 +83,9 @@ awful.rules.rules = {
 	{
 		rule = {},
 		properties = {
-			focus = awful.client.focus.filter,
-			raise = true,
+			-- focus = awful.client.focus.filter,
+			raise = false,
+      focus = false,
 			keys = keys,
 			-- buttons = clientbuttons,
 			screen = awful.screen.preferred,

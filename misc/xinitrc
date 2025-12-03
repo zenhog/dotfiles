@@ -92,7 +92,4 @@ register
 
 gui action inittheme &>/dev/null
 
-find "$HOME/.lockdir" -type f -exec rm -f {} \;
-
 awesome
-# i3
