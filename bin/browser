@@ -93,11 +93,11 @@ browse() {
 
   local profile="$browser.$subpath"
 
-  local url="$3"
+  local url="$3" suburl
 
   for path in "${!SUBPATHS[@]}"; do
-    if [[ -z "$url" && "$subpath" == "$path"* ]]; then
-      url="${SUBPATHS[$path]}"
+    if [[ "$subpath" == "$path"* ]]; then
+      suburl="${SUBPATHS[$path]}"
       break
     fi
   done
@@ -112,17 +112,15 @@ browse() {
 
   local subcmd+=("$browser" -p "$subpath")
 
-  if [[ -n "$url" ]]; then
-    subcmd+=("$url")
-  fi
-
-  cmd+=("${subcmd[@]}")
-
   if gui awm exists profile="$profile" && [[ -n "$url" ]]; then
-    exec "${subcmd[@]}"
+    exec "${subcmd[@]}" "$url"
   fi
 
-  exec "${cmd[@]}"
+  if [[ -n "$suburl" ]]; then
+    subcmd+=("$suburl")
+  fi
+
+  exec "${cmd[@]}" "${subcmd[@]}"
 }
 
 main() {
