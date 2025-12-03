@@ -6,11 +6,15 @@ local fs = require("gears.filesystem")
 local serpent = require("serpent")
 local path = fs.get_cache_dir() .. 'persistent_state.lua'
 
+local home = os.getenv("HOME")
+local lockdir = home .. '/.lockdir'
+
 local awm = {}
 
 awm.parse = function(args)
   local attrs = {}
   local props = {}
+  local keys = {}
 
   local sep = false
 
@@ -22,13 +26,14 @@ awm.parse = function(args)
         attrs[args[i-1]] = arg
       end
     else
+      table.insert(keys, arg)
       if i % 2 == 1 then
         props[args[i-1]] = arg
       end
     end
   end
 
-  return attrs, props
+  return attrs, props, keys
 end
 
 awm.match = function(c, attrs)
@@ -54,24 +59,41 @@ awm.find = function(attrs)
   return nil
 end
 
-awm.list = function()
-  local res = '\n'
+awm.fmt = function(c, keys)
+  local res = ''
   local sep = '\x01'
-  local fmt = '%s' .. sep .. '%d' .. sep .. '%d' .. sep .. '%s' .. sep .. '%s'
-    .. sep .. '%s' .. sep .. '[%s]' .. '\n'
+
+  for i, key in ipairs(keys) do
+    if c then
+      local fmt = '%s'
+
+      if type(c[key]) == 'number' then
+        fmt = '%d'
+        if key == 'window' then
+          fmt = "0x%08x"
+        end
+      end
+
+      if i == #keys then
+        sep = '\n'
+      end
+
+      res = res .. string.format(fmt, c[key]) .. sep
+    end
+  end
+
+  return res
+end
+
+awm.list = function(...)
+  local args = { ... }
+  local list = '\n'
 
   for _, c in ipairs(client.get()) do
-    res = res .. string.format(fmt,
-      string.format('0x%08x', c.window or -1),
-      c.pid or -1,
-      c.tagnum or -1,
-      c.profile,
-      c.class,
-      c.instance,
-      c.name
-    )
+    list = list .. awm.fmt(c, args)
   end
-  return res
+
+  return list
 end
 
 awm.raise = function(c)
@@ -83,6 +105,7 @@ awm.raise = function(c)
       c.first_tag:view_only()
     end
     client.focus = c
+    print(string.format("Raising: %s\n", c.profile))
     return true
   end
   return false
@@ -112,19 +135,63 @@ end
 awm.inspect = function()
   for pid, attrs in pairs(_G.attrs) do
     for k, v in pairs(attrs) do
-      print(string.format('attrs[%d].%s = %s',
-        pid, k, v)
+      print(string.format('attrs[%d].%s = %s', pid, k, v)
       )
     end
   end
 end
 
+awm.kill = function(...)
+  local args = { ... }
+  local attrs = awm.parse(args)
+  local c = awm.find(attrs)
+
+  if c then
+    return c:kill()
+  end
+
+  return false
+end
+
 awm.getattributes = function(...)
   local args = { ... }
+  local output = '\n'
 
-  local c = awm.find(args)
+  local attrs, keys
 
+  attrs, _, keys = awm.parse(args)
 
+  local c = awm.find(attrs)
+
+  if c then
+    for _, k in ipairs(keys) do
+      output = output .. string.format('%s: %s', k, awm.fmt(c, { k }))
+    end
+    return output
+  end
+  return false
+end
+
+awm.setattributes = function(...)
+  local args = { ... }
+  local output = '\n'
+
+  local attrs, props, keys = {}
+
+  attrs, props, _ = awm.parse(args)
+
+  local c = awm.find(attrs)
+
+  if c then
+    for k, v in pairs(props) do
+      if v == '' then v = nil end
+      c[k] = v
+      output = output .. string.format('%s: %s', k, awm.fmt(c, { k }))
+    end
+    return output
+  end
+
+  return false
 end
 
 awm.spawn = function(mode, cmd, ...)
@@ -134,8 +201,12 @@ awm.spawn = function(mode, cmd, ...)
 
   local c = awm.find(attrs)
 
-  if c and mode == 'fg' then
-    return awm.raise(c)
+  if c then
+    print(string.format('awm.spawn(%s): found %s', mode, c.profile))
+    if mode == 'fg' then
+      return awm.raise(c)
+    end
+    return true
   end
 
   local pid = awful.spawn(cmd)
@@ -147,9 +218,12 @@ awm.spawn = function(mode, cmd, ...)
       mode = mode,
       cmd = cmd,
     }
+    print(string.format('awm.spawn(%s): new "%s" as %s',
+      mode, cmd, attrs.profile))
     return pid
   end
 
+  print(string.format('awm.spawn(%s): failed "%s"', mode, cmd))
   return false
 end
 

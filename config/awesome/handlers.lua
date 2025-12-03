@@ -284,17 +284,14 @@ handlers.client.manage = function(c)
     c.state = _G.states[c.pid]
   end
 
-  for _, cc in ipairs(client.get()) do
-    if c ~= cc and c.state and cc.state then
-      if awm.cmp(c.state.attrs, cc.state.attrs) then
-        print(string.format('Client "%s" already exists!', c.state.cmd))
-        -- if c.lockfile then
-        --   os.execute('rm -f ' .. c.lockfile)
-        -- end
-        c:kill()
-      end
-    end
-  end
+  -- for _, cc in ipairs(client.get()) do
+  --   if c ~= cc and c.state and cc.state then
+  --     if awm.cmp(c.state.attrs, cc.state.attrs) then
+  --       print(string.format('Client "%s" already exists!', c.state.cmd))
+  --       c:kill()
+  --     end
+  --   end
+  -- end
 
 	set_attributes(c)
 	set_clienttag(c)
@@ -342,9 +339,9 @@ handlers.client.unmanage = function(c)
 
   update_screen_tags()
 
-  if c.lockfile then
-    os.execute('rm -f ' .. c.lockfile)
-  end
+  -- if c.lockfile then
+  --   os.execute('rm -f ' .. c.lockfile)
+  -- end
 end
 
 handlers.tag['property::selected'] = function(t)
