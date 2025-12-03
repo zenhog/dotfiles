@@ -5,6 +5,7 @@ local gears = require("gears")
 local fs = require("gears.filesystem")
 local serpent = require("serpent")
 local path = fs.get_cache_dir() .. 'persistent_state.lua'
+-- local widgets = require("widgets")
 
 local home = os.getenv("HOME")
 local lockdir = home .. '/.lockdir'
@@ -310,6 +311,16 @@ awm.save = function()
 
   f:write(serpent.dump(data))
   f:close()
+end
+
+awm.timeout = function(...)
+  local args = { ... }
+
+  local widgets = require("widgets")
+
+  for _, arg in ipairs(args) do
+    widgets.timers[arg]:emit_signal("timeout")
+  end
 end
 
 return awm
