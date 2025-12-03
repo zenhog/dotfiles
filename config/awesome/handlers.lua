@@ -324,6 +324,14 @@ handlers.client.focus = function(c, context)
 	-- last_focused_screen = c.screen
 	focus_menu()
 	set_visibility(c.first_tag)
+
+  local prevclient = _G.prevclient
+
+   if prevclient and c then
+     if prevclient.screen.selected_tag ~= c.screen.selected_tag then
+       prevclient.opacity = prevclient.transparency or 1
+     end
+   end
 end
 
 handlers.client['property::screen'] = function(c)
@@ -334,6 +342,7 @@ end
 
 handlers.client.unfocus = function(c)
   -- set_visibility(c.first_tag)
+  _G.prevclient = c
 end
 
 handlers.client['request::activate'] = function(c)
@@ -352,6 +361,10 @@ handlers.client.unmanage = function(c)
 
   update_screen_tags()
 
+  if _G.prevclient == c then
+    _G.prevclient = nil
+  end
+
   -- if c.lockfile then
   --   os.execute('rm -f ' .. c.lockfile)
   -- end
@@ -367,7 +380,7 @@ end
 handlers.tag['property::layout'] = function(t)
   update_layout_icon(t)
   -- update_wibox_visibility(t.screen)
-  -- set_visibility(t)
+  set_visibility(t)
 end
 
 handlers.client['property::icon'] = function(c)
