@@ -112,7 +112,7 @@ browse() {
     fi
   done
 
-  local cmd=(gui awm fg profile="$profile" --)
+  local cmd=(gui awm "${MODE:-bg}" profile="$profile" --)
 
   cmd+=(browser spawn "$browser" "$subpath" "$profile")
 
