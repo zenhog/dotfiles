@@ -135,11 +135,7 @@ winkill() {
 }
 
 timeout() {
-	for widget in "$@"; do
-		awesome-client <<EOF
-      require('widgets').timers.${widget}:emit_signal('timeout')
-EOF
-	done
+  dispatch timeout "$@"
 }
 
 properties() {
@@ -157,9 +153,7 @@ properties() {
     fullscreen \
     maximized \
     opacity \
-    transparency \
-    lockfile
-
+    transparency
 }
 
 getattributes() {
