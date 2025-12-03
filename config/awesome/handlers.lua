@@ -284,15 +284,6 @@ handlers.client.manage = function(c)
     c.state = _G.states[c.pid]
   end
 
-  -- for _, cc in ipairs(client.get()) do
-  --   if c ~= cc and c.state and cc.state then
-  --     if awm.cmp(c.state.attrs, cc.state.attrs) then
-  --       print(string.format('Client "%s" already exists!', c.state.cmd))
-  --       c:kill()
-  --     end
-  --   end
-  -- end
-
 	set_attributes(c)
 	set_clienttag(c)
 	set_clientimg(c)
