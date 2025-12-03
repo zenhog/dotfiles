@@ -3,7 +3,7 @@
 LOCKDIR="$HOME/.lockdir"
 
 declare -A SUBPATHS=(
-  [whatsie]='https://web.whatsapp.com/'
+  [whatsapp]='https://web.whatsapp.com/'
   [discord]='https://discord.com/channels/@me'
   [fmovies]='https://ww4.seeflix.to/home/'
   [spotify]='https://open.spotify.com/'
@@ -60,11 +60,21 @@ clone() (
 
   local basedir="$HOME/.zen"
 
+  local basestore="$basedir/wan/storage/default"
+  local substore="$basedir/$subpath/storage/default"
+
   if cd "$basedir"; then
+    (
+      cd "$substore" &&
+      find . -maxdepth 1 -type d -iname '*'"$subpath"'*' \
+        -exec rm -rf "$basestore/{}" \; \
+        -exec mv -f "$substore/{}" "$basestore" \;
+    )
+
     rm -rf "$subpath"
     cp -a wan "$subpath"
+
     rm -rf "$subpath/sessionstore-backups/"
-    # save storage specific to subpath
   fi
 )
 

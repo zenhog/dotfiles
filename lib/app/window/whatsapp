@@ -3,5 +3,5 @@
 KEY='W:t'
 
 runner() {
-  browser zen whatsie
+  browser zen whatsapp
 }
