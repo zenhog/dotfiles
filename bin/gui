@@ -177,6 +177,17 @@ printfmt() {
   printf "%s\n" "$1"
 }
 
+require() {
+  local cmd
+
+  for cmd in "$@"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "Error: required command '$cmd' not found" >&2
+      exit 1
+    fi
+  done
+}
+
 return 0 2>/dev/null
 
 case $# in

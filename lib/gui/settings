@@ -60,7 +60,7 @@ link() {
 size() {
 	local file="${ALACRITTY_DIR}/font-size.toml"
 	case "$1" in
-	get) sed -rn '/size/s/[^[:digit:]]//gp' "${file}" ;;
+	get) sed -rn '/size/s/[^[:digit:]\.]//gp' "${file}" ;;
 	set)
 		cat <<EOF >"$file"
 [font]
@@ -71,17 +71,19 @@ EOF
 }
 
 BINDS[inc]=alt-n
+HOOKS[inc]=noclear
 DESCS[inc]='Increase size'
 inc() {
 	local size
 	read -r size < <(size get)
-	size set $((size + 1))
+	size set "$(echo "$size + 0.1" | bc)"
 }
 
 BINDS[dec]=alt-p
+HOOKS[dec]=noclear
 DESCS[dec]='Decrease size'
 dec() {
 	local size
 	read -r size < <(size get)
-	size set $((size - 1))
+	size set "$(echo "$size - 0.1" | bc)"
 }
