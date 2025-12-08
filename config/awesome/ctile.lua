@@ -160,9 +160,9 @@ end
 
 local function apply_size_hints(c, width, height, useless_gap)
     local bw = c.border_width
-    width, height = width - 2 * bw - useless_gap, height - 2 * bw - useless_gap
+    width, height = width - 2 * bw - useless_gap, height - 2 * bw
     width, height = c:apply_size_hints(math.max(1, width), math.max(1, height))
-    return width + 2 * bw + useless_gap * 2, height + 2 * bw + useless_gap * 2
+    return width + 2 * bw + useless_gap * 2, height + 2 * bw
 end
 
 local function tile_group(gs, cls, wa, orientation, fact, group, useless_gap)

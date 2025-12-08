@@ -160,6 +160,13 @@ local function update_screen_tags()
   for s in screen do
     if s ~= awful.screen.focused() then
       for _, t in ipairs(s.tags) do
+        for _, c in ipairs(t:clients()) do
+          if c.opacity ~= 0 then
+            break
+          end
+          c.opacity = c.transparency
+          c.transparency = nil
+        end
         t:emit_signal("property::name")
       end
     end
@@ -268,7 +275,7 @@ end
 
 handlers.client['property::fullscreen'] = function(c)
   set_statusbars(c)
-  c.first_tag:emit_signal("property::selected")
+  c.screen.selected_tag:emit_signal("property::selected")
 end
 
 handlers.awesome.exit = function(restarting)
@@ -288,12 +295,12 @@ handlers.client.manage = function(c)
 	set_clientimg(c)
   set_buttons(c)
 
-  set_visibility(c.first_tag)
+  set_visibility(c.screen.selected_tag)
 
   if c.state and c.state.mode and c.state.mode == 'fg' then
     c:raise()
     client.focus = c
-    return c.first_tag:view_only()
+    return c.screen.selected_tag:view_only()
   end
 
   local current_screen = awful.screen.focused()
@@ -321,60 +328,21 @@ handlers.client.manage = function(c)
 end
 
 handlers.client.focus = function(c, context)
-	-- last_focused_screen = c.screen
 	focus_menu()
-	set_visibility(c.first_tag)
-
-  local prevclient = _G.prevclient
-
-   if prevclient and c then
-     if prevclient.screen.selected_tag ~= c.screen.selected_tag then
-       prevclient.opacity = prevclient.transparency or 1
-     end
-   end
-end
-
-handlers.client['property::screen'] = function(c)
-	-- if c.active then
-	--    set_visibility(c.first_tag)
-	-- end
+	set_visibility(c.screen.selected_tag)
 end
 
 handlers.client.unfocus = function(c)
-  -- set_visibility(c.first_tag)
-  _G.prevclient = c
-end
-
-handlers.client['request::activate'] = function(c)
-  -- set_visibility(c.first_tag)
-  -- update_wibox_visibility(c.screen)
-  set_statusbars(c)
-	focus_menu()
 end
 
 handlers.client.unmanage = function(c)
-	-- if c.fullscreen then
-	-- 	update_wibox_visibility(c.screen)
-	-- end
-
   set_statusbars(c)
-
   update_screen_tags()
-
-  if _G.prevclient == c then
-    _G.prevclient = nil
-  end
-
-  -- if c.lockfile then
-  --   os.execute('rm -f ' .. c.lockfile)
-  -- end
 end
 
 handlers.tag['property::selected'] = function(t)
   update_layout_icon(t)
-  -- update_wibox_visibility(t.screen)
   update_screen_tags()
-  -- set_visibility(t)
 end
 
 handlers.tag['property::layout'] = function(t)
