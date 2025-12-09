@@ -1,0 +1,7 @@
+*
+!/.gitignore
+!/.gitattributes
+!/.gitremote
+!/remote.enc/
+!/remote.enc/**/
+!**.tar.gz.gpg
