@@ -67,19 +67,24 @@ awm.fmt = function(c, keys)
   for i, key in ipairs(keys) do
     if c then
       local fmt = '%s'
+      local val = c[key]
 
-      if type(c[key]) == 'number' then
-        fmt = '%d'
+      if type(val) == 'number' then
+        fmt = '%.1f'
         if key == 'window' then
           fmt = "0x%08x"
         end
+      end
+
+      if type(val) == 'table' then
+        val = serpent.dump(val)
       end
 
       if i == #keys then
         sep = '\n'
       end
 
-      res = res .. string.format(fmt, c[key]) .. sep
+      res = res .. string.format(fmt, val) .. sep
     end
   end
 
@@ -103,7 +108,7 @@ awm.raise = function(c)
     c.minimized = false
     c:raise()
     if not (c.above and c.sticky) then
-      c.first_tag:view_only()
+      if c.first_tag then c.first_tag:view_only() end
     end
     client.focus = c
     print(string.format("Raising: %s\n", c.profile))

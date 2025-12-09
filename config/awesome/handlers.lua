@@ -2,6 +2,7 @@ local awm = require('awm')
 local awful = require('awful')
 local gears = require('gears')
 local fs = gears.filesystem
+local cairo = require("lgi").cairo
 
 local M = {}
 
@@ -133,18 +134,16 @@ local function set_attributes(c)
   c.transparency = c.opacity or 1
 end
 
+local function raise(c)
+  if c ~= client.focus then
+    c:emit_signal("request::activate", "tasklist", { raise = true })
+  end
+end
+
 local function set_buttons(c)
 	c:buttons(awful.util.table.join(
-		awful.button({}, 1, function(c)
-			if c ~= client.focus then
-				c:emit_signal("request::activate", "tasklist", { raise = true })
-			end
-		end),
-		awful.button({}, 3, function(c)
-			if c ~= client.focus then
-				c:emit_signal("request::activate", "tasklist", { raise = true })
-			end
-		end)
+		awful.button({}, 1, raise),
+		awful.button({}, 3, raise)
 	))
 end
 
@@ -160,13 +159,13 @@ local function update_screen_tags()
   for s in screen do
     if s ~= awful.screen.focused() then
       for _, t in ipairs(s.tags) do
-        for _, c in ipairs(t:clients()) do
-          if c.opacity ~= 0 then
-            break
-          end
-          c.opacity = c.transparency
-          c.transparency = nil
-        end
+        -- for _, c in ipairs(t:clients()) do
+        --   if c.opacity ~= 0 then
+        --     break
+        --   end
+        --   c.opacity = c.transparency
+        --   c.transparency = nil
+        -- end
         t:emit_signal("property::name")
       end
     end
@@ -181,6 +180,15 @@ local function set_visibility(t)
   local clients = t:clients()
   local layout = t.layout.name
   local focused = client.focus
+
+  if not focused then
+    return
+  end
+
+  if focused.first_tag ~= t then
+    -- focused = clients[1]
+    focused = awful.client.focus.history.get(t.screen, 0)
+  end
 
   if not focused then
     return
@@ -218,9 +226,15 @@ local function set_visibility(t)
   end
 end
 
-local function set_clientimg(c)
-	local cairo = require("lgi").cairo
+local function set_opacity()
+  for _, s in ipairs(screen) do
+    for _, t in ipairs(s.tags) do
+      set_visibility(t)
+    end
+  end
+end
 
+local function set_clientimg(c)
 	if c and c.valid then
 		local icon = c.iconpath or nil
 
@@ -250,7 +264,7 @@ local function update_wibox_visibility(s)
   for _, c in ipairs(current_tag:clients()) do
 		if c.fullscreen then
 			should_hide = true
-			break
+	 		break
 		end
 	end
 
@@ -284,71 +298,78 @@ handlers.awesome.exit = function(restarting)
   end
 end
 
-handlers.client.manage = function(c)
+local function set_state(c)
+  local states = _G.states
 
-  if _G.states and _G.states[c.pid] then
-    c.state = _G.states[c.pid]
+  if not states then
+    return false
   end
 
+  c.state = states[c.pid]
+
+  return true
+end
+
+local function raise(c)
+  if c and c.state and c.state.mode and c.state.mode == 'fg' then
+    awm.raise(c)
+  end
+end
+
+local function do_raise(c)
+  local current_screen = awful.screen.focused()
+
+  local ctag = c.first_tag
+  local cscreen = ctag.screen
+
+  if current_screen ~= cscreen and ctag == cscreen.selected_tag then
+    gears.timer.delayed_call(function()
+      awful.screen.focus(current_screen)
+      raise(c)
+    end)
+    return
+  end
+
+  return raise(c)
+end
+
+handlers.client.manage = function(c)
+  set_state(c)
 	set_attributes(c)
 	set_clienttag(c)
 	set_clientimg(c)
   set_buttons(c)
-
-  set_visibility(c.screen.selected_tag)
-
-  if c.state and c.state.mode and c.state.mode == 'fg' then
-    c:raise()
-    client.focus = c
-    return c.screen.selected_tag:view_only()
-  end
-
-  local current_screen = awful.screen.focused()
-
-  local belongs_elsewhere = false
-
-  for _, t in ipairs(c:tags()) do
-    if t.screen ~= current_screen then
-      belongs_elsewhere = true
-      break
-    end
-  end
-
-  if belongs_elsewhere then
-    c:lower()
-    if client.focus == c then
-      client.focus = nil
-    end
-
-    c:tags({})
-    gears.timer.delayed_call(function()
-      c:tags(c:tags())
-    end)
-  end
+  set_opacity()
+  do_raise(c)
 end
 
 handlers.client.focus = function(c, context)
 	focus_menu()
-	set_visibility(c.screen.selected_tag)
+  set_opacity()
 end
 
 handlers.client.unfocus = function(c)
+  set_opacity()
 end
 
 handlers.client.unmanage = function(c)
   set_statusbars(c)
   update_screen_tags()
+  set_opacity()
 end
 
 handlers.tag['property::selected'] = function(t)
   update_layout_icon(t)
+  -- update_wibox_visibility(t.screen)
   update_screen_tags()
+  set_opacity()
 end
 
 handlers.tag['property::layout'] = function(t)
   update_layout_icon(t)
   -- update_wibox_visibility(t.screen)
-  set_visibility(t)
+  -- set_visibility(t)
+  set_opacity()
 end
 
 handlers.client['property::icon'] = function(c)
