@@ -59,7 +59,7 @@ edit() {
 }
 
 run() {
-	local folder="$1" app="$2" mode="$3"
+	local mode="$1" folder="$2" app="$3"
 
   shift 3
 
@@ -75,6 +75,8 @@ spawn() {
 
   IFS=$'/\t ' read -r folder app _ <<< "$2"
 
+  shift 2
+
   local ATTRIBUTES
 
   if [[ "$folder" == window ]]; then
@@ -83,8 +85,8 @@ spawn() {
 
 	source "$APP_DIR/$folder/$app"
 
-	gui awm "$mode" "${ATTRIBUTES[@]}" -- gui run run "$folder" "$app" "$mode" \
-    "${@:3}"
+	gui awm "$mode" "${ATTRIBUTES[@]}" -- \
+    gui run run "$mode" "$folder" "$app" "$@"
 }
 
 BINDS[fg]=enter

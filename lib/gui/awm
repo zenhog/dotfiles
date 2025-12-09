@@ -153,7 +153,8 @@ properties() {
     fullscreen \
     maximized \
     opacity \
-    transparency
+    transparency \
+    state
 }
 
 getattributes() {
