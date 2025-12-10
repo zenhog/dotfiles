@@ -26,6 +26,7 @@ _G.tags = sharedtags({
 		name = "1",
 		idx = 1,
 		layout = awful.layout.layouts[1],
+    screen = 1,
 	},
 	{
 		name = "2",
@@ -105,6 +106,16 @@ awful.rules.rules = {
 }
 
 handlers.register_handlers()
+
+awful.ewmh.add_activate_filter(function() return false end, "ewmh")
+awful.ewmh.add_activate_filter(function() return false end, "rules")
+
+-- awful.permissions.add_activate_filter(function(c)
+--     if c.class == "Firefox" then
+--         return false -- Return false to deny the activation request
+--     end
+--     return nil -- Return nil to let other filters handle it, or true to allow by default
+-- end, "permissions")
 
 handle_errors()
 

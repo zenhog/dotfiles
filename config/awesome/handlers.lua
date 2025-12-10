@@ -185,13 +185,12 @@ local function set_visibility(t)
     return
   end
 
+  -- if focused is not on this tag, make the last client visible instead
   if focused.first_tag ~= t then
-    -- focused = clients[1]
     focused = awful.client.focus.history.get(t.screen, 0)
-  end
-
-  if not focused then
-    return
+    if not focused then
+      return
+    end
   end
 
   if focused.class == 'menu' then
@@ -252,24 +251,15 @@ local function set_clientimg(c)
 	end
 end
 
-local function set_statusbars(c)
+local function update_wibox_visibility(c)
+  if c.profile == 'menuloop' then
+    return false
+  end
+
 	c.screen.leftbar.visible = not c.fullscreen
 	c.screen.topbar.visible = not c.fullscreen
-end
 
-local function update_wibox_visibility(s)
-	local current_tag = s.selected_tag
-	local should_hide = false
-
-  for _, c in ipairs(current_tag:clients()) do
-		if c.fullscreen then
-			should_hide = true
-	 		break
-		end
-	end
-
-	s.leftbar.visible = not should_hide
-	s.topbar.visible = not should_hide
+  return true
 end
 
 handlers.client.tagged = function(c)
@@ -282,13 +272,14 @@ handlers.client.tagged = function(c)
   --   update_wibox_visibility(s)
   -- end
 
-  set_statusbars(c)
+  -- set_statusbars(c)
 
   update_screen_tags()
 end
 
 handlers.client['property::fullscreen'] = function(c)
-  set_statusbars(c)
+  -- set_statusbars(c)
+  update_wibox_visibility(c)
   c.screen.selected_tag:emit_signal("property::selected")
 end
 
@@ -343,8 +334,13 @@ handlers.client.manage = function(c)
   do_raise(c)
 end
 
-handlers.client.focus = function(c, context)
+handlers.client["request::activate"] = function(c, context)
+  print(context)
+end
+
+handlers.client.focus = function(c)
 	focus_menu()
+  update_wibox_visibility(c)
   set_opacity()
 end
 
@@ -353,8 +349,9 @@ handlers.client.unfocus = function(c)
 end
 
 handlers.client.unmanage = function(c)
-  set_statusbars(c)
+  -- set_statusbars(c)
   update_screen_tags()
+  update_wibox_visibility(c)
   set_opacity()
 end
 
