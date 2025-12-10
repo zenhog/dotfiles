@@ -324,7 +324,9 @@ awm.timeout = function(...)
   local widgets = require("widgets")
 
   for _, arg in ipairs(args) do
-    widgets.timers[arg]:emit_signal("timeout")
+    if widgets.timers[arg] then
+      widgets.timers[arg]:emit_signal("timeout")
+    end
   end
 end
 

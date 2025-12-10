@@ -136,7 +136,7 @@ end
 
 local function raise(c)
   if c ~= client.focus then
-    c:emit_signal("request::activate", "tasklist", { raise = true })
+    c:emit_signal("request::activate", "click", { raise = true })
   end
 end
 
@@ -159,13 +159,6 @@ local function update_screen_tags()
   for s in screen do
     if s ~= awful.screen.focused() then
       for _, t in ipairs(s.tags) do
-        -- for _, c in ipairs(t:clients()) do
-        --   if c.opacity ~= 0 then
-        --     break
-        --   end
-        --   c.opacity = c.transparency
-        --   c.transparency = nil
-        -- end
         t:emit_signal("property::name")
       end
     end
@@ -349,7 +342,7 @@ handlers.client.unfocus = function(c)
 end
 
 handlers.client.unmanage = function(c)
-  -- set_statusbars(c)
+  c.fullscreen = false
   update_screen_tags()
   update_wibox_visibility(c)
   set_opacity()
