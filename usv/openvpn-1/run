@@ -48,6 +48,7 @@ CMD=(
   --dev-type tun
   --connect-retry 5 5
   --verb 1
+  #--mssfix 1300
   #--ca "$CAFILE"
 )
 
