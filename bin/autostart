@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-gui run bg window/zen.spotify
-gui run bg window/zen.youtube
-gui run bg window/zen.discord
-gui run bg window/zen.whatsapp
+# gui run bg window/zen.spotify
+# gui run bg window/zen.youtube
+# gui run bg window/zen.discord
+# gui run bg window/zen.whatsapp

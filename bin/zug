@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+H="$((FZF_PREVIEW_LINES - 2))"
+W="$FZF_PREVIEW_COLUMNS"
+X="$FZF_PREVIEW_LEFT"
+Y="$((FZF_PREVIEW_TOP + 2))"
+X=10
+Y=10
+W=10
+H=10
+
+UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
+UEBERZUG_FIFO="$HOME/test.fifo"
+
+add() {
+  path="$1"
+
+  declare -A -p cmd=(
+    [action]=add [identifier]=preview
+    [x]="$X" [y]="$Y"
+    [width]="$W" [height]="$H"
+    [scaler]=fit_contain
+    [path]="$path"
+    ) >"$UEBERZUG_FIFO"
+}
+
+del() {
+  path="$1"
+
+	declare -A -p cmd=([action]=remove [identifier]=preview) >"$UEBERZUG_FIFO"
+}
+
+"$@"

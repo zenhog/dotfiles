@@ -17,70 +17,48 @@ declare -A -x DESCS
 declare -A -x GDESCS
 declare -A -x HOOKS=([default]=qclear)
 declare -A -x CALLS=(
-	[accept]='execute-silent(do_call %s {} {q})+accept'
-	[acceptsync]='execute(do_call %s {} {q})+accept'
-	[qclear]='execute-silent(do_call %s {} {q})+reload-sync(list)+clear-query'
-	[sclear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)'
-	[clear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)+clear-query'
-	[noclear]='execute-silent(do_call %s {} {q})+reload-sync(list)'
-	[preview]='change-preview(do_call %s {} {q})'
+  [accept]='execute-silent(do_call %s {} {q})+accept'
+  [acceptsync]='execute(do_call %s {} {q})+accept'
+  [qclear]='execute-silent(do_call %s {} {q})+reload-sync(list)+clear-query'
+  [sclear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)'
+  [clear]='execute(do_call %s {} {q})+clear-screen+reload-sync(list)+clear-query'
+  [noclear]='execute-silent(do_call %s {} {q})+reload-sync(list)'
+  [preview]='change-preview(do_call %s {} {q})'
 )
 
 do_call() {
-	local func="$1"
-	local entry="$(filter all "$2")"
-	local query="$(filter all "$3")"
+  local func="$1"
+  local entry="$(filter all "$2")"
+  local query="$(filter all "$3")"
 
-	"$func" "$entry" "$query"
+  "$func" "$entry" "$query"
 }
 
 preview() {
-	mute declare -F view && do_call view "$1" "$2"
+  mute declare -F view && do_call view "$1" "$2"
 }
 
 filter() {
-	local kind="$1" input="$2"
+  local kind="$1" input="$2"
 
-	case "$kind" in
-	unprintable)
-		# filters out unprintable and multicell chars like nerdfont icons
-		perl -pe 's|^[^[:graph:]].*?[ ]||p' <<<"$input"
-		;;
-	ansicolors)
-		# filters out ansi color sequences and more?
-		sed 's/\x1b\[[0-9;]*[mGKHF]//g' <<<"$input"
-		;;
-	all)
-		local out="$input"
+  case "$kind" in
+  unprintable)
+    # filters out unprintable and multicell chars like nerdfont icons
+    perl -pe 's|^[^[:graph:]].*?[ ]||p' <<<"$input"
+    ;;
+  ansicolors)
+    # filters out ansi color sequences and more?
+    sed 's/\x1b\[[0-9;]*[mGKHF]//g' <<<"$input"
+    ;;
+  all)
+    local out="$input"
 
-		out="$(filter unprintable "$out")"
-		out="$(filter ansicolors "$out")"
+    out="$(filter unprintable "$out")"
+    out="$(filter ansicolors "$out")"
 
-		echo "$out"
-		;;
-	esac
-}
-
-arrind() {
-  local -n arr="$1"
-  shift
-
-  local res
-
-  for ind in "${!arr[@]}"; do
-    for val in "$@"; do
-      if [[ "$val" == "${arr[ind]}" ]]; then
-        res+=($ind)
-      fi
-    done
-  done
-
-  if [[ -n "$res" ]]; then
-    (IFS=,; printf "%s\n" "${r[@]}")
-    return 0
-  fi
-
-  return 1
+    echo "$out"
+    ;;
+  esac
 }
 
 readeval() {
@@ -93,87 +71,87 @@ readeval() {
 }
 
 notify() {
-	silent notify-send -t 5000 -a menu "$MODULE" "$@"
-	widget push timeout
+  silent notify-send -t 5000 -a menu "$MODULE" "$@"
+  widget push timeout
 }
 
 urlencode() {
-  jq -rR @uri <<< "$*"
+  jq -rR @uri <<<"$*"
 }
 
 get_opt() {
-	quiet tmux show -sv "@menu-${MODULE}-$1"
+  quiet tmux show -sv "@menu-${MODULE}-$1"
 }
 
 set_opt() {
-	quiet tmux set -s "@menu-${MODULE}-$1" "$2"
+  quiet tmux set -s "@menu-${MODULE}-$1" "$2"
 }
 
 unset_opt() {
-	quiet tmux set -su "@menu-${MODULE}-$1"
+  quiet tmux set -su "@menu-${MODULE}-$1"
 }
 
 list_opt() {
-	quiet tmux show -s | grep "^@menu-${1:-${MODULE}}"
+  quiet tmux show -s | grep "^@menu-${1:-${MODULE}}"
 }
 
 save_opt() {
-	local val
+  local val
 
-	read -r val < <(get_opt "$1")
+  read -r val < <(get_opt "$1")
 
-	if [[ -n "$val" ]]; then
-		set_opt "$1-saved" "$val"
-	fi
+  if [[ -n "$val" ]]; then
+    set_opt "$1-saved" "$val"
+  fi
 }
 
 restore_opt() {
-	local val
+  local val
 
-	read -r val < <(get_opt "$1-saved")
+  read -r val < <(get_opt "$1-saved")
 
-	if [[ -n "$val" ]]; then
-		set_opt "$1" "$val"
-		unset_opt "$1-saved"
-	fi
+  if [[ -n "$val" ]]; then
+    set_opt "$1" "$val"
+    unset_opt "$1-saved"
+  fi
 }
 
 toggle_opt() {
-	local opt="$1"
-	local val="$(get_opt "$opt")"
+  local opt="$1"
+  local val="$(get_opt "$opt")"
 
-	val="${val:-0}"
+  val="${val:-0}"
 
-	case "$val" in
-	0) set_opt "$opt" 1 ;;
-	1) set_opt "$opt" 0 ;;
-	esac
+  case "$val" in
+  0) set_opt "$opt" 1 ;;
+  1) set_opt "$opt" 0 ;;
+  esac
 }
 
 rotate_opt() {
-	local val="$(get_opt "$1")"
-	local mod="$(get_opt "$1-mod")"
+  local val="$(get_opt "$1")"
+  local mod="$(get_opt "$1-mod")"
 
-	[[ -z "$val" || -z "$mod" ]] && return
+  [[ -z "$val" || -z "$mod" ]] && return
 
-	set_opt "$1" $((++val % mod))
+  set_opt "$1" $((++val % mod))
 }
 
 printline() {
-	local s="" i=0
-	while ((i < $#)); do
-		s+="%s"
-		((++i))
-	done
-	printf "$s" "$@"
-	printf "\n"
+  local s="" i=0
+  while ((i < $#)); do
+    s+="%s"
+    ((++i))
+  done
+  printf "$s" "$@"
+  printf "\n"
 }
 
 printfmt() {
-  for p in "${@:1:$(($#-1))}"; do
+  for p in "${@:1:$(($# - 1))}"; do
     printf "%s%s" "$p" "$iSEP"
   done
-  shift $(($#-1))
+  shift $(($# - 1))
   printf "%s\n" "$1"
 }
 
@@ -192,25 +170,25 @@ return 0 2>/dev/null
 
 case $# in
 0) # list modules
-	readarray -t modules < <(realpath $MODULES_DIR/*)
-	readarray -t modules < <(basename -a "${modules[@]}")
-	for mod in "${modules[@]}"; do
-		unset ICON ALTICON MOD KEY COLOR
-		COLOR=white
-		source "$MODULES_DIR/$mod"
-		[[ -n "$KEY" ]] && printf "%s:%s:%s:%s:%s:%s\n" "$ICON" \
+  readarray -t modules < <(realpath $MODULES_DIR/*)
+  readarray -t modules < <(basename -a "${modules[@]}")
+  for mod in "${modules[@]}"; do
+    unset ICON ALTICON MOD KEY COLOR
+    COLOR=white
+    source "$MODULES_DIR/$mod"
+    [[ -n "$KEY" ]] && printf "%s:%s:%s:%s:%s:%s\n" "$ICON" \
       "${ALTICON:-$ICON}" "$mod" "$MOD" "$KEY" "$COLOR"
-	done
-	;;
+  done
+  ;;
 1) # list module functions
-	source "$MODULES_DIR/$1" || exit 1
-	#declare -F | awk '{print $3}'
-	for f in "${!BINDS[@]}"; do
-		echo "$f"
-	done
-	;;
+  source "$MODULES_DIR/$1" || exit 1
+  #declare -F | awk '{print $3}'
+  for f in "${!BINDS[@]}"; do
+    echo "$f"
+  done
+  ;;
 *) # call module functions
-	source "$MODULES_DIR/$1" || exit 1
-	[[ "$2" == inspect ]] && declare -f "$3" || "${@:2}"
-	;;
+  source "$MODULES_DIR/$1" || exit 1
+  [[ "$2" == inspect ]] && declare -f "$3" || "${@:2}"
+  ;;
 esac

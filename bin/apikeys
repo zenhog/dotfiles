@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+case "$1" in
+  gemini)
+    pass show iz/www/cloud/google.com/0/apikey | tr -d '\n'
+    ;;
+  openrouter)
+    pass show iz/www/llm/openrouter.ai/0/neokey | tr -d '\n'
+esac
+

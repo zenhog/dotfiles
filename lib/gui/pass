@@ -19,13 +19,13 @@ label() {
 }
 
 extract() {
-	view "$1" | command extract GR_PASSVAL 2>/dev/tty
+  view "$1" | command extract GR_PASSVAL 2>/dev/tty
 }
 
 restore() {
   local id dir tag dom ind
 
-  read -r id dir tag dom ind <<< "$1"
+  read -r id dir tag dom ind <<<"$1"
 
   echo "$id/$dir/$tag/$dom/$ind"
 }
@@ -35,44 +35,44 @@ view() {
 
   read -r path < <(restore "$1")
 
-	local entries
+  local entries
 
-	readarray -t entries < <(cd "$STORE/$path" && find -- * -type f -or -type l)
+  readarray -t entries < <(cd "$STORE/$path" && find -- * -type f -or -type l)
 
-	local val
-	for entry in "${entries[@]}"; do
-		unset val
+  local val
+  for entry in "${entries[@]}"; do
+    unset val
 
-		if [[ "$entry" == *.gpg ]]; then
-			read -r val < <(quiet pass show "$path/${entry%.gpg}")
+    if [[ "$entry" == *.gpg ]]; then
+      read -r val < <(quiet pass show "$path/${entry%.gpg}")
     elif [[ -L "$STORE/$path/$entry" ]]; then
       read -r val < <(readlink -s "$STORE/$path/$entry")
     else
-			read -r val < "$STORE/$path/$entry"
-		fi
+      read -r val <"$STORE/$path/$entry"
+    fi
 
     if [[ "$entry" == *.last ]]; then
       printfmt "$(colorize magenta "$entry")" "$(basename "$val")"
       continue
     fi
 
-		if [[ "$entry" == password* ]]; then
-			local charspec
+    if [[ "$entry" == password* ]]; then
+      local charspec
 
-			read -r charspec < <(get "$path" charspec)
+      read -r charspec < <(get "$path" charspec)
 
-			if silent check "$val" "$charspec"; then
-				read -r val < <(colorize green "$val")
-			else
-				read -r val < <(colorize red "$val")
-			fi
-		fi
+      if silent check "$val" "$charspec"; then
+        read -r val < <(colorize green "$val")
+      else
+        read -r val < <(colorize red "$val")
+      fi
+    fi
 
     if [[ "$entry" == location* ]]; then
       local newloc
 
       IFS= read -r newloc < <(quiet tmux show-buffer -b location)
- 
+
       if [[ -n "$newloc" && "$newloc" == "$val" ]]; then
         read -r val < <(colorize green "$val")
       elif [[ -n "$newloc" && "$newloc" != "$val" ]]; then
@@ -86,8 +86,8 @@ view() {
       read -r entry < <(colorize yellow "${entry}")
     fi
 
-		printf "%s%s%s\n" "$entry" "$iSEP" "$val"
-	done | column -t -s "$iSEP" -o "$oSEP"
+    printf "%s%s%s\n" "$entry" "$iSEP" "$val"
+  done | column -t -s "$iSEP" -o "$oSEP"
 }
 
 # TODO:
@@ -97,13 +97,14 @@ OPTS+=(--header-lines=1)
 list() {
   local entries
   readarray -t entries < <(
-	cd "$STORE" && find -L -- * \( -type d -or -type l \) -exec sh -c \
-		'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; | sort)
+    cd "$STORE" && find -L -- * \( -type d -or -type l \) -exec sh -c \
+      'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; | sort
+  )
 
   local id dir tag dom ind
 
   for entry in "${entries[@]}"; do
-    IFS=/ read -r id dir tag dom ind <<< "$entry"
+    IFS=/ read -r id dir tag dom ind <<<"$entry"
     printfmt \
       "$(colorize cyan "$id")" \
       "$(colorize red "$dir")" \
@@ -114,8 +115,8 @@ list() {
 }
 
 rename() {
-	local rand file="$STORE/$1.gpg"
-	read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=5)
+  local rand file="$STORE/$1.gpg"
+  read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=5)
   local target="${file%.gpg}.old.$rand.gpg"
 
   [[ -f "$file" ]] && mv -v -- "$file" "$target"
@@ -124,46 +125,46 @@ rename() {
 }
 
 get() {
-	local dir="$1" key="$2"
-	quiet pass show "$dir/$key" || quiet cat "$STORE/.defaults/$key"
+  local dir="$1" key="$2"
+  quiet pass show "$dir/$key" || quiet cat "$STORE/.defaults/$key"
 }
 
 insert() {
-	local dir="$1" key="$2" val="$3" curval
+  local dir="$1" key="$2" val="$3" curval
 
-	[[ -z "${key?}" ]] && return 1
+  [[ -z "${key?}" ]] && return 1
 
-	read -r curval < <(get "$dir" "$key")
+  read -r curval < <(get "$dir" "$key")
 
-	[[ "$val" == "$curval" ]] && return 0
+  [[ "$val" == "$curval" ]] && return 0
 
-	pass insert -f "$dir/$key" < <(tee /dev/stdout <<<"$val")
+  pass insert -f "$dir/$key" < <(tee /dev/stdout <<<"$val")
 }
 
 check() {
-	local password="${1}" charspec="${2}" length count specs regex
+  local password="${1}" charspec="${2}" length count specs regex
 
-	[[ -n "${password}" && -n "${charspec}" ]] || return 1
+  [[ -n "${password}" && -n "${charspec}" ]] || return 1
 
-	{
-		read -r -d, length
-		IFS=$',\n' readarray -d, -t -s 0 specs
-	} <<<"${charspec}" || return 1
+  {
+    read -r -d, length
+    IFS=$',\n' readarray -d, -t -s 0 specs
+  } <<<"${charspec}" || return 1
 
-	read -r count < <((grep -o '.' | wc -l) <<<"$password")
+  read -r count < <((grep -o '.' | wc -l) <<<"$password")
 
-	((count == length)) || return 1
+  ((count == length)) || return 1
 
-	for spec in "${specs[@]}"; do
-		local count class length
-		IFS=$'|\n' read -r -d '' length class _ <<<"$spec"
-		read -r count < <((grep -o "[${class}]" | wc -l) <<<"$password")
-		((count >= length)) || return 1
-	done
+  for spec in "${specs[@]}"; do
+    local count class length
+    IFS=$'|\n' read -r -d '' length class _ <<<"$spec"
+    read -r count < <((grep -o "[${class}]" | wc -l) <<<"$password")
+    ((count >= length)) || return 1
+  done
 
-	read -r regex < <(printf "%s" "${specs[@]#*|}")
+  read -r regex < <(printf "%s" "${specs[@]#*|}")
 
-	grep -o "[^${regex}]" <<<"$password" && return 1 || return 0
+  grep -o "[^${regex}]" <<<"$password" && return 1 || return 0
 }
 
 BINDS[regen]=alt-r
@@ -174,41 +175,41 @@ regen() {
 
   read -r path < <(restore "$1")
 
-	local password charspec length specs regex
+  local password charspec length specs regex
 
-	read -r charspec < <(get "$path" charspec)
-	{
-		read -r -d, length
-		IFS=$',\n' readarray -t -s 0 specs
-	} <<<"${charspec}" || return 1
+  read -r charspec < <(get "$path" charspec)
+  {
+    read -r -d, length
+    IFS=$',\n' readarray -t -s 0 specs
+  } <<<"${charspec}" || return 1
 
-	mkdir -p "$STORE/$path"
+  mkdir -p "$STORE/$path"
 
-	silent pass show "$path/password" && rename "$path/password"
+  silent pass show "$path/password" && rename "$path/password"
 
-	read -r regex < <(printf "%s" "${specs[@]#*|}")
+  read -r regex < <(printf "%s" "${specs[@]#*|}")
 
-	until check "${password}" "${charspec}"; do
-		PASSWORD_STORE_CHARACTER_SET="${regex}" \
-			command pass generate -f "$path/password" "${length}"
-		read -r password < <(quiet pass show "$path/password")
-	done
+  until check "${password}" "${charspec}"; do
+    PASSWORD_STORE_CHARACTER_SET="${regex}" \
+      command pass generate -f "$path/password" "${length}"
+    read -r password < <(quiet pass show "$path/password")
+  done
 }
 
 BINDS[reloc]=alt-u
 HOOKS[reloc]=noclear
 DESCS[reloc]='Overwrite location'
 reloc() {
-	local entry
+  local entry
 
   read -r entry < <(restore "${1?}")
 
   read -r newloc < <(quiet tmux show-buffer -b location)
 
-	if [[ -n "$newloc" ]]; then
-		rename "$entry/location"
-		insert "$entry" location "$newloc"
-	fi
+  if [[ -n "$newloc" ]]; then
+    rename "$entry/location"
+    insert "$entry" location "$newloc"
+  fi
 }
 
 BINDS[cleanup]=alt-c
@@ -219,11 +220,11 @@ cleanup() {
 
   read -r path < <(restore "${1?}")
 
-	[[ -d "$STORE/$path" ]] && rm -f "$STORE/$path"/*.old.*.gpg
+  [[ -d "$STORE/$path" ]] && rm -f "$STORE/$path"/*.old.*.gpg
 
   rm -f "$STORE/$path/"*.old.last
 
-	(cd "$STORE" && find -- * -type d -empty -delete)
+  (cd "$STORE" && find -- * -type d -empty -delete)
 }
 
 # TODO:
@@ -254,29 +255,39 @@ reset() {
   fi
 }
 
+BINDS[cdin]=alt-n
+HOOKS[cdin]=accept
+DESCS[cdin]='Enter entry directory'
+cdin() {
+  local path
+  read -r path < <(restore "$1")
+
+  command open "$STORE/$path"
+}
+
 BINDS[mod]=alt-w
 HOOKS[mod]=sclear
 DESCS[mod]='Modify entries'
 mod() {
-	local path entries
+  local path entries
 
   read -r path < <(restore "$1")
 
-	view "$1" | tmux load-buffer -b preview -
+  view "$1" | tmux load-buffer -b preview -
 
   readarray -t entries < <(readeval < <(input))
 
-	mute tmux delete-buffer -b preview
+  mute tmux delete-buffer -b preview
 
-	for entry in "${entries[@]}"; do
-    IFS=: read -r key val <<< "$entry"
+  for entry in "${entries[@]}"; do
+    IFS=: read -r key val <<<"$entry"
     if [[ -z "$val" ]]; then
       rename "$path/$key"
       continue
     fi
     rename "$path/$key"
     insert "$path" "$key" "$val"
-	done
+  done
 }
 
 BINDS[edit]=alt-e
@@ -287,14 +298,14 @@ edit() {
 
   read -r path < <(restore "${1?}")
 
-	view "$1" | tmux load-buffer -b preview -
+  view "$1" | tmux load-buffer -b preview -
 
-	read -r newpath < <(input ghost="$path")
+  read -r newpath < <(input ghost="$path")
 
-	tmux delete-buffer -b preview
+  tmux delete-buffer -b preview
 
-	[[ ! -d "$STORE/$newpath" ]] &&
-		(mkdir -p "$STORE/$newpath" && mv -Tvf -- "$STORE/$path" "$STORE/$newpath")
+  [[ ! -d "$STORE/$newpath" ]] &&
+    (mkdir -p "$STORE/$newpath" && mv -Tvf -- "$STORE/$path" "$STORE/$newpath")
 }
 
 BINDS[getuser]=alt-t
@@ -305,7 +316,7 @@ getuser() {
 
   read -r path < <(restore "$1")
 
-	quiet get "$path" username | tmux load-buffer -
+  quiet get "$path" username | tmux load-buffer -
 }
 
 BINDS[getpass]=alt-y
@@ -316,16 +327,16 @@ getpass() {
 
   read -r path < <(restore "$1")
 
-	quiet get "$path" password | tmux load-buffer -
+  quiet get "$path" password | tmux load-buffer -
 }
 
 BINDS[add]=alt-a
 HOOKS[add]=sclear
 DESCS[add]='Add directory entry'
 add() {
-	local path="$1"
+  local path="$1"
 
-	read -r entry < <(input query="${path:-0/www/}")
+  read -r entry < <(input query="${path:-0/www/}")
 
   mkdir -p "$STORE/$path"
 }
@@ -340,62 +351,62 @@ del() {
 
   rm -rf "$STORE/$path"
 
-	(cd "$STORE" && find -- * -type d -empty -delete)
+  (cd "$STORE" && find -- * -type d -empty -delete)
 }
 
 dom() {
-	local IFS='.' i=0 matches
+  local IFS='.' i=0 matches
 
-	local zones=($@)
+  local zones=($@)
 
-	while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
-		readarray -t matches < <(cd "$STORE" &&
+  while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
+    readarray -t matches < <(cd "$STORE" &&
       find -L -- * -type d -wholename "*${zones[*]:$i}/*")
 
-		[[ -n "$matches" ]] && break
+    [[ -n "$matches" ]] && break
 
-		((++i))
-	done
+    ((++i))
+  done
 
-  if (( ${#matches[@]} == 0 )); then
+  if ((${#matches[@]} == 0)); then
     return
   fi
 
-	printf "%s\n" "${matches[@]}"
+  printf "%s\n" "${matches[@]}"
 }
 
 baseurl() {
-	local IFS='.'
+  local IFS='.'
 
-	local zones=($@)
+  local zones=($@)
 
-	if [[ ${#zones[@]} -gt 2 ]]; then
-		local chunks=(${zones[-1]})
-		local i=2
-		while [[ $i -le ${#zones[@]} ]]; do
-			chunks=("${zones[-$i]}" "${chunks[@]}")
-			[[ ${#zones[-$i]} -ge 4 ]] && break
-			((i++))
-		done
-		zones=(${chunks[@]})
-	fi
+  if [[ ${#zones[@]} -gt 2 ]]; then
+    local chunks=(${zones[-1]})
+    local i=2
+    while [[ $i -le ${#zones[@]} ]]; do
+      chunks=("${zones[-$i]}" "${chunks[@]}")
+      [[ ${#zones[-$i]} -ge 4 ]] && break
+      ((i++))
+    done
+    zones=(${chunks[@]})
+  fi
 
-	printf "iz/www/%s/0\n" "${zones[*]}"
+  printf "iz/www/%s/0\n" "${zones[*]}"
 }
 
 grab() {
-	local domain="$1" key="$2" index="$3" dirs
+  local domain="$1" key="$2" index="$3" dirs
 
   readarray -t entries < <(dom "$domain")
 
-  (( ${#entries[@]} == 0 )) && {
+  ((${#entries[@]} == 0)) && {
     notify "No entry found for '$domain'"
     return 1
   }
 
   local entry
 
-  (( ${#entries[@]} == 1 )) && index=0
+  ((${#entries[@]} == 1)) && index=0
 
   if [[ -z "$index" ]]; then
     {
@@ -405,12 +416,12 @@ grab() {
   else
     entry="${entries[index]}"
   fi
- 
+
   read -r entry < <(quiet get "$entry" "$key")
 
   if [[ -n "$entry" ]]; then
     echo "$entry"
-		notify "Copied '$entry/$key'"
+    notify "Copied '$entry/$key'"
     return 0
   fi
 
@@ -426,29 +437,29 @@ open() {
 
   read -r entry < <(restore "$1")
 
-	read -r location < <(get "$entry" location)
+  read -r location < <(get "$entry" location)
 
-	command open "$location"
+  command open "$location"
 }
 
 BINDS[bgopen]=tab
 HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open location entry in the background'
 bgopen() {
-	open "$@"
+  open "$@"
 }
 
 BINDS[fopen]=alt-enter
 HOOKS[fopen]=clear
 DESCS[fopen]='Open location entry'
 fopen() {
-	local location path
+  local location path
 
   read -r path < <(restore "$1")
 
-	read -r location < <(get "$path" location)
+  read -r location < <(get "$path" location)
 
-	urlopen "$location"
+  urlopen "$location"
 }
 
 # clone with new index? with new password? same location?
@@ -459,7 +470,7 @@ clone() {
   local path id dir tag dom ind
 
   read -r path < <(restore "$1")
-  read -r id dir tag dom ind <<< "$1"
+  read -r id dir tag dom ind <<<"$1"
 
   local entries
 
@@ -485,11 +496,11 @@ new() {
 
   local len=${#entries[@]}
 
-  if (( len == 0 )); then
+  if ((len == 0)); then
     read -r entry < <(baseurl "$dom")
     dir="$entry"
   else
-    dir="${entries[$((len-1))]}"
+    dir="${entries[$((len - 1))]}"
     entry="${dir%/*}"
     entry="${dir//\// }"
   fi
@@ -500,13 +511,13 @@ new() {
 
   [[ -d "$path" ]] && exec menu auto "$MODULE" -- "$entry"
 
-	list | tmux load-buffer -b preview -
+  list | tmux load-buffer -b preview -
 
   read -r entry < <(menu input "ghost=$entry" "query=$entry")
 
   [[ -z "$entry" ]] && return
 
-	tmux delete-buffer -b preview
+  tmux delete-buffer -b preview
 
   if [[ -n "$entry" ]]; then
     insert "$entry" location "$loc"

@@ -34,7 +34,10 @@ setup() {
     '/releases/latest/download/install.sh'
   )
 
-  url() (IFS=; printf "%s" "$*")
+  url() (
+    IFS=
+    printf "%s" "$*"
+  )
 
   read -r zen_url < <(url "${zen_url[@]}")
   read -r tri_url < <(url "${tri_url[@]}")
@@ -66,9 +69,9 @@ clone() (
   if cd "$basedir"; then
     (
       cd "$substore" &&
-      find . -maxdepth 1 -type d -iname '*'"$subpath"'*' \
-        -exec rm -rf "$basestore/{}" \; \
-        -exec mv -f "$substore/{}" "$basestore" \;
+        find . -maxdepth 1 -type d -iname '*'"$subpath"'*' \
+          -exec rm -rf "$basestore/{}" \; \
+          -exec mv -f "$substore/{}" "$basestore" \;
     )
 
     rm -rf "$subpath"
@@ -90,7 +93,8 @@ spawn() {
 
   flock -n 9 || exit 1
 
-  if [[ "$subpath" != wan ]]; then
+  # if [[ "$subpath" != wan ]]; then
+  if [[ "$subpath" == vpn* ]]; then
     clone "$subpath"
   fi
 
@@ -145,16 +149,16 @@ main() {
   [[ "$CTTY" != "$RTTY" ]] && exec w3m "$@"
 
   case "$browser" in
-    spawn)
-      spawn "$subpath" "$@"
-      ;;
-    zen|firefox)
-      setup
-      browse "$browser" "$subpath" "$@"
-      ;;
-    *)
-      browser zen wan "$@"
-      ;;
+  spawn)
+    spawn "$subpath" "$@"
+    ;;
+  zen | firefox)
+    setup
+    browse "$browser" "$subpath" "$@"
+    ;;
+  *)
+    browser zen wan "$@"
+    ;;
   esac
 }
 

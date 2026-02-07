@@ -10,9 +10,9 @@ NOWRAP=1
 export UEBERZUG_PREVIEW=1
 
 init() {
-	#set_opt pwd "$HOME/.marks"
-	[[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
-	set_opt hide visible
+	set_opt pwd "$HOME/.marks"
+	# [[ -n "$(get_opt pwd)" ]] || set_opt pwd "$HOME/.marks"
+	set_opt hide hidden
 	set_opt mode dirs
 }
 
@@ -45,8 +45,20 @@ label() {
 	local mode="$(get_opt mode)"
 	local hide="$(get_opt hide)"
   local save="$(get_opt save)"
+  local base="$(get_opt path)"
 
-	printf "[ %s - hide = %s - mode = %s - save = %s ]" "$path" "$hide" "$mode" "$save"
+  local flags=''
+
+  [[ "$mode" == dirs ]] && flags+='D' || flags='-'
+  [[ "$hide" == visible ]] && flags+='.' || flags+='*'
+  [[ "$save" == 1 ]] && flags+='+' || flags+=' '
+
+  printf '[%s]' "$path"
+  printf '[%s]' "$flags"
+  if [[ -n "$base" ]]; then
+    printf "[%s]" "$(basename "$base")"
+  fi
+
 }
 
 mimetype() {
@@ -114,13 +126,20 @@ DESCS[choose]='Choose file or directory'
 choose() {
   local query="$1"
   shift
-  local items=("$@")
+
+  local items
+
+  for entry in "$@"; do
+    items+=("$(path "$entry")")
+  done
 
   local save="$(get_opt save)"
   local path="$(get_opt path)"
   local out="$(get_opt out)"
   local mult="$(get_opt mult)"
   local dir="$(get_opt dir)"
+
+  # rm -f "$out"
 
   if [[ "$save" == 1 ]]; then
     local base=$(basename "$path")
@@ -129,28 +148,29 @@ choose() {
       base="$query"
     fi
 
-    echo "$HOME/downloads/$base" > "$out"
-    return
+	  folder_restore
+
+    touch "$FOLDER/$base"
+    echo "$FOLDER/$base" > "$out"
+
+    return 0
   fi
 
   if [[ "$dir" == 1 ]]; then
-      items="$(path "$items")"
-      [[ -d "$items" ]] && echo "$items" > "$out"
-      return
+    if [[ -d "$items" ]]; then
+      echo "$items" > "$out"
+      return 0
+    fi
   fi
 
   if [[ "$mult" == 1 ]]; then
     for item in "${items[@]}"; do
-      item="$(path "$item")"
-      rm -f "$out"
-      [[ -f "$item" ]] && echo "$item" >> "$out"
+      if [[ -r "$item" ]]; then
+        echo "$item" >> "$out"
+      fi
     done
-    return
   else
-      items="$(path "$items")"
-      rm -f "$out"
       [[ -f "$items" ]] && echo "$items" > "$out"
-      return
   fi
 }
 
