@@ -28,54 +28,56 @@ weather() {
     [4000]=
   )
 
-    # "1000": "Clear, Sunny",
-    # "1100": "Mostly Clear",
-    # "1101": "Partly Cloudy",
-    # "1102": "Mostly Cloudy",
-    # "1001": "Cloudy",
-    # "2000": "Fog",
-    # "2100": "Light Fog",
-    # "4000": "Drizzle",
-    # "4001": "Rain",
-    # "4200": "Light Rain",
-    # "4201": "Heavy Rain",
-    # "5000": "Snow",
-    # "5001": "Flurries",
-    # "5100": "Light Snow",
-    # "5101": "Heavy Snow",
-    # "6000": "Freezing Drizzle",
-    # "6001": "Freezing Rain",
-    # "6200": "Light Freezing Rain",
-    # "6201": "Heavy Freezing Rain",
-    # "7000": "Ice Pellets",
-    # "7101": "Heavy Ice Pellets",
-    # "7102": "Light Ice Pellets",
-    # "8000": "Thunderstorm"
+  # "1000": "Clear, Sunny",
+  # "1100": "Mostly Clear",
+  # "1101": "Partly Cloudy",
+  # "1102": "Mostly Cloudy",
+  # "1001": "Cloudy",
+  # "2000": "Fog",
+  # "2100": "Light Fog",
+  # "4000": "Drizzle",
+  # "4001": "Rain",
+  # "4200": "Light Rain",
+  # "4201": "Heavy Rain",
+  # "5000": "Snow",
+  # "5001": "Flurries",
+  # "5100": "Light Snow",
+  # "5101": "Heavy Snow",
+  # "6000": "Freezing Drizzle",
+  # "6001": "Freezing Rain",
+  # "6200": "Light Freezing Rain",
+  # "6201": "Heavy Freezing Rain",
+  # "7000": "Ice Pellets",
+  # "7101": "Heavy Ice Pellets",
+  # "7102": "Light Ice Pellets",
+  # "8000": "Thunderstorm"
   local city="$1"
-  local apikey="$(pass show iz/www/weather/tomorrow.io/0/apikey)"
+  local apikey="$(pass show www/weather/tomorrow.io/key.api)"
 
   local endpoint='https://api.tomorrow.io/v4/weather'
 
   local query response
 
-  read -r query < <(printf '%s/realtime?location=%s&apikey=%s' \
-    "$endpoint" "$city" "$apikey"
+  read -r query < <(
+    printf '%s/realtime?location=%s&apikey=%s' \
+      "$endpoint" "$city" "$apikey"
   )
 
   read -r response < <(curl -sSL "$query")
 
   local icon code desc realtemp feeltemp hum lat lon name
 
-  read -r code < <(jq -r '.data.values.weatherCode' <<< "$response")
-  read -r realtemp < <(jq -r '.data.values.temperature' <<< "$response")
-  read -r feeltemp < <(jq -r '.data.values.temperatureApparent' <<< "$response")
-  read -r hum < <(jq -r '.data.values.humidity' <<< "$response")
-  read -r lat < <(jq -r '.location.lat' <<< "$response")
-  read -r lon < <(jq -r '.location.lon' <<< "$response")
-  read -r name < <(jq -r '.location.name' <<< "$response")
+  read -r code < <(jq -r '.data.values.weatherCode' <<<"$response")
+  read -r realtemp < <(jq -r '.data.values.temperature' <<<"$response")
+  read -r feeltemp < <(jq -r '.data.values.temperatureApparent' <<<"$response")
+  read -r hum < <(jq -r '.data.values.humidity' <<<"$response")
+  read -r lat < <(jq -r '.location.lat' <<<"$response")
+  read -r lon < <(jq -r '.location.lon' <<<"$response")
+  read -r name < <(jq -r '.location.name' <<<"$response")
 
   read -r desc < <(
-    jq -r ".weatherCode.\"$code\"" < "$HOME/.lib/data/weather_codes.json")
+    jq -r ".weatherCode.\"$code\"" <"$HOME/.lib/data/weather_codes.json"
+  )
 
   icon="${icons[$code]}"
 
@@ -91,9 +93,9 @@ view() {
   # holiday events for the timezone?
   local continent city
 
-  read -r continent _ <<< "$1"
+  read -r continent _ <<<"$1"
 
-  IFS=/ read -r continent city <<< "$continent"
+  IFS=/ read -r continent city <<<"$continent"
 
   weather "$city"
 }
@@ -115,7 +117,7 @@ DESCS[open]='Change timezone and sync with NTP'
 open() {
   local tz
 
-  read -r tz _ <<< "$1"
+  read -r tz _ <<<"$1"
 
   sudo ln -svf "/usr/share/zoneinfo/$tz" /etc/localtime
   sync

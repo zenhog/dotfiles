@@ -6,33 +6,77 @@ export UEBERZUG_FIFO="$HOME/.menuloop-zug.fifo"
 
 atexit() {
   mute tmux delete-buffer -b preview
-	silent declare -F atfinish && atfinish
+  silent declare -F atfinish && atfinish
 }
 
 # BINDS[help]=alt-h
 # HOOKS[help]=help
 help() {
-	eval "$S_DESCS"
-	eval "$S_BINDS"
-	eval "$S_GDESCS"
+  eval "$S_DESCS"
+  eval "$S_BINDS"
+  eval "$S_GDESCS"
 
-	sepline " Global bindings "
-	for func in "${!GDESCS[@]}"; do
-		echo "${BINDS[$func]} $iSEP ${GDESCS[$func]}"
-	done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
+  sepline " Global bindings "
+  for func in "${!GDESCS[@]}"; do
+    echo "${BINDS[$func]} $iSEP ${GDESCS[$func]}"
+  done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
 
-	echo
-	sepline " ${MODULE^^} bindings "
+  echo
+  sepline " ${MODULE^^} bindings "
 
-	for func in "${!DESCS[@]}"; do
-		echo "${BINDS[$func]} $iSEP ${DESCS[$func]}"
-	done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
+  for func in "${!DESCS[@]}"; do
+    echo "${BINDS[$func]} $iSEP ${DESCS[$func]}"
+  done | column -t -s "$iSEP" -o "$oSEP" | sort -k1 -r
+}
+
+open() {
+  local url
+  read -r url _ <<<"$1"
+  command open "$url"
+  gui run fg window/zen.wan
+}
+
+bgopen() {
+  open "$@"
+}
+
+open1() {
+  local url
+  read -r url _ <<<"$1"
+  browser zen vpn1 "$url"
+  gui run fg window/zen.vpn1
+}
+
+bgopen1() {
+  open1 "$@"
+}
+
+open2() {
+  local url
+  read -r url _ <<<"$1"
+  browser zen vpn1 "$url"
+  gui run fg window/zen.vpn1
+}
+
+bgopen2() {
+  open2 "$@"
+}
+
+open3() {
+  local url
+  read -r url _ <<<"$1"
+  browser zen vpn1 "$url"
+  gui run fg window/zen.vpn1
+}
+
+bgopen3() {
+  open3 "$@"
 }
 
 urlopen() {
-	local choice alternatives
+  local choice alternatives
 
-	readarray -t alternatives < <(browser list)
+  readarray -t alternatives < <(browser list)
 
   {
     read -r _
@@ -41,24 +85,24 @@ urlopen() {
 
   [[ -z "$choice" ]] && return
 
-	local cmd
+  local cmd
 
-	IFS=$'-' read -r -a cmd <<< "$choice"
+  IFS=$'-' read -r -a cmd <<<"$choice"
 
-	browser "${cmd[@]}" "$@"
+  browser "${cmd[@]}" "$@"
 }
 
 BINDS[copyentry]='alt-\'
 GDESCS[copyentry]='Clip entry'
 copyentry() {
-	echo -n "$1" | fzf --ansi -f '' | tmux load-buffer -
+  echo -n "$1" | fzf --ansi -f '' | tmux load-buffer -
 }
 
 BINDS[extract]='alt-/'
 HOOKS[extract]=sclear
 GDESCS[extract]='Fzfgrep preview'
 extract() {
-	preview "$1" | command extract 2>/dev/tty
+  preview "$1" | command extract 2>/dev/tty
 }
 
 BINDS[change]=change
@@ -81,13 +125,16 @@ GDESCS[qalc]='Evaluate qalc expressions'
 CALLS[qalc]='change-preview(eval qalc {q})'
 
 inputpreview() {
-	tmux show-buffer -b preview 2>/dev/null && tmux delete-buffer -b preview
+  tmux show-buffer -b preview 2>/dev/null && tmux delete-buffer -b preview
 }
 
 input() {
-	local cmd fifo preview ghost query lines
+  local cmd fifo preview ghost query lines
 
-  MODULE=debug set_opt input-args "$(IFS=:; printf "%s\n" "$*")"
+  MODULE=debug set_opt input-args "$(
+    IFS=:
+    printf "%s\n" "$*"
+  )"
 
   for arg in "$@"; do
     [[ "$arg" == *=* ]] && eval "$arg" || lines+=("$arg")
@@ -95,23 +142,23 @@ input() {
 
   [[ -z "$preview" ]] && IFS= read -r -d '' preview < <(inputpreview)
 
-	cmd=('fzf' '--print-query')
-	cmd+=('--border' 'sharp')
-	cmd+=('--prompt' "input($MODULE)> ")
+  cmd=('fzf' '--print-query')
+  cmd+=('--border' 'sharp')
+  cmd+=('--prompt' "input($MODULE)> ")
   cmd+=('--query' "$query")
-	cmd+=('--ansi' '--reverse' '--cycle' '--multi')
-	# cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
-	cmd+=('--info=inline-right')
-	cmd+=('--no-separator')
-	cmd+=('--preview' "echo '$preview'")
+  cmd+=('--ansi' '--reverse' '--cycle' '--multi')
+  # cmd+=('--ansi' '--reverse' '--cycle' '--no-multi')
+  cmd+=('--info=inline-right')
+  cmd+=('--no-separator')
+  cmd+=('--preview' "echo '$preview'")
   cmd+=('--border-label' "$label")
-	cmd+=('--preview-window' 'bottom,60%,border-top')
+  cmd+=('--preview-window' 'bottom,60%,border-top')
   cmd+=('--ghost' "$ghost")
-	# cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
+  # cmd+=('--bind' 'alt-b:transform-query(echo -n {q}; tmux showb)')
 
   {
     if [[ -n "$fifo" ]]; then
-      "${cmd[@]}" 2>/dev/tty > "$fifo"
+      "${cmd[@]}" 2>/dev/tty >"$fifo"
     else
       "${cmd[@]}" 2>/dev/tty
     fi
@@ -123,27 +170,27 @@ input() {
 }
 
 main() {
-	trap atexit EXIT
+  trap atexit EXIT
 
-	if [[ "$1" == input ]]; then
-		export -f inputpreview
-		input "${@:2}"
-		return
-	fi
+  if [[ "$1" == input ]]; then
+    export -f inputpreview
+    input "${@:2}"
+    return
+  fi
 
-	export MODULE="$1"
+  export MODULE="$1"
 
-	source "$MODULES_DIR/$MODULE" || exit 1
+  source "$MODULES_DIR/$MODULE" || exit 1
 
   mkdir -p /tmp/menus/$MODULE
 
   exec &> >(tee "/tmp/menus/$MODULE/output-$(date).txt")
 
-	shift 1
+  shift 1
 
-	while read -r _ _ func _; do
-		export -f "$func"
-	done < <(declare -F)
+  while read -r _ _ func _; do
+    export -f "$func"
+  done < <(declare -F)
 
   EXPORTS+=(BINDS HOOKS CALLS DESCS GDESCS)
 
@@ -152,22 +199,22 @@ main() {
     eval export "S_$exp"
   done
 
-	COMMAND+=(fzf)
-	COMMAND+=(--prompt="$MODULE> ")
-	COMMAND+=(--border=bold)
-	COMMAND+=(--info=inline-right)
-	COMMAND+=(--no-separator)
-	COMMAND+=(--ansi)
-	COMMAND+=(--cycle)
-	COMMAND+=(--no-multi)
-	# COMMAND+=(--multi)
+  COMMAND+=(fzf)
+  COMMAND+=(--prompt="$MODULE> ")
+  COMMAND+=(--border=bold)
+  COMMAND+=(--info=inline-right)
+  COMMAND+=(--no-separator)
+  COMMAND+=(--ansi)
+  COMMAND+=(--cycle)
+  COMMAND+=(--no-multi)
+  # COMMAND+=(--multi)
   COMMAND+=(--no-hscroll)
 
-	# if [[ "$1" == -- ]]; then
-	# 	COMMAND+=(--query "${*:2}")
-	# else
-	# LIST_ARGS=("$@")
-	# fi
+  # if [[ "$1" == -- ]]; then
+  # 	COMMAND+=(--query "${*:2}")
+  # else
+  # LIST_ARGS=("$@")
+  # fi
 
   for arg in "$@"; do
     if [[ "$arg" == -- ]]; then
@@ -183,172 +230,172 @@ main() {
     shift
   done
 
-	if [[ -n "$PREVIEW_CMD" ]]; then
-		COMMAND+=(--preview="$PREVIEW_CMD")
-	elif silent declare -F view; then
-		COMMAND+=(--preview="preview {}")
-	fi
+  if [[ -n "$PREVIEW_CMD" ]]; then
+    COMMAND+=(--preview="$PREVIEW_CMD")
+  elif silent declare -F view; then
+    COMMAND+=(--preview="preview {}")
+  fi
 
-	focusbinds+=("change-preview(preview {})")
+  focusbinds+=("change-preview(preview {})")
 
-	if silent declare -F label; then
-		loadbinds+=("transform-border-label(do_call label {} {q})")
-		focusbinds+=("${loadbinds[@]}")
-	fi
+  if silent declare -F label; then
+    loadbinds+=("transform-border-label(do_call label {} {q})")
+    focusbinds+=("${loadbinds[@]}")
+  fi
 
-	if silent declare -F previewlabel; then
-		loadbinds+=("transform-preview-label(do_call previewlabel {} {q})")
-		focusbinds+=("${loadbinds[@]}")
-	fi
+  if silent declare -F previewlabel; then
+    loadbinds+=("transform-preview-label(do_call previewlabel {} {q})")
+    focusbinds+=("${loadbinds[@]}")
+  fi
 
-	if [[ -n "$focusbinds" ]]; then
-		COMMAND+=(--bind "focus:$(
-			IFS=+
-			printf "%s" "${focusbinds[*]}"
-		)")
-	fi
+  if [[ -n "$focusbinds" ]]; then
+    COMMAND+=(--bind "focus:$(
+      IFS=+
+      printf "%s" "${focusbinds[*]}"
+    )")
+  fi
 
-	if [[ -n "$PREVIEW_LABEL_OFFSET" ]]; then
-		COMMAND+=(--preview-label-pos="$PREVIEW_LABEL_OFFSET")
-	fi
+  if [[ -n "$PREVIEW_LABEL_OFFSET" ]]; then
+    COMMAND+=(--preview-label-pos="$PREVIEW_LABEL_OFFSET")
+  fi
 
-	if [[ -n "$loadbinds" ]]; then
-		COMMAND+=(--bind "load:$(
-			IFS=+
-			printf "%s" "${loadbinds[*]}"
-		)")
-	fi
+  if [[ -n "$loadbinds" ]]; then
+    COMMAND+=(--bind "load:$(
+      IFS=+
+      printf "%s" "${loadbinds[*]}"
+    )")
+  fi
 
-	WINDOW=right,border-bold
-	EXTRA=(
-		--bind
-		'ctrl-x:change-preview-window(bottom,border-bold|right,border-bold)'
-	)
+  WINDOW=right,border-bold
+  EXTRA=(
+    --bind
+    'ctrl-x:change-preview-window(bottom,border-bold|right,border-bold)'
+  )
 
-	if [[ -n "$HORIZONTAL" ]]; then
-		WINDOW=bottom,border-rounded
-		EXTRA=(
-			--bind
-			'ctrl-x:change-preview-window(right,border-bold|bottom,border-bold)'
-		)
-	else
-		case "$POSITION" in
-		TOP)
-			WINDOW=top,border-bottom
-			;;
-		BOTTOM)
-			WINDOW=bottom,border-top
-			;;
-		LEFT)
-			WINDOW=left,border-right
-			;;
-		RIGHT)
-			WINDOW=right,border-left
-			;;
-		esac
-	fi
+  if [[ -n "$HORIZONTAL" ]]; then
+    WINDOW=bottom,border-rounded
+    EXTRA=(
+      --bind
+      'ctrl-x:change-preview-window(right,border-bold|bottom,border-bold)'
+    )
+  else
+    case "$POSITION" in
+    TOP)
+      WINDOW=top,border-bottom
+      ;;
+    BOTTOM)
+      WINDOW=bottom,border-top
+      ;;
+    LEFT)
+      WINDOW=left,border-right
+      ;;
+    RIGHT)
+      WINDOW=right,border-left
+      ;;
+    esac
+  fi
 
-	[[ -n "$RATIO" ]] && WINDOW+=",$RATIO" || WINDOW+=,65%
+  [[ -n "$RATIO" ]] && WINDOW+=",$RATIO" || WINDOW+=,65%
 
-	[[ -z "$NOWRAP" ]] && WINDOW+=,wrap
-	[[ -n "$FOLLOW" ]] && WINDOW+=,follow
+  [[ -z "$NOWRAP" ]] && WINDOW+=,wrap
+  [[ -n "$FOLLOW" ]] && WINDOW+=,follow
 
-	COMMAND+=(--preview-window="$WINDOW")
+  COMMAND+=(--preview-window="$WINDOW")
 
-	for func in "${!BINDS[@]}"; do
-		local key hook call cmd
+  for func in "${!BINDS[@]}"; do
+    local key hook call cmd
 
-		key="${BINDS[$func]}"
+    key="${BINDS[$func]}"
 
-		hook="${HOOKS[$func]}"
-		hook="${hook:-${CALLS[$func]}}"
-		hook="${hook:-${HOOKS[default]}}"
+    hook="${HOOKS[$func]}"
+    hook="${hook:-${CALLS[$func]}}"
+    hook="${hook:-${HOOKS[default]}}"
 
-		read -r call < <(eval printf -- '"${CALLS[$hook]}"' "$func")
+    read -r call < <(eval printf -- '"${CALLS[$hook]}"' "$func")
 
-		read -r cmd < <(printf -- '--bind=%s:%s' "$key" "$call")
+    read -r cmd < <(printf -- '--bind=%s:%s' "$key" "$call")
 
-		COMMAND+=("$cmd")
-	done
+    COMMAND+=("$cmd")
+  done
 
-	[[ -n "$EXTRA" ]] && COMMAND+=("${EXTRA[@]}")
-	[[ -n "$OPTS" ]] && COMMAND+=("${OPTS[@]}")
+  [[ -n "$EXTRA" ]] && COMMAND+=("${EXTRA[@]}")
+  [[ -n "$OPTS" ]] && COMMAND+=("${OPTS[@]}")
 
-	mute declare -F init && init
+  mute declare -F init && init
 
   if [[ -n "$fifo" ]]; then
-    list "${LIST_ARGS[@]}" | "${COMMAND[@]}" > "$fifo"
+    list "${LIST_ARGS[@]}" | "${COMMAND[@]}" >"$fifo"
   else
     list "${LIST_ARGS[@]}" | "${COMMAND[@]}"
   fi
 }
 
 dispatch() {
-	local mode="$1"
+  local mode="$1"
 
-	shift
+  shift
 
-	export DISPATCH_MODE="$mode"
+  export DISPATCH_MODE="$mode"
 
-	case "$mode" in
-	input)
+  case "$mode" in
+  input)
     menu auto input "$@"
-		# local query="$*"
+    # local query="$*"
 
-		# local fifo="$(mktemp --dry-run --suffix=.fifo)"
-		#
-		# mkfifo "$fifo"
-		#
-		#   menu loop input fifo="$fifo" "$@"
-		#
-		# local output
-		#
-		# IFS= read -r -d '' output < "$fifo"
-		#
-		# rm -f "$fifo"
-		#
-		#   printf "%s" "$output"
-		;;
-	main)
-		main "$@"
-		;;
-	shell)
-		if [[ -n "$TMUX" ]]; then
-			tmux popup -BE -w 100% -h 100% menu main "$@"
-		else
-			main "$@"
-		fi
-		;;
-	popup)
-		tmux popup -BE -w 100% -h 100% menu main "$@"
-		;;
-	loop)
-		local fifo="$(mktemp --dry-run --suffix=.fifo)"
-		mkfifo "$fifo"
+    # local fifo="$(mktemp --dry-run --suffix=.fifo)"
+    #
+    # mkfifo "$fifo"
+    #
+    #   menu loop input fifo="$fifo" "$@"
+    #
+    # local output
+    #
+    # IFS= read -r -d '' output < "$fifo"
+    #
+    # rm -f "$fifo"
+    #
+    #   printf "%s" "$output"
+    ;;
+  main)
+    main "$@"
+    ;;
+  shell)
+    if [[ -n "$TMUX" ]]; then
+      tmux popup -BE -w 100% -h 100% menu main "$@"
+    else
+      main "$@"
+    fi
+    ;;
+  popup)
+    tmux popup -BE -w 100% -h 100% menu main "$@"
+    ;;
+  loop)
+    local fifo="$(mktemp --dry-run --suffix=.fifo)"
+    mkfifo "$fifo"
 
     set "$1" fifo="$fifo" "${@:2}"
 
-		socat -u STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(
-			IFS=$'\x01'
-			printf "%s\n" "$*"
-		)
+    socat -u STDIN "UNIX-CONNECT:$HOME/.menu.S" < <(
+      IFS=$'\x01'
+      printf "%s\n" "$*"
+    )
 
-		local output
+    local output
 
-		IFS= read -r -d '' output < "$fifo"
+    IFS= read -r -d '' output <"$fifo"
     rm -f "$fifo"
     echo "$output"
 
     return 0
-		;;
-	auto)
-		if on_xsession; then
-			exec menu loop "$@"
-		else
-			exec menu shell "$@"
-		fi
-		;;
-	esac
+    ;;
+  auto)
+    if on_xsession; then
+      exec menu loop "$@"
+    else
+      exec menu shell "$@"
+    fi
+    ;;
+  esac
 }
 
 dispatch "$@"

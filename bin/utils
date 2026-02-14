@@ -3,171 +3,174 @@
 RUNSHELL="$(readlink /proc/$$/exe)"
 
 if [[ "$RUNSHELL" == *bash* ]]; then
-	RUNSHELL=bash
+  RUNSHELL=bash
 elif [[ "$RUNSHELL" == *zsh* ]]; then
-	RUNSHELL=zsh
+  RUNSHELL=zsh
 else
-	unset RUNSHELL
+  unset RUNSHELL
 fi
 
 case "$RUNSHELL" in
 bash)
-	shopt -s nullglob
-	shopt -s extglob
-	;;
+  shopt -s nullglob
+  shopt -s extglob
+  ;;
 zsh)
-	setopt nullglob
-	setopt extendedglob
-	;;
+  setopt nullglob
+  setopt extendedglob
+  ;;
 esac
 
 quiet() {
-	"$@" 2>/dev/null
+  "$@" 2>/dev/null
 }
 
 silent() {
-	"$@" >/dev/null
+  "$@" >/dev/null
 }
 
 mute() {
-	"$@" &>/dev/null
+  "$@" &>/dev/null
 }
 
 exitwith() {
-	echo "$@" >&2
-	exit 1
+  echo "$@" >&2
+  exit 1
 }
 
 failwith() {
-	echo "$@" >&2
-	exit 1
+  echo "$@" >&2
+  exit 1
 }
 
 verbose() {
-	sepline >&2
-	echo "$*" >&2
+  sepline >&2
+  echo "$*" >&2
 
-	if [[ -n "$DEBUG" ]]; then
-		local answer
-		IFS= read -r answer
-		[[ -n "$answer" ]] && return 1
-	fi
+  if [[ -n "$DEBUG" ]]; then
+    local answer
+    IFS= read -r answer
+    [[ -n "$answer" ]] && return 1
+  fi
 
-	"$@"
+  "$@"
 }
 
 on_xsession() {
-	local rtty ctty
+  local rtty ctty
 
-	read -r ctty < <(cat /sys/class/tty/tty0/active)
-	read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
+  read -r ctty < <(cat /sys/class/tty/tty0/active)
+  read -r rtty < <(cat "/tmp/.X11-unix/registrations/$USER/tty")
 
-	[[ "$ctty" == "$rtty" ]]
+  [[ "$ctty" == "$rtty" ]]
 }
 
 checkbin() {
-	for bin in "$@"; do
-		silent which "$bin" || return
-	done
+  for bin in "$@"; do
+    silent which "$bin" || return
+  done
 }
 
 chainsource() {
-	local sources
+  local sources
 
-	for f in "$@"; do
-		[[ -r "$f" ]] && source "$f"
-	done
+  for f in "$@"; do
+    [[ -r "$f" ]] && source "$f"
+  done
 }
 
 backup() {
-	for f in "$@"; do
-		local rand
-		read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=8)
-		[[ -e "$f" ]] && verbose mv -v -- "$f" "$f.old.$rand"
-	done
+  for f in "$@"; do
+    local rand
+    read -r rand < <(tr -dc '[:alnum:]' </dev/urandom | quiet dd bs=1 count=8)
+    [[ -e "$f" ]] && verbose mv -v -- "$f" "$f.old.$rand"
+  done
 }
 
 printvars() {
-	for var in "$@"; do
-		echo "$var: $(eval echo \$"$var")"
-	done
+  for var in "$@"; do
+    echo "$var: $(eval echo \$"$var")"
+  done
 }
 
 path() {
-	local fullpath dir base
+  local fullpath dir base
 
-	[[ -z "$1" ]] && return
+  [[ -z "$1" ]] && return
 
-	read -r fullpath < <(realpath -sm "$1")
-	read -r dir < <(dirname "$fullpath")
-	read -r base < <(basename "$fullpath")
+  read -r fullpath < <(realpath -sm "$1")
+  read -r dir < <(dirname "$fullpath")
+  read -r base < <(basename "$fullpath")
 
-	mute realpath -se "$dir" || return
+  mute realpath -se "$dir" || return
 
-	echo "$fullpath" "$dir" "$base"
+  echo "$fullpath" "$dir" "$base"
 }
 
 prompt() {
-	if eval "[[ -z \$$1 ]]"; then
-		echo -n "$1: " >&2
-		eval "IFS=$'\n' read -r $1"
-	fi
+  if eval "[[ -z \$$1 ]]"; then
+    echo -n "$1: " >&2
+    eval "IFS=$'\n' read -r $1"
+  fi
 
-	eval "export $1=\$$1"
+  eval "export $1=\$$1"
 
-	printf '%s=%s\n' "$1" "$(eval "echo \$$1")" >&2
+  printf '%s=%s\n' "$1" "$(eval "echo \$$1")" >&2
 }
 
 sepline() {
-	local columns="${FZF_PREVIEW_COLUMNS}"
+  local columns="${FZF_PREVIEW_COLUMNS}"
 
-	[[ -z "$columns" ]] && columns="$COLUMNS"
-	[[ -z "$columns" ]] && read -r _ columns < <(quiet stty size)
-	[[ -z "$columns" ]] && columns=80
+  [[ -z "$columns" ]] && columns="$COLUMNS"
+  [[ -z "$columns" ]] && read -r _ columns < <(quiet stty size)
+  [[ -z "$columns" ]] && columns=80
 
-	local text="$1"
-	local sep="${2:-}"
+  local text="$1"
+  local sep="${2:-}"
 
-	local middle="$(($columns - ${#text}))"
+  local middle="$(($columns - ${#text}))"
 
-	local d=$(((columns - ${#text}) / 2))
-	local r=$(((columns - ${#text}) % 2))
+  local d=$(((columns - ${#text}) / 2))
+  local r=$(((columns - ${#text}) % 2))
 
-	for _ in $(seq 1 $d); do
-		printf -- "$sep"
-	done
+  for _ in $(seq 1 $d); do
+    printf -- "$sep"
+  done
 
-	printf "%s" "$text"
+  printf "%s" "$text"
 
-	for _ in $(seq 1 $((d + r))); do
-		printf -- "$sep"
-	done
+  for _ in $(seq 1 $((d + r))); do
+    printf -- "$sep"
+  done
 
-	[[ -n "$NONEWLINE" ]] || echo
+  [[ -n "$NONEWLINE" ]] || echo
 }
 
 zug() {
-	mute which ueberzug || return
+  mute which ueberzug || return
 }
 
 colorize() {
-	local -A colors=(
-		[reset]=$'\e[39m'
-		[black]=$'\e[30m'
-		[red]=$'\e[31m'
-		[green]=$'\e[32m'
-		[yellow]=$'\e[33m'
-		[blue]=$'\e[34m'
-		[magenta]=$'\e[35m'
-		[cyan]=$'\e[36m'
-		[white]=$'\e[37m'
-	)
+  local -A colors=(
+    [reset]=$'\e[39m'
+    [black]=$'\e[30m'
+    [red]=$'\e[31m'
+    [green]=$'\e[32m'
+    [yellow]=$'\e[33m'
+    [blue]=$'\e[34m'
+    [magenta]=$'\e[35m'
+    [cyan]=$'\e[36m'
+    [white]=$'\e[37m'
+  )
 
-	local color="$1"
+  local color="$1"
+  local colid="$2"
 
-	shift
+  shift
 
-  if [[ -z "${colors[$color]}" ]]; then
+  if [[ "$color" == code ]]; then
+    echo -ne "${colors["$colid"]}"
+  elif [[ -z "${colors[$color]}" ]]; then
     pastel -f paint "$color" "$@"
   else
     printf "%s%s%s\n" "${colors[$color]}" "$*" "${colors[reset]}"
@@ -175,182 +178,182 @@ colorize() {
 }
 
 enc() {
-	gpg -q --yes --pinentry-mode=loopback --symmetric \
-		--passphrase-file=<(passphrase) "$@"
+  gpg -q --yes --pinentry-mode=loopback --symmetric \
+    --passphrase-file=<(passphrase) "$@"
 }
 
 dec() {
-	gpg -q --yes --pinentry-mode=loopback --decrypt \
-		--passphrase-file=<(passphrase) "$@"
+  gpg -q --yes --pinentry-mode=loopback --decrypt \
+    --passphrase-file=<(passphrase) "$@"
 }
 
 passphrase() {
-	declare -g PASSPHRASE
+  declare -g PASSPHRASE
 
-	local token="$HOME/.password-store/iz/tokens/keys/system/0/main.gpg"
+  local token="$HOME/.password-store/iz/tokens/keys/system/0/main.gpg"
 
-	if [[ -z "$PASSPHRASE" ]]; then
-		if [[ -z "$PROMPTPASS" ]]; then
-			read -r PASSPHRASE \
-				< <(quiet gpg --batch --pinentry-mode=loopback -qd "$token")
-		fi
+  if [[ -z "$PASSPHRASE" ]]; then
+    if [[ -z "$PROMPTPASS" ]]; then
+      read -r PASSPHRASE \
+        < <(quiet gpg --batch --pinentry-mode=loopback -qd "$token")
+    fi
 
-		[[ -z "$PASSPHRASE" ]] && read -r -p 'Passphrase: ' PASSPHRASE
-	fi
+    [[ -z "$PASSPHRASE" ]] && read -r -p 'Passphrase: ' PASSPHRASE
+  fi
 
-	[[ -n "$PASSPHRASE" ]] && echo "$PASSPHRASE"
+  [[ -n "$PASSPHRASE" ]] && echo "$PASSPHRASE"
 }
 
 emutils() {
-	utils "$@"
+  utils "$@"
 }
 
 if [[ "$RUNSHELL" == zsh ]]; then
-	return 0 2>/dev/null
+  return 0 2>/dev/null
 fi
 
 tarformat() {
-	COLUMNS=80 sepline "> $TAR_FILENAME <" '-'
-	cat -v -
-	echo
+  COLUMNS=80 sepline "> $TAR_FILENAME <" '-'
+  cat -v -
+  echo
 }
 
 tarcreate() {
-	local src dst
+  local src dst
 
-	read -r -a src < <(path "$1")
-	read -r -a dst < <(path "$2")
+  read -r -a src < <(path "$1")
+  read -r -a dst < <(path "$2")
 
-	local opts=(
-		--create
-		--gzip
-		--file "${dst:-/dev/stdout}"
-		--exclude-vcs-ignores
-		--sort=name
+  local opts=(
+    --create
+    --gzip
+    --file "${dst:-/dev/stdout}"
+    --exclude-vcs-ignores
+    --sort=name
     --preserve-permissions
-	)
+  )
 
-	tar "${opts[@]}" -C "${src[1]}" "${src[2]}"
+  tar "${opts[@]}" -C "${src[1]}" "${src[2]}"
 }
 
 tarextract() {
-	local src opts
+  local src opts
 
-	read -r -a src < <(path "$1")
+  read -r -a src < <(path "$1")
 
-	opts=(
-		--extract
-		--gzip
-		--keep-newer-files
-		--preserve-permissions
-		--no-same-owner
-		--verbose
-		--file "${src:-/dev/stdin}"
-	)
+  opts=(
+    --extract
+    --gzip
+    --keep-newer-files
+    --preserve-permissions
+    --no-same-owner
+    --verbose
+    --file "${src:-/dev/stdin}"
+  )
 
-	opts+=("${extra_opts[@]}")
+  opts+=("${extra_opts[@]}")
 
-	# local errs=(
-	#   '-e' 'is newer or same age'
-	#   '-e' 'Unexpected inconsistency when making directory'
-	#   '-e' 'Exiting with failure status due to previous errors'
-	# )
-	#
-	# coproc cat -
-	#
-	# exec 3>&"${COPROC[1]}"
-	# exec 4>&"${COPROC[0]}"
-	# exec {COPROC[0]}>&-
-	# exec {COPROC[1]}>&-
+  # local errs=(
+  #   '-e' 'is newer or same age'
+  #   '-e' 'Unexpected inconsistency when making directory'
+  #   '-e' 'Exiting with failure status due to previous errors'
+  # )
+  #
+  # coproc cat -
+  #
+  # exec 3>&"${COPROC[1]}"
+  # exec 4>&"${COPROC[0]}"
+  # exec {COPROC[0]}>&-
+  # exec {COPROC[1]}>&-
 
-	tar "${opts[@]}" -C "${src[1]:-$PWD}"
+  tar "${opts[@]}" -C "${src[1]:-$PWD}"
 
-	[[ $? -eq 1 || $? -eq 0 ]]
+  [[ $? -eq 1 || $? -eq 0 ]]
 
-	# exec 3>&-
+  # exec 3>&-
 
-	#grep -v "${errs[@]:2}" <&4 |
-	#  tee >(cat > /dev/stderr) |
-	#    grep -qv "${errs[@]:0:2}"
+  #grep -v "${errs[@]:2}" <&4 |
+  #  tee >(cat > /dev/stderr) |
+  #    grep -qv "${errs[@]:0:2}"
 
-	# if grep -v "${errs[@]}" <&4; then
-	#   exec 4>&-
-	#   return 1
-	# fi
+  # if grep -v "${errs[@]}" <&4; then
+  #   exec 4>&-
+  #   return 1
+  # fi
 
-	# exec 4>&-
-	# return 0
+  # exec 4>&-
+  # return 0
 }
 
 tarlist() {
-	local src
+  local src
 
-	read -r -a src < <(path "$1")
+  read -r -a src < <(path "$1")
 
-	local opts=(
-		--list
-		--gzip
-		--verbose
-		--file "${src:-/dev/stdin}"
-	)
+  local opts=(
+    --list
+    --gzip
+    --verbose
+    --file "${src:-/dev/stdin}"
+  )
 
-	local lines
+  local lines
 
-	readarray -t lines < <(tar "${opts[@]}")
+  readarray -t lines < <(tar "${opts[@]}")
 
-	COLUMNS=80 sepline ' Archive contents ' '*'
-	for line in "${lines[@]}"; do
-		local mode ownership size date time path
-		read -r mode ownership size date time path <<<"$line"
-		echo "$mode $size $path"
-	done | column -t
+  COLUMNS=80 sepline ' Archive contents ' '*'
+  for line in "${lines[@]}"; do
+    local mode ownership size date time path
+    read -r mode ownership size date time path <<<"$line"
+    echo "$mode $size $path"
+  done | column -t
 }
 
 tardump() {
-	local extra_opts=(--to-command="${BASH_SOURCE[0]} tarformat")
+  local extra_opts=(--to-command="${BASH_SOURCE[0]} tarformat")
 
-	#coproc tarextract "$@"
+  #coproc tarextract "$@"
 
-	#exec 3>&"${COPROC[1]}"
-	#exec 4>&"${COPROC[0]}"
-	#exec {COPROC[0]}>&-
-	#exec {COPROC[1]}>&-
+  #exec 3>&"${COPROC[1]}"
+  #exec 4>&"${COPROC[0]}"
+  #exec {COPROC[0]}>&-
+  #exec {COPROC[1]}>&-
 
-	local fifo="$(mktemp --dry-run)"
+  local fifo="$(mktemp --dry-run)"
 
-	tee "$fifo" | tarlist
+  tee "$fifo" | tarlist
 
-	tarextract "$@" <"$fifo"
+  tarextract "$@" <"$fifo"
 
-	rm -f "$fifo"
+  rm -f "$fifo"
 
-	#tarextract "$@" < <(printf "%s\n" "${lines[@]}")
+  #tarextract "$@" < <(printf "%s\n" "${lines[@]}")
 
-	#cat "${1:-/dev/stdin}" | tee >(tarlist) >&3
+  #cat "${1:-/dev/stdin}" | tee >(tarlist) >&3
 
-	#exec 3>&-
-	#cat <&4
-	#exec 4>&-
+  #exec 3>&-
+  #cat <&4
+  #exec 4>&-
 }
 
 tarpreview() {
-	tarcreate "${1?}" | tardump
+  tarcreate "${1?}" | tardump
 }
 
 tardiff() {
-	local diff=diff
-	tty -s && diff=diff
+  local diff=diff
+  tty -s && diff=diff
 
-	if [[ "${1?}" == *.tar.gz && "${2?}" == *.tar.gz ]]; then
-		"$diff" <(quiet tardump "$1") <(quiet tardump "$2")
-	elif [[ -d "$1" && -d "$2" ]]; then
-		"$diff" <(quiet tarpreview "$1") <(quiet tarpreview "$2")
-	fi
+  if [[ "${1?}" == *.tar.gz && "${2?}" == *.tar.gz ]]; then
+    "$diff" <(quiet tardump "$1") <(quiet tardump "$2")
+  elif [[ -d "$1" && -d "$2" ]]; then
+    "$diff" <(quiet tarpreview "$1") <(quiet tarpreview "$2")
+  fi
 }
 
 decsecret() {
-	local src="$(realpath -sm "${1?}")"
-	local dst
+  local src="$(realpath -sm "${1?}")"
+  local dst
 
   if [[ -n "$2" ]]; then
     dst="$(realpath -sm "$2")"
@@ -363,26 +366,26 @@ decsecret() {
 }
 
 dumpsecret() {
-	local src="$(realpath -sm "${1?}")"
-	dec --output - "$src" | tardump
+  local src="$(realpath -sm "${1?}")"
+  dec --output - "$src" | tardump
 }
 
 diffsecret() {
-	local dirsrc tarsrc diff=diff
+  local dirsrc tarsrc diff=diff
 
-	dirsrc="$(realpath -sm "${1?}")"
-	tarsrc="${2:-${dirsrc}.tar.gz.gpg}"
+  dirsrc="$(realpath -sm "${1?}")"
+  tarsrc="${2:-${dirsrc}.tar.gz.gpg}"
 
-	tty -s && diff=diff
+  tty -s && diff=diff
 
-	"$diff" \
-		<(quiet dumpsecret "$tarsrc") \
-		<(quiet tarpreview "$dirsrc")
+  "$diff" \
+    <(quiet dumpsecret "$tarsrc") \
+    <(quiet tarpreview "$dirsrc")
 }
 
 encsecret() {
-	local src="$(realpath -sm "${1?}")"
-	local dst
+  local src="$(realpath -sm "${1?}")"
+  local dst
 
   if [[ -n "$2" ]]; then
     dst="$(realpath -sm "$2")"
@@ -390,11 +393,11 @@ encsecret() {
     dst="$src.tar.gz.gpg"
   fi
 
-	if [[ -n "$nodiff" ]] || ! mute diffsecret "$src" "$dst"; then
-		if tarcreate "$src" | enc --output "$dst" -; then
-			printf 'Successful encryption of %s into %s\n' "$src" "$dst" >&2
-		fi
-	fi
+  if [[ -n "$nodiff" ]] || ! mute diffsecret "$src" "$dst"; then
+    if tarcreate "$src" | enc --output "$dst" -; then
+      printf 'Successful encryption of %s into %s\n' "$src" "$dst" >&2
+    fi
+  fi
 }
 
 return 0 2>/dev/null

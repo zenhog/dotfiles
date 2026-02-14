@@ -95,23 +95,23 @@ view() {
 #  clip preview
 OPTS+=(--header-lines=1)
 list() {
-  local entries
-  readarray -t entries < <(
-    cd "$STORE" && find -L -- * \( -type d -or -type l \) -exec sh -c \
-      'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; | sort
-  )
+  local C_DIR="$(colorize code cyan)"
+  local C_TAG="$(colorize code yellow)"
+  local C_DOM="$(colorize code green)"
+  local C_ID="$(colorize code magenta)"
 
-  local id dir tag dom ind
-
-  for entry in "${entries[@]}"; do
-    IFS=/ read -r id dir tag dom ind <<<"$entry"
-    printfmt \
-      "$(colorize cyan "$id")" \
-      "$(colorize red "$dir")" \
-      "$(colorize yellow "$tag")" \
-      "$(colorize green "$dom")" \
-      "$(colorize magenta "$ind")"
-  done | column -t -s "$iSEP" -N ID,DIR,TAG,DOM,IND -R DOM
+  # printf "%s\n" "${entries[@]}"
+  find -L -- "$STORE" -type d -exec sh -c \
+    'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; |
+    sort | sed "s|^$STORE/||" |
+    awk -F/ -v sep="$iSEP" -v reset="$C_RESET" \
+      -v dir="$C_DIR" -v tag="$C_TAG" -v dom="$C_DOM" -v id="$C_ID" '
+     {
+        # awk builds the line with colors and your separator
+        printf "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+          dir, $1, reset, sep, tag, $2, reset, sep, dom, $3, reset, sep, id, $4, reset
+    }
+  ' | column -t -s "$iSEP" -N DIR,TAG,DOM,ID -R ID
 }
 
 rename() {
@@ -314,9 +314,15 @@ DESCS[getuser]='Clip username field'
 getuser() {
   local path
 
+  read -r wid < <(xdotool getactivewindow)
+  notify wid:$wid
+
+  xdotool type --file - -window "$wid" <<<abc
+
   read -r path < <(restore "$1")
 
   quiet get "$path" username | tmux load-buffer -
+
 }
 
 BINDS[getpass]=alt-y
@@ -361,7 +367,11 @@ dom() {
 
   while [[ $i -lt $((${#zones[@]} - 1)) ]]; do
     readarray -t matches < <(cd "$STORE" &&
-      find -L -- * -type d -wholename "*${zones[*]:$i}/*")
+      find -L -- * -type d -wholename "*${zones[*]:$i}*" -exec sh -c \
+        'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \;)
+
+    # cd "$STORE" && find -L -- * \( -type d \) -exec sh -c \
+    #   'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; | sort
 
     [[ -n "$matches" ]] && break
 
@@ -392,6 +402,15 @@ baseurl() {
   fi
 
   printf "iz/www/%s/0\n" "${zones[*]}"
+}
+
+type() {
+  local domain="$1" key="$2" index="$3" wid
+
+  read -r wid < <(xdotool getactivewindow)
+  notify wid:$wid
+
+  xdotool type --file - -window "$wid" <<<abc
 }
 
 grab() {

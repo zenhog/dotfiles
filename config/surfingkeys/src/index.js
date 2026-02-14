@@ -133,3 +133,5 @@ const main = async () => {
 if (typeof window !== "undefined") {
   main()
 }
+
+iunmap('<Alt-w>');

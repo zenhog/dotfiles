@@ -9,19 +9,7 @@ HORIZONTAL=1
 NOWRAP=1
 RATIO=20%
 
-export DB="$HOME/.db/marks.db"
-export SQL="${DB%.db}.sql"
 export JS="$HOME/.db/marks.jsonl"
-
-initdb() {
-  sqlite3 "$DB" <<EOF
-    CREATE TABLE IF NOT EXISTS bookmarks (
-      url TEXT PRIMARY KEY,
-      title TEXT NOT NULL
-    );
-    CREATE INDEX bookmarks_index ON bookmarks (title);
-EOF
-}
 
 insert() {
   local url="$1"
@@ -34,17 +22,37 @@ insert() {
     read -r url < <(sed -E 's/\/$//' <<<"$url")
   fi
 
-  sqlite3 "$DB" "
-    INSERT INTO bookmarks (url, title)
-    VALUES ('$url', '$title')
-  "
+  local words tags cat mytitle
 
-  if ! mute jq -e --arg url "$url" '(select(.url == $url)' "$JS"; then
-    jq -n -c --arg url "$url" --arg title "$title" \
-      '{url: $url, title: $title}' >>"$JS"
-    echo "Bookmark ($url) added with title ($title)"
+  read -ra words <<<"$title"
+
+  cat="${words[0]}"
+
+  for word in "${words[@]:1}"; do
+    if [[ "$word" == \#* ]]; then
+      tags+=("$word")
+    else
+      mytitle+=("$word")
+    fi
+  done
+
+  if ! check "$url"; then
+    jq -n -c \
+      --arg url "$url" \
+      --arg title "${mytitle[*]}" \
+      --arg cat "$cat" \
+      --arg tags "${tags[*]}" \
+      '{url: $url, title: $title, cat: $cat, tags: $tags}' >>"$JS"
   else
-    echo "URL ($url) already exists. Skipping..."
+    local tmp="$(mktemp)"
+
+    jq -c \
+      --arg url "$url" \
+      --arg title "${mytitle[*]}" \
+      --arg cat "$cat" \
+      --arg tags "${tags[*]}" \
+      'if .url == $url then .title = $title | .cat = $cat | .tags = $tags else . end' "$JS" >"$tmp" &&
+      mv "$tmp" "$JS" && rm "$tmp"
   fi
 }
 
@@ -80,30 +88,72 @@ label() {
 
 OPTS=(--with-nth 2.. --header-lines=1 --preview-window=hidden)
 list() {
-  # sqlite3 -separator "$iSEP" "$DB" "SELECT url, title FROM bookmarks" |
-  #   column -t -s "$iSEP" | column -t -l 3 -N URL,CATEGORY,TITLE
+
+  local lblock rblock
+
+  local C_CAT="$(colorize code magenta)"
+  local C_TIT="$(colorize code yellow)"
+  local C_TAG="$(colorize code cyan)"
+  local C_RESET="$(colorize code reset)"
+
+  IFS= read -r -d '' lblock < <(
+    jq -r --arg t "$C_TAG" --arg r "$C_RESET" '.tags | $t + . + $r' "$JS" | column -t
+  )
+
+  IFS= read -r -d '' rblock < <(
+    jq -r --arg s "$iSEP" --arg u "$C_URL" --arg c "$C_CAT" --arg t "$C_TIT" --arg r "$C_RESET" \
+      '.url + $s + (.cat | $c + . + $r) + $s + (.title | $t + . + $r)' "$JS"
+  )
+
+  # read -r -d '' rblock < <(jq -r --arg sep "$iSEP" '.url + $sep + .cat + $sep + .title' "$JS" |
+  #   column -t -s "$iSEP" -o "$iSEP" -N URL,CATEGORY,TITLE)
+
+  paste -d "$iSEP" <(echo -n "$rblock") <(echo -n "$lblock") | sort |
+    column -t -s "$iSEP" -N URL,CATEGORY,TITLE,TAGS
+  # echo -n "$rblock"
+
+  # local lines
   #
-  jq -r --arg sep "$iSEP" '.url + $sep + .title' "$JS" | column -t -s "$iSEP" |
-    column -t -l 3 -N URL,CATEGORY,TITLE,TAGS
+  # readarray -t lines < <(jq -r --arg sep "$iSEP" '.url + $sep + .cat + $sep + .title + $sep + .tags' "$JS")
+  #
+  # for line in "${lines[@]}"; do
+  #   IFS="$iSEP" read -r url cat title tags <<<"$line"
+  #   printfmt "$url" "$cat" "$title" "$tags"
+  # done | column -t -s "$iSEP" -N URL,CATEGORY,TITLE,TAGS
 
 }
 
 BINDS[open]=enter
 HOOKS[open]=accept
 DESCS[open]='Open mark in foreground'
-open() {
-  local url
-  read -r url _ <<<"$1"
-  command open "$url"
-  gui run fg zen.wan
-}
 
 BINDS[bgopen]=tab
 HOOKS[bgopen]=noclear
 DESCS[bgopen]='Open mark in background'
-bgopen() {
-  open "$@"
-}
+
+BINDS[open1]=alt-1
+HOOKS[open1]=accept
+DESCS[open1]='Open bookmark in cg1'
+
+BINDS[bgopen1]='alt-!'
+HOOKS[bgopen1]=accept
+DESCS[bgopen1]='Open bookmark in cg1'
+
+BINDS[open2]=alt-2
+HOOKS[open2]=accept
+DESCS[open2]='Open bookmark in cg2'
+
+BINDS[bgopen2]='alt-@'
+HOOKS[bgopen2]=accept
+DESCS[bgopen2]='Open bookmark in cg2'
+
+BINDS[open3]=alt-3
+HOOKS[open3]=accept
+DESCS[open3]='Open bookmark in cg3'
+
+BINDS[bgopen3]='alt-#'
+HOOKS[bgopen3]=accept
+DESCS[bgopen3]='Open bookmark in cg3'
 
 BINDS[_open]=alt-enter
 HOOKS[_open]=clear
@@ -125,22 +175,25 @@ copy() {
 }
 
 check() {
-  local url
+  local url="$1"
 
-  read -r url < <(sqlite3 "$DB" "SELECT url FROM bookmarks WHERE url == '$1'")
-
-  [[ -n "$url" ]]
+  mute jq -e --arg url "$url" '(select(.url == $url))' "$JS"
 }
 
 BINDS[rm]=alt-d
 HOOKS[rm]=noclear
 DESCS[rm]='Delete bookmark'
 rm() {
-  local url
+  local url tmp
+
+  read -r tmp < <(mktemp)
 
   read -r url _ <<<"$1"
 
-  sqlite3 "$DB" "DELETE FROM bookmarks WHERE url == '$url'"
+  if check "$url"; then
+    grep -vF "\"url\":\"$url\"" "$JS" >"$tmp"
+    mv "$tmp" "$JS"
+  fi
 }
 
 BINDS[mod]=alt-w
@@ -153,8 +206,10 @@ mod() {
 
   read -r title < <(sed -E 's/ +/ /g' <<<"$title")
 
+  # copy the title
   echo -n "$title" | tmux load-buffer -
 
+  # preview
   (
     echo "$title"
     sepline
@@ -164,8 +219,7 @@ mod() {
   read -r title < <(input preview="'$preview'" label="' [$url] '")
 
   if [[ -n "$title" ]]; then
-    sqlite3 "$DB" \
-      "UPDATE bookmarks SET title = '${title}' WHERE url == '$url'"
+    insert "$url" "$title"
   fi
 }
 
@@ -183,31 +237,11 @@ add() {
     list | awk '{print $2}' | sort -u | column -x
   ) | tmux load-buffer -b preview -
 
-  read -r mytitle < <(menu input label="' [$url] '" ghost=@)
+  read -r mytitle < <(menu input label="' [$url] '")
 
   [[ -z "$mytitle" ]] && return
 
   [[ "$mytitle" == @ ]] && mytitle="$title"
-
-  # CATEGORY Multi World Title #tag1 #tag2 #tag-3 #tag4
-
-  local words tags cat
-
-  title=()
-
-  read -ra words <<<"$mytitle"
-
-  cat="${words[0]}"
-
-  for word in "${words[@]:1}"; do
-    if [[ "$word" == \#* ]]; then
-      tags+=("$word")
-    else
-      title+=("$word")
-    fi
-  done
-
-  insert "$url" "$cat" "${tags[*]}"
 
   insert "$url" "$mytitle"
 
