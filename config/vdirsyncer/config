@@ -15,5 +15,5 @@ fileext = ".vcf"
 [storage rmain]
 type = "carddav"
 url = "https://cloud.disroot.org/remote.php/dav/addressbooks/users/prisoner"
-username.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/izemmouri/username" ]
-password.fetch = [ "command", "bash", "-c", "pass show iz/www/mail/disroot.org/izemmouri/password" ]
+username.fetch = [ "command", "bash", "-c", "pass show www/mail/disroot.org/izemmouri/email" ]
+password.fetch = [ "command", "bash", "-c", "pass show www/mail/disroot.org/izemmouri/password" ]

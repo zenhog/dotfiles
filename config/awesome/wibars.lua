@@ -14,7 +14,7 @@ local M = {}
 awful.layout.layouts = {
 	awful.layout.suit.max,
 	-- awful.layout.suit.tile.left,
-  ctile.left,
+	ctile.left,
 }
 
 local function rrect(radius)
@@ -36,10 +36,10 @@ local function block(widget, forced_width)
 		widget = wibox.container.background,
 	})
 
-  w:buttons(w.widget.widget:buttons())
-  w.widget:buttons(w.widget.widget:buttons())
+	w:buttons(w.widget.widget:buttons())
+	w.widget:buttons(w.widget.widget:buttons())
 
-  return w
+	return w
 end
 
 local function scroll(widget, width)
@@ -392,31 +392,30 @@ awful.screen.connect_for_each_screen(function(s)
 			end))
 		end
 
-    widget.icon = icon
-    widget.alticon = alticon
-    widget.color = color
-    widget.align = "center"
-    widget.valign = "center"
-    widget.font = theme.iconfont
-    widget.forced_width = theme.iconsize
-    widget.id = command
-    widget.id = 'iconwidget'
-    widget.cmd = command
+		widget.icon = icon
+		widget.alticon = alticon
+		widget.color = color
+		widget.align = "center"
+		widget.valign = "center"
+		widget.font = theme.iconfont
+		widget.forced_width = theme.iconsize
+		widget.id = command
+		widget.id = "iconwidget"
+		widget.cmd = command
 
-    widget.update = function(kind)
-      widget.markup = string.format(
-        '<b><span color="%s">%s</span></b>', widget.color, widget[kind])
-    end
+		widget.update = function(kind)
+			widget.markup = string.format('<b><span color="%s">%s</span></b>', widget.color, widget[kind])
+		end
 
-    widget.update('icon')
+		widget.update("icon")
 
 		widget:buttons(buttons)
 
-    local signame = string.format("menus::%s", widget.cmd)
+		local signame = string.format("menus::%s", widget.cmd)
 
-    widget:connect_signal(signame, function(w, newicon)
-      w.update(newicon)
-    end)
+		widget:connect_signal(signame, function(w, newicon)
+			w.update(newicon)
+		end)
 
 		return widget
 	end
@@ -426,21 +425,18 @@ awful.screen.connect_for_each_screen(function(s)
 	local pipe = io.popen("gui")
 
 	for line in pipe:lines() do
-		local icon, alticon, command, _, _, color = line:match(
-      "^(%S+):(%S+):(%S+):(%S+):(%S+):(%S*)$")
-    local buttons = {}
+		local icon, alticon, command, _, _, color = line:match("^(%S+):(%S+):(%S+):(%S+):(%S+):(%S*)$")
+		local buttons = {}
 
-    local lcommand = string.format('menu loop %s', command)
-    local rcommand = string.format('gui %s click', command)
+		local lcommand = string.format("menu loop %s", command)
+		local rcommand = string.format("gui %s click", command)
 
 		if command then
-			s.menus[command] = iconwidget(
-        icon, alticon, command, lcommand, rcommand, color or nil)
+			s.menus[command] = iconwidget(icon, alticon, command, lcommand, rcommand, color or nil)
 
-      buttons = addbutton(buttons, 1, lcommand)
-      buttons = addbutton(buttons, 3, rcommand)
-      s.menus[command]:buttons(buttons)
-
+			buttons = addbutton(buttons, 1, lcommand)
+			buttons = addbutton(buttons, 3, rcommand)
+			s.menus[command]:buttons(buttons)
 		end
 	end
 	pipe:close()
@@ -495,27 +491,27 @@ awful.screen.connect_for_each_screen(function(s)
 				block(M.group(widgets.playback, widgets.capture, widgets.backlight)),
 				block(M.group(widgets.ping_wan, widgets.ping_vpn1)),
 				block(M.group(widgets.cpu, widgets.ram, widgets.disk, widgets.temp)),
-        scroll(widgets.push),
+				scroll(widgets.push),
 			},
 			{
 				widget = wibox.container.margin,
 				block(s.taglist),
 				left = 1,
-        right = 1,
+				right = 1,
 			},
-      {
-        layout = cfixed.horizontal,
-        spacing = 1,
-        scroll(widgets.music),
-        scroll(widgets.connection, 100),
-        block(M.group(widgets.weather)),
-        block(M.group(widgets.mail, widgets.news, widgets.download)),
-        block(M.group(widgets.battery)),
-        block(M.group(widgets.date)),
-        block(M.group(widgets.time)),
-        block(M.group(s.menus.service), theme.iconsize),
-        block(M.group(s.menus.menu), theme.iconsize),
-      },
+			{
+				layout = cfixed.horizontal,
+				spacing = 1,
+				scroll(widgets.music),
+				scroll(widgets.connection, 100),
+				block(M.group(widgets.weather)),
+				block(M.group(widgets.mail, widgets.news, widgets.download)),
+				block(M.group(widgets.battery)),
+				block(M.group(widgets.date)),
+				block(M.group(widgets.time)),
+				block(M.group(s.menus.service), theme.iconsize),
+				block(M.group(s.menus.menu), theme.iconsize),
+			},
 		},
 		left = 1,
 		right = 1,

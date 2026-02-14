@@ -6,9 +6,9 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "echo -n 'user '; pass show iz/www/mail/mailbox.org/username"
-eval "echo -n 'from '; pass show iz/www/mail/mailbox.org/username"
-passwordeval "pass show iz/www/mail/mailbox.org/password"
+eval "echo -n 'user '; pass show www/mail/mailbox.org/username"
+eval "echo -n 'from '; pass show www/mail/mailbox.org/username"
+passwordeval "pass show www/mail/mailbox.org/password"
 
 account disroot-prisoner
 protocol smtp
@@ -18,9 +18,9 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "printf 'user %s' `pass show iz/www/mail/disroot.org/prisoner/email`"
-eval "printf 'from %s' `pass show iz/www/mail/disroot.org/prisoner/email`"
-passwordeval "pass show iz/www/mail/disroot.org/prisoner/password"
+eval "printf 'user %s' `pass show www/mail/disroot.org/prisoner/email`"
+eval "printf 'from %s' `pass show www/mail/disroot.org/prisoner/email`"
+passwordeval "pass show www/mail/disroot.org/prisoner/password"
 
 account disroot-izemmouri
 protocol smtp
@@ -30,9 +30,9 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "printf 'user %s' `pass show iz/www/mail/disroot.org/izemmouri/email`"
-eval "printf 'from %s' `pass show iz/www/mail/disroot.org/izemmouri/email`"
-passwordeval "pass show iz/www/mail/disroot.org/izemmouri/password"
+eval "printf 'user %s' `pass show www/mail/disroot.org/izemmouri/email`"
+eval "printf 'from %s' `pass show www/mail/disroot.org/izemmouri/email`"
+passwordeval "pass show www/mail/disroot.org/izemmouri/password"
 
 account disroot-stuck
 protocol smtp
@@ -42,6 +42,6 @@ auth on
 tls on
 tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "printf 'user %s' `pass show iz/www/mail/disroot.org/stuck/email`"
-eval "printf 'from %s' `pass show iz/www/mail/disroot.org/stuck/email`"
-passwordeval "pass show iz/www/mail/disroot.org/stuck/password"
+eval "printf 'user %s' `pass show www/mail/disroot.org/stuck/email`"
+eval "printf 'from %s' `pass show www/mail/disroot.org/stuck/email`"
+passwordeval "pass show www/mail/disroot.org/stuck/password"
