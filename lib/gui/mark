@@ -11,6 +11,15 @@ RATIO=20%
 
 export JS="$HOME/.db/marks.jsonl"
 
+cleanurl() {
+  local url="$1"
+
+  read -r url < <(sed -E 's/[#?].*//g' <<<"$url")
+  read -r url < <(sed -E 's/\/$//' <<<"$url")
+
+  echo "$url"
+}
+
 insert() {
   local url="$1"
   local title="$2"
@@ -18,8 +27,7 @@ insert() {
   if [[ "$title" == @* ]]; then
     title="${title#@}"
   else
-    read -r url < <(sed -E 's/[#?].*//g' <<<"$url")
-    read -r url < <(sed -E 's/\/$//' <<<"$url")
+    read -r url < <(cleanurl "$url")
   fi
 
   local words tags cat mytitle
@@ -136,7 +144,6 @@ HOOKS[open1]=accept
 DESCS[open1]='Open bookmark in cg1'
 
 BINDS[bgopen1]='alt-!'
-HOOKS[bgopen1]=accept
 DESCS[bgopen1]='Open bookmark in cg1'
 
 BINDS[open2]=alt-2
@@ -144,7 +151,6 @@ HOOKS[open2]=accept
 DESCS[open2]='Open bookmark in cg2'
 
 BINDS[bgopen2]='alt-@'
-HOOKS[bgopen2]=accept
 DESCS[bgopen2]='Open bookmark in cg2'
 
 BINDS[open3]=alt-3
@@ -152,7 +158,6 @@ HOOKS[open3]=accept
 DESCS[open3]='Open bookmark in cg3'
 
 BINDS[bgopen3]='alt-#'
-HOOKS[bgopen3]=accept
 DESCS[bgopen3]='Open bookmark in cg3'
 
 BINDS[_open]=alt-enter
@@ -176,6 +181,8 @@ copy() {
 
 check() {
   local url="$1"
+
+  read -r url < <(cleanurl "$url")
 
   mute jq -e --arg url "$url" '(select(.url == $url))' "$JS"
 }

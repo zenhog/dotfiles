@@ -97,6 +97,7 @@ OPTS+=(--header-lines=1)
 list() {
   local C_DIR="$(colorize code cyan)"
   local C_TAG="$(colorize code yellow)"
+  local C_TAGALT="$(colorize code blue)"
   local C_DOM="$(colorize code green)"
   local C_ID="$(colorize code magenta)"
 
@@ -104,13 +105,18 @@ list() {
   find -L -- "$STORE" -type d -exec sh -c \
     'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; |
     sort | sed "s|^$STORE/||" |
-    awk -F/ -v sep="$iSEP" -v reset="$C_RESET" \
-      -v dir="$C_DIR" -v tag="$C_TAG" -v dom="$C_DOM" -v id="$C_ID" '
+    awk -F/ -v sep="$iSEP" -v reset="$C_RESET" -v base="$STORE" \
+      -v dir="$C_DIR" -v tag="$C_TAG" -v tagAlt="$C_TAGALT" -v dom="$C_DOM" -v id="$C_ID" '
      {
-        # awk builds the line with colors and your separator
+        full_path = base "/" $0
+
+        is_link = (system("test -L \"" full_path "\"") == 0)
+
+        dom_color = is_link ? tagAlt : dom
+
         printf "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-          dir, $1, reset, sep, tag, $2, reset, sep, dom, $3, reset, sep, id, $4, reset
-    }
+        dir, $1, reset, sep, tag, $2, reset, sep, dom_color, $3, reset, sep, id, $4, reset
+      }
   ' | column -t -s "$iSEP" -N DIR,TAG,DOM,ID -R ID
 }
 
@@ -401,7 +407,7 @@ baseurl() {
     zones=(${chunks[@]})
   fi
 
-  printf "iz/www/%s/0\n" "${zones[*]}"
+  printf "www/%s\n" "${zones[*]}"
 }
 
 type() {

@@ -190,7 +190,7 @@ dec() {
 passphrase() {
   declare -g PASSPHRASE
 
-  local token="$HOME/.password-store/iz/tokens/keys/system/0/main.gpg"
+  local token="$HOME/.password-store/tokens/keys/system/main.gpg"
 
   if [[ -z "$PASSPHRASE" ]]; then
     if [[ -z "$PROMPTPASS" ]]; then

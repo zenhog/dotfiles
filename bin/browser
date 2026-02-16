@@ -77,11 +77,17 @@ clone() (
     rm -rf "$subpath"
     cp -a wan "$subpath"
 
+    rm -rf "$subpath/sessionstore.jsonlz4"
     rm -rf "$subpath/sessionstore-backups/"
+    rm -rf "$subpath/sessionstore-logs/"
+    rm -rf "$subpath/bookmarkbackups/"
+    rm -rf "$subpath/zen-sessions.jsonlz4"
+    rm -rf "$subpath/zen-sessions-backups/"
   fi
 )
 
 spawn() {
+  # zen/firefox wan/vpn1/whatsapp  zen.wan/firefox.vpn1
   local browser="$1"
   local subpath="$2"
   local profile="$3"
@@ -93,8 +99,7 @@ spawn() {
 
   flock -n 9 || exit 1
 
-  # if [[ "$subpath" != wan ]]; then
-  if [[ "$subpath" == vpn* ]]; then
+  if [[ "$subpath" != wan ]]; then
     clone "$subpath"
   fi
 
@@ -130,7 +135,9 @@ browse() {
     exec "${subcmd[@]}" "$url"
   fi
 
-  if [[ -n "$suburl" ]]; then
+  if [[ -n "$url" ]]; then
+    subcmd+=("$url")
+  elif [[ -n "$suburl" ]]; then
     subcmd+=("$suburl")
   fi
 

@@ -12,7 +12,7 @@ kind="${mime##*/}"
 
 if [[ "$mime" == inode/directory ]]; then
   if [[ -r "$file/.dirtype" ]]; then
-    read -r mime < "$path/.dirtype"
+    read -r mime <"$path/.dirtype"
   else
     cd "$file" &&
       exec gui tmux window local "$(hostname)" "$(basename "$path")" "${@:2}"
@@ -20,58 +20,57 @@ if [[ "$mime" == inode/directory ]]; then
 fi
 
 urlopen() {
-  if [[ "$file" == *youtube.com* ]]; then
-    browser zen youtube "$file"
-  elif [[ "$file" == *whatsapp.com* ]]; then
-    browser zen whatsie "$file"
-  elif [[ "$file" == *discord.com* ]]; then
-    browser zen discord "$file"
-  elif [[ "$file" == *seeflix.to* || "$file" == *fastflix.to* ]]; then
-    browser zen fmovies "$file"
-  elif [[ "$file" == *spotify.com* ]]; then
-      browser zen spotify "$file"
+  # if [[ "$file" == *youtube.com* ]]; then
+  #   browser zen youtube "$file"
+  # elif [[ "$file" == *whatsapp.com* ]]; then
+  #   browser zen whatsie "$file"
+  # elif [[ "$file" == *discord.com* ]]; then
+  #   browser zen discord "$file"
+  # elif [[ "$file" == *seeflix.to* || "$file" == *fastflix.to* ]]; then
+  #   browser zen fmovies "$file"
+  if [[ "$file" == *spotify.com* ]]; then
+    browser zen vpn1 "$file"
   else
     browser "$file"
   fi
 }
 
 case "${mime}" in
-  text/*)
-    gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$path"
+text/*)
+  gui tmux window local "$(hostname)" "$(basename "$file")" nvim "$path"
+  ;;
+image/*)
+  gui awm bg -- nsxiv -a -s f -- "$path"
+  ;;
+video/*)
+  gui awm bg -- mpv "$path"
+  ;;
+application/pdf)
+  gui awm bg -- mupdf "$path"
+  ;;
+*)
+  case "$file" in
+  file://*)
+    gui tmux window local "$(hostname)" "$(basename "$file")" \
+      nvim "${file#file://}"
     ;;
-  image/*)
-    gui awm bg -- nsxiv -a -s f -- "$path"
+  irc:*) ;;
+  ircs:*) ;;
+  mailto:*)
+    gui tmux window local "$(hostname)" mail neomutt "${file#mailto:}"
     ;;
-  video/*)
-    gui awm bg -- mpv "$path"
+  magnet:*)
+    gui aria request add "$file"
     ;;
-  application/pdf)
-    gui awm bg -- mupdf "$path"
+  ftp://*)
+    browser "$file"
     ;;
-  *)
-    case "$file" in
-      file://*)
-        gui tmux window local "$(hostname)" "$(basename "$file")" \
-          nvim "${file#file://}"
-        ;;
-      irc:*)
-          ;;
-      ircs:*)
-          ;;
-      mailto:*)
-        gui tmux window local "$(hostname)" mail neomutt "${file#mailto:}"
-        ;;
-      magnet:*)
-        gui aria request add "$file"
-        ;;
-      ftp://*)
-        browser "$file"
-        ;;
-      http://*)
-        urlopen "$file"
-        ;;
-      https://*)
-        urlopen "$file"
-        ;;
-      esac
+  http://*)
+    urlopen "$file"
+    ;;
+  https://*)
+    urlopen "$file"
+    ;;
+  esac
+  ;;
 esac

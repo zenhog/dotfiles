@@ -54,8 +54,8 @@ bgopen1() {
 open2() {
   local url
   read -r url _ <<<"$1"
-  browser zen vpn1 "$url"
-  gui run fg window/zen.vpn1
+  browser zen vpn2 "$url"
+  gui run fg window/zen.vpn2
 }
 
 bgopen2() {
@@ -65,8 +65,8 @@ bgopen2() {
 open3() {
   local url
   read -r url _ <<<"$1"
-  browser zen vpn1 "$url"
-  gui run fg window/zen.vpn1
+  browser zen vpn3 "$url"
+  gui run fg window/zen.vpn3
 }
 
 bgopen3() {
