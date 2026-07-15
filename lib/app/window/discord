@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-KEY='W:r'
-
-runner() {
-  flatpak run com.discordapp.Discord
-}

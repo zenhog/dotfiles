@@ -28,6 +28,7 @@ prependpath "$HOME/.luarocks/bin"
 prependpath "$HOME/.cargo/bin"
 prependpath "$HOME/.local/bin"
 prependpath "$HOME/.bin"
+prependpath "$HOME/.local/share/mise/shims"
 
 unset prependpath
 

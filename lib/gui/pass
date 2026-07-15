@@ -94,31 +94,14 @@ view() {
 #  qrencode -m1 -tANSI256
 #  clip preview
 OPTS+=(--header-lines=1)
-list() {
-  local C_DIR="$(colorize code cyan)"
-  local C_TAG="$(colorize code yellow)"
-  local C_TAGALT="$(colorize code blue)"
-  local C_DOM="$(colorize code green)"
-  local C_ID="$(colorize code magenta)"
+list() (
+  local leafcmd='test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}'
+  local diffcmd="$(printf 'test -L "%s/{}"' "$STORE")"
 
-  # printf "%s\n" "${entries[@]}"
-  find -L -- "$STORE" -type d -exec sh -c \
-    'test -z "$(find -L "{}" -mindepth 1 -type d)" && echo {}' \; |
-    sort | sed "s|^$STORE/||" |
-    awk -F/ -v sep="$iSEP" -v reset="$C_RESET" -v base="$STORE" \
-      -v dir="$C_DIR" -v tag="$C_TAG" -v tagAlt="$C_TAGALT" -v dom="$C_DOM" -v id="$C_ID" '
-     {
-        full_path = base "/" $0
-
-        is_link = (system("test -L \"" full_path "\"") == 0)
-
-        dom_color = is_link ? tagAlt : dom
-
-        printf "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-        dir, $1, reset, sep, tag, $2, reset, sep, dom_color, $3, reset, sep, id, $4, reset
-      }
-  ' | column -t -s "$iSEP" -N DIR,TAG,DOM,ID -R ID
-}
+  cd "$STORE" && find -L -- * -type d -exec sh -c "$leafcmd" \; |
+    colorcols "/" "$iSEP" cyan yellow green:blue:"$diffcmd":0 magenta |
+      column -t -s "$iSEP" -N DIR,TAG,DOM,ID -R ID
+)
 
 rename() {
   local rand file="$STORE/$1.gpg"

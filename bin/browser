@@ -82,7 +82,19 @@ clone() (
     rm -rf "$subpath/sessionstore-logs/"
     rm -rf "$subpath/bookmarkbackups/"
     rm -rf "$subpath/zen-sessions.jsonlz4"
-    rm -rf "$subpath/zen-sessions-backups/"
+    rm -rf "$subpath/zen-sessions-backup/"
+    rm -rf "$subpath/zen-live-folders.jsonlz4"
+    rm -rf "$subpath/crashes/"
+    rm -rf "$subpath/minidumps/"
+    rm -rf "$subpath/datareporting/"
+    rm -rf "$subpath/features/"
+    rm -rf "$subpath/weave/"
+    # rm -rf "$subpath/settings/"
+    # rm -rf "$subpath"/*.txt
+    # rm -rf "$subpath"/*-wal
+    # rm -rf "$subpath"/*.bak
+    rm -rf "$subpath"/*.bin
+    rm -rf "$subpath"/lock
   fi
 )
 

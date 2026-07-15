@@ -5,8 +5,19 @@ MOD='S-M'
 ICON=
 
 #POSITION=RIGHT
-#RATIO=40%
-HORIZONTAL=1
+RATIO=35%
+# HORIZONTAL=1
+#
+
+init() {
+  set_opt sort mem
+}
+
+label() {
+  local sort="$(get_opt sort)"
+
+  printf "sort: %s" "$sort"
+}
 
 view() {
   local pid
@@ -19,10 +30,11 @@ view() {
     fsuser fsgroup
     longtname
     lxc lwp
+    docker
     cgroup cgname
     mntns netns pidns userns
     sig size slice stat state stime
-    args
+    cmd
   )
 
   local buf
@@ -35,10 +47,74 @@ view() {
   done | column -t -s "$iSEP"
 }
 
-OPTS+=(--with-nth 2..)
+OPTS+=(--with-nth 1.. --header-lines=1)
 list() {
-  LIBPROC_HIDE_KERNEL=1 ps axo pid,ppid,pidns,userns,user,pmem,cmd --sort pmem |
-    tail -n +2 | tac
+  local keyvals=(
+    PID white
+    PPID yellow
+    STAT blue
+    EUSER blue
+    # GROUP red
+    # TPGID red
+    PCPU cyan
+    PMEM magenta
+    # TTY orange
+    # SID orange
+    # CGROUP gold
+    CMD green
+  # docker
+  # lxc/incus/lxd
+  # cgroup
+  )
+
+  local fields colors
+
+  for i in "${!keyvals[@]}"; do
+    if (( i % 2 == 0 )); then
+      fields+=("${keyvals[$i]}")
+    else
+      colors+=("${keyvals[$i]}")
+    fi
+  done
+
+  local header="$(IFS=,; echo "${fields[*]~~}")"
+
+  local opts=()
+
+  local sort="$(get_opt sort)"
+
+  case "$sort" in
+    mem)
+      opts+=("-pmem")
+      ;;
+    cpu)
+      opts+=("-pcpu")
+      ;;
+  esac
+
+  opts+=(--ppid 9460)
+
+  LIBPROC_HIDE_KERNEL=1 ps -A x o "$header" --sort "${opts[@]}" --no-headers |
+    colorcols " " "$iSEP" "${colors[@]}" | column -t -s "$iSEP" -N "${header^^}"
+
+  # get_process_hiearchy "$PID" enter
+  # filter
+  # changePrio alt-np
+}
+
+BINDS[toggle]=alt-t
+DESCS[toggle]='Toggle sorting'
+toggle() {
+  local sort="$(get_opt sort)"
+
+  case "$sort" in
+    mem)
+      set_opt sort cpu
+      ;;
+    cpu)
+      set_opt sort mem
+      ;;
+  esac
 }
 
 # kill/chgprio/ insert in namespaces?
@@ -51,7 +127,6 @@ del() {
   local pid
   read -r pid _ <<< "$1"
   sudo kill -9 "$pid"
-  #sudo kill -9 "$pid"
 }
 
 BINDS[reload]=alt-r

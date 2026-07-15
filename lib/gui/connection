@@ -51,6 +51,8 @@ info() {
       return
     fi
 
+    SECURITY=WPA2
+
     val="WIFI:T:$SECURITY;S:$ssid;P:$psk;;"
     qrencode -m1 -tANSI256 "$val"
   fi
@@ -154,20 +156,7 @@ clone() {
 # alt-x: qrencode in the middle of the screen?
 # extract BSSID,SSID,
 
-BINDS[add]=enter
-HOOKS[add]=sclear
-DESCS[add]='Create or modify connection'
-add() {
-	local uuid state type ifname bssid ssid prio
-
-  read -r uuid state type ifname _ bssid ssid prio mode _ <<< "$1"
-
-  if [[ "$uuid" != -- ]]; then
-    # toggle "$uuid $state"
-    # modify 
-    return
-  fi
-
+mod() {
   local -A values
 
   values[wifi.bssid]="$bssid"
@@ -201,16 +190,128 @@ add() {
 
   tmux load-buffer - <<< "$bssid"
 
-  IFS= read -r entry < <(input query="name:")
+  readarray -t entries < <(readeval < <(input query=name:))
 
-  local args=("$@")
+	tmux delete-buffer -b preview
 
-  eval "set -- $entry"
+	for entry in "${entries[@]}"; do
+    local lhs rhs
+    IFS=: read -r lhs rhs <<< "$entry"
+    case "$lhs" in
+      prio)
+        if [[ "${rhs:0:1}" == - ]]; then
+          values[autoconnect]=no
+          rhs="${rhs:1}"
+        fi
+        values[connection.autoconnect-priority]="$rhs"
+        ;;
+      bssid)
+        values[wifi.bssid]="$rhs"
+        ;;
+      name)
+        values[con-name]="$rhs"
+        ;;
+      mgmt)
+        values[wifi-sec.key-mgmt]="$rhs"
+        ;;
+      psk)
+        values[wifi-sec.psk]="$rhs"
+        ;;
+      *)
+        values[$lhs]="$rhs"
+        ;;
+    esac
+	done
 
-  entries=("$@")
-  set -- "$@"
+  for key in "${!values[@]}"; do
+    if [[ "$key" == type ]]; then
+      opts=("$key" "${values[$key]}" "${opts[@]}")
+    else
+      opts+=("$key" "${values[$key]}")
+    fi
+  done
 
-  unset entry
+  sudo nmcli connection add "${opts[@]}"
+  # sudo nmcli connection mod "$uuid" "${opts[@]}"
+}
+
+BINDS[add]=enter
+HOOKS[add]=sclear
+DESCS[add]='Create or modify connection'
+add() {
+	local uuid state type ifname name bssid ssid prio
+
+  read -r uuid state type ifname name bssid ssid prio mode _ <<< "$1"
+
+  if [[ "$uuid" != -- ]]; then
+    # toggle "$uuid $state"
+    # enter: connectOrAddConnect
+    # alt-w: modify
+    return
+  fi
+
+  local -A keys
+  local -A values
+
+  keys[prio]='connection.autoconnect-priority'
+  keys[auto]='autoconnect'
+  keys[name]='con-name'
+  keys[mgmt]='wifi-sec.key-mgmt'
+  keys[bssid]='wifi.bssid'
+  keys[psk]='wifi-sec.psk'
+
+  values[wifi.bssid]="$bssid"
+  values[wifi-sec.key-mgmt]=wpa-psk
+  values[autoconnect]=yes
+  values[connection.autoconnect-priority]=100
+  values[wifi.mode]="$mode"
+  values[save]=yes
+  values[ssid]="$ssid"
+  values[ifname]="$ifname"
+  values[type]=wifi
+
+  values[bssid]="$bssid"
+  values[mgmt]=wpa-psk
+  values[auto]=yes
+  values[prio]=100
+  values[mode]="$mode"
+  values[save]=yes
+  values[ssid]="$ssid"
+  values[ifname]="$ifname"
+  values[type]=wifi
+
+  local defaults=(
+    "+NAME"
+    "+PSK"
+    "SAVE=yes"
+    "PRIO=+100"
+    "TYPE=wifi" # [ list]
+    "MODE=$mode" # [ list modes]
+    "IFNAME=$ifname" # [ list interfaces]
+    "BSSID=$bssid" # [ automatically ]
+    "SSID=$ssid" # []
+    "MGMT=wpa-psk" # [ wpa-psk, none,
+  )
+
+  local query entry entries
+
+  IFS= read -r -d '' query < <(printf "%s\n" "${defaults[@]}" | column -t -s=)
+
+  tmux load-buffer -b preview - <<< "$query"
+
+  tmux load-buffer - <<< "$bssid"
+
+  readarray -t entries < <(readeval < <(input query=name:))
+  # IFS= read -r entry < <(input query="name:")
+
+  # local args=("$@")
+  #
+  # eval "set -- $entry"
+  #
+  # entries=("$@")
+  # set -- "$@"
+  #
+  # unset entry
 
 	tmux delete-buffer -b preview
 

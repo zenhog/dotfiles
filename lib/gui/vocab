@@ -9,6 +9,21 @@ HORIZONTAL=1
 
 export DB="$HOME/.db/vocab.db"
 
+reverso() {
+  local lang="$1"
+  local word="$2"
+
+  local url="https://dictionnaire.reverso.net/$lang/$word"
+
+  local page json
+
+  read -r page < <(bkt --ttl 20m --stale 10s --discard-failures -- -sSL "$url")
+
+  read -r -d '' json < <(pup 'body json{}' <<< "$page")
+
+  jq <<< "$json"
+}
+
 translate() {
   local sl="$1"
   local dl="$2"

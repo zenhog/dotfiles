@@ -71,8 +71,9 @@ readeval() {
 }
 
 notify() {
-  silent notify-send -t 5000 -a menu "$MODULE" "$@"
-  widget push timeout
+  # silent notify-send -t 5000 -a menu "$MODULE" "$@"
+  # widget push timeout
+  :
 }
 
 urlencode() {

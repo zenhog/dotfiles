@@ -53,6 +53,8 @@ open() {
 
 	read -r wid _ <<< "$1"
 
+
+  setattributes @window="$wid" -- opacity=1.0 transparency=1.0
 	raise @window="$wid"
 }
 

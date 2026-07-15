@@ -32,7 +32,7 @@ bind --mode=browser <A-.> tabnext
 bind --mode=browser <A-k> tabprev
 bind --mode=browser <A-j> tabnext
 bind --mode=browser <A-t> jsb escapehatch(); fillcmdline('tabopen')
-bind --mode=browser <A-s> source
+" bind --mode=browser <A-s> source
 bind --mode=browser <A-c> tabonly
 
 bind --mode=browser <A-h> back
@@ -115,11 +115,39 @@ bind --mode=ex     <C-w> text.backward_kill_word
 " bind --mode=insert <C-u> text.backward_kill_line
 " bind --mode=insert <C-w> text.backward_kill_word
 
-bind --mode=normal <Alt-f> js (async function() { \
-  await tri.native.run(`gui clip fork '${document.location.origin}' '${document.location.pathname}'`); \
-  })();
+" bind --mode=normal <Alt-f> js (async function() { \
+"   await tri.native.run(`gui clip fork '${document.location.origin}' '${document.location.pathname}'`); \
+"   })();
+
+" imdb bookmark
+bind --mode=browser <A-f> js (async function() { \
+  const getText = (xpath) => { \
+    const elm = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; \
+    return elm ? elm.textContent.trim() : ''; \
+  }; \
+
+  const type = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]'; \
+  const desc = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/h1/span'; \
+  const movieDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a'; \
+  const showDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[2]/a'; \
+
+  const typeText = getText(type).includes('Series') ? 'Series' : 'Movie'; \
+  const date = typeText.includes('Series') ? showDate : movieDate; \
+
+  const dateText = getText(date).split('-')[0]; \
+
+  const res = `type:"${typeText}" tag:"${dateText}" desc:"${getText(desc)}"`; \
+
+  const url = `${document.location.protocol}//${document.location.host}${document.location.pathname}`; \
+
+  await tri.native.run(`gui mark add '${url}' '${res}'`); \
+})();
 
 bind --mode=normal <C-m> js (async function() { \
+  await tri.native.run(`gui mark add '${document.URL}' 'desc:"${document.title}"'`); \
+})();
+
+bind --mode=browser <A-x> js (async function() { \
   await tri.native.run(`gui mark add '${document.URL}' '${document.title}'`); \
   })();
 

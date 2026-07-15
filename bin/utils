@@ -177,6 +177,57 @@ colorize() {
   fi
 }
 
+colorcols() {
+  local opts=()
+  local cols=()
+
+  local isep="$1"
+  local osep="$2"
+  local reset="$(colorize code reset)"
+
+  shift 2
+
+  local col1 col2 pred
+
+  for arg in "$@"; do
+    if [[ "$arg" == *:* ]]; then
+      IFS=: read -r col1 col2 pred <<< "$arg"
+      cols+=("$(colorize code "$col1")":"$(colorize code "$col2")":"$pred")
+    else
+      cols+=("$(colorize code "$arg")")
+    fi
+  done
+
+  opts+=(-F"$isep" -v sep="$osep" -v reset="$reset")
+  opts+=(-v colors="$(IFS=$'|'; echo "${cols[*]}")")
+
+  awk "${opts[@]}" '
+    BEGIN {
+      n = split(colors, c, "|")
+    } {
+      line = $0
+      for (i = 1; i < n; i++) {
+        current_color = c[i]
+        if (split(c[i], parts, ":") == 4) {
+          col1 = parts[1]; col2 = parts[2]; cmd = parts[3]; col = parts[4]
+
+          target = (col == "0") ? line : $i
+
+          gsub(/{}/, target, cmd)
+
+          current_color = (system(cmd) == 0) ? col2 : col1
+        }
+
+        printf "%s%s%s%s", current_color, $i, reset, sep
+        $i = ""
+      }
+
+      sub("^" FS "+", "", $0)
+      printf "%s%s%s\n", c[n], $0, reset
+    }
+  '
+}
+
 enc() {
   gpg -q --yes --pinentry-mode=loopback --symmetric \
     --passphrase-file=<(passphrase) "$@"

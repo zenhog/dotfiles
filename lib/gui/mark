@@ -14,54 +14,110 @@ export JS="$HOME/.db/marks.jsonl"
 cleanurl() {
   local url="$1"
 
-  read -r url < <(sed -E 's/[#?].*//g' <<<"$url")
+  # read -r url < <(sed -E 's/[#?].*//g' <<<"$url")
   read -r url < <(sed -E 's/\/$//' <<<"$url")
 
   echo "$url"
+}
+
+json() {
+  local mode="$1"
+  local ikey key val opts args json
+
+  shift 1
+
+  while (( $# > 0 )); do
+    key="$1"
+    val="$2"
+
+    shift 2
+
+    [[ "$key" == newurl && -z "$val" ]] && continue
+
+    [[ "$key" == newurl ]] && ikey=url || ikey="$key"
+
+    [[ "$key" == s && -z "$val" ]] && val=0
+
+    opts+=(--arg "$key" "$val")
+
+    case "$mode" in
+      new)
+        if [[ "$key" == s ]]; then
+          args+=("$key:(\$$key | tonumber)")
+        else
+          args+=("$key:\$$key")
+        fi
+        ;;
+      mod)
+        if [[ "$key" != url ]]; then
+          if [[ "$key" == s ]]; then
+            args+=("\
+              .$ikey |= ( \
+                if . == null or . == \"\" then 0 \
+                elif \$s == \"2\" then (1 - .) \
+                elif \$s == \"1\" or \$s == \"0\" then (\$s | tonumber) \
+                else . end \
+              ) \
+            ")
+          else
+            args+=(".$ikey |= (if \$$key == \"\" then . else \$$key end)")
+          fi
+        fi
+    esac
+  done
+
+  case "$mode" in
+    new)
+      read -r json < <(IFS=,; printf "inputs, {%s}\n" "${args[*]}")
+      jq -n -c "${opts[@]}" "$json"
+      ;;
+    mod)
+      read -r json < \
+        <(IFS='|'; printf 'if .url == $url then %s else . end\n' "${args[*]}")
+      jq -c "${opts[@]}" "$json"
+  esac
 }
 
 insert() {
   local url="$1"
   local title="$2"
 
-  if [[ "$title" == @* ]]; then
-    title="${title#@}"
-  else
-    read -r url < <(cleanurl "$url")
+  local entries key val
+  local -A values
+
+  values[url]="$url"
+
+  if [[ -z "$url" ]]; then
+    values[url]=`tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 15`
   fi
 
-  local words tags cat mytitle
+  readarray -t entries < <(readeval <<< "$title")
 
-  read -ra words <<<"$title"
-
-  cat="${words[0]}"
-
-  for word in "${words[@]:1}"; do
-    if [[ "$word" == \#* ]]; then
-      tags+=("$word")
-    else
-      mytitle+=("$word")
-    fi
+  for entry in "${entries[@]}"; do
+    IFS=: read -r key val <<< "$entry"
+    values[$key]="$val"
   done
 
   if ! check "$url"; then
-    jq -n -c \
-      --arg url "$url" \
-      --arg title "${mytitle[*]}" \
-      --arg cat "$cat" \
-      --arg tags "${tags[*]}" \
-      '{url: $url, title: $title, cat: $cat, tags: $tags}' >>"$JS"
+    mode=new
   else
-    local tmp="$(mktemp)"
-
-    jq -c \
-      --arg url "$url" \
-      --arg title "${mytitle[*]}" \
-      --arg cat "$cat" \
-      --arg tags "${tags[*]}" \
-      'if .url == $url then .title = $title | .cat = $cat | .tags = $tags else . end' "$JS" >"$tmp" &&
-      mv "$tmp" "$JS" && rm "$tmp"
+    mode=mod
   fi
+
+  local txt
+
+  read -r -d '' txt < "$JS"
+
+  <<< "$txt" > "$JS" json "$mode" \
+  url "${values[url]}" \
+  newurl "${values[newurl]}" \
+  type "${values[type]}" \
+  kind "${values[kind]}" \
+  tag "${values[tag]}" \
+  desc "${values[desc]}" \
+  s "${values[s]}"
+
+  # jq -s -c 'sort_by(.type, .kind, .tag, .desc)[]' "$tmp" > "$JS"
 }
 
 view() {
@@ -94,56 +150,40 @@ label() {
   printf " [%s] " "$url"
 }
 
-OPTS=(--with-nth 2.. --header-lines=1 --preview-window=hidden)
+OPTS=(--multi --with-nth 2.. --header-lines=1 --preview-window=hidden)
 list() {
+  # printf '.%s | $%s + . + $%s' ""
 
-  local lblock rblock
-
-  local C_CAT="$(colorize code magenta)"
-  local C_TIT="$(colorize code yellow)"
-  local C_TAG="$(colorize code cyan)"
-  local C_RESET="$(colorize code reset)"
-
-  IFS= read -r -d '' lblock < <(
-    jq -r --arg t "$C_TAG" --arg r "$C_RESET" '.tags | $t + . + $r' "$JS" | column -t
-  )
-
-  IFS= read -r -d '' rblock < <(
-    jq -r --arg s "$iSEP" --arg u "$C_URL" --arg c "$C_CAT" --arg t "$C_TIT" --arg r "$C_RESET" \
-      '.url + $s + (.cat | $c + . + $r) + $s + (.title | $t + . + $r)' "$JS"
-  )
-
-  # read -r -d '' rblock < <(jq -r --arg sep "$iSEP" '.url + $sep + .cat + $sep + .title' "$JS" |
-  #   column -t -s "$iSEP" -o "$iSEP" -N URL,CATEGORY,TITLE)
-
-  paste -d "$iSEP" <(echo -n "$rblock") <(echo -n "$lblock") | sort |
-    column -t -s "$iSEP" -N URL,CATEGORY,TITLE,TAGS
-  # echo -n "$rblock"
-
-  # local lines
-  #
-  # readarray -t lines < <(jq -r --arg sep "$iSEP" '.url + $sep + .cat + $sep + .title + $sep + .tags' "$JS")
-  #
-  # for line in "${lines[@]}"; do
-  #   IFS="$iSEP" read -r url cat title tags <<<"$line"
-  #   printfmt "$url" "$cat" "$title" "$tags"
-  # done | column -t -s "$iSEP" -N URL,CATEGORY,TITLE,TAGS
-
+  jq -r \
+    --arg sep "$iSEP" \
+    --arg c_reset "$(colorize code reset)" \
+    --arg c_type "$(colorize code green)" \
+    --arg c_kind "$(colorize code magenta)" \
+    --arg c_tag "$(colorize code yellow)" \
+    --arg c_desc "$(colorize code cyan)" \
+  '.url + $sep +
+  (if .s == 1 then "*" else "-" end) + $sep +
+  (.type | $c_type + . + $c_reset) + $sep +
+  (.kind | $c_kind + . + $c_reset) + $sep +
+  (.tag | $c_tag + . + $c_reset) + $sep +
+  (.desc | $c_desc + . + $c_reset)' "$JS" |
+    column -t -s "$iSEP" -N URL,STAR,TYPE,KIND,TAG,DESC
 }
 
 BINDS[open]=enter
 HOOKS[open]=accept
-DESCS[open]='Open mark in foreground'
+DESCS[open]='FG'
 
 BINDS[bgopen]=tab
-HOOKS[bgopen]=noclear
-DESCS[bgopen]='Open mark in background'
+HOOKS[bgopen]=sclear
+DESCS[bgopen]='BG'
 
 BINDS[open1]=alt-1
 HOOKS[open1]=accept
 DESCS[open1]='Open bookmark in cg1'
 
 BINDS[bgopen1]='alt-!'
+HOOKS[bgopen1]=sclear
 DESCS[bgopen1]='Open bookmark in cg1'
 
 BINDS[open2]=alt-2
@@ -151,6 +191,7 @@ HOOKS[open2]=accept
 DESCS[open2]='Open bookmark in cg2'
 
 BINDS[bgopen2]='alt-@'
+HOOKS[bgopen2]=sclear
 DESCS[bgopen2]='Open bookmark in cg2'
 
 BINDS[open3]=alt-3
@@ -158,6 +199,7 @@ HOOKS[open3]=accept
 DESCS[open3]='Open bookmark in cg3'
 
 BINDS[bgopen3]='alt-#'
+HOOKS[bgopen3]=sclear
 DESCS[bgopen3]='Open bookmark in cg3'
 
 BINDS[_open]=alt-enter
@@ -170,87 +212,125 @@ _open() {
 }
 
 BINDS[copy]=alt-c
-DESCS[copy]='Clipboard bookmark URL'
+DESCS[copy]='Clip'
 copy() {
   local url
 
   read -r url _ <<<"$1"
 
   tmux load-buffer - <<<"$url"
+  # prolly should be
+  # [LINE](url)
 }
 
 check() {
   local url="$1"
 
-  read -r url < <(cleanurl "$url")
+  # read -r url < <(cleanurl "$url")
 
   mute jq -e --arg url "$url" '(select(.url == $url))' "$JS"
 }
 
 BINDS[rm]=alt-d
 HOOKS[rm]=noclear
-DESCS[rm]='Delete bookmark'
+DESCS[rm]='Delete'
 rm() {
   local url tmp
 
   read -r tmp < <(mktemp)
 
-  read -r url _ <<<"$1"
+  read -r url _ <<< "$1"
 
   if check "$url"; then
-    grep -vF "\"url\":\"$url\"" "$JS" >"$tmp"
+    grep -vF "\"url\":\"$url\"" "$JS" > "$tmp"
     mv "$tmp" "$JS"
   fi
 }
 
 BINDS[mod]=alt-w
 HOOKS[mod]=sclear
-DESCS[mod]='Rename bookmark'
+DESCS[mod]='Rename'
 mod() {
-  local url title
+  local url data star type kind tag desc
 
-  read -r url title <<<"$1"
+  read -r url star type kind tag desc <<< "$1"
 
-  read -r title < <(sed -E 's/ +/ /g' <<<"$title")
+  read -r data \
+  <<< "url:'$url' star:'$star' type:'$type' kind:'$kind' tag:'$kind' desc:'$desc'"
 
-  # copy the title
-  echo -n "$title" | tmux load-buffer -
-
-  # preview
-  (
-    echo "$title"
-    sepline
-    list | awk '{print $2}' | sort -u | column -x
-  ) | tmux load-buffer -b preview -
-
-  read -r title < <(input preview="'$preview'" label="' [$url] '")
+  read -r data < <(edit "$url" "$data")
 
   if [[ -n "$title" ]]; then
     insert "$url" "$title"
   fi
 }
 
+pview() {
+  # types
+  # kinds
+  # tags
+  :
+}
+
+edit() {
+  local url="$1" title="$2" entries key val
+  local -A keyvals
+
+  readarray -t entries < <(readeval <<< "$title")
+
+  for entry in "${entries[@]}"; do
+    IFS=: read -r key val <<< "$entry"
+    [[ -n "$key" ]] && keyvals[$key]="$val"
+  done
+
+  (
+    echo "type: ${keyvals[type]}"
+    echo "kind: ${keyvals[kind]}"
+    echo "tag: ${keyvals[tag]}"
+    echo "desc: ${keyvals[desc]}"
+  ) | tmux load-buffer -b preview -
+
+  menu input label="' [$url] '" query="'$title'"
+}
+
+
+BINDS[cleanurl]='alt-r'
+HOOKS[cleanurl]='sclear'
+DESCS[cleanurl]='cleanurl'
+cleanurl() {
+  local url newurl
+
+  read -r url _ <<<"$1"
+
+  newurl="${url%%[\?#]*}"
+
+  insert "$url" "newurl:'${newurl}'"
+}
+
+BINDS[star]='alt-t'
+HOOKS[star]='sclear'
+DESCS[star]='star'
+star() {
+  local url newurl
+
+  read -r url _ <<< "$1"
+
+  insert "$url" 's:"2"'
+}
+
 add() {
-  local url="$1" title="$2" mytitle
+  local url="$1" data="$2"
 
   if check "$url"; then
     notify "'$url' already exists"
     return 1
   fi
 
-  (
-    echo "$title"
-    sepline
-    list | awk '{print $2}' | sort -u | column -x
-  ) | tmux load-buffer -b preview -
+  read -r data < <(edit "$url" "$data")
 
-  read -r mytitle < <(menu input label="' [$url] '")
+  [[ -z "$data" ]] && return
 
-  [[ -z "$mytitle" ]] && return
-
-  [[ "$mytitle" == @ ]] && mytitle="$title"
-
-  insert "$url" "$mytitle"
+  check "$url" || insert "$url" "$data"
 
   if check "$url"; then
     notify "Added '$url'"

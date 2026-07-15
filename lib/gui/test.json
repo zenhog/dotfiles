@@ -1,0 +1,837 @@
+{
+  "gateways": [
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn01-sea.riseup.net",
+      "ip_address": "204.13.164.252",
+      "location": "Seattle"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn02-par.riseup.net",
+      "ip_address": "51.159.197.108",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn03-par.riseup.net",
+      "ip_address": "163.172.20.106",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn04-ams.riseup.net",
+      "ip_address": "51.15.9.205",
+      "location": "Amsterdam"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn05-par.riseup.net",
+      "ip_address": "195.154.119.165",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn06-ams.riseup.net",
+      "ip_address": "51.158.144.32",
+      "location": "Amsterdam"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn07-par.riseup.net",
+      "ip_address": "163.172.83.106",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn08-par.riseup.net",
+      "ip_address": "51.15.187.53",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn10-mtl.riseup.net",
+      "ip_address": "199.58.83.11",
+      "location": "Montreal"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn11-par.riseup.net",
+      "ip_address": "51.159.55.86",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn12-nyc.riseup.net",
+      "ip_address": "185.220.103.11",
+      "location": "New York City"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn13-ams.riseup.net",
+      "ip_address": "51.158.144.31",
+      "location": "Amsterdam"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn14-par.riseup.net",
+      "ip_address": "51.159.196.108",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn15-sea.riseup.net",
+      "ip_address": "199.254.238.55",
+      "location": "Seattle"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn16-sea.riseup.net",
+      "ip_address": "198.252.153.109",
+      "location": "Seattle"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn18-mtl.riseup.net",
+      "ip_address": "199.58.83.9",
+      "location": "Montreal"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn19-ams.riseup.net",
+      "ip_address": "163.172.211.109",
+      "location": "Amsterdam"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn20-par.riseup.net",
+      "ip_address": "51.159.198.167",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn21-par.riseup.net",
+      "ip_address": "163.172.20.108",
+      "location": "Paris"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn22-mia.riseup.net",
+      "ip_address": "89.187.173.169",
+      "location": "Miami"
+    },
+    {
+      "capabilities": {
+        "adblock": false,
+        "filter_dns": false,
+        "limited": false,
+        "transport": [
+          {
+            "ports": [
+              "53",
+              "80",
+              "1194"
+            ],
+            "protocols": [
+              "tcp",
+              "udp"
+            ],
+            "type": "openvpn"
+          },
+          {
+            "options": {
+              "cert": "/ntRNI6JYP7R6kGKldibKWj0aCsv96Hdu/jSGncPy+rcverCLI7Emod+vRkz61hM7F/udA",
+              "iatMode": "0"
+            },
+            "ports": [
+              "9443"
+            ],
+            "protocols": [
+              "tcp"
+            ],
+            "type": "obfs4"
+          }
+        ]
+      },
+      "host": "vpn23-mia.riseup.net",
+      "ip_address": "89.187.173.174",
+      "location": "Miami"
+    }
+  ],
+  "locations": {
+    "Amsterdam": {
+      "country_code": "NL",
+      "hemisphere": "N",
+      "name": "Amsterdam",
+      "timezone": "+2"
+    },
+    "Miami": {
+      "country_code": "US",
+      "hemisphere": "S",
+      "name": "Miami",
+      "timezone": "-4"
+    },
+    "Montreal": {
+      "country_code": "CA",
+      "hemisphere": "N",
+      "name": "Montreal",
+      "timezone": "-4"
+    },
+    "New York City": {
+      "country_code": "US",
+      "hemisphere": "N",
+      "name": "New York",
+      "timezone": "-4"
+    },
+    "Paris": {
+      "country_code": "FR",
+      "hemisphere": "N",
+      "name": "Paris",
+      "timezone": "+2"
+    },
+    "Seattle": {
+      "country_code": "US",
+      "hemisphere": "N",
+      "name": "Seattle",
+      "timezone": "-7"
+    }
+  },
+  "openvpn_configuration": {
+    "auth": "SHA512",
+    "cipher": "AES-256-GCM",
+    "data-ciphers": "AES-256-GCM",
+    "dev": "tun",
+    "float": "",
+    "keepalive": "10 30",
+    "key-direction": "1",
+    "nobind": true,
+    "persist-key": true,
+    "rcvbuf": "0",
+    "sndbuf": "0",
+    "tls-cipher": "TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384",
+    "tls-version-min": "1.2",
+    "verb": "3"
+  },
+  "serial": 3,
+  "version": 3
+}

@@ -37,7 +37,11 @@ open() {
 }
 
 bgopen() {
-  open "$@"
+  # open "$@"
+  local url
+  read -r url _ <<<"$1"
+  command open "$url"
+  gui run bg window/zen.wan
 }
 
 open1() {

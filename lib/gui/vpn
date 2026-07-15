@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+
+KEY=v
+MOD='S-M'
+ICON=󰘳
+COLOR=yellow
+
+FOLLOW=1
+NOWRAP=1
+RATIO=80%
+HORIZONTAL=1
+
+DIR="$HOME/.lib/data/vpn"
+CONFIG_DIR="$DIR/config"
+CERTS_DIR="$DIR/keys"
+AUTH_DIR="$DIR/auth"
+
+for i in "$CONFIG_DIR" "$CERTS_DIR" "$AUTH_DIR"; do
+  mkdir -p "$i"
+done
+
+declare -A VPNs=(
+  [vpngate]='https://www.vpngate.net/api/iphone'
+  [vpnbook]='https://www.vpnbook.com/freevpn/openvpn'
+  [riseup]='https://api.black.riseup.net/3/config/eip-service.json'
+  [proton]=''
+)
+
+list() {
+  local vpns
+  readarray -t vpns < <(cd "$CONFIG_DIR" && find * -iname '*.ovpn')
+
+  for vpn in "${vpns[@]}"; do
+    IFS=._ read -r kind name cc id ipk proto port _ <<< "$vpn"
+    echo "$kind" "$name" "$cc" "$id" "$ipk"
+  done | column -t
+}
+
+riseup() {
+  local certUrl='https://api.black.riseup.net/3/cert'
+  local url="${VPNs[riseup]}"
+
+  local json
+
+  read -r json < <(bkt --ttl 20m --stale 10s --discard-failures -- curl -sSL "$url")
+
+  readarray -t gws < <(jq -r '.gateways | .[] |
+  "\(.host) \(.ip_address) \(.location) 
+  \(.capabilities.transport[] | select(.type | contains("openvpn")) | "\(.ports[]) \(.protocols[])" )"' <<< "$json")
+
+  printf "%s\n" "${gws[@]}"
+
+}
+
+vpngate() {
+  local curl
+}
+
+vpnbook() {
+  creds() {
+    jq -r  --arg tag "$1" '
+    path(.. | select(.text? == $tag and .tag? == "label")) as $p |
+    getpath($p[:-2]) | .. | select(.tag? == "code") | .text
+    '
+  }
+
+  ports() {
+    jq -r --arg port "$1" '
+      .. | select(.text?) |
+    select(.text? | startswith($port)) | .text'
+  }
+
+  servers() {
+    jq -r '
+      .. | select(.tag? == "script" and (.text | type == "string")
+      and (.text? | contains("ipAddress"))) | .text |
+      sub("^.*?\\("; "") | sub("\\)$"; "") | fromjson | .[1] |
+      sub("^[0-9]+:"; "")
+    ' | jq -r '.. | select(.id?) | "\(.countryCode) \(.id) \(.hostname) \(.ipAddress)"'
+  }
+
+  download() {
+    local api='https://www.vpnbook.com/api/openvpn?'
+    local hostname="$1" proto="$2" ip="$3"
+
+    curl -sSL "${api}hostname=${hostname}&protocol=${proto}&ip=${ip}"
+  }
+
+  local vpn=vpnbook
+  local url="${VPNs[$vpn]}"
+
+  local page json
+
+  read -r page < <(bkt --ttl 20m --stale 10s --discard-failures -- curl -sSL "$url")
+
+  read -r -d '' json < <(pup 'body json{}' <<< "$page")
+
+  creds Username > "$AUTH_DIR/$vpn" <<< "$json"
+  creds Password >> "$AUTH_DIR/$vpn" <<< "$json"
+
+  local tcp udp servers
+
+  readarray -t tcp < <(ports TCP <<< "$json")
+  readarray -t udp < <(ports UDP <<< "$json")
+
+  readarray -t servers < <(servers <<< "$json")
+
+  ipkind() {
+    grep : && echo IP6 || echo IP4
+  }
+
+  local cc id host ip proto port ipv name
+  for s in "${servers[@]}"; do
+    read -r cc id host ip _ <<< "$s"
+    read -r ipv < <(ipkind "$ip" <<< "$ip")
+    for p in "${tcp[@]}" "${udp[@]}"; do
+      read -r proto port <<< "$p"
+
+      read -r name <<< "FREE_VPNBOOK_${cc}_${id^^}_${ipv}_${proto}_${port}.ovpn"
+
+      quiet echo Updating "$"
+
+      download "$host" "${proto~~}${port}" "$ip" > "$name"
+    done
+  done
+}
