@@ -15,6 +15,9 @@ CRLFILE="$PWD/config/crl.rsa.4096.pem"
 read -r VPNUSER < <(pass show www/vpn/proton.me/user)
 read -r VPNPASS < <(pass show www/vpn/proton.me/pass)
 
+VPNUSER=vpnbook
+VPNPASS=ex9psfv
+
 ipt() {
   sudo iptables -v -w -C "$@" || sudo iptables -v -w -A "$@"
 }
@@ -48,6 +51,8 @@ CMD=(
   --dev-type tun
   --connect-retry 5 5
   --verb 1
+  --up /bin/true
+  --down /bin/true
   #--mssfix 1300
   #--ca "$CAFILE"
 )

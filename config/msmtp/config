@@ -1,15 +1,3 @@
-account mailbox
-protocol smtp
-host smtp.mailbox.org
-port 465
-auth on
-tls on
-tls_starttls off
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
-eval "echo -n 'user '; pass show www/mail/mailbox.org/username"
-eval "echo -n 'from '; pass show www/mail/mailbox.org/username"
-passwordeval "pass show www/mail/mailbox.org/password"
-
 account disroot-prisoner
 protocol smtp
 host disroot.org

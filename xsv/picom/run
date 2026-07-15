@@ -1,5 +1,11 @@
 #!/bin/sh
 
+CG_PATH="/sys/fs/cgroup/unified/runit/test/picom"
+
+mkdir -p "$CG_PATH"
+
+echo $$ > "$CG_PATH/cgroup.procs"
+
 exec 2>&1
 exec picom --backend xrender
 #--shadow \

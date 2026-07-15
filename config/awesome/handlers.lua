@@ -134,11 +134,18 @@ local function set_attributes(c)
   c.transparency = c.opacity or 1
 end
 
+-- local function raise(c)
+--   if c ~= client.focus then
+--     c:emit_signal("request::activate", "click", { raise = true })
+--   end
+-- end
+
 local function raise(c)
-  if c ~= client.focus then
-    c:emit_signal("request::activate", "click", { raise = true })
+  if c and c.state and c.state.mode and c.state.mode == 'fg' then
+    awm.raise(c)
   end
 end
+
 
 local function set_buttons(c)
 	c:buttons(awful.util.table.join(
@@ -292,12 +299,6 @@ local function set_state(c)
   c.state = states[c.pid]
 
   return true
-end
-
-local function raise(c)
-  if c and c.state and c.state.mode and c.state.mode == 'fg' then
-    awm.raise(c)
-  end
 end
 
 local function do_raise(c)

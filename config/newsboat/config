@@ -19,7 +19,7 @@ highlight article "\\[[0-9]+\\]" color2 default bold
 highlight article "\\[image\\ [0-9]+\\]" color2 default bold
 highlight feedlist "^─.*$" color6 color6 bold
 
-auto-reload no
+auto-reload yes
 refresh-on-startup no
 suppress-first-reload no
 reload-time 60
