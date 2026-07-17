@@ -120,36 +120,36 @@ bind --mode=ex     <C-w> text.backward_kill_word
 "   })();
 
 " imdb bookmark
+" youtube: watch?
+" definition
+" channel
 bind --mode=browser <A-f> js (async function() { \
   const getText = (xpath) => { \
     const elm = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; \
     return elm ? elm.textContent.trim() : ''; \
   }; \
-
-  const type = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]'; \
-  const desc = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/h1/span'; \
-  const movieDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a'; \
-  const showDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[2]/a'; \
-
-  const typeText = getText(type).includes('Series') ? 'Series' : 'Movie'; \
-  const date = typeText.includes('Series') ? showDate : movieDate; \
-
-  const dateText = getText(date).split('-')[0]; \
-
-  const res = `type:"${typeText}" tag:"${dateText}" desc:"${getText(desc)}"`; \
-
-  const url = `${document.location.protocol}//${document.location.host}${document.location.pathname}`; \
-
+  const host = document.location.hostname; \
+  var res; \
+  var url; \
+  if (host.includes('imdb.com')) { \
+    const type = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]'; \
+    const desc = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/h1/span'; \
+    const movieDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[1]/a'; \
+    const showDate = '/html/body/div[2]/main/div/section[1]/section/div[3]/section/section/div[2]/div[1]/ul/li[2]/a'; \
+    const typeText = getText(type).includes('Series') ? 'Series' : 'Movie'; \
+    const date = typeText.includes('Series') ? showDate : movieDate; \
+    const dateText = getText(date).split('-')[0]; \
+    res = `type:"${typeText}" tag:"${dateText}" desc:"${getText(desc)}"`; \
+    url = `${document.location.protocol}//${document.location.host}${document.location.pathname}`; \
+  } else if (host.includes('youtube.com')) { \
+    url = `${document.URL}`; \
+    res = `${document.title}`; \
+  } else { \
+    url = `${document.URL}`; \
+    res = `${document.title}`; \
+  } \
   await tri.native.run(`gui mark add '${url}' '${res}'`); \
 })();
-
-bind --mode=normal <C-m> js (async function() { \
-  await tri.native.run(`gui mark add '${document.URL}' 'desc:"${document.title}"'`); \
-})();
-
-bind --mode=browser <A-x> js (async function() { \
-  await tri.native.run(`gui mark add '${document.URL}' '${document.title}'`); \
-  })();
 
 bind --mode=normal <A-Escape> js (async function() { \
   await tri.native.run(`gui mark del '${document.URL}'`); \

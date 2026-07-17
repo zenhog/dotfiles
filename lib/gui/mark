@@ -178,27 +178,15 @@ BINDS[bgopen]=tab
 HOOKS[bgopen]=sclear
 DESCS[bgopen]='BG'
 
-BINDS[open1]=alt-1
-HOOKS[open1]=accept
-DESCS[open1]='Open bookmark in cg1'
-
-BINDS[bgopen1]='alt-!'
+BINDS[bgopen1]=alt-1
 HOOKS[bgopen1]=sclear
 DESCS[bgopen1]='Open bookmark in cg1'
 
-BINDS[open2]=alt-2
-HOOKS[open2]=accept
-DESCS[open2]='Open bookmark in cg2'
-
-BINDS[bgopen2]='alt-@'
+BINDS[bgopen2]=alt-2
 HOOKS[bgopen2]=sclear
 DESCS[bgopen2]='Open bookmark in cg2'
 
-BINDS[open3]=alt-3
-HOOKS[open3]=accept
-DESCS[open3]='Open bookmark in cg3'
-
-BINDS[bgopen3]='alt-#'
+BINDS[bgopen3]=alt-3
 HOOKS[bgopen3]=sclear
 DESCS[bgopen3]='Open bookmark in cg3'
 
@@ -255,13 +243,15 @@ mod() {
 
   read -r url star type kind tag desc <<< "$1"
 
-  read -r data \
-  <<< "url:'$url' star:'$star' type:'$type' kind:'$kind' tag:'$kind' desc:'$desc'"
+  read -r data < <(
+    printf 'newurl:"%s" star:"%s" type:"%s" kind:"%s" tag:"%s" desc:"%s"\n' \
+      "$url" "$star" "$type" "$kind" "$tag" "$desc"
+  )
 
-  read -r data < <(edit "$url" "$data")
+  read -r data < <(edit nomenu "$url" "$data")
 
-  if [[ -n "$title" ]]; then
-    insert "$url" "$title"
+  if [[ -n "$data" ]]; then
+    insert "$url" "$data"
   fi
 }
 
@@ -273,7 +263,7 @@ pview() {
 }
 
 edit() {
-  local url="$1" title="$2" entries key val
+  local mode="$1" url="$2" title="$3" entries key val
   local -A keyvals
 
   readarray -t entries < <(readeval <<< "$title")
@@ -284,13 +274,21 @@ edit() {
   done
 
   (
+    echo "newurl: ${keyvals[newurl]}"
     echo "type: ${keyvals[type]}"
     echo "kind: ${keyvals[kind]}"
     echo "tag: ${keyvals[tag]}"
     echo "desc: ${keyvals[desc]}"
   ) | tmux load-buffer -b preview -
 
-  menu input label="' [$url] '" query="'$title'"
+  case "$mode" in
+    menu)
+      menu input label="' [$url] '"
+      ;;
+    *)
+      input label="' [$url] '"
+      ;;
+  esac
 }
 
 
@@ -326,7 +324,7 @@ add() {
     return 1
   fi
 
-  read -r data < <(edit "$url" "$data")
+  read -r data < <(edit menu "$url" "$data")
 
   [[ -z "$data" ]] && return
 
