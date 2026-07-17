@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+SFILE=/tmp/UPDATING
+
+rm -f "$SFILE"
+touch "$SFILE"
+
 echo '>> Syncing repos and updating ...'
 
 xbps-install -uy xbps
@@ -27,3 +32,5 @@ updatedb
 xlocate -S
 
 echo '>> Done'
+
+rm -f "$SFILE"

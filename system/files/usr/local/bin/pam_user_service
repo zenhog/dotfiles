@@ -1,15 +1,36 @@
 #!/bin/bash
 
+LOGFILE="/tmp/$PAM_USER.log"
+
+logx() {
+  echo '$' "$@"
+  "$@"
+}
+
 case "$PAM_TYPE" in
 	open_session)
+    (
+      echo "In open_session"
+      logx sv check runsvdir-"$PAM_USER" 2>&1
+    ) > /tmp/$LOGFILE
 		sv start runsvdir-"$PAM_USER"
 		;;
 	close_session)
 		read -r tty < <(tty)
 		read -r stillup < <(w -h "$PAM_USER" | grep -v "${tty#/dev/}")
+    (
+      echo "In close_session"
+      logx sv check runsvdir-"$PAM_USER" 2>&1
+      echo "tty = $tty"
+      echo "stillup = $stillup"
+    ) >> /tmp/$LOGFILE
 		[[ -z "$stillup" ]] && (
 			sv stop runsvdir-"$PAM_USER"
 			su $PAM_USER -c "gpgconf --kill gpg-agent"
+      (
+        echo "Should have stopped runsvdir and killed gpgconf"
+        logx sv check runsvdir-"$PAM_USER" 2>&1
+      ) >> /tmp/$LOGFILE
 		)
 		;;
 esac

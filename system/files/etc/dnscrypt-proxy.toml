@@ -29,8 +29,22 @@
 ##
 ## Remove the leading # first to enable this; lines starting with # are ignored.
 
-server_names = ['dnscrypt.uk-ipv4', 'ams-dnscrypt-nl', 'acsacsar-ams-ipv4',
-'dnscrypt.be', 'dnscrypt.pl', 'pwoss.org-dnscrypt', 'scaleway-fr']
+# server_names = ['dnscrypt.uk-ipv4', 'ams-dnscrypt-nl', 'acsacsar-ams-ipv4',
+# 'dnscrypt.be', 'dnscrypt.pl', 'pwoss.org-dnscrypt', 'scaleway-fr']
+
+server_names = [
+  'dnscry.pt-prague-ipv4',
+  'dnscry.pt-riga-ipv4',
+  'dnscry.pt-barcelona-ipv4',
+  'dnscry.pt-bratislava-ipv4',
+  'dnscry.pt-brisbane-ipv4',
+  'dnscry.pt-brussels-ipv4',
+  'dnscry.pt-dublin-ipv4',
+  'dnscry.pt-dusseldorf-ipv4',
+  'dnscry.pt-munich-ipv4',
+  'dnscry.pt-madrid-ipv4',
+  'dnscry.pt-luxembourg-ipv4',
+]
 
 
 ## List of local addresses and ports to listen to. Can be IPv4 and/or IPv6.

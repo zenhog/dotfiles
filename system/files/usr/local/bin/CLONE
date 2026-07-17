@@ -302,7 +302,7 @@ credentials() (
 
     local groups=(
         wheel audio video input bluetooth
-        kvm libvirt
+        kvm libvirt docker
         _incus _incus-admin
         tor wireshark
     )
